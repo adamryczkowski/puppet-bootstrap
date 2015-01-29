@@ -1,0 +1,14 @@
+[submodule "manifest"]
+	path = manifest
+	url = /home/Adama-docs/Adam/Adam/MyDocs/praca/Puppet/manifest
+
+[submodule "modules/autostart"]
+	path = modules/autostart
+	url = /home/Adama-docs/Adam/Adam/MyDocs/praca/Puppet/moje moduły/autostart
+
+[submodule "modules/lxc"]
+	path = modules/lxc
+	url = /home/Adama-docs/Adam/Adam/MyDocs/praca/Puppet/moje moduły/lxc
+[submodule "modules/sshauth"]
+	path = modules/sshauth
+	url = /home/Adama-docs/Adam/Adam/MyDocs/praca/Puppet/moje moduły/sshauth
