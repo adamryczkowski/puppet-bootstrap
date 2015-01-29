@@ -18,7 +18,7 @@ The purpose of these is scripts is to give a new users a quick way of launching 
 
 **Ability to be executed as unprivileged user** Some key commands would require administrative privileges, and will be executed via `sudo`.
 
-# Common patterns in implementation common patterns and debugging
+# Common patterns in implementation and debugging
 The scripts are written in Bash. Each script is designed with command line parameters handled by Bash itself, preferably using long self-explanatory, double-dash syntax. I tried to use only English names for local variables and comments but occasionally you might find Polish words, which I will correct whenever you contact me. 
 
 The bootstrap process includes downloading a Puppet manifest and its the modules it depends on. The only supported way of transferring the Puppet manifest is via git, because it is so easy to set up and share a git repository using git daemon (the script for managing it: `prepare-git-serving.sh`). 
