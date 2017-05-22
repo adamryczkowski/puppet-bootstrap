@@ -195,7 +195,7 @@ fi
 
 #Ustawiamy fqdn i hostname...
 #echo "Setting fqdn and hostname for the container and the host..."
-echo $lxcfqdn | grep -Fq . >/dev/null
+echo $lxcfqdn | grep -Fq . 2>/dev/null
 if [ $? -eq 0 ]; then
 	lxcname=`echo $lxcfqdn | sed -En 's/^([^.]*)\.(.*)$/\1/p'` 
 	hostsline="$lxcfqdn $lxcname" 
@@ -226,7 +226,7 @@ else
 fi
 
 if [ -n "${internalif}" ]; then
-	lxc network attach ${internalif} ${name} eth0
+	logexec lxc network attach ${internalif} ${name} eth0
 fi
 
 
@@ -268,19 +268,43 @@ if [ "$lxcip" != "auto" ]; then
 	fi
 
 
-#	tmpfile=$(mktemp)
-#	$loglog
-#	sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
-#	$loglog
-#	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
+	tmpfile=$(mktemp)
+	$loglog
+	sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
+	$loglog
+	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
 
-#	if [ ! -d /etc/lxc ]; then
-#		logexec sudo mkdir -p /etc/lxc
-#	fi
-#	if [ ! -f $staticleases ]; then
-#		logexec sudo touch $staticleases
-#	fi
-	lxc config device set ${name} eth0 ipv4.address ${lxcip}
+	if [ ! -d /etc/lxc ]; then
+		logexec sudo mkdir -p /etc/lxc
+	fi
+	if [ ! -f $staticleases ]; then
+		staticleases=/etc/lxc/staticleases
+		logexec sudo touch $staticleases
+		if ! grep -q "^$lxcname,$lxcip" $staticleases; then
+			if grep -q "$lxcip" $staticleases; then
+				errcho "IP address $lxcip already reserved!"
+				exit 1
+			fi
+			#lxc config device set ${name} eth0 ipv4.address ${lxcip}
+
+			if grep -q "^$lxcname,[\\s\\d\\.]+" $staticleases; then
+				#We need to replace the line rather than append
+				if [ "$lxcname" == "$lxcfqdn" ]; then
+					logexec sudo sed -i -e "/^$lxcname,[\\s\\d\\.]+/$lxcname,$lxcip/" $staticleases
+				fi
+			else
+				if [ "$lxcname" == "$lxcfqdn" ]; then
+					$loglog
+					echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
+				else
+					$loglog
+					echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
+				fi
+			fi
+			restartcontainer=1
+		fi
+	fi
+	logexec lxc config device set ${name} eth0 ipv4.address ${lxcip}
 
 	if [[ "$restartcontainer" == "1" ]]; then
 		if lxc config get ${name} volatile.last_state.power | grep -q -F "RUNNING"; then
@@ -304,15 +328,21 @@ fi
 
 
 #Upewniamy się, że kontener jest uruchomiony
-if lxc config get ${name} volatile.last_state.power | grep -q -F "STOPPED" 2>/dev/null ; then
+if lxc config get ${name} volatile.last_state.power | grep -q -F "STOPPED" 2>/dev/null  ; then
 	echo "Starting the container..."
 	logexec $sudoprefix lxc start $name
-#	sleep 5
+fi
+
+if [ -z $(lxc config get ${name} volatile.last_state.power) ] ; then
+	echo "Starting the container..."
+	logexec $sudoprefix lxc start $name
+fi
+
+
 	
-	if lxc config get ${name} volatile.last_state.power | grep -q -F "STOPPED"; then
-		errcho "Failed to start lxc container $name!"
-		exit 1
-	fi
+if lxc config get ${name} volatile.last_state.power | grep -q -F "STOPPED"; then
+	errcho "Failed to start lxc container $name!"
+	exit 1
 fi
 
 #actual_ip=$(lxc info $name | grep -E "eth0:\sinet\s+" | grep -E -o "[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}\.[[:digit:]]{1,3}")
