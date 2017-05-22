@@ -2,10 +2,10 @@
 cd `dirname $0`
 . ./common.sh
 
-#To jest skrypt, który przygotowywuje serwer do bootstrapowania
+#This script prepares apt-cacher-ng client
 
 #syntax:
-#prepare-apt-cache.sh -p|--apt-proxy <auto>|<adres do apt-cacher razem z portem>
+#prepare-apt-cache.sh -p|--apt-proxy <auto>|<apt-cacher-ng address together with port>
 
 alias errcho='>&2 echo'
 
@@ -52,7 +52,7 @@ if [ "$aptproxy" == "none" ]; then
 	exit 0
 fi
 
-if [ "$aptproxy" == "auto" ]; then
+if [ "$aptproxy" != "auto" ]; then
 	if dpkg -s apt-cacher-ng>/dev/null 2>/dev/null; then
 		echo "apt-cacher-ng already installed!"
 	else

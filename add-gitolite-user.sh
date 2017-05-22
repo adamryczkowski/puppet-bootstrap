@@ -1,7 +1,7 @@
 #!/bin/bash
 cd `dirname $0`
 
-#Program służy do dodania danego użytkownika do istniejącej instalacji gitolite. Należy go wywoływać jako użytkownik, który ma uprawnienia do modyfikacji repozytorium gitolite.
+#Adds user to the existing gitolite installation. Needs to be called as a user that has rights to modify gitolite's master repository.
 
 #add-gitolite-user.sh --gitolite-host <gitolite address> --client-access <admin@client.host> [--client-target-account <target-user-name-on-client-host>] [--username-for-gitolite <username>] 
 # -g|--gitolite-host - nazwa serwera gitolite

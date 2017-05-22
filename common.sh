@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#Defines various functions for logging purposes.
+#
+#
+
 shopt -s extdebug
 repetition_count=0
 

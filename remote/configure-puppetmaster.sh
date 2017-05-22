@@ -25,30 +25,9 @@ sshhome=`getent passwd $puppetuser | awk -F: '{ print $6 }'`
 gitfolder=$sshhome/puppet
 
 
-if ! sudo -n 'ls>/dev/null' 2>/dev/null; then
-	echo "No sudo permissions!"
-fi
-
-function pingsudo
-{
-
-cat >/tmp/pingsudo.sh <<EOT
-#!/bin/bash
-sudo mkdir /var/lib/sudo/$1 2>/dev/null
-while [[ 0 ]]
-do
-sleep 60
-sudo touch /var/lib/sudo/$1/0
-done
-EOT
-
-chmod +x /tmp/pingsudo.sh
-bash -x -- "/tmp/pingsudo.sh" &
-pingsudopid=`jobs -p 1`
-return `jobs -p 1`
-}
-
-# pingsudo $puppetuser
+#if ! sudo -n 'ls>/dev/null' 2>/dev/null; then
+#	echo "No sudo permissions!"
+#fi
 
 while [[ $# > 0 ]]
 do
@@ -99,27 +78,137 @@ fi
 
 
 if ! dpkg -s wget >/dev/null  2>/dev/null; then
-	logexec sudo apt-get --yes install wget
+	logexec sudo apt --yes install wget
 fi
 
 if ! dpkg -s augeas-tools>/dev/null 2>/dev/null; then
-	logexec sudo apt-get --yes install augeas-tools
+	logexec sudo apt --yes install augeas-tools
 fi
+
+if ! dpkg -s git>/dev/null 2>/dev/null; then
+	logexec sudo apt --yes install git
+fi
+
+#TODO:
+#sudo ufw allow 8140
+#sudo systemctl start puppetserver
+#sudo systemctl status puppetserver
+#sudo systemctl enable puppetserver
+
+
 
 source /etc/lsb-release
 
-if ! grep apt.puppetlabs /etc/apt/sources.list  || grep apt.puppetlabs /etc/apt/sources.list.d/* >/dev/null 2>/dev/null; then
-	if [ ! -f "/tmp/puppetlabs-release-$DISTRIB_CODENAME.deb" ]; then
-		logexec wget -O "/tmp/puppetlabs-release-$DISTRIB_CODENAME.deb" http://apt.puppetlabs.com/puppetlabs-release-$DISTRIB_CODENAME.deb
+if [ ! -f /etc/apt/sources.list.d/puppetlabs-pc1.list ]; then
+	if [ ! -f "/tmp/puppet-${DISTRIB_CODENAME}.deb" ]; then
+		logexec curl https://apt.puppetlabs.com/puppetlabs-release-pc1-${DISTRIB_CODENAME}.deb -o /tmp/puppet-${DISTRIB_CODENAME}.deb
 	fi
-	logexec sudo dpkg -i "/tmp/puppetlabs-release-$DISTRIB_CODENAME.deb"
+	logexec sudo dpkg -i "/tmp/puppet-${DISTRIB_CODENAME}.deb"
 	logexec sudo apt-get update
-	logexec rm /tmp/puppetlabs-release-$DISTRIB_CODENAME.deb
+	logexec rm /tmp/puppet-${DISTRIB_CODENAME}.deb
 fi
 
-if ! dpkg -s puppetmaster >/dev/null  2>/dev/null; then
-    logexec sudo apt-get --yes install puppetmaster puppetdb-terminus
+if ! dpkg -s puppetserver >/dev/null  2>/dev/null; then
+	logexec sudo apt-get --yes install puppetserver #puppetdb-terminus
 fi
+
+if [ ! -f /etc/profile.d/puppetserver.sh ]; then
+logheredoc EOT
+	sudo tee /etc/profile.d/puppetserver.sh >/dev/null <<'EOT'
+# Add /opt/puppetlabs/puppet/bin to the path for sh compatible users
+if ! echo $PATH | grep -q /opt/puppetlabs/puppet/bin ; then
+  export PATH=$PATH:/opt/puppetlabs/puppet/bin
+fi
+EOT
+	export PATH=/opt/puppetlabs/puppet/bin:$PATH
+fi
+
+pattern="secure_path\\s*=.*/opt/puppetlabs/puppet/bin"
+if ! sudo grep $pattern /etc/sudoers ; then
+	pattern='^Defaults\s*secure_path\s*=\s*"(.*+)"\s*$'
+	currentpath=$(sudo grep 'Defaults\s*secure_path\s*=\s*.*' /etc/sudoers)
+	if [[ $currentpath =~ $pattern ]]; then
+		currentpath=${BASH_REMATCH[1]}
+		logexec sudo sed -i "/secure_path/c\Defaults secure_path=/opt/puppetlabs/puppet/bin:$currentpath" /etc/sudoers
+	fi
+fi
+
+
+logexec sudo augtool  --autosave --noautoload --transform "Puppet incl /etc/puppetlabs/puppet/puppet.conf" set "/files/etc/puppetlabs/puppet/puppet.conf/master/trusted_server_facts" true
+logexec sudo augtool  --autosave --noautoload --transform "Puppet incl /etc/puppetlabs/puppet/puppet.conf" set "/files/etc/puppetlabs/puppet/puppet.conf/master/strict_variables" true
+
+logexec sudo systemctl enable puppetserver
+logexec sudo service puppetserver start
+
+#Now we are installing puppetdb
+sudo service puppetserver stop
+
+logexec sudo augtool  --autosave --noautoload --transform "Puppet incl /etc/puppetlabs/puppet/puppet.conf" set "/files/etc/puppetlabs/puppet/puppet.conf/master/storeconfigs" true
+logexec sudo augtool  --autosave --noautoload --transform "Puppet incl /etc/puppetlabs/puppet/puppet.conf" set "/files/etc/puppetlabs/puppet/puppet.conf/master/storeconfigs_backend" puppetdb
+logexec sudo augtool  --autosave --noautoload --transform "Puppet incl /etc/puppetlabs/puppet/puppet.conf" set "/files/etc/puppetlabs/puppet/puppet.conf/master/reports = store,puppetdbadam" store,puppetdb
+
+
+logexec sudo augtool  --autosave --noautoload --transform "Puppet incl /etc/puppetlabs/puppet/puppetdb.conf" set "/files/etc/puppetlabs/puppet/puppetdb.conf/main/server_urls" "https://${fqdn}:8081"
+
+logexec sudo /opt/puppetlabs/puppet/bin/puppet module install puppetlabs-puppetdb --version 5.1.2
+
+logexec sudo apt install puppetdb-termini
+
+logheredoc EOT
+sudo tee /etc/puppetlabs/puppet/routes.yaml >/dev/null <<'EOT'
+---
+master:
+  facts:
+    terminus: puppetdb
+    cache: yaml
+EOT
+
+logexec sudo /opt/puppetlabs/puppet/bin/puppet apply --execute  "class { 'puppetdb': listen_address => 'puppetmaster.statystyka.net'}"
+
+logexec sudo /opt/puppetlabs/puppet/bin/puppet module install puppet-hiera --version 2.4.0
+
+logexec sudo /opt/puppetlabs/puppet/bin/gem install hiera-eyaml
+
+#logexec sudo /opt/puppetlabs/bin/puppetserver gem install hiera-eyaml
+logexec sudo /opt/puppetlabs/puppet/bin/puppet apply --execute "class {'hiera': hierarchy => ['secure', '%{fqdn}', '%{environment}', 'common'], eyaml => true, provider => 'puppetserver_gem'}"
+
+
+logexec sudo service puppetserver start
+logexec sudo service puppetdb start
+
+logexec sudo systemctl enable puppetdb
+
+logexec sudo gem install librarian-puppet
+
+
+exit 0
+
+logheredoc EOT
+sudo tee /etc/puppetlabs/puppet/hiera.yaml >/dev/null <<'EOT'
+---
+version: 5
+defaults:  # Used for any hierarchy level that omits these keys.
+  datadir: data         # This path is relative to hiera.yaml's directory.
+  data_hash: yaml_data  # Use the built-in YAML backend.
+
+hierarchy:
+  - name: "Per-node data"
+    path: "nodes/%{trusted.certname}.yaml"  # File path, relative to datadir.
+                                   # ^^^ IMPORTANT: include the file extension!
+
+  - name: "Secret data (encrypted)"
+    lookup_key: eyaml_lookup_key   # Uses non-default backend.
+    path: "secrets.eyaml"
+    options:
+      pkcs7_private_key: /etc/puppetlabs/puppet/eyaml/private_key.pkcs7.pem
+      pkcs7_public_key:  /etc/puppetlabs/puppet/eyaml/public_key.pkcs7.pem
+
+  - name: "Per-OS defaults"
+    path: "os/%{facts.os.family}.yaml"
+
+  - name: "Common data"
+    path: "common.yaml"
+EOT
 
 logexec sudo adduser $puppetuser puppet >/dev/null
 
@@ -160,7 +249,7 @@ EOT
 
 logexec sudo ln -sf /etc/puppet/hiera.yaml /etc/hiera.yaml
 
-logexec sudo service puppetmaster restart
+logexec sudo service puppetserver restart
 
 exitcode=0
 $loglog

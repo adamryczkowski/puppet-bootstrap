@@ -8,14 +8,12 @@ cd `dirname $0`
 
 . ./common.sh
 
-puppetuser=
-sshhome=`getent passwd $puppetuser | awk -F: '{ print $6 }'`
-gitfolder=$sshhome/puppet
+puppetuser=$USER
 
-if ! sudo -n -- ls / >/dev/null 2>/dev/null; then
-	echo "No sudo permissions!"
-	exit 1
-fi
+#if ! sudo -n -- ls / >/dev/null 2>/dev/null; then
+#	echo "No sudo permissions!"
+#	exit 1
+#fi
 
 while [[ $# > 0 ]]
 do
@@ -58,36 +56,55 @@ else
 	fi
 fi
 
+sshhome=`getent passwd $puppetuser | awk -F: '{ print $6 }'`
+gitfolder=$sshhome/puppet
+
+
 if ! dpkg -s wget>/dev/null  2> /dev/null; then
 	logexec sudo apt-get --yes install wget
 fi
 
-
 source /etc/lsb-release
 
-if grep apt.puppetlabs /etc/apt/sources.list || grep apt.puppetlabs /etc/apt/sources.list.d/* >/dev/null 2>/dev/null; then
-	echo "puppet repository already installed!"
-else
-	if [ -f "/tmp/puppetlabs-release-$DISTRIB_CODENAME.deb" ]; then
-		echo "Puppet release deb already downloaded!"
-	else
-		$loglog
-		wget -O "/tmp/puppetlabs-release-$DISTRIB_CODENAME.deb" http://apt.puppetlabs.com/puppetlabs-release-$DISTRIB_CODENAME.deb
+if [ ! -f /etc/apt/sources.list.d/puppetlabs-pc1.list ]; then
+	if [ ! -f "/tmp/puppet-${DISTRIB_CODENAME}.deb" ]; then
+		logexec curl https://apt.puppetlabs.com/puppetlabs-release-pc1-${DISTRIB_CODENAME}.deb -o /tmp/puppet-${DISTRIB_CODENAME}.deb
 	fi
-	$loglog
-	sudo dpkg -i "/tmp/puppetlabs-release-$DISTRIB_CODENAME.deb"
+	logexec sudo dpkg -i "/tmp/puppet-${DISTRIB_CODENAME}.deb"
 	logexec sudo apt-get update
-	logexec rm /tmp/puppetlabs-release-$DISTRIB_CODENAME.deb
+	logexec rm /tmp/puppet-${DISTRIB_CODENAME}.deb
 fi
 
-if dpkg -s puppet >/dev/null 2>/dev/null; then
+if ! dpkg -s puppet-agent >/dev/null  2>/dev/null; then
+	logexec sudo apt-get --yes install puppet-agent
+fi
+
+if ! grep "/opt/puppetlabs/puppet/bin" /etc/environment; then
+	currentpath=$(bash -c "source /etc/environment; echo \$PATH")
+	$loglog
+	echo "PATH=/opt/puppetlabs/puppet/bin:${PATH}" | sudo tee /etc/environment
+	export PATH=/opt/puppetlabs/puppet/bin:$PATH
+fi
+
+pattern="secure_path\\s*=.*/opt/puppetlabs/puppet/bin"
+if ! sudo grep $pattern /etc/sudoers ; then
+	pattern='^Defaults\s*secure_path\s*=\s*"(.*+)"\s*$'
+	currentpath=$(sudo grep 'Defaults\s*secure_path\s*=\s*.*' /etc/sudoers)
+	if [[ $currentpath =~ $pattern ]]; then
+		currentpath=${BASH_REMATCH[1]}
+		logexec sudo sed -i "/secure_path/c\Defaults secure_path=/opt/puppetlabs/puppet/bin:$currentpath" /etc/sudoers
+	fi
+fi
+
+
+if dpkg -s puppet-agent >/dev/null 2>/dev/null; then
 	sudo service puppet stop
 	sudo rm -f /var/lib/puppet/ssl/certs/*
 	sudo rm -f /var/lib/puppet/ssl/certificate_requests/*
 	sudo rm -r /var/lib/puppet/ssl/crl.pem
 	sudo service puppet start
 else
-	logexec sudo apt-get --yes install puppet
+	logexec sudo apt --yes install puppet-agent
 fi
 
 if [ -n "$puppetmaster" ]; then
@@ -96,31 +113,30 @@ if [ -n "$puppetmaster" ]; then
 	else
 		logexec sudo apt-get --yes install augeas-tools
 	fi
-	$loglog
-	sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/main/server" $puppetmaster
+	logexec sudo augtool  --autosave --noautoload --transform "Puppet incl /etc/puppetlabs/puppet/puppet.conf" set "/files/etc/puppetlabs/puppet/puppet.conf/agent/server" ${puppetmaster}
 fi
 
-mypuppetcert=`augtool -L -A --transform "Shellvars incl /etc/default/lxc-net" get "/files/etc/default/lxc-net/LXC_BRIDGE" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p'`
-if [ "$mypuppetcert" != "$myfqdn" ]; then
-	sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/main/certname" $myfqdn
-fi
-
-sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" rm "/files/etc/puppet/puppet.conf/main/templatedir" $myfqdn
+#sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" rm "/files/etc/puppet/puppet.conf/main/templatedir" $myfqdn
 
 
-logexec sudo mkdir -p /etc/facter/facts.d
+#logexec sudo mkdir -p /etc/facter/facts.d
 
-if [ -n "$puppetuser" ]; then
-	logexec sudo tee /etc/facter/facts.d/userlocation.json <<EOT
-{
-  "user": "$puppetuser",
-  "location": "LxcOnAm"
-}
-EOT
-fi
+#if [ -n "$puppetuser" ]; then
+#	logexec sudo tee /etc/facter/facts.d/userlocation.json <<EOT
+#{
+#  "user": "$puppetuser",
+#  "location": "LxcOnAm"
+#}
+#EOT
+#fi
 
-$loglog
-sudo service puppet restart || true
+logexec sudo service puppet stop
+logexec sudo rm -f /etc/puppetlabs/puppet/ssl/certs/*
+logexec sudo rm -f /etc/puppetlabs/puppet/ssl/certificate_requests/*
+logexec sudo rm -f /etc/puppetlabs/puppet/ssl/certificate_requests/*
+logexec sudo rm -f /etc/puppetlabs/puppet/ssl/certificate_requests/*
+logexec 	
+logexec sudo service puppet start
 
-logexec sudo puppet agent --test
+logexec sudo /opt/puppetlabs/puppet/bin/puppet agent --test
 
