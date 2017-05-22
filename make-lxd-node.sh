@@ -279,7 +279,8 @@ if [ "$lxcip" != "auto" ]; then
 	fi
 
 
-	staticleases=/etc/lxc/static_leases
+#	staticleases=/etc/lxc/static_leases
+	staticleases=/var/lib/lxd/networks/${internalif}/dnsmasq.hosts
 	if [ ! -f $staticleases ]; then
 		logexec sudo touch $staticleases
 	fi
