@@ -277,32 +277,35 @@ if [ "$lxcip" != "auto" ]; then
 	if [ ! -d /etc/lxc ]; then
 		logexec sudo mkdir -p /etc/lxc
 	fi
-	if [ ! -f $staticleases ]; then
-		staticleases=/etc/lxc/staticleases
-		logexec sudo touch $staticleases
-		if ! grep -q "^$lxcname,$lxcip" $staticleases; then
-			if grep -q "$lxcip" $staticleases; then
-				errcho "IP address $lxcip already reserved!"
-				exit 1
-			fi
-			#lxc config device set ${name} eth0 ipv4.address ${lxcip}
 
-			if grep -q "^$lxcname,[\\s\\d\\.]+" $staticleases; then
-				#We need to replace the line rather than append
-				if [ "$lxcname" == "$lxcfqdn" ]; then
-					logexec sudo sed -i -e "/^$lxcname,[\\s\\d\\.]+/$lxcname,$lxcip/" $staticleases
-				fi
-			else
-				if [ "$lxcname" == "$lxcfqdn" ]; then
-					$loglog
-					echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
-				else
-					$loglog
-					echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
-				fi
-			fi
-			restartcontainer=1
+
+	staticleases=/etc/lxc/staticleases
+	if [ ! -f $staticleases ]; then
+		logexec sudo touch $staticleases
+	fi
+
+	if ! grep -q "^$lxcname,$lxcip" $staticleases; then
+		if grep -q "$lxcip" $staticleases; then
+			errcho "IP address $lxcip already reserved!"
+			exit 1
 		fi
+		#lxc config device set ${name} eth0 ipv4.address ${lxcip}
+
+		if grep -q "^$lxcname,[\\s\\d\\.]+" $staticleases; then
+			#We need to replace the line rather than append
+			if [ "$lxcname" == "$lxcfqdn" ]; then
+				logexec sudo sed -i -e "/^$lxcname,[\\s\\d\\.]+/$lxcname,$lxcip/" $staticleases
+			fi
+		else
+			if [ "$lxcname" == "$lxcfqdn" ]; then
+				$loglog
+				echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
+			else
+				$loglog
+				echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
+			fi
+		fi
+		restartcontainer=1
 	fi
 	logexec lxc config device set ${name} eth0 ipv4.address ${lxcip}
 
