@@ -305,7 +305,7 @@ fi
 
 #Upewniamy się, że kontener jest uruchomiony
 if lxc config get ${name} volatile.last_state.power | grep -q -F "STOPPED" 2>/dev/null ; then
-#	echo "Starting the container..."
+	echo "Starting the container..."
 	logexec $sudoprefix lxc start $name
 #	sleep 5
 	
