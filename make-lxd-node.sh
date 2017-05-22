@@ -221,7 +221,7 @@ if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 		fi
 	done
 else
-	logexec lxc init ubuntu:${release} ${name} -n ${lxcname}
+	logexec lxc init ubuntu:${release} ${name} 
 #	logexec lxc stop ${name}
 fi
 
