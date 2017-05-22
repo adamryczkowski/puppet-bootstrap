@@ -279,7 +279,7 @@ if [ "$lxcip" != "auto" ]; then
 	fi
 
 
-	staticleases=/etc/lxc/staticleases
+	staticleases=/etc/lxc/static_leases
 	if [ ! -f $staticleases ]; then
 		logexec sudo touch $staticleases
 	fi
