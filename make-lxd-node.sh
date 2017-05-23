@@ -327,7 +327,7 @@ if [ "$lxcip" != "auto" ]; then
 #	logexec sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
 #	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
 #	logexec sudo service lxd start 
-#fi
+fi
 
 
 
