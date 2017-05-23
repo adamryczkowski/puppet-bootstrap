@@ -1,0 +1,80 @@
+configure-lxc 02.01.2017 15:13:58: configure-lxc called with arguments: Namespace(dhcprange=None, hostip='10.0.14.1', internalif='lxcbr0', log='proba.log', loglevel='INFO', network='10.0.14.0/24', usermode=True, usermode_user='')
+configure-lxc 02.01.2017 15:14:01: dpkg -s returned 1 which is FAILURE
+configure-lxc 02.01.2017 15:14:01: dpkg -s returned 0 which is SUCCESS
+configure-lxc 02.01.2017 15:14:01: ("Attempting to run '", "sudo apt install --yes lxc1' as root")
+configure-lxc 02.01.2017 15:14:11: b'
+configure-lxc 02.01.2017 15:14:11: WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+configure-lxc 02.01.2017 15:14:11: 
+configure-lxc 02.01.2017 15:14:11: Reading package lists...
+configure-lxc 02.01.2017 15:14:11: Building dependency tree...
+configure-lxc 02.01.2017 15:14:11: Reading state information...
+configure-lxc 02.01.2017 15:14:11: The following additional packages will be installed:
+configure-lxc 02.01.2017 15:14:11:   lxc-templates
+configure-lxc 02.01.2017 15:14:11: Suggested packages:
+configure-lxc 02.01.2017 15:14:11:   qemu-user-static lvm2 lxctl
+configure-lxc 02.01.2017 15:14:11: The following NEW packages will be installed:
+configure-lxc 02.01.2017 15:14:11:   lxc-templates lxc1
+configure-lxc 02.01.2017 15:14:11: debconf: unable to initialize frontend: Dialog
+configure-lxc 02.01.2017 15:14:11: debconf: (Dialog frontend will not work on a dumb terminal, an emacs shell buffer, or without a controlling terminal.)
+configure-lxc 02.01.2017 15:14:11: debconf: falling back to frontend: Readline
+configure-lxc 02.01.2017 15:14:11: debconf: unable to initialize frontend: Readline
+configure-lxc 02.01.2017 15:14:11: debconf: (This frontend requires a controlling tty.)
+configure-lxc 02.01.2017 15:14:11: debconf: falling back to frontend: Teletype
+configure-lxc 02.01.2017 15:14:11: dpkg-preconfigure: unable to re-open stdin: 
+configure-lxc 02.01.2017 15:14:11: 0 upgraded, 2 newly installed, 0 to remove and 3 not upgraded.
+configure-lxc 02.01.2017 15:14:11: Need to get 0 B/374 kB of archives.
+configure-lxc 02.01.2017 15:14:11: After this operation, 1361 kB of additional disk space will be used.
+configure-lxc 02.01.2017 15:14:11: Selecting previously unselected package lxc1.\r
+configure-lxc 02.01.2017 15:14:11: (Reading database ... \r(Reading database ... 5%\r(Reading database ... 10%\r(Reading database ... 15%\r(Reading database ... 20%\r(Reading database ... 25%\r(Reading database ... 30%\r(Reading database ... 35%\r(Reading database ... 40%\r(Reading database ... 45%\r(Reading database ... 50%\r(Reading database ... 55%\r(Reading database ... 60%\r(Reading database ... 65%\r(Reading database ... 70%\r(Reading database ... 75%\r(Reading database ... 80%\r(Reading database ... 85%\r(Reading database ... 90%\r(Reading database ... 95%\r(Reading database ... 100%\r(Reading database ... 440538 files and directories currently installed.)\r
+configure-lxc 02.01.2017 15:14:11: Preparing to unpack .../lxc1_2.0.6-0ubuntu1~ubuntu16.04.1_amd64.deb ...\r
+configure-lxc 02.01.2017 15:14:11: Unpacking lxc1 (2.0.6-0ubuntu1~ubuntu16.04.1) ...\r
+configure-lxc 02.01.2017 15:14:11: Selecting previously unselected package lxc-templates.\r
+configure-lxc 02.01.2017 15:14:11: Preparing to unpack .../lxc-templates_2.0.6-0ubuntu1~ubuntu16.04.1_amd64.deb ...\r
+configure-lxc 02.01.2017 15:14:11: Unpacking lxc-templates (2.0.6-0ubuntu1~ubuntu16.04.1) ...\r
+configure-lxc 02.01.2017 15:14:11: Processing triggers for ureadahead (0.100.0-19) ...\r
+configure-lxc 02.01.2017 15:14:11: Processing triggers for man-db (2.7.5-1) ...\r
+configure-lxc 02.01.2017 15:14:11: Setting up lxc1 (2.0.6-0ubuntu1~ubuntu16.04.1) ...\r
+configure-lxc 02.01.2017 15:14:11: Setting up lxc dnsmasq configuration.\r
+configure-lxc 02.01.2017 15:14:11: Setting up lxc-templates (2.0.6-0ubuntu1~ubuntu16.04.1) ...\r
+configure-lxc 02.01.2017 15:14:11: Processing triggers for ureadahead (0.100.0-19) ...\r
+configure-lxc 02.01.2017 15:14:11: '
+configure-lxc 02.01.2017 16:25:15: configure-lxc called with arguments: Namespace(dhcprange=None, hostip='10.0.14.1', internalif='lxcbr0', log='proba.log', loglevel='INFO', network='10.0.14.0/24', usermode=True, usermode_user='')
+configure-lxc 02.01.2017 16:25:18: dpkg -s returned 0 which is SUCCESS
+configure-lxc 02.01.2017 16:25:18: dpkg -s returned 1 which is FAILURE
+configure-lxc 02.01.2017 16:25:18: ("Attempting to run '", "sudo apt install --yes augeas-tools' as root")
+configure-lxc 02.01.2017 16:25:24: b'
+configure-lxc 02.01.2017 16:25:24: WARNING: apt does not have a stable CLI interface. Use with caution in scripts.
+configure-lxc 02.01.2017 16:25:24: 
+configure-lxc 02.01.2017 16:25:24: Reading package lists...
+configure-lxc 02.01.2017 16:25:24: Building dependency tree...
+configure-lxc 02.01.2017 16:25:24: Reading state information...
+configure-lxc 02.01.2017 16:25:24: The following NEW packages will be installed:
+configure-lxc 02.01.2017 16:25:24:   augeas-tools
+configure-lxc 02.01.2017 16:25:24: 0 upgraded, 1 newly installed, 0 to remove and 3 not upgraded.
+configure-lxc 02.01.2017 16:25:24: Need to get 21,8 kB of archives.
+configure-lxc 02.01.2017 16:25:24: After this operation, 65,5 kB of additional disk space will be used.
+configure-lxc 02.01.2017 16:25:24: Get:1 http://pl.archive.ubuntu.com/ubuntu xenial/main amd64 augeas-tools amd64 1.4.0-0ubuntu1 [21,8 kB]
+configure-lxc 02.01.2017 16:25:24: debconf: unable to initialize frontend: Dialog
+configure-lxc 02.01.2017 16:25:24: debconf: (Dialog frontend will not work on a dumb terminal, an emacs shell buffer, or without a controlling terminal.)
+configure-lxc 02.01.2017 16:25:24: debconf: falling back to frontend: Readline
+configure-lxc 02.01.2017 16:25:24: debconf: unable to initialize frontend: Readline
+configure-lxc 02.01.2017 16:25:24: debconf: (This frontend requires a controlling tty.)
+configure-lxc 02.01.2017 16:25:24: debconf: falling back to frontend: Teletype
+configure-lxc 02.01.2017 16:25:24: dpkg-preconfigure: unable to re-open stdin: 
+configure-lxc 02.01.2017 16:25:24: Fetched 21,8 kB in 0s (67,5 kB/s)
+configure-lxc 02.01.2017 16:25:24: Selecting previously unselected package augeas-tools.\r
+configure-lxc 02.01.2017 16:25:24: (Reading database ... \r(Reading database ... 5%\r(Reading database ... 10%\r(Reading database ... 15%\r(Reading database ... 20%\r(Reading database ... 25%\r(Reading database ... 30%\r(Reading database ... 35%\r(Reading database ... 40%\r(Reading database ... 45%\r(Reading database ... 50%\r(Reading database ... 55%\r(Reading database ... 60%\r(Reading database ... 65%\r(Reading database ... 70%\r(Reading database ... 75%\r(Reading database ... 80%\r(Reading database ... 85%\r(Reading database ... 90%\r(Reading database ... 95%\r(Reading database ... 100%\r(Reading database ... 440772 files and directories currently installed.)\r
+configure-lxc 02.01.2017 16:25:24: Preparing to unpack .../augeas-tools_1.4.0-0ubuntu1_amd64.deb ...\r
+configure-lxc 02.01.2017 16:25:24: Unpacking augeas-tools (1.4.0-0ubuntu1) ...\r
+configure-lxc 02.01.2017 16:25:24: Processing triggers for man-db (2.7.5-1) ...\r
+configure-lxc 02.01.2017 16:25:24: Setting up augeas-tools (1.4.0-0ubuntu1) ...\r
+configure-lxc 02.01.2017 16:25:24: '
+configure-lxc 02.01.2017 16:26:11: configure-lxc called with arguments: Namespace(dhcprange=None, hostip='10.0.14.1', internalif='lxcbr0', log='proba.log', loglevel='INFO', network='10.0.14.0/24', usermode=True, usermode_user='')
+configure-lxc 02.01.2017 16:26:12: dpkg -s returned 0 which is SUCCESS
+configure-lxc 02.01.2017 16:26:12: dpkg -s returned 0 which is SUCCESS
+configure-lxc 02.01.2017 17:14:08: configure-lxc called with arguments: Namespace(dhcprange=None, hostip='10.0.14.1', internalif='lxcbr0', log='proba.log', loglevel='INFO', network='10.0.14.0/24', usermode=True, usermode_user='')
+configure-lxc 02.01.2017 17:14:15: dpkg -s returned 0 which is SUCCESS
+configure-lxc 02.01.2017 17:14:15: dpkg -s returned 0 which is SUCCESS
+configure-lxc 02.01.2017 17:32:13: configure-lxc called with arguments: Namespace(dhcprange=None, hostip='10.0.14.1', internalif='lxcbr0', log='proba.log', loglevel='INFO', network='10.0.14.0/24', usermode=True, usermode_user='')
+configure-lxc 02.01.2017 17:32:15: dpkg -s returned 0 which is SUCCESS
+configure-lxc 02.01.2017 17:32:15: dpkg -s returned 0 which is SUCCESS

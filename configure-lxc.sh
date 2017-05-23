@@ -3,7 +3,7 @@ cd `dirname $0`
 
 . ./common.sh
 
-#Ten skrypt konfiguruje lxc-net na gospodarzu
+#Configures lxc-net on the host. The script is compatible with Ubuntu 14.04 and lxc1.
 
 #syntax:
 #configure-lxc [-i|--internalif] <internal if name, e.g. lxcbr0> [-h|--hostip] <host ip, e.g. 10.0.14.1> [-n|--network <network domain, e.g. 10.0.14.0/24>] [--dhcprange] <dhcp range, e.g. '10.0.14.3,10.0.14.254' [--usermode]
@@ -11,8 +11,7 @@ cd `dirname $0`
 # -h|--hostip - host ip, e.g. 10.0.14.1
 # -n|--network network domain e.g. 10.0.14.0/24
 # --dhcprange - dhcp range, e.g. '10.0.14.3,10.0.14.254' 
-# --usermode - if set, usermode-containers will be setup for the user --usermode-user
-# --usermode-user - this user will be given privileges to set up user-mode linux containers
+# --usermode-user - if provided, usermode containers will be setup for this user and the user will get all necessary privileges granted
 internalif=auto
 lxchostip=auto
 lxcnetwork=auto
@@ -30,10 +29,8 @@ shift
 case $key in
 	--usermode-user)
 	user=$1
-	shift
-	;;
-	--usermode)
 	usermode=1
+	shift
 	;;
 	-i|--internalif)
 	internalif="$1"

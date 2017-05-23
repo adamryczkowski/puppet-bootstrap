@@ -1,9 +1,0 @@
-[14:29:21 adam@adam-N56VZ:/home/Adama-docs/Adam/Adam/MyDocs/praca/Puppet/bootstrap/tmp/tmp-script.sh:15] $ echo /
-/
-
-[14:29:21 adam@adam-N56VZ:/home/Adama-docs/Adam/Adam/MyDocs/praca/Puppet/bootstrap/tmp/tmp-script.sh:18] $ ls /
-
-[14:29:21 adam@adam-N56VZ:/home/Adama-docs/Adam/Adam/MyDocs/praca/Puppet/bootstrap/tmp/tmp-script.sh:21] $ echo 'server = '
-+ tee -a /tmp/tmp.txt
-server = 
-

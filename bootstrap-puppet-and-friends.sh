@@ -9,26 +9,22 @@ wait
  
 . ./common.sh
 
-#To jest skrypt, który zajmuje się instalacją całego systemu puppet.
-#Skrypt bierze na siebie odpowiedzialność za instalację puppeta (puppetdb, r10k i inni) wraz z gitolite oraz za konfigurację tego wszystkiego razem. 
+#This script installs whole puppet system. 
+#It manages installation of the puppet itself (puppetdb, r10k and other), gitolite repository that serves the configurations and it glues everything together.
 
-#Jeśli poda się --gitolite-lxc-name lub --gitolite-lxc-name, to skrypt weźmie na siebie obowiązek stworzenia kontenera lxc gitolite/gitolite. Inaczej skrypt spróbuje skonfigurować istniejące kontenery korzystając z dostępu przez ssh i sudo - dlatego użytkownik musi upewnić się, że te istnieje dostęp ssh i uprawnienia sudo oraz jest gotowy na wpisywanie ew. haseł.
+#If you give argument --gitolite-lxc-name or --gitolite-lxc-name, skrypt will take case of creation of the lxc container with gitolite. Otherwise script will attempt to configure existing contenners accessing them with ssh and sudo. It is user's responisibility to provide the ssh access and sudo rights (preferably non-interactive, otherwise script will require sudo passwords to be typed in).
 
 #syntax:
 #bootstrap-puppet-and-friends.sh [--debug] [--gitolite-lxc-name <lxc name> [--gitolite-lxc-ip <ip>]] [--puppetmaster-lxc-name <lxc name> [--puppetmaster-lxc-ip <ip>]] --user-on-gitolite <username> --user-on-puppetmaster <username> --[lxc-host-ip <ip> --lxc-network <e.g. 10.0.17.0/24> --lxc-dhcprange <e.g. 10.0.17.200,10.0.17.254> [--lxc-usermode]]   [--apt-proxy <apt-proxy address>] [--import-puppet-manifest <git address> --dont-merge-manifest-with-template] [--import-git <reponame>:<git uri>
-#--gitolite-lxc-name - Jeśli podane, to stworzony zostanie kontener lxc o nazwie <lxc name> zawierający gitolite.
-#--gitolite-lxc-ip - Ma sens tylko, gdy podano --gitolite-lxc-name. Jeśli podane to, ustawia stały adres ip dla lxc gitolite
-#--gitolite-lxc-name - Jeśli podane, to stworzony zostanie kontener lxc o nazwie <lxc name> zawierający gitolite.
-#--gitolite-lxc-ip - Ma sens tylko, gdy podano --gitolite-lxc-name. Jeśli podane to, ustawia stały adres ip dla lxc gitolite
-#--gitolite-name - Obowiązkowy argument. Nazwa komputera, w którym ma być gitolite. Można podać localhost.
-#--gitolite-name - Obowiązkowy argument. Nazwa komputera, w którym ma być gitolite. Można podać localhost.
-#--user-on-gitolite - Obowiązkowy argument. Nazwa użytkownika, pod którym będzie logowanie.
-#--user-on-gitolite - Obowiązkowy argument. Nazwa użytkownika, pod którym będzie logowanie.
-#--lxc-host-ip - Jeśli konfigurujemy sieć lxc, to tutaj definiujemy jej parametry.
-#--lxc-network - np. 10.0.17.0/24. Jeśli konfigurujemy sieć lxc, to tutaj definiujemy jej parametry.
-#--lxc-dhcprange - np. 10.0.17.200,10.0.17.254. Jeśli konfigurujemy sieć lxc, to tutaj definiujemy jej parametry.
-#--lxc-usermode - Jeśli podane, to tworzone kontenery będą w trybie usermode. 
-#--apt-proxy - Można podać: none, auto lub adres do istniejącego serwera apt-proxy. Jeśli podane zostanie auto, to localhost stanie się serwerem apt-proxy.
+#--gitolite-lxc-name - If set, it will create gitolite lxc container named <lxc name> with gitolite.
+#--gitolite-lxc-ip - Relevant only with  --gitolite-lxc-name. Sets static ip address for lxc gitolite
+#--gitolite-name - Mandatory argument. Name of the computer with gitolite. It can be localhost.
+#--user-on-gitolite - Mandatory argument. Sets user name, under which script will log in on the gitolite system. 
+#--lxc-host-ip - Needed if we want to configure lxc network. Sets ip address of the host.
+#--lxc-network - e.g. 10.0.17.0/24. Needed if we want to configure the lxc network. 
+#--lxc-dhcprange - e.g. 10.0.17.200,10.0.17.254. Needed if we want to configure the lxc network. 
+#--lxc-user - Name of the user that hosts all the lxc containers. All containers will be in usermode.
+#--apt-proxy - none, auto or address to the existing apt-cache-ng.
 #--import-puppet-manifest - Jeśli podane, to główne repozytorium puppeta zostanie zaimportowane z tego adresu git. Domyślnie na początek historii git z zadanego repozytorium, chyba że podano --dont-merge-manifest-with-template.
 #--dont-merge-manifest-with-template - Nie ma sensu, jeśli nie podano --import-puppet-manifest. Jeśli NIE podane, to na początek zaimportowanego repozytorium git z manifestem zostanie wstawiony pusty szablon konfiguracji.
 #--import-git <reponame>:<git uri> - Jeśli do zadziałania manifestu puppet potrzeba jakiegoś zewnętrznego repozytorium, to tu można podać jego nazwę (np. puppet/autostart) i adres git dostępny dla gitolite.
@@ -166,7 +162,7 @@ if [ -n "$aptproxy" ]; then
 	else
 		optx=""
 	fi
-	. ./execute-script-remotely.sh ./prepare-apt-cache.sh $optx $opts2 -- $opts 
+	. ./execute-script-remotely.sh ./apt-cacher-ng-client.sh $optx $opts2 -- $opts 
 fi
 exitstat=$?
 if [ $exitstat -ne 0 ]; then
