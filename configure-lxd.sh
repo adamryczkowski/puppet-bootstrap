@@ -169,7 +169,6 @@ if ! lxc network list >/dev/null 2>/dev/null; then
 	exit 0
 fi
 
-lxc network list | grep -q "$internalif" 2>/dev/null
 
 if [ "$lxcnetwork" == "auto" ]; then
 	lxcnetworkarg=""
@@ -184,8 +183,8 @@ else
 	fi
 fi
 
-if [ $? -eq 0 ]; then
-	ifstate=`sudo lxc network show "$internalif"`
+if [ lxc network list | grep -q "$internalif" 2>/dev/null ]; then
+	ifstate=`lxc network show "$internalif"`
 	pattern='\s+managed:\sfalse'
 
 	if [[ $ifstate =~ $pattern ]]; then

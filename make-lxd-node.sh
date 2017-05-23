@@ -316,7 +316,7 @@ if [ "$lxcip" != "auto" ]; then
 #		fi
 #		logexec sudo service lxd restart
 #	fi
-fi
+#fi
 
 
 #Zanim uruchomimy kontener, upewniamy się, że dostanie prawidłowy adres IP
