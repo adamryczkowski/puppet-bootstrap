@@ -152,19 +152,6 @@ if ! dpkg -s lxc2 >/dev/null 2>/dev/null; then
 	needs_restart=1
 fi
 
-if [ "$lxcnetwork" == "auto" ]; then
-	lxcnetwork=""
-else
-	#Pattern for full CIDR notation. It extracts hostip.
-	pattern='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/(3[0-2]|[12][0-9]|0?[1-9])$' 
-	if [[ $lxcnetwork =~ $pattern ]]; then
-		lxcnetwork=" ipv4.address=$lxcnetwork"
-	else
-		errcho "Malformed --network parameter. Please use CIDR notation to encode hostname and the network mask, like this: 192.168.10.1/24"
-		exit 1
-	fi
-fi
-
 if [ "$lxcdhcprange" == "auto" ]; then
 	lxcdhcprange=''
 else
@@ -183,6 +170,19 @@ if ! lxc network list >/dev/null 2>/dev/null; then
 fi
 
 lxc network list | grep -q "$internalif" 2>/dev/null
+
+if [ "$lxcnetwork" == "auto" ]; then
+	lxcnetworkarg=""
+else
+	#Pattern for full CIDR notation. It extracts hostip.
+	pattern='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/(3[0-2]|[12][0-9]|0?[1-9])$' 
+	if [[ $lxcnetwork =~ $pattern ]]; then
+		lxcnetworkarg=" ipv4.address=$lxcnetwork"
+	else
+		errcho "Malformed --network parameter. Please use CIDR notation to encode hostname and the network mask, like this: 192.168.10.1/24"
+		exit 1
+	fi
+fi
 
 if [ $? -eq 0 ]; then
 	ifstate=`sudo lxc network show "$internalif"`
@@ -215,7 +215,7 @@ if [ $? -eq 0 ]; then
 		fi
 	fi	
 else
-	logexec lxc network create $internalif $lxcnetwork ipv4.nat=true $lxcdhcprange
+	logexec lxc network create $internalif $lxcnetworkarg ipv4.nat=true $lxcdhcprange
 fi
 
 
