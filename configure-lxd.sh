@@ -73,6 +73,11 @@ if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/*; 
 fi
 if ! dpkg -s lxc2 >/dev/null 2>/dev/null; then
 	logexec sudo apt-get --yes install lxc2
+	if mount |grep " /home " | grep -q btrfs; then
+		logexec sudo lxd init --auto --storage-backend=btrfs
+	else
+		logexec sudo lxd init --auto 
+	fi
 else
 	logexec sudo apt-get upgrade --yes
 fi
@@ -114,9 +119,18 @@ else
 	logexec sudo lxc network create $internalif $lxcnetwork $lxcdhcprange
 fi
 
+#staticleases=/etc/lxc/static_leases
+#
+#if [ ! -d /etc/lxc ]; then
+#	logexec sudo mkdir -p /etc/lxc
+#fi
+#if [ ! -f $staticleases ]; then
+#	logexec sudo touch $staticleases
+#fi
 
-if [ "$usermode" -eq 1 ]; then
-	sudo usermod -aG lxd $user
+
+if [ "$needsrestart" -eq 1 ]; then
+	echo "You need to log off the current session!"
+	exit -1
 fi
-
 

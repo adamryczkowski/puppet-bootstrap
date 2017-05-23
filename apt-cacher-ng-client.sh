@@ -52,7 +52,7 @@ if [ "$aptproxy" == "none" ]; then
 	exit 0
 fi
 
-if [ "$aptproxy" == "auto" ]; then
+if [ "$aptproxy" != "auto" ]; then
 	if dpkg -s apt-cacher-ng>/dev/null 2>/dev/null; then
 		echo "apt-cacher-ng already installed!"
 	else
