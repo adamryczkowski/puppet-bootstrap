@@ -195,7 +195,7 @@ fi
 
 #Ustawiamy fqdn i hostname...
 #echo "Setting fqdn and hostname for the container and the host..."
-echo $lxcfqdn | grep -Fq . 2>/dev/null
+echo "$lxcfqdn" | grep -Fq . 2>/dev/null
 if [ $? -eq 0 ]; then
 	lxcname=`echo $lxcfqdn | sed -En 's/^([^.]*)\.(.*)$/\1/p'` 
 	hostsline="$lxcfqdn $lxcname" 
@@ -268,66 +268,66 @@ if [ "$lxcip" != "auto" ]; then
 	fi
 
 
-	tmpfile=$(mktemp)
-	$loglog
-	sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
-	$loglog
-	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
-
-	if [ ! -d /etc/lxc ]; then
-		logexec sudo mkdir -p /etc/lxc
-	fi
+#	tmpfile=$(mktemp)
+#	$loglog
+#	sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
+#	$loglog
+#	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
+#
+#	if [ ! -d /etc/lxc ]; then
+#		logexec sudo mkdir -p /etc/lxc
+#	fi
 
 
 #	staticleases=/etc/lxc/static_leases
-	staticleases=/var/lib/lxd/networks/${internalif}/dnsmasq.hosts
-	if [ ! -f $staticleases ]; then
-		logexec sudo touch $staticleases
-	fi
-
-	if ! grep -q "^$lxcname,$lxcip" $staticleases; then
-		if grep -q "$lxcip" $staticleases; then
-			errcho "IP address $lxcip already reserved!"
-			exit 1
-		fi
-		#lxc config device set ${name} eth0 ipv4.address ${lxcip}
-
-		if grep -q "^$lxcname,[\\s\\d\\.]+" $staticleases; then
-			#We need to replace the line rather than append
-			if [ "$lxcname" == "$lxcfqdn" ]; then
-				logexec sudo sed -i -e "/^$lxcname,[\\s\\d\\.]+/$lxcname,$lxcip/" $staticleases
-			fi
-		else
-			if [ "$lxcname" == "$lxcfqdn" ]; then
-				$loglog
-				echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
-			else
-				$loglog
-				echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
-			fi
-		fi
-		restartcontainer=1
-	fi
+#	staticleases=/var/lib/lxd/networks/${internalif}/dnsmasq.hosts
+#	if [ ! -f $staticleases ]; then
+#		logexec sudo touch $staticleases
+#	fi
+#
+#	if ! grep -q "^$lxcname,$lxcip" $staticleases; then
+#		if grep -q "$lxcip" $staticleases; then
+#			errcho "IP address $lxcip already reserved!"
+#			exit 1
+#		fi
+#		#lxc config device set ${name} eth0 ipv4.address ${lxcip}
+#
+#		if grep -q "^$lxcname,[\\s\\d\\.]+" $staticleases; then
+#			#We need to replace the line rather than append
+#			if [ "$lxcname" == "$lxcfqdn" ]; then
+#				logexec sudo sed -i -e "/^$lxcname,[\\s\\d\\.]+/$lxcname,$lxcip/" $staticleases
+#			fi
+#		else
+#			if [ "$lxcname" == "$lxcfqdn" ]; then
+#				$loglog
+#				echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
+#			else
+#				$loglog
+#				echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
+#			fi
+#		fi
+#		restartcontainer=1
+#	fi
 	logexec lxc config device set ${name} eth0 ipv4.address ${lxcip}
 
-	if [[ "$restartcontainer" == "1" ]]; then
-		if lxc config get ${name} volatile.last_state.power | grep -q -F "RUNNING"; then
-			logexec lxc stop ${name}
-		fi
-		logexec sudo service lxd restart
-	fi
+#	if [[ "$restartcontainer" == "1" ]]; then
+#		if lxc config get ${name} volatile.last_state.power | grep -q -F "RUNNING"; then
+#			logexec lxc stop ${name}
+#		fi
+#		logexec sudo service lxd restart
+#	fi
 fi
 
 
 #Zanim uruchomimy kontener, upewniamy się, że dostanie prawidłowy adres IP
-if [ "$lxcip" != "auto" ]; then
-	logexec sudo service lxd stop 
-
-	tmpfile=$(mktemp)
-	logexec sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
-	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
-	logexec sudo service lxd start 
-fi
+#if [ "$lxcip" != "auto" ]; then
+#	logexec sudo service lxd stop 
+#
+#	tmpfile=$(mktemp)
+#	logexec sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
+#	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
+#	logexec sudo service lxd start 
+#fi
 
 
 
