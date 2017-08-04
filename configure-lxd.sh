@@ -41,7 +41,7 @@ fi
 pattern='^(setup|show|help)$'
 if [[ ! $command =~ $pattern ]]; then
 	errcho "Unknown command: $1"
-	echo "$usage"
+	printf "$usage"
 	exit 1
 fi
 shift
@@ -54,9 +54,11 @@ needs_restart=0
 
 if [ $command == "setup" ]; then
 	pattern='^--.*$'
-	if ! [[ $1 =~ $pattern ]]; then
-		internalif=$1
-		shift
+	if [ -n "$1" ]; then
+		if ! [[ $1 =~ $pattern ]]; then
+			internalif=$1
+			shift
+		fi
 	fi
 fi
 
@@ -86,16 +88,16 @@ case $key in
 	debug=1
 	;;
 	--help)
-        echo "$usage"
+        printf "$usage"
         exit 0
 	;;
 	*)
-	echo "Unkown parameter '$key'. Aborting."
+	printf "Unkown parameter '$key'. Aborting."
 	exit 1
 	;;
         -*)
-        echo "Error: Unknown option: $1" >&2
-        echo "$usage" >&2
+        printf "Error: Unknown option: $1" >&2
+        printf "$usage" >&2
         ;;
 esac
 done
@@ -107,26 +109,26 @@ if [ -n "$debug" ]; then
 fi
 
 if [ "$command" == "help" ]; then
-	echo "$usage"
+	printf "$usage"
 	exit 0
 fi
 
 
 if [ "$command" == "show" ]; then
 	if dpkg -s lxc2 >/dev/null 2>/dev/null; then
-		echo "lxc version $(lxc --version) installed."
+		printf "lxc version $(lxc --version) installed."
 		
-		echo "\n networks list "
+		printf "\n networks list "
 		lxc network list | head -n 3
 		lxc network list | grep -E '(YES)' -A 1
 
 		allnetworks=$(lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o)
 		lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o | while read x; do 
-			echo "Details of $x";lxc network show $x
+			printf "Details of $x";lxc network show $x
 		done
 
 	else
-		echo "lxc NOT installed."
+		printf "lxc NOT installed."
 		exit 0
 	fi
 fi
@@ -165,7 +167,7 @@ else
 fi
 
 if ! lxc network list >/dev/null 2>/dev/null; then
-	echo "Current user added to the lxd group. For this setting to take effect, you need to logout, login and run this script again"
+	printf "Current user added to the lxd group. For this setting to take effect, you need to logout, login and run this script again"
 	exit 0
 fi
 
@@ -183,20 +185,21 @@ else
 	fi
 fi
 
-if [ lxc network list | grep -q "$internalif" 2>/dev/null ]; then
+
+if lxc network list | grep -q "$internalif" 2>/dev/null; then
 	ifstate=`lxc network show "$internalif"`
 	pattern='\s+managed:\sfalse'
 
 	if [[ $ifstate =~ $pattern ]]; then
-		echo "Cannot set physical network. Choose some non-existant --internalif"
+		printf "Cannot set physical network. Choose some non-existant --internalif"
 		exit 10
 	fi
-	if ! -z "$lxcnetwork"; then
+	if [ ! -z "$lxcnetwork" ] && [ "$lxcnetwork" != "auto" ]; then
 		pattern='\s+ipv4\.address:\s+([0-9./]*)'
 		if [[ $ifstate =~ $pattern ]]; then
 			actual_network=${BASH_REMATCH[1]}
 			if [ "$actual_network" != "$lxcnetwork" ]; then
-				echo "Actual network $actual_network doesn't match the intended one $lxcnetwork ! Specify different network interface or make sure networks match, or delete the $internalif network beforehand with\n    lxc network delete $internalif\nand run the script again."
+				printf "Actual network $actual_network doesn't match the intended one $lxcnetwork ! Specify different network interface or make sure networks match, or delete the $internalif network beforehand with\n    lxc network delete $internalif\nand run the script again."
 				exit 11
 			fi
 		fi

@@ -168,6 +168,10 @@ fi
 if [ -n "$sshuser" ]; then
 	sshhome=`getent passwd $sshuser | awk -F: '{ print $6 }'`
 	if [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
+		if [ -f "$sshhome/.ssh/id_ed25519" ]; then
+			errcho "Abnormal condition: private key is installed without the corresponding public key. Please make sure both files are present, or neither of them. Exiting."
+			exit 1
+		fi
 		errcho "Warning: User on host does not have ssh keys generated. The script will generate them."
 		logexec ssh-keygen -q -t ed25519 -N "" -a 100 -f "$sshhome/.ssh/id_ed25519"
 		if [ $? -ne 0 ]; then
