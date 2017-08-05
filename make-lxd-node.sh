@@ -29,7 +29,7 @@ where
                             Requires sudo privileges on host.
  -s|--grant-ssh-access-to - username which will get automatic login via ssh to that container.
                             Defaults to `whoami`.
- -p|--apt-proxy           - Address of the existing apt-cacher.
+ -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
  --bridgeif               - If set, name of the bridge interface the container will be connected to.
                             Defaults to the first available bridge interface used by LXD deamon.
  --private_key_path       - Path to the file with the ssh private key. If set, installs private
@@ -226,6 +226,10 @@ if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 	done
 else
 	logexec lxc init ubuntu:${release} ${name} 
+	if ! $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
+	        errcho "Cannot create the lxc container"
+	        exit 1
+	fi       
 #	logexec lxc stop ${name}
 fi
 

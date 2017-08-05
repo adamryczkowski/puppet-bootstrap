@@ -36,16 +36,16 @@ This script sends script to the remote machine either by lxc send or ssh.
 
 Usage:
 
-$(basename $0) <script path> [--ssh_address <host_address>]  
+$(basename $0) <script path> [--ssh-address <host_address>]  
                [--lxc-name <lxcname>] [--username <user>] 
-               [--debug] [--extra-executable] 
+               [--debug] [--step-debug] [--extra-executable] 
                -- <arguments that will get send to the remote script>
                
 where
 
  <script path>      - path to the script, to send. The script doesn't need to 
                       have execution rights.
- --ssh_address      - ssh address in format [user@]host[:port] to the remote 
+ --ssh-address      - ssh address in format [user@]host[:port] to the remote 
                       system. Port defaults to 22, and user to the current user.
  --lxc-name         - name of the lxc container to send the command to. 
                       The command will be transfered by and executed 
@@ -53,7 +53,7 @@ where
  --username         - name of the user, on behalf of which the script 
                       will be run. The username defaults to the connected 
                       user in case of ssh, and root in case of lxc.
- --debug            - Will run the target script with bash -x, 
+ --step-debug       - Will run the target script with bash -x, 
                       the line debugging option.
  --extra-executable - Extra file(s) that will be transfered to the remote host. 
                       Each instantion of this parameter will add another file. 
@@ -121,7 +121,7 @@ case $exec_key in
 	exec_extrascripts="$exec_extrascripts $1"
 	shift
 	;;
-	--ssh_address)
+	--ssh-address)
 	ssh_address=$1
 	shift
 	;;
@@ -154,6 +154,7 @@ done
 #if [ "$exec_fulldebug" -eq "1" ]; then
 #	set -x
 #fi
+set -x
 
 if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then
@@ -307,9 +308,9 @@ case $exec_mode in
 		else
 			exec_rpath=$exec_remote_dir/$exec_file
 			exec_command="if [ ! -d "`dirname $exec_rpath`" ]; then mkdir -p `dirname $exec_rpath`; fi"
-			ssh $exec_portarg1 $sshuser@$exec_host $exec_command
+			logexec ssh $exec_portarg1 $sshuser@$exec_host $exec_command
 		fi
-		scp $exec_portarg2 $exec_file $sshuser@$exec_host:$exec_rpath >/dev/null
+		logexec scp $exec_portarg2 $exec_file $sshuser@$exec_host:$exec_rpath >/dev/null
 	done
 	if [ -n "$log" ]; then
 		#ssh $exec_user@$exec_host "echo \"Script $exec_script on \$(hostname): \" >$exec_remote_dir/log.log"
@@ -326,8 +327,8 @@ case $exec_mode in
         		fi
                 fi
 	fi
-	ssh $exec_portarg1 $sshuser@$exec_host chmod -R +x $exec_remote_dir
-	ssh $exec_portarg1 $sshuser@$exec_host chmod +x $exec_remote_path
+	logexec ssh $exec_portarg1 $sshuser@$exec_host chmod -R +x $exec_remote_dir
+	logexec ssh $exec_portarg1 $sshuser@$exec_host chmod +x $exec_remote_path
 	exec_prefix="ssh $exec_portarg1 $sshuser@$exec_host -- sudo -Hu $exec_user -- "
 	;;
 	3)
@@ -378,7 +379,7 @@ esac
 function appendlog ()
 {
 #Funkcja zbierająca log na końcu pracy
-	if [ -n "$log" ]; then
+	if [ -n "$log" ] && [ "$log" != "/dev/stdout" ]; then
 		case $exec_mode in
 			1)
 			cat $exec_remote_dir/log.log >>$log
