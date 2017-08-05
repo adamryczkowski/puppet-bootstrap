@@ -30,19 +30,39 @@ function exitfunction()
 trap 'exitfunction' EXIT
 
 
+usage="
+This script sends script to the remote machine either by lxc send or ssh. 
 
-#Plik, który pozwala na wykonanie zewnętrznego skryptu zdalnie na innej maszynie. 
-#Obsługiwany jest tryb pracy przez ssh, lxc oraz lokalnie.
 
-#syntax:
-#execute-script-remotely.sh <script path> --user <username> [--host <hostname>] [--port <ssh port>] [--lxc-name <lxcname>] [--debug] -- <commands>
-#<script path> - ścieżka do skryptu, dostępna przez nas. Skrypt nie musi mieć uprawnień wykonywalnych.
-#--user - nazwa użytkownika wykonująca dany skrypt username on server. Domyślnie: użytkownik wykonujący ten skrypt.
-#--host - nazwa hosta na którym skrypt ma być wykonany. Może być localhost, wtedy nie będzie wykonywane wywołanie przez ssh
-#--port - alternatywny numer portu ssh. Używane, jeśli połączenie wykonywane jest przez ssh.
-#--lxc-name - nazwa kontenera lxc w którym należy wykonać skrypt. Kontener musi być włączony - wyłączony kontener nie zostanie uruchomiony. Skrypt najpierw szuka kontenera o danej nazwie wśród kontenerów userspace, a potem wśród kontenerów root.
-#--debug
-#--extra-executable - dodatkowy plik wykonywalny, do którego odwołuje się wykonywany skrypt. Można ten parametr podać więcej niż jeden raz.
+Usage:
+
+$(basename $0) <script path> [--ssh_address <host_address>]  
+               [--lxc-name <lxcname>] [--username <user>] 
+               [--debug] [--extra-executable] 
+               -- <arguments that will get send to the remote script>
+               
+where
+
+ <script path>      - path to the script, to send. The script doesn't need to 
+                      have execution rights.
+ --ssh_address      - ssh address in format [user@]host[:port] to the remote 
+                      system. Port defaults to 22, and user to the current user.
+ --lxc-name         - name of the lxc container to send the command to. 
+                      The command will be transfered by and executed 
+                      by means of the lxc api.
+ --username         - name of the user, on behalf of which the script 
+                      will be run. The username defaults to the connected 
+                      user in case of ssh, and root in case of lxc.
+ --debug            - Will run the target script with bash -x, 
+                      the line debugging option.
+ --extra-executable - Extra file(s) that will be transfered to the remote host. 
+                      Each instantion of this parameter will add another file. 
+
+Example:
+
+$(basename $0) test.sh --ssh_address testnode -- file tmp.flag
+"
+
 
 function errcho()
 {
@@ -60,6 +80,10 @@ cd $exec_mypath
 exec_host=localhost
 
 exec_script=$1
+if [ -z "$exec_script" ]; then
+	echo "$usage"
+	exit 0
+fi
 shift
 
 exec_extrascripts="$exec_script common.sh"
@@ -74,12 +98,14 @@ fi
 #3 - lxc node
 exec_mode=2
 exec_fulldebug=0
+debug=0
 exec_lxcname=""
 exec_opts=""
 log=""
 exec_user=""
 exec_debug=0
 exec_port=22
+
 
 while [[ $# > 0 ]]
 do
@@ -89,20 +115,17 @@ shift
 case $exec_key in
 	--debug|-x)
 	exec_debug=1
+	debug=1
 	;;
 	--extra-executable)
 	exec_extrascripts="$exec_extrascripts $1"
 	shift
 	;;
-	--host)
-	exec_host=$1
+	--ssh_address)
+	ssh_address=$1
 	shift
 	;;
-	--port)
-	exec_port=$1
-	shift
-	;;
-	--full-debug)
+	--step-debug)
 	exec_fulldebug=1
 	;;
 	--user)
@@ -128,20 +151,71 @@ case $exec_key in
 esac
 done
 
-if [ "$exec_fulldebug" -eq "1" ]; then
-	set -x
+#if [ "$exec_fulldebug" -eq "1" ]; then
+#	set -x
+#fi
+
+if [ -n "$debug" ]; then
+	if [ -z "$log" ]; then
+		log=/dev/stdout
+	fi
+fi
+
+
+if [ -z "${ssh_address}" ] && [ -z "${lxc_name}" ]; then
+        errcho "You must provide either --ssh-address or --lxc-name argument."
+        exit 1
+fi
+
+if [ -n "${ssh_address}" ] && [ -n "${lxc_name}" ]; then
+        errcho "You must provide only one, either --ssh-address or --lxc-name argument."
+        exit 1
+fi
+
+if [ -n "${ssh_address}" ]; then
+        pattern='^(([[:alnum:]]+)://)?(([[:alnum:]]+)@)?([^:^@]+)(:([[:digit:]]+))?$'
+        if [[ "$ssh_address" =~ $pattern ]]; then
+                proto=${BASH_REMATCH[2]}
+                sshuser=${BASH_REMATCH[4]}
+                sshhost=${BASH_REMATCH[5]}
+                exec_host="${sshhost}"
+                sshport=${BASH_REMATCH[7]}
+        else
+                errcho "You must put proper address of the ssh server in the first argument, e.g. user@host.com:2022"
+                exit 1
+        fi
+        if [ -z "$proto" ]; then
+                proto='ssh'
+        fi
+        if [ -z "$sshuser" ]; then
+                sshuser="$USER"
+        fi
+        if [ -z "$sshport" ]; then
+                sshport='22'
+        fi
+        if [ "$proto" != 'ssh' ]; then
+                errcho "You must connect using the ssh protocol, not $proto."
+                exit 1
+        fi
+        if [ "$sshport" != "22" ]; then
+	        exec_portarg1="-p $sshport"
+	        exec_portarg2="-P $sshport"
+        else
+	        exec_portarg1=''
+	        exec_portarg2=''
+        fi
+        exec_mode=2
+else
+        sshuser='root'
 fi
 
 if [ -z "$exec_user" ]; then
-	exec_user=`whoami`
-fi
-
-if [ "$exec_port" != "22" ]; then
-	exec_portarg1="-p $exec_port"
-	exec_portarg2="-P $exec_port"
-else
-	exec_portarg1=
-	exec_portarg2=
+        if [ "$exec_mode" == "2" ]; then
+                exec_user=$sshuser
+        fi
+        if [ "$exec_mode" == "3" ]; then 
+                exec_user=root
+        fi
 fi
 
 if [ "$exec_host" == "localhost" ]; then
@@ -166,18 +240,12 @@ if [ -n "$log" ]; then
 fi
 
 if [ -n "$exec_lxcname" ]; then
-	if lxc-ls | grep $exec_lxcname >/dev/null 2>/dev/null; then
+        if lxc info ${exec_lxcname}>/dev/null 2>/dev/null; then
 		exec_sshhome=`getent passwd $(whoami) | awk -F: '{ print $6 }'`
-		exec_lxcprefix=$exec_sshhome/.local/share/lxc/$exec_lxcname/rootfs
 		exec_lxcsudo=""
-	else
-		if sudo lxc-ls | grep $exec_lxcname >/dev/null 2>/dev/null; then
-			exec_lxcprefix=/var/lib/lxc/$exec_lxcname/rootfs
-			exec_lxcsudo=sudo
-		else
-			errcho "Cannot find lxc container with name $exec_lxcname"
-			exit 1
-		fi
+        else
+	        errcho "Cannot find lxc container with name $exec_lxcname"
+	        exit 1
 	fi
 	exec_mode=3
 fi
@@ -231,7 +299,7 @@ case $exec_mode in
 	;;
 	2)
 #ssh
-	exec_remote_dir=`ssh $exec_user@$exec_host mktemp -d`
+	exec_remote_dir=`ssh ${sshuser}@${exec_host} ${exec_portarg1} mktemp -d`
 	exec_remote_path="$exec_remote_dir/`basename $exec_script`"
 	for exec_file in $exec_extrascripts; do
 		if [ "$exec_file" == "$exec_script" ]; then
@@ -239,9 +307,9 @@ case $exec_mode in
 		else
 			exec_rpath=$exec_remote_dir/$exec_file
 			exec_command="if [ ! -d "`dirname $exec_rpath`" ]; then mkdir -p `dirname $exec_rpath`; fi"
-			ssh $exec_portarg1 $exec_user@$exec_host $exec_command
+			ssh $exec_portarg1 $sshuser@$exec_host $exec_command
 		fi
-		scp $exec_portarg2 $exec_file $exec_user@$exec_host:$exec_rpath >/dev/null
+		scp $exec_portarg2 $exec_file $sshuser@$exec_host:$exec_rpath >/dev/null
 	done
 	if [ -n "$log" ]; then
 		#ssh $exec_user@$exec_host "echo \"Script $exec_script on \$(hostname): \" >$exec_remote_dir/log.log"
@@ -251,15 +319,20 @@ case $exec_mode in
 			exec_opts="$exec_opts --log $exec_remote_dir/log.log"
 		fi
 	fi
-	if [ "$exec_user" != "`whoami`" ]; then
-		ssh $exec_portarg1 $exec_user@$exec_host sudo chown -R $exec_user $exec_remote_dir
+	if [ "$exec_user" != "$sshuser" ]; then
+		if ! ssh $exec_portarg1 $sshuser@$exec_host sudo chown -R $exec_user $exec_remote_dir; then
+        		if ! ssh $exec_portarg1 $sshuser@$exec_host chown -R $exec_user $exec_remote_dir; then
+        		        errcho "Warning: insufficient privileges to change ownership of the file"
+        		fi
+                fi
 	fi
-	ssh $exec_portarg1 $exec_user@$exec_host sudo chmod -R +x $exec_remote_dir
-	ssh $exec_portarg1 $exec_user@$exec_host chmod +x $exec_remote_path
-	exec_prefix="ssh $exec_portarg1 $exec_user@$exec_host"
+	ssh $exec_portarg1 $sshuser@$exec_host chmod -R +x $exec_remote_dir
+	ssh $exec_portarg1 $sshuser@$exec_host chmod +x $exec_remote_path
+	exec_prefix="ssh $exec_portarg1 $sshuser@$exec_host -- sudo -Hu $exec_user -- "
 	;;
 	3)
 #lxc
+TODODOTODODOTODO
 	exec_full_remote_dir=`mktemp --suffix=.ssh -d --tmpdir=$exec_lxcprefix/var/tmp`
 	exec_full_remote_path="$exec_full_remote_dir/`basename $exec_script`"
 	exec_uid=`grep $exec_user $exec_lxcprefix/etc/passwd | awk -F: '{ print $3 }'`
@@ -292,6 +365,7 @@ case $exec_mode in
 		exit 1
 	fi
 	exec_prefix="$exec_lxcsudo lxc-attach -n $exec_lxcname -- sudo -i -u $exec_user --"
+	exec_postfix=""
 	;;
 	*)
 	echo "Error. Aborting."
@@ -312,7 +386,7 @@ function appendlog ()
 			2)
 			#ssh
 			exec_locallog=`mktemp --dry-run --suffix .log`
-			scp $exec_user@$exec_host:$exec_remote_dir/log.log $exec_locallog >/dev/null
+			scp $sshuser@$exec_host:$exec_remote_dir/log.log $exec_locallog >/dev/null
 			cat $exec_locallog >>$log
 			rm $exec_locallog
 			;;
@@ -332,14 +406,15 @@ function appendlog ()
 }
 
 #A teraz wykonujemy skrypt
-if [ -n "$log" ]; then
+if [ -n "$log" ] && [ "$log" != "/dev/stdout" ] ; then
 	trap 'appendlog' ERR
 #	logheading $exec_prefix $exec_remote_path $exec_opts
+#	echo "$exec_prefix $exec_remote_path $exec_opts"
 fi
-if [ "$exec_debug" -eq "1" ]; then
-	if [ "$exec_fulldebug" -eq "1" ]; then
-		echo "EXECUTING $exec_prefix bash -x -- $exec_remote_path $exec_opts"
-	fi
+if [ "$exec_fulldebug" -eq "1" ]; then
+#	if [ "$exec_fulldebug" -eq "1" ]; then
+#		echo "EXECUTING $exec_prefix bash -x -- $exec_remote_path $exec_opts"
+#	fi
 	$exec_prefix bash -x -- $exec_remote_path $exec_opts
 else
 	$exec_prefix bash -- $exec_remote_path $exec_opts
