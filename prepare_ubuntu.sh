@@ -71,6 +71,8 @@ case $key in
 esac
 done
 
+done_apt_update=0
+
 if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then
 		log=/dev/stdout
@@ -82,6 +84,15 @@ if ! sudo -n true 2>/dev/null; then
         exit 1
 fi
 
+if [ -n "$aptproxy" ]; then
+	$loglog
+	echo "Acquire::http { Proxy \"http://$aptproxy\"; };" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
+        logexec sudo apt update
+        done_apt_update=1
+        logexec sudo apt --yes upgrade
+fi
+
+
 if ! grep -q LC_ALL /etc/default/locale 2>/dev/null; then
 sudo tee /etc/default/locale <<EOF
 LANG="en_US.UTF-8"
@@ -92,33 +103,45 @@ logexec sudo locale-gen pl_PL.UTF-8
 fi
 
 if ! dpkg -s liquidprompt >/dev/null 2>/dev/null; then
-        logexec sudo apt install liquidprompt
+        if [ "$done_apt_update" == "0" ]; then
+                logexec sudo apt update
+                done_apt_update=1
+        fi
+        logexec sudo apt install --yes liquidprompt
 fi
 liquidprompt_activate
 
 if ! dpkg -s bash-completion >/dev/null 2>/dev/null; then
-        logexec sudo apt install bash-completion
+        if [ "$done_apt_update" == "0" ]; then
+                logexec sudo apt update
+                done_apt_update=1
+        fi
+        logexec sudo apt install --yes bash-completion
 fi
 
 if ! dpkg -s htop >/dev/null 2>/dev/null; then
-        logexec sudo apt install htop
+        if [ "$done_apt_update" == "0" ]; then
+                logexec sudo apt update
+                done_apt_update=1
+        fi
+        logexec sudo apt install --yes htop
 fi
 
 if ! dpkg -s byobu >/dev/null 2>/dev/null; then
-        logexec sudo apt install byobu
+        if [ "$done_apt_update" == "0" ]; then
+                logexec sudo apt update
+                done_apt_update=1
+        fi
+        logexec sudo apt install --yes byobu
 fi
+
 if ! dpkg -s mc >/dev/null 2>/dev/null; then
-        logexec sudo apt install mc
+        if [ "$done_apt_update" == "0" ]; then
+                logexec sudo apt update
+                done_apt_update=1
+        fi
+        logexec sudo apt install --yes mc
 fi
-
-
-if [ -n "$aptproxy" ]; then
-	$loglog
-	echo "Acquire::http { Proxy \"http://$aptproxy\"; };" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
-        logexec sudo apt update
-        logexec sudo apt --yes upgrade
-fi
-
 
 
 

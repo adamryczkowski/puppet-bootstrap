@@ -99,16 +99,22 @@ if [ -n "$user" ]; then
         fi
         if [ ! -d ${sshhome}/.ssh ]; then
                 logexec sudo mkdir ${sshhome}/.ssh
-		logexec sudo chown ${user}:${user} "$sshhome/.ssh"
+                if [[ "$user" != "root" ]]; then
+        		logexec sudo chown ${user}:${user} "$sshhome/.ssh"
+		fi
         fi
         if [ -n "$external_key" ]; then
                 if ! sudo [ -f ${sshhome}/.ssh/authorized_keys ]; then
-                        logexec echo "${external_key}" | sudo tee ${sshhome}/.ssh/authorized_keys
+                        loglog
+                        echo "${external_key}" | sudo tee ${sshhome}/.ssh/authorized_keys
                         logexec sudo chmod 0600 ${sshhome}/.ssh/authorized_keys
                         logexec sudo chmod 0700 ${sshhome}/.ssh
-                        logexec sudo chown ${user}:${user} -R ${sshhome}/.ssh 
+                        if [[ "$user" != "root" ]]; then
+                                logexec sudo chown ${user}:${user} -R ${sshhome}/.ssh 
+		        fi
                 else
                         if ! sudo grep -q "${external_key}" ${sshhome}/.ssh/authorized_keys; then
+                                loglog
                                 echo "${external_key}" >>${sshhome}/.ssh/authorized_keys
                         fi
                 fi
@@ -116,7 +122,8 @@ if [ -n "$user" ]; then
 
         
         if ! sudo [ -f /etc/sudoers.d/${user}_nopasswd ]; then
-                logexec echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/${user}_nopasswd
+                loglog
+                echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/${user}_nopasswd
         fi
         
 	if sudo [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
@@ -128,10 +135,17 @@ if [ -n "$user" ]; then
 		if [ $? -ne 0 ]; then
 			exit 1
 		fi
-		logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519*"
+                if [[ "$user" != "root" ]]; then
+        		logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519"
+        		logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519.pub"
+	        fi
 	fi
-	if ! dpkg -s liquidprompt >/dev/null 2>/dev/null; then
-                sudo -Hu $user liquidprompt_activate
+	if dpkg -s liquidprompt >/dev/null 2>/dev/null; then
+                if [[ "$user" != "root" ]]; then
+                        logexec sudo -Hu $user liquidprompt_activate
+                else
+                        logexec liquidprompt_activate
+                fi
         fi
 fi
 

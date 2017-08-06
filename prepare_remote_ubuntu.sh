@@ -87,7 +87,7 @@ case $key in
 	private_key_path="$1"
 	shift
 	;;
-	--external_key)
+	--external-key)
 	external_key="$1"
 	shift
 	;;
@@ -103,7 +103,7 @@ esac
 done
 
 pattern='^(([[:alnum:]]+)://)?(([[:alnum:]]+)@)?([^:^@]+)(:([[:digit:]]+))?$'
-if [[ "ssh_address" =~ $pattern ]]; then
+if [[ "$ssh_address" =~ $pattern ]]; then
         proto=${BASH_REMATCH[2]}
         sshuser=${BASH_REMATCH[4]}
         sshhost=${BASH_REMATCH[5]}
@@ -112,16 +112,16 @@ else
         errcho "You must put proper address of the ssh server in the first argument, e.g. user@host.com:2022"
         exit 1
 fi
-if [ -z '$proto' ]; then
+if [ -z "$proto" ]; then
         proto='ssh'
 fi
-if [ -z '$sshuser' ]; then
-        sshuser='@USER'
+if [ -z "$sshuser" ]; then
+        sshuser="$USER"
 fi
-if [ -z '$sshport' ]; then
+if [ -z "$sshport" ]; then
         sshport='22'
 fi
-if [ '$proto' != 'ssh' ]; then
+if [ "$proto" != 'ssh' ]; then
         errcho "You must connect using the ssh protocol, not $proto."
         exit 1
 fi
@@ -135,10 +135,10 @@ fi
 
 
 
-if ssh -o PasswordAuthentication=no ${sshuser}@${ssh_address} -p ${sshport} exit 2>/dev/null; then
-        ssh-copy-id ${sshuser}@${ssh_address} -p ${sshport}
+if ! ssh -o PasswordAuthentication=no ${sshuser}@${sshhost} -p ${sshport} exit 2>/dev/null; then
+        ssh-copy-id ${sshuser}@${sshhost} -p ${sshport}
         
-        if ! ssh -o PasswordAuthentication=no ${sshuser}@${ssh_address} -p ${sshport} exit 2>/dev/null; then
+        if ! ssh -o PasswordAuthentication=no ${sshuser}@${sshhost} -p ${sshport} exit 2>/dev/null; then
                 errcho "Still cannot login to the remote host!" 
                 exit 1
         fi  
@@ -152,19 +152,28 @@ if [ -n "$private_key_path" ]; then
 fi
 
 if [ -n "$aptproxy" ]; then
-        external_opts2 = "--apt-proxy ${aptproxy}"
+        external_opts2="--apt-proxy ${aptproxy}"
 fi
 
 ./execute-script-remotely.sh prepare_ubuntu.sh ${external_opts} --ssh-address $ssh_address -- ${external_opts2}
 
+external_opts2=""
 if [ -n "$external_key" ]; then
-        external_opts2 = "--external-key ${external_key}"
+        external_opts2="${external_opts2} --external-key '${external_key}'"
 fi
 
 if [ -n "$private_key_path" ]; then
-        external_opts = "${external_opts} --extra-executable ${private_key_path}"
+        external_opts="${external_opts} --extra-executable '${private_key_path}'"
+        external_opts2="${external_opts2} --private_key_path '$(basename ${private_key_path})'"
 fi
 
-./execute-script-remotely.sh prepare_ubuntu_user.sh ${external_opts} --ssh-address $ssh_address -- ${external_opts2}
+./execute-script-remotely.sh prepare_ubuntu_user.sh ${external_opts} --ssh-address $ssh_address -- $user ${external_opts2}
 
+if [ "$user" != "$sshuser" ]; then
+        external_opts2=""
+        if [ -n "$private_key_path" ]; then
+                external_opts2="${external_opts2} --private_key_path '$(basename ${private_key_path})'"
+        fi
 
+        ./execute-script-remotely.sh prepare_ubuntu_user.sh ${external_opts} --ssh-address $ssh_address -- $sshuser ${external_opts2}
+fi
