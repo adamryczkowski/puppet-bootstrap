@@ -230,7 +230,7 @@ if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 		fi
 	done
 else
-	logexec lxc init ubuntu:${release} ${name} 
+	logexec lxc init ubuntu-daily:${release} ${name} 
 	if ! $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 	        errcho "Cannot create the lxc container"
 	        exit 1
