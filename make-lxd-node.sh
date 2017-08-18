@@ -236,7 +236,7 @@ else
 	        errcho "Cannot create the lxc container"
 	        exit 1
 	fi
-	if [[ -n $hostuser ]]; then
+	if [ -n "$hostuser" ]; then
 	    hostuid=$(id -u ${hostuser})
 	    hostgid=$(id -g ${hostuser})
 	    if [[ $hostuid == $hostgid ]]; then
