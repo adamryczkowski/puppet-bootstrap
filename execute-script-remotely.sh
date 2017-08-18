@@ -154,7 +154,7 @@ done
 #if [ "$exec_fulldebug" -eq "1" ]; then
 #	set -x
 #fi
-set -x
+#set -x
 
 if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then

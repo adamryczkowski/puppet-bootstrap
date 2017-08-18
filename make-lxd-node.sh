@@ -16,6 +16,7 @@ $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <
                         [-p|--apt-proxy <address of the existing apt-proxy>] 
                         [--bridgeif <name of the bridge interface on host>] 
                         [--private-key-path <path to the private key>]
+                        [--map-host-user <username>]
                         [--help] [--debug] [--log <output file>]
 
 where
@@ -34,6 +35,7 @@ where
                             Defaults to the first available bridge interface used by LXD deamon.
  --private_key_path       - Path to the file with the ssh private key. If set, installs private
                             key on the user's account in the container.
+ --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
 
@@ -107,6 +109,10 @@ case $key in
 	;;
 	-p|--apt-proxy)
 	aptproxy="$1"
+	shift
+	;;
+	--map-host-user)
+	hostuser="$1"
 	shift
 	;;
 	--log)
@@ -229,7 +235,17 @@ else
 	if ! $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 	        errcho "Cannot create the lxc container"
 	        exit 1
-	fi       
+	fi
+	if [[ -n $hostuser ]]; then
+	    hostuid=$(id -u ${hostuser})
+	    hostgid=$(id -g ${hostuser})
+	    if [[ $hostuid == $hostgid ]]; then
+        	logexec lxc config set ${name} raw.idmap "both 1001 ${hostuid}"
+        else
+        	logexec lxc config set ${name} raw.idmap "uid 1001 ${hostuid}"
+        	logexec lxc config set ${name} raw.idmap "gid 1001 ${hostgid}"
+        fi
+    fi
 #	logexec lxc stop ${name}
 fi
 

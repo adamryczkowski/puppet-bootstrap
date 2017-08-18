@@ -144,7 +144,7 @@ if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/* 2
 	logexec sudo apt-get update --yes
 	logexec sudo apt-get upgrade --yes
 fi
-if ! dpkg -s lxc2 >/dev/null 2>/dev/null; then
+if ! dpkg -s lxc2 || ! dpkg -s lxd >/dev/null 2>/dev/null; then
 	logexec sudo apt-get --yes install lxc2
 	if mount |grep " /home " | grep -q btrfs; then
 		logexec sudo lxd init --auto --storage-backend=btrfs
