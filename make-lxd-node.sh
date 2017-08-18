@@ -72,7 +72,6 @@ private_key_path=''
 common_debug=0
 sshuser=`whoami`
 lxcuser=`whoami`
-hostuser=0
 
 
 while [[ $# > 0 ]]
@@ -236,7 +235,7 @@ else
 	        errcho "Cannot create the lxc container"
 	        exit 1
 	fi
-	if [ -n "$hostuser" ]; then
+	if [[ -n "$hostuser" ]]; then
 	    hostuid=$(id -u ${hostuser})
 	    hostgid=$(id -g ${hostuser})
 	    if [[ $hostuid == $hostgid ]]; then
