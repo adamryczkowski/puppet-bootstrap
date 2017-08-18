@@ -239,10 +239,10 @@ else
 	    hostuid=$(id -u ${hostuser})
 	    hostgid=$(id -g ${hostuser})
 	    if [[ $hostuid == $hostgid ]]; then
-        	logexec lxc config set ${name} raw.idmap "both 1001 ${hostuid}"
+        	logexec lxc config set ${name} raw.idmap "both ${hostuid} 1001"
         else
-        	logexec lxc config set ${name} raw.idmap "uid 1001 ${hostuid}"
-        	logexec lxc config set ${name} raw.idmap "gid 1001 ${hostgid}"
+        	logexec lxc config set ${name} raw.idmap "uid ${hostuid} 1001"
+        	logexec lxc config set ${name} raw.idmap "gid ${hostgid} 1001"
         fi
     fi
 #	logexec lxc stop ${name}
