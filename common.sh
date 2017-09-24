@@ -134,14 +134,14 @@ function logexec()
 		set -x
 	fi
 	trap - ERR
-	file=${BASH_SOURCE[1]##*/}
+	_file=${BASH_SOURCE[1]##*/}
 	linenr=$((${BASH_LINENO[0]}-1))
-	if [ ! -f "$DIR/$file" ]; then
-		msg "Cannot find file $DIR/$file!!" >>$log
+	if [ ! -f "$DIR/$_file" ]; then
+		msg "Cannot find file $DIR/$_file!!" >>$log
 		line="$@"
 		echo "$line" >>$log
 	else
-		line=`sed "1,${linenr} d;$((${linenr}+1)) s/^\s*//; q" $DIR/$file`
+		line=`sed "1,${linenr} d;$((${linenr}+1)) s/^\s*//; q" $DIR/$_file`
 		line=${line:${#FUNCNAME[0]}}
 	fi
 	tmpcmd=`mktemp`
@@ -239,9 +239,9 @@ function logheredoc()
 		trap - ERR
 		token=$1
 		shift
-		file=${BASH_SOURCE[1]##*/}
+		_file=${BASH_SOURCE[1]##*/}
 		linenr=$((${BASH_LINENO[0]} + 1 ))
-		lines=`sed -n "$((${linenr})),/^$token$/p" $DIR/$file`
+		lines=`sed -n "$((${linenr})),/^$token$/p" $DIR/$_file`
 		n=0
 		while read -r line; do
 			if [ "$n" -ne "0" ]; then
@@ -267,9 +267,9 @@ function loglog()
 	fi
 	if [ -n "$log" ]; then
 		trap - ERR
-		file=${BASH_SOURCE[1]##*/}
+		_file=${BASH_SOURCE[1]##*/}
 		linenr=$((${BASH_LINENO[0]} ))
-		lines=`sed "1,${linenr} d;$((${linenr}+1)) s/^\s*//; q" $DIR/$file`
+		lines=`sed "1,${linenr} d;$((${linenr}+1)) s/^\s*//; q" $DIR/$_file`
 		n=0
 		while read -r line; do
 			if [ "$n" -ne "0" ]; then
@@ -309,9 +309,9 @@ function errorhdl()
 		return
 	fi
 	if [ -n "$log" ]; then
-		file=${BASH_SOURCE[1]##*/}
+		_file=${BASH_SOURCE[1]##*/}
 		myline=${BASH_LINENO[0]}
-		line=`sed "1,$((${myline}-1)) d;${myline} s/^ *//; q" $DIR/$file`
+		line=`sed "1,$((${myline}-1)) d;${myline} s/^ *//; q" $DIR/$_file`
 		msg "$line" >>$log
 		echo "Trapped ERROR in the line above!!" >>$log
 	fi
@@ -325,3 +325,13 @@ function errorhdl()
 
 trap 'errorhdl' ERR
 
+function dir_resolve
+{
+	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
+	echo "`pwd -P`" # output full, link-resolved path
+}
+mypath=${0%/*}
+mypath=`dir_resolve $mypath`
+cd $mypath
+
+source libs.sh

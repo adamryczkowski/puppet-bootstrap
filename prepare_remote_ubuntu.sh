@@ -155,7 +155,7 @@ if [ -n "$aptproxy" ]; then
         external_opts2="--apt-proxy ${aptproxy}"
 fi
 
-./execute-script-remotely.sh prepare_ubuntu.sh ${external_opts} --ssh-address $ssh_address -- ${external_opts2}
+./execute-script-remotely.sh prepare_ubuntu.sh ${external_opts} --ssh-address $ssh_address -- ${user} ${external_opts2} 
 
 external_opts2=""
 if [ -n "$external_key" ]; then
@@ -166,6 +166,13 @@ if [ -n "$private_key_path" ]; then
         external_opts="${external_opts} --extra-executable '${private_key_path}'"
         external_opts2="${external_opts2} --private_key_path '$(basename ${private_key_path})'"
 fi
+if [ "$user" != "$sshuser" ]; then
+        sshhome=$(getent passwd ${user} | awk -F: '{ print $6 }')
+        public_key=$(cat ${sshhome}/.ssh/id_ed25519.pub)
+        if [ -n "$public_key" ]; then
+	        external_opts2="${external_opts2} --external-key \"${public_key}\""
+	    fi
+fi
 
 ./execute-script-remotely.sh prepare_ubuntu_user.sh ${external_opts} --ssh-address $ssh_address -- $user ${external_opts2}
 
@@ -174,6 +181,5 @@ if [ "$user" != "$sshuser" ]; then
         if [ -n "$private_key_path" ]; then
                 external_opts2="${external_opts2} --private_key_path '$(basename ${private_key_path})'"
         fi
-
         ./execute-script-remotely.sh prepare_ubuntu_user.sh ${external_opts} --ssh-address $ssh_address -- $sshuser ${external_opts2}
 fi

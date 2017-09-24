@@ -16,10 +16,11 @@ The script must be run as a root.
 
 Usage:
 
-$(basename $0) <user-name> [--apt-proxy IP:PORT] 
+$(basename $0) <user-name> [--apt-proxy IP:PORT] [--wormhole]
 
 where
 
+ --wormhole               - Install magic wormhole (app for easy sending files)
  -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
@@ -41,7 +42,7 @@ cd $mypath
 
 
 debug=0
-
+wormhole=0
 
 while [[ $# > 0 ]]
 do
@@ -64,10 +65,13 @@ case $key in
 	aptproxy=$1
 	shift
 	;;
-        -*)
-        echo "Error: Unknown option: $1" >&2
-        echo "$usage" >&2
-        ;;
+	--wormhole)
+	wormhole=1
+	;;
+    -*)
+    echo "Error: Unknown option: $1" >&2
+    echo "$usage" >&2
+    ;;
 esac
 done
 
@@ -80,16 +84,14 @@ if [ -n "$debug" ]; then
 fi
 
 if ! sudo -n true 2>/dev/null; then
-        errcho "User $USER doesn't have admin rights"
-        exit 1
+    errcho "User $USER doesn't have admin rights"
+    exit 1
 fi
 
 if [ -n "$aptproxy" ]; then
 	$loglog
 	echo "Acquire::http { Proxy \"http://$aptproxy\"; };" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
-        logexec sudo apt update
-        done_apt_update=1
-        logexec sudo apt --yes upgrade
+	flag_need_apt_update=1
 fi
 
 
@@ -98,50 +100,29 @@ sudo tee /etc/default/locale <<EOF
 LANG="en_US.UTF-8"
 LC_ALL="en_US.UTF-8"
 EOF
-logexec sudo locale-gen en_US.UTF-8
-logexec sudo locale-gen pl_PL.UTF-8
+	logexec sudo locale-gen en_US.UTF-8
+	logexec sudo locale-gen pl_PL.UTF-8
 fi
 
-if ! dpkg -s liquidprompt >/dev/null 2>/dev/null; then
-        if [ "$done_apt_update" == "0" ]; then
-                logexec sudo apt update
-                done_apt_update=1
-        fi
-        logexec sudo apt install --yes liquidprompt
-fi
-liquidprompt_activate
+do_update
 
-if ! dpkg -s bash-completion >/dev/null 2>/dev/null; then
-        if [ "$done_apt_update" == "0" ]; then
-                logexec sudo apt update
-                done_apt_update=1
-        fi
-        logexec sudo apt install --yes bash-completion
+if install_apt_package liquidprompt; then
+	liquidprompt_activate
 fi
 
-if ! dpkg -s htop >/dev/null 2>/dev/null; then
-        if [ "$done_apt_update" == "0" ]; then
-                logexec sudo apt update
-                done_apt_update=1
-        fi
-        logexec sudo apt install --yes htop
-fi
+install_apt_packages bash-completion htop byobu mc
 
-if ! dpkg -s byobu >/dev/null 2>/dev/null; then
-        if [ "$done_apt_update" == "0" ]; then
-                logexec sudo apt update
-                done_apt_update=1
-        fi
-        logexec sudo apt install --yes byobu
+if [[ "${wormhole}" == "1" ]]; then
+	if which wormhole >/dev/null; then
+		if install_apt_package python3-pip; then
+			logexec sudo -H pip3 install --upgrade pip
+		fi
+		install_apt_packages build-essential python3-dev libffi-dev libssl-dev
+		logexec sudo -H pip3 install magic-wormhole
+	fi
 fi
+do_upgrade
 
-if ! dpkg -s mc >/dev/null 2>/dev/null; then
-        if [ "$done_apt_update" == "0" ]; then
-                logexec sudo apt update
-                done_apt_update=1
-        fi
-        logexec sudo apt install --yes mc
-fi
 
 
 

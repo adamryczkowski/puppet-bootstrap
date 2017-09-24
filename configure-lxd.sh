@@ -133,19 +133,30 @@ if [ "$command" == "show" ]; then
 	fi
 fi
 
-the_ppa=ubuntu-lxc/lxd-stable
-if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
-
-	if ! which add-apt-repository; then
-		logexec sudo apt install --yes software-properties-common 
-	fi
-
-	logexec sudo add-apt-repository -y ppa:ubuntu-lxc/lxd-stable
-	logexec sudo apt-get update --yes
-	logexec sudo apt-get upgrade --yes
+if ! grep -q "root:$UID:1" /etc/subuid; then
+    echo "root:$UID:1" | sudo tee -a /etc/subuid
 fi
-if ! dpkg -s lxc2 || ! dpkg -s lxd >/dev/null 2>/dev/null; then
-	logexec sudo apt-get --yes install lxc2
+if ! grep -q "root:$UID:1" /etc/subgid; then
+    echo "root:$UID:1" | sudo tee -a /etc/subgid
+fi
+
+the_ppa=ubuntu-lxc/lxd-stable
+add_ppa $the_ppa
+do_upgrade
+
+#if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
+
+#	if ! which add-apt-repository; then
+#		logexec sudo apt install --yes software-properties-common 
+#	fi
+
+#	logexec sudo add-apt-repository -y ppa:ubuntu-lxc/lxd-stable
+#	logexec sudo apt-get update --yes
+#	logexec sudo apt-get upgrade --yes
+#fi
+
+
+if install_apt_package lxc2; then
 	if mount |grep " /home " | grep -q btrfs; then
 		logexec sudo lxd init --auto --storage-backend=btrfs
 	else

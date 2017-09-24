@@ -60,7 +60,7 @@ where
 
 Example:
 
-$(basename $0) test.sh --ssh_address testnode -- file tmp.flag
+$(basename $0) test.sh --ssh-address testnode -- file tmp.flag
 "
 
 
@@ -86,7 +86,7 @@ if [ -z "$exec_script" ]; then
 fi
 shift
 
-exec_extrascripts="$exec_script common.sh"
+exec_extrascripts="$exec_script common.sh libs.sh"
 
 if [ ! -f "$exec_script" ]; then
 	errcho "Cannot find script at location $exec_script"
