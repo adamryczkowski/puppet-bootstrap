@@ -29,7 +29,7 @@ function install_apt_packages {
 		fi
 	done
 	if [[ "${to_install}" != "" ]]; then
-		logexec sudo apt-get --yes install "$package"
+		logexec sudo apt-get --yes install $to_install
 		return 0
 	fi
 	return 1
@@ -68,11 +68,75 @@ function edit_bash_augeas {
 	file=$1
 	var=$2
 	value=$3
-	install_apt_package augeas-tools
+	install_apt_package augeas-tools augtool
 	oldvalue=$(sudo augtool -L -A --transform "Shellvars incl $file" get "/files${file}/${var}" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
 	if [ "$value" != "$oldvalue" ]; then
 		logexec sudo augtool -L -A --transform "Shellvars incl $file" set "/files${file}/${var}" "${value}" >/dev/null
 	fi
+}
+
+function add_dhcpd_entry {
+	subnet=$1
+	netmask=$2
+	range_from=$3
+	range_to=$4
+	install_apt_package augeas-tools augtool
+	if ! augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" match "/files/etc/dhcp/dhcpd.conf/subnet/network" | grep -q $subnet; then
+	logheredoc EOT
+	sudo augtool -L -A --transform 'Dhcpd incl /etc/dhcp/dhcpd.conf' <<EOT >/dev/null
+clear '/files/etc/dhcp/dhcpd.conf/subnet[last() + 1]'
+set "/files/etc/dhcp/dhcpd.conf/subnet[last()]/network" "$subnet"
+set "/files/etc/dhcp/dhcpd.conf/subnet[last()]/netmask" "$netmask"
+save
+EOT
+		dirty=1
+	fi
+
+	oldvalue=$(augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/netmask" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
+	if [ "$netmask" != "$oldvalue" ]; then
+		logexec sudo augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" set "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/netmask" "${netmask}" >/dev/null
+		dirty=1
+	fi
+	
+	oldvalue1=$(augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/range/from" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
+	oldvalue2=$(augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/range/to" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
+	if [ "$range_from" != "$oldvalue1" ] || [ "$range_to" != "$oldvalue2" ]; then
+		logheredoc EOT
+		sudo augtool -L -A --transform 'Dhcpd incl /etc/dhcp/dhcpd.conf' <<EOT >/dev/null
+set "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/range/from" "${range_from}"
+set "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/range/to" "${range_to}"
+save
+EOT
+		dirty=1
+	fi
+	
+	if [ "$dirty" == "1" ]; then
+		return 0
+	fi
+	return 1
+}
+
+function edit_dhcpd {
+	key=$1
+	value=$2
+	if [ "${value}" == "<ON>" ]; then
+		if augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/${key}" | grep -q '(o)'; then
+			logexec sudo augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" clear "/files/etc/dhcp/dhcpd.conf/option/${key}" >/dev/null
+			return 0
+		fi
+	fi
+	if [ "${value}" == "<OFF>" ]; then
+		if augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/${key}" | grep -q '(none)'; then
+			logexec sudo augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" rm "/files/etc/dhcp/dhcpd.conf/option/${key}" >/dev/null
+			return 0
+		fi
+	fi
+	oldvalue=$(augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/option/${key}" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
+	if [ "$value" != "$oldvalue" ]; then
+		logexec sudo augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" set "/files/etc/dhcp/dhcpd.conf/option/${key}" "${value}" >/dev/null
+		return 0
+	fi
+	return 1
 }
 
 function simple_systemd_service {
@@ -119,9 +183,9 @@ EOT
 
 	if ! systemctl status $name | grep -q running; then
 		logexec sudo service $name start
-		exit 0
+		return 0
 	fi
-	exit 1
+	return 1
 }
 
 function random_mac {
@@ -159,4 +223,15 @@ function parse_URI {
             errcho "You must put proper address of the ssh server in the first argument, e.g. user@host.com:2022"
             return 1
     fi
+}
+
+function get_iface_ip {
+	iface=$1
+	if ifconfig $local_n2n_iface 2>/dev/null >/dev/null; then
+		ip addr show $1 | awk '$1 == "inet" {gsub(/\/.*$/, "", $2); print $2}'
+		return 0
+	else
+		return 1
+	fi
+
 }

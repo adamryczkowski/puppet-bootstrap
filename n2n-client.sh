@@ -9,9 +9,7 @@ Prepares peer-to-peer vpn 'n2n' server or node on
 
 Usage:
 
-$(basename $0) supernode --port <portnr> 
-
-$(basename $0) edge <supernode ip:port> [--network_name <network_name>] [--ifname <ifname>]
+$(basename $0) <supernode ip:port> [--network_name <network_name>] [--ifname <ifname>]
 		[--mac <mac address>] [--password <password>] 
 		[--help] [--debug] [--log <output file>]
 
@@ -41,59 +39,9 @@ where
 
 Example2:
 
-$(basename $0) supernode --port 5000
-
+Will use existing DHCP server on the n2n network
 $(basename $0) edge 139.162.181.142:5000 --network_name WAMS --password 'pa\$\$word'
 "
-
-mode=$1
-if [ -z "$mode" ]; then
-	echo "$usage"
-	exit 0
-fi
-
-if [ "$mode" != "supernode" ] && [ "$mode" != "edge" ]; then
-	echo "$usage"
-	exit 1
-fi
-shift
-
-if [[ "$mode" == "supernode" ]]; then
-	port=5000
-	while [[ $# > 0 ]]
-	do
-	key="$1"
-	shift
-
-	case $key in
-		--debug)
-		debug=1
-		;;
-		--log)
-		log=$1
-		shift
-		;;
-		--help)
-		    echo "$usage"
-		    exit 0
-		;;
-		--port)
-		port="$1"
-		shift
-		;;
-		-*)
-		echo "Error: Unknown option: $1" >&2
-		echo "$usage" >&2
-		exit 1
-		;;
-	esac
-	done
-	
-	install_apt_package n2n
-
-	simple_systemd_service n2n_supernode  "N2N Supernode service" supernode -l ${port}
-	exit 0
-fi
 
 server_address=$1
 shift

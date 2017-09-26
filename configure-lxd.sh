@@ -47,6 +47,32 @@ fi
 shift
 
 
+if [ "$command" == "help" ]; then
+	printf "$usage"
+	exit 0
+fi
+
+
+if [ "$command" == "show" ]; then
+	if dpkg -s lxc2 >/dev/null 2>/dev/null; then
+		printf "lxc version $(lxc --version) installed."
+		
+		printf "\n networks list "
+		lxc network list | head -n 3
+		lxc network list | grep -E '(YES)' -A 1
+
+		allnetworks=$(lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o)
+		lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o | while read x; do 
+			printf "Details of $x";lxc network show $x
+			echo ""
+		done
+		exit 0
+	else
+		printf "lxc NOT installed."
+		exit 0
+	fi
+fi
+
 internalif=lxcbr0
 lxcnetwork=auto
 lxcdhcprange=auto
@@ -108,30 +134,6 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-if [ "$command" == "help" ]; then
-	printf "$usage"
-	exit 0
-fi
-
-
-if [ "$command" == "show" ]; then
-	if dpkg -s lxc2 >/dev/null 2>/dev/null; then
-		printf "lxc version $(lxc --version) installed."
-		
-		printf "\n networks list "
-		lxc network list | head -n 3
-		lxc network list | grep -E '(YES)' -A 1
-
-		allnetworks=$(lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o)
-		lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o | while read x; do 
-			printf "Details of $x";lxc network show $x
-		done
-
-	else
-		printf "lxc NOT installed."
-		exit 0
-	fi
-fi
 
 if ! grep -q "root:$UID:1" /etc/subuid; then
     echo "root:$UID:1" | sudo tee -a /etc/subuid

@@ -54,7 +54,6 @@ if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then
 		log=/dev/stdout
 	fi
-	external_opts="--debug"
 fi
 
 
@@ -64,7 +63,10 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	
 	logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 	flag_need_apt_update=1
-	install_apt_packages r-base r-cran-digest r-cran-foreign r-cran-getopt pandoc git-core r-cran-rcpp r-cran-rjava r-cran-rsqlite r-cran-rserve libxml2-dev libssl-dev libcurl4-openssl-dev
+fi
+
+if ! install_apt_packages r-base r-cran-digest r-cran-foreign r-cran-getopt pandoc git-core r-cran-rcpp r-cran-rjava r-cran-rsqlite r-cran-rserve libxml2-dev libssl-dev libcurl4-openssl-dev; then
+	do_upgrade
 fi
 
 
