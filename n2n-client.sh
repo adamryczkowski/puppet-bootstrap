@@ -10,7 +10,7 @@ Prepares peer-to-peer vpn 'n2n' server or node on
 Usage:
 
 $(basename $0) <supernode ip:port> [--network_name <network_name>] [--ifname <ifname>]
-		[--mac <mac address>] [--password <password>] 
+		[--mac <mac address>] [--password <password>] [--dhcp]
 		[--help] [--debug] [--log <output file>]
 
 
@@ -31,8 +31,10 @@ where
                             due to a newly generated MAC addess, and they will not send 
                             traffic to the node until the polluted ARP entry is evicted. 
                             Default 'auto', which will randomize MAC address.
+ --dhcp                   - Flag. If set, the client will obtain its IP from the DHCP server.
  --password               - Password needed to join the network.  
- --ip                     - IP address in the private network of the node. 
+ --ip                     - IP address in the private network of the node, or 'dhcp'. 
+                            Default to 'dhcp'
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
 
@@ -66,6 +68,7 @@ supernode_port=${port}
 
 network_name="My_n2n_network"
 ifname="edge0"
+our_ip="dhcp"
 
 while [[ $# > 0 ]]
 do
@@ -135,6 +138,9 @@ if [ -z "${our_ip}" ]; then
 fi
 
 install_apt_package n2n
+if apply_patch /etc/init.d/n2n n2n.patch; then
+	restart=1
+fi
 
 if edit_bash_augeas /etc/default/n2n N2N_COMMUNITY ${network_name}; then
 	restart=1
@@ -148,13 +154,24 @@ fi
 if edit_bash_augeas /etc/default/n2n N2N_SUPERNODE_PORT ${supernode_port}; then
 	restart=1
 fi
-if edit_bash_augeas /etc/default/n2n N2N_IP ${our_ip}; then
-	restart=1
+if [ "$our_ip" == "dhcp" ]; then
+	if edit_bash_augeas /etc/default/n2n N2N_IP 0.0.0.0; then
+		restart=1
+	fi
+	if edit_bash_augeas /etc/default/n2n N2N_DAEMON_OPTS "-r"; then
+		restart=1
+	fi
+else
+	if edit_bash_augeas /etc/default/n2n N2N_IP ${our_ip}; then
+		restart=1
+	fi
 fi
 if edit_bash_augeas /etc/default/n2n N2N_EDGE_CONFIG_DONE yes; then
 	restart=1
 fi
- 
+if edit_bash_augeas /etc/default/n2n N2N_MAC ${mac}; then
+	restart=1
+fi 
 
 if [ "$restart" == "1" ]; then
 	logexec sudo service n2n restart

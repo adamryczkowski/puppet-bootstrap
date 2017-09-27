@@ -28,7 +28,8 @@ where
  --external-key <string>  - Sets external public key to access the account, 
                             both for the account used for ssh access and
                             (--username). 'auto' means 
-                            public key of the calling user. 
+                            public key of the calling user.
+ --wormhole               - Install magic-wormhole on the remote host 
  -p|--apt-proxy           - Address of the existing apt-cacher together with the port, e.g. 
                             192.168.1.1:3142
  --debug                  - Flag that sets debugging mode. 
@@ -86,6 +87,9 @@ case $key in
 	--private-key-path)
 	private_key_path="$1"
 	shift
+	;;
+	--wormhole)
+	flag_wormhole=1
 	;;
 	--external-key)
 	external_key="$1"
@@ -151,8 +155,14 @@ if [ -n "$private_key_path" ]; then
         fi 
 fi
 
+
+external_opts2="--need-apt-update"
 if [ -n "$aptproxy" ]; then
         external_opts2="--apt-proxy ${aptproxy}"
+fi
+
+if [ -n "$flag_wormhole" ]; then
+	external_opts2="$external_opts2 --wormhole"
 fi
 
 ./execute-script-remotely.sh prepare_ubuntu.sh ${external_opts} --ssh-address $ssh_address -- ${user} ${external_opts2} 

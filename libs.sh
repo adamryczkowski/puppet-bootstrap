@@ -6,11 +6,13 @@ function install_apt_package {
 	command=$2
 	if [ -n "$command" ]; then
 		if ! which "$command">/dev/null  2> /dev/null; then
+			do_update
 			logexec sudo apt-get --yes install "$package"
 			return 0
 		fi
 	else
 		if ! dpkg -s "$package">/dev/null  2> /dev/null; then
+			do_update
 			logexec sudo apt-get --yes install "$package"
 			return 0
 		fi
@@ -29,6 +31,7 @@ function install_apt_packages {
 		fi
 	done
 	if [[ "${to_install}" != "" ]]; then
+		do_update
 		logexec sudo apt-get --yes install $to_install
 		return 0
 	fi
@@ -42,11 +45,12 @@ function do_update {
 		flag_need_apt_update=0
 		return 0
 	fi
+	return 1
 }
 
 function do_upgrade {
 	do_update
-	logexec sudo apt update
+	logexec sudo apt upgrade --yes
 	return 0
 }
 
@@ -234,4 +238,18 @@ function get_iface_ip {
 		return 1
 	fi
 
+}
+
+function apply_patch {
+	orig=$1
+	patch=$2
+	tmp=/tmp/tmp_patched
+	patch $orig -i $patch -o $tmp 2>/dev/null
+	if ! cmp -s $tmp $orig; then
+		cp $orig $tmp
+		logexec cat $patch
+		logexec patch $tmp -i $patch -o $orig
+		return 0
+	fi
+	return 1
 }

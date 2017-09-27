@@ -2,7 +2,6 @@
 cd `dirname $0`
 . ./common.sh
 
-
 usage="
 Enhances bare-bones Ubuntu installation with several tricks. 
 It adds a new user,
@@ -16,12 +15,13 @@ The script must be run as a root.
 
 Usage:
 
-$(basename $0) <user-name> [--apt-proxy IP:PORT] [--wormhole]
+$(basename $0) <user-name> [--apt-proxy IP:PORT] [--wormhole] [--need-apt-update]
 
 where
 
  --wormhole               - Install magic wormhole (app for easy sending files)
  -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
+ --need-apt-update        - If the flag is set the script will assume the apt cache needs apdate. 
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
 
@@ -68,6 +68,9 @@ case $key in
 	--wormhole)
 	wormhole=1
 	;;
+	--need-apt-update)
+	flag_need_apt_update=1
+	;;
     -*)
     echo "Error: Unknown option: $1" >&2
     echo "$usage" >&2
@@ -75,7 +78,7 @@ case $key in
 esac
 done
 
-done_apt_update=0
+
 
 if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then
@@ -112,8 +115,8 @@ fi
 
 install_apt_packages bash-completion htop byobu mc
 
-if [[ "${wormhole}" == "1" ]]; then
-	if which wormhole >/dev/null; then
+if [ "${wormhole}" == "1" ]; then
+	if ! which wormhole >/dev/null; then
 		if install_apt_package python3-pip; then
 			logexec sudo -H pip3 install --upgrade pip
 		fi
@@ -121,6 +124,7 @@ if [[ "${wormhole}" == "1" ]]; then
 		logexec sudo -H pip3 install magic-wormhole
 	fi
 fi
+
 do_upgrade
 
 
