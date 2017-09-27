@@ -1,0 +1,9 @@
+24c24,29
+< DAEMON_ARGS=""             # Arguments to run the daemon with
+---
+> if [ -n "$N2N_MAC " ]; then
+> 	DAEMON_ARGS="-m $N2N_MAC"
+> else
+> 	DAEMON_ARGS=""
+> fi
+> DAEMON_ARGS=$DAEMON_ARGS $N2N_DAEMON_OPTS             # Arguments to run the daemon with
