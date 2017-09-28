@@ -140,7 +140,7 @@ fi
 
 
 if ! ssh -o PasswordAuthentication=no ${sshuser}@${sshhost} -p ${sshport} exit 2>/dev/null; then
-        ssh-copy-id ${sshuser}@${sshhost} -p ${sshport}
+        logexec ssh-copy-id ${sshuser}@${sshhost} -p ${sshport}
         
         if ! ssh -o PasswordAuthentication=no ${sshuser}@${sshhost} -p ${sshport} exit 2>/dev/null; then
                 errcho "Still cannot login to the remote host!" 

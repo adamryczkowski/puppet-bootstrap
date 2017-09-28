@@ -4,25 +4,27 @@ cd `dirname $0`
 
 
 usage="
-Deploys the n2n server on the given ssh address. It might install the N2N client on the server
-as well, depending on the options. 
-
-It will install a client if you want to deploy a DHCP server. 
+Deploys the N2N client on the given ssh address
 
 
 Usage:
 
-$(basename $0) <ssh addres of the server> <further options passed to n2n-server.sh>
+$(basename $0) <ssh addres of the server> <options passed to n2n-client>
+             [--help] [--debug] [--log <output file>] 
 
 
 where
  ssh addres of the server - Address to the server, including username, e.g. root@134.234.3.63
- <further options ...>    - Options passed to n2n-server.sh 
+ other options passed...  - Options passed to n2n-client. Be sure to include password 
+                            and check network-name
+ --debug                  - Flag that sets debugging mode. 
+ --log                    - Path to the log file that will log all meaningful commands
+
 
 
 Example2:
 
-$(basename $0) root@172.104.148.166 --debug -- --password 'secret_password' 
+$(basename $0) root@178.79.188.145 172.104.148.166:5535 --password szakal --debug 
 
 "
 
@@ -35,6 +37,7 @@ shift
 
 all_opts="$@"
 opts=""
+
 
 while [[ $# > 0 ]]
 do
@@ -74,4 +77,4 @@ if [ -z "$ip" ]; then
 fi
 
 
-./execute-script-remotely.sh n2n-server.sh --ssh-address $ssh_address --extra-executable n2n-client.sh --extra-executable files/n2n $opts -- $all_opts
+./execute-script-remotely.sh n2n-client.sh --ssh-address $ssh_address  --extra-executable files/n2n $opts -- $all_opts

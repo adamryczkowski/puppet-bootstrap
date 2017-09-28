@@ -7,13 +7,13 @@ function install_apt_package {
 	if [ -n "$command" ]; then
 		if ! which "$command">/dev/null  2> /dev/null; then
 			do_update
-			logexec sudo apt-get --yes install "$package"
+			logexec sudo apt-get --yes --force-yes -q install "$package"
 			return 0
 		fi
 	else
 		if ! dpkg -s "$package">/dev/null  2> /dev/null; then
 			do_update
-			logexec sudo apt-get --yes install "$package"
+			logexec sudo apt-get --yes --force-yes -q install "$package"
 			return 0
 		fi
 	fi
@@ -32,7 +32,7 @@ function install_apt_packages {
 	done
 	if [[ "${to_install}" != "" ]]; then
 		do_update
-		logexec sudo apt-get --yes install $to_install
+		logexec sudo apt-get --yes --force-yes -q  install $to_install
 		return 0
 	fi
 	return 1
@@ -244,12 +244,12 @@ function apply_patch {
 	orig=$1
 	patch=$2
 	tmp=/tmp/tmp_patched
-	patch $orig -i $patch -o $tmp 2>/dev/null
+	patch --batch $orig -i $patch -o $tmp 2>/dev/null
 	if ! cmp -s $tmp $orig; then
 		cp $orig $tmp
 		logexec cat $patch
-		logexec patch $tmp -i $patch -o $orig
-		return 0
+		logexec sudo patch --batch $tmp -i $patch -o $orig
+		return $?
 	fi
 	return 1
 }

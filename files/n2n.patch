@@ -1,9 +1,18 @@
-24c24,29
+24c24,33
 < DAEMON_ARGS=""             # Arguments to run the daemon with
 ---
-> if [ -n "$N2N_MAC " ]; then
+> if [ "$N2N_DHCP" == "yes" ]; then
+> 	N2N_IP="dhcp:0.0.0.0"
+> 	N2N_DAEMON_OPTS="$N2N_DAEMON_OPTS -r"
+> fi
+> if [ -n "$N2N_MAC" ]; then
 > 	DAEMON_ARGS="-m $N2N_MAC"
 > else
 > 	DAEMON_ARGS=""
 > fi
 > DAEMON_ARGS=$DAEMON_ARGS $N2N_DAEMON_OPTS             # Arguments to run the daemon with
+71a81,84
+> 	if [ "$N2N_DHCP" == "yes" ]; then
+> 		dhclient edge0
+> 	fi
+> 

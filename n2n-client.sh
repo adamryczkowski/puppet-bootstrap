@@ -2,6 +2,7 @@
 cd `dirname $0`
 . ./common.sh
 
+set -x
 
 usage="
 Prepares peer-to-peer vpn 'n2n' server or node on
@@ -10,7 +11,7 @@ Prepares peer-to-peer vpn 'n2n' server or node on
 Usage:
 
 $(basename $0) <supernode ip:port> [--network_name <network_name>] [--ifname <ifname>]
-		[--mac <mac address>] [--password <password>] [--dhcp]
+		[--mac <mac address>] [--password <password>]
 		[--help] [--debug] [--log <output file>]
 
 
@@ -31,7 +32,6 @@ where
                             due to a newly generated MAC addess, and they will not send 
                             traffic to the node until the polluted ARP entry is evicted. 
                             Default 'auto', which will randomize MAC address.
- --dhcp                   - Flag. If set, the client will obtain its IP from the DHCP server.
  --password               - Password needed to join the network.  
  --ip                     - IP address in the private network of the node, or 'dhcp'. 
                             Default to 'dhcp'
@@ -42,7 +42,7 @@ where
 Example2:
 
 Will use existing DHCP server on the n2n network
-$(basename $0) edge 139.162.181.142:5000 --network_name WAMS --password 'pa\$\$word'
+$(basename $0)  172.104.148.166:5535 --password 'szakal'
 "
 
 server_address=$1
@@ -93,6 +93,8 @@ case $key in
 	;;
 	--ifname)
 	ifname="$1"
+	errcho "Option --ifname is not supported now, because the init scripts that come with Ubuntu don't."
+	exit 1
 	shift
 	;;
 	--mac)
@@ -138,9 +140,18 @@ if [ -z "${our_ip}" ]; then
 fi
 
 install_apt_package n2n
-if apply_patch /etc/init.d/n2n n2n.patch; then
-	restart=1
+if ! [ -f files/n2n ]; then
+	errcho "Cannot find n2n file to replace"
+	exit 1
 fi
+if ! cmp /etc/init.d/n2n files/n2n; then
+	logexec sudo cp files/n2n /etc/init.d/n2n
+	logexec sudo chown root:root /etc/init.d/n2n
+	logexec sudo chmod 755 /etc/init.d/n2n
+fi
+#if apply_patch /etc/init.d/n2n files/n2n.patch; then
+#	restart=1
+#fi
 
 if edit_bash_augeas /etc/default/n2n N2N_COMMUNITY ${network_name}; then
 	restart=1
@@ -155,10 +166,10 @@ if edit_bash_augeas /etc/default/n2n N2N_SUPERNODE_PORT ${supernode_port}; then
 	restart=1
 fi
 if [ "$our_ip" == "dhcp" ]; then
-	if edit_bash_augeas /etc/default/n2n N2N_IP 0.0.0.0; then
+	if edit_bash_augeas /etc/default/n2n N2N_IP dhcp:0.0.0.0; then
 		restart=1
 	fi
-	if edit_bash_augeas /etc/default/n2n N2N_DAEMON_OPTS "-r"; then
+	if edit_bash_augeas /etc/default/n2n N2N_DHCP "yes"; then
 		restart=1
 	fi
 else
@@ -174,5 +185,6 @@ if edit_bash_augeas /etc/default/n2n N2N_MAC ${mac}; then
 fi 
 
 if [ "$restart" == "1" ]; then
+	logexec sudo systemctl daemon-reload
 	logexec sudo service n2n restart
 fi
