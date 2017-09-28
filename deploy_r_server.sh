@@ -62,6 +62,12 @@ case $key in
 	n2n_password=$1
 	shift
 	;;
+	--rstudio)
+	opts2="$opts2 --rstudio"
+	;;
+	--rstudio-server)
+	opts2="$opts2 --rstudio-server"
+	;;
 	-*)
 	echo "Error: Unknown option: $1" >&2
 	echo "$usage" >&2
@@ -96,4 +102,4 @@ fi
 
 ./deploy_n2n_client.sh $ssh_address $n2n_server --password $n2n_password 
 
-./execute-script-remotely.sh prepare-R-node.sh --ssh-address $ssh_address  $opts 
+./execute-script-remotely.sh prepare-R-node.sh --ssh-address $ssh_address  $opts -- $opts2 

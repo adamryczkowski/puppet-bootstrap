@@ -151,9 +151,9 @@ case $exec_key in
 esac
 done
 
-#if [ "$exec_fulldebug" -eq "1" ]; then
-#	set -x
-#fi
+if [ "$exec_fulldebug" -eq "1" ]; then
+	set -x
+fi
 #set -x
 
 if [ -n "$debug" ]; then

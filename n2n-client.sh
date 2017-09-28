@@ -2,7 +2,7 @@
 cd `dirname $0`
 . ./common.sh
 
-set -x
+#set -x
 
 usage="
 Prepares peer-to-peer vpn 'n2n' server or node on
