@@ -253,3 +253,26 @@ function apply_patch {
 	fi
 	return 1
 }
+
+function logmkdir {
+	dir=$1
+	if ! [ -d "$dir" ]; then
+		logexec mkdir "$dir"
+	fi
+}
+
+function textfile {
+	file=$1
+	contents=$2
+	logmkdir $(dirname ${file})
+	if [ ! -f "${file}" ]; then
+		flag=1
+	else
+		tmpfile=$(mktemp)
+		echo "$2" > "${tmpfile}"
+		if ! cmp $tmpfile $file; then
+			loglog
+			echo "$2" > "$file}"
+		fi
+	fi
+}
