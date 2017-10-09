@@ -100,6 +100,6 @@ fi
 
 ./prepare_remote_ubuntu.sh $ssh_address --wormhole $opts
 
-./deploy_n2n_client.sh $ssh_address $n2n_server --password $n2n_password 
+./deploy_n2n_client.sh $ssh_address $n2n_server --password $n2n_password $opts
 
 ./execute-script-remotely.sh prepare-R-node.sh --ssh-address $ssh_address  $opts -- $opts2 

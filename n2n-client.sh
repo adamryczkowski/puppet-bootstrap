@@ -69,6 +69,7 @@ supernode_port=${port}
 network_name="My_n2n_network"
 ifname="edge0"
 our_ip="dhcp"
+mac="auto"
 
 while [[ $# > 0 ]]
 do
