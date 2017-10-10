@@ -1,8 +1,7 @@
-cd `dirname $0`
 #!/bin/bash
+cd `dirname $0`
 . ./common.sh
 
-set -x
 
 usage="
 Prepares R in the server it is run on
@@ -10,8 +9,7 @@ Prepares R in the server it is run on
 
 Usage:
 
-$(basename $0) [--help] [--debug] [--log <output file>] [--rstudio] 
-			   [--rstudio-server]
+$(basename $0) [--rstudio] [--rstudio-server] [--help] [--debug] [--log <output file>]
 
 
 where
@@ -27,6 +25,7 @@ $(basename $0) --debug
 
 "
 
+set -x
 
 while [[ $# > 0 ]]
 do
@@ -103,7 +102,7 @@ cat(html_node(thepage, xpath) %>% html_attr("href"))
 EOF
 			RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
 			
-			logexec wget -c --output-document /tmp/rstudio.deb $RSTUDIO_URI 
+			logexec wget -c --output-document /tmp/rstudio.deb "$RSTUDIO_URI"
 			logexec sudo dpkg -i /tmp/rstudio.deb
 			logexec apt install -f --yes
 			logexec rm /tmp/rstudio.deb
