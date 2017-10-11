@@ -72,7 +72,7 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	flag_need_apt_update=1
 fi
 
-if ! install_apt_packages r-base r-cran-digest r-cran-foreign r-cran-getopt pandoc git-core r-cran-rcpp r-cran-rjava r-cran-rsqlite r-cran-rserve libxml2-dev libssl-dev libcurl4-openssl-dev; then
+if ! install_apt_packages r-base r-cran-digest r-cran-foreign r-cran-getopt pandoc git-core r-cran-rcpp r-cran-rjava r-cran-rsqlite r-cran-rserve libxml2-dev libssl-dev libcurl4-openssl-dev sysbench; then
 	do_upgrade
 	chmod a+w /usr/local/lib/R/site-library
 fi
