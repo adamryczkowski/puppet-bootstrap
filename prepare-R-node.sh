@@ -77,6 +77,20 @@ if ! install_apt_packages r-base r-cran-digest r-cran-foreign r-cran-getopt pand
 	chmod a+w /usr/local/lib/R/site-library
 fi
 
+if ! which Rscript >/dev/null; then
+	errcho "Something wrong with the R install. Abourt."
+	exit 1
+fi
+
+logheredoc EOT
+tee /tmp/prepare_R.R <<'EOT'
+if(!require('devtools')) install.packages('devtools', Ncpus=8, repos='http://cran.us.r-project.org')
+devtools::install_github('hadley/devtools', Ncpus=8, repos='http://cran.us.r-project.org')
+EOT
+
+logexec Rscript /tmp/get_rstudio_uri.R)
+
+
 if [ -n "$rstudio" ]; then
 	if dpkg -s rstudio>/dev/null  2> /dev/null; then
 		ver=$(apt show rstudio | grep Version)
