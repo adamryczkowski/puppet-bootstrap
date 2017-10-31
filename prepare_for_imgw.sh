@@ -59,9 +59,8 @@ if [ -n "$debug" ]; then
 	external_opts="--debug"
 fi
 
-install_apt_packages git cmake build-essential gfortran libboost-system1.58-dev libboost-program-options1.58-dev jq
+install_apt_packages git cmake build-essential gfortran libboost-program-options-dev jq libboost-filesystem-dev libboost-system-dev libboost-log-dev libboost-date-time-dev libboost-thread-dev libboost-chrono-dev libboost-atomic-dev
 
-install_apt_packages libboost-filesystem-dev libboost-system-dev libboost-log-dev libboost-date-time-dev libboost-thread-dev libboost-chrono-dev libboost-atomic-dev
 
 if [ "$flag_docs" == "1" ]; then
 	install_apt_packages mkdocs

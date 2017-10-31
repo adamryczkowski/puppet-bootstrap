@@ -257,7 +257,7 @@ function apply_patch {
 function logmkdir {
 	dir=$1
 	if ! [ -d "$dir" ]; then
-		logexec mkdir "$dir"
+		logexec sudo mkdir "$dir"
 	fi
 }
 
@@ -269,10 +269,13 @@ function textfile {
 		flag=1
 	else
 		tmpfile=$(mktemp)
-		echo "$2" > "${tmpfile}"
+		echo "$contents" > "${tmpfile}"
 		if ! cmp $tmpfile $file; then
-			loglog
-			echo "$2" > "$file}"
+			flag=1
 		fi
+	fi
+	if [ "$flag" == "1" ]; then
+		loglog
+		echo "$contents" | sudo tee "${file}" >/dev/null
 	fi
 }

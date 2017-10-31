@@ -26,7 +26,7 @@ $(basename $0) https://aryczkowski@vpn.imgw.pl --password Qwerty12345 --debug
 "
 
 if [ -z "$1" ]; then
-	echo $usage
+	echo "$usage"
 	exit 0
 fi
 vpn_address=$1
@@ -73,7 +73,7 @@ if [ -z "$password" ]; then
 	exit 1
 fi
 
-parse_URI vpn_address
+parse_URI $vpn_address
             proto=${BASH_REMATCH[2]}
             user=${BASH_REMATCH[4]}
             ip=${BASH_REMATCH[5]}
@@ -92,9 +92,11 @@ fi
 
 install_apt_package openconnect openconnect
 
-textfile /etc/openconnect/password ${password}
+textfile /etc/openconnect/password "${password}"
 
-prg="/bin/bash -c '/bin/cat /etc/openconnect/password | $(which openconnect) ${proto}://${ip} -u ${user} --passwd-on-stdin'"
+prg="#!/bin/bash
+/bin/cat /etc/openconnect/password | $(which openconnect) https://${ip} -u ${user} --passwd-on-stdin"
+textfile /etc/openconnect/imgw "${prg}"
 
-simple_systemd_service IMGW_VPN "VPN of IMGW on ${ip}" "${prg}"
+simple_systemd_service IMGW_VPN "VPN of IMGW on ${ip}" "/etc/openconnect/imgw"
 
