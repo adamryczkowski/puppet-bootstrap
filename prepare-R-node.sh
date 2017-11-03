@@ -88,7 +88,7 @@ if(!require('devtools')) install.packages('devtools', Ncpus=8, repos='http://cra
 devtools::install_github('hadley/devtools', Ncpus=8, repos='http://cran.us.r-project.org')
 EOT
 
-logexec Rscript /tmp/get_rstudio_uri.R)
+logexec sudo Rscript /tmp/get_rstudio_uri.R)
 
 
 if [ -n "$rstudio" ]; then
@@ -155,8 +155,8 @@ thepage<-xml2::read_html(url)
 link<-html_node(thepage, xpath) %>% html_text()
 cat(stringr::str_match(link, '^\\$ (.*)$')[[2]])
 EOT
-			RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
-			RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
+			RSTUDIO_URI=$(sudo Rscript /tmp/get_rstudio_uri.R)
+			RSTUDIO_URI=$(sudo Rscript /tmp/get_rstudio_uri.R)
 			
 			logexec wget -c --output-document /tmp/rstudio-server.deb $RSTUDIO_URI 
 			logexec sudo dpkg -i /tmp/rstudio-server.deb
