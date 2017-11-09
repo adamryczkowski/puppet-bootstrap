@@ -8,7 +8,7 @@ sudo -H pip3 install magic-wormhole
 echo "deb https://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee /etc/apt/sources.list.d/r.list
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 sudo apt update
-sudo apt install --yes r-base r-cran-digest r-cran-foreign r-cran-getopt pandoc git-core r-cran-rcpp r-cran-rjava r-cran-rsqlite r-cran-rserve libxml2-dev libssl-dev libcurl4-openssl-dev sysbench
+sudo apt install --yes r-base r-cran-digest r-cran-foreign r-cran-getopt pandoc git-core r-cran-rcpp r-cran-rjava r-cran-rsqlite r-cran-rserve libxml2-dev libssl-dev libcurl4-openssl-dev sysbench libssh2-1-dev
 
 sudo chown -R adam:adam /usr/local/lib/R/site-library
 
