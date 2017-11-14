@@ -67,8 +67,10 @@ fi
 if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
 	$loglog
 	echo "deb https://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee /etc/apt/sources.list.d/r.list
-	
-	logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+	logexec gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9
+	$loglog
+	gpg -a --export E084DAB9 | sudo apt-key add -
+	#logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 	flag_need_apt_update=1
 fi
 
@@ -121,7 +123,13 @@ EOF
 			logexec apt install -f --yes
 			logexec rm /tmp/rstudio.deb
 			rm /tmp/get_rstudio_uri.R
-	
+
+
+			if ! fc-list |grep -q FiraCode; then
+			for type in Bold Light Medium Regular Retina; do
+				logexec wget -O ~/.local/share/fonts/FiraCode-${type}.ttf "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true";
+			done
+
 			if fc-list |grep -q FiraCode; then
 				if !grep -q "text-rendering:" /usr/lib/rstudio/www/index.htm; then
 					logexec sudo sed -i '/<head>/a<style>*{text-rendering: optimizeLegibility;}<\/style>' /usr/lib/rstudio/www/index.htm
