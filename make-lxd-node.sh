@@ -506,3 +506,9 @@ else
 	logexec lxc exec ${name} -- ssh-keygen -lvf ${sshhome}/.ssh/$(basename $private_key_path)
 fi
 
+if [ -n "${hostuser}" ]; then
+	echo "Since you map host user to lxc user, you may try folder sharing.\nFor example, if you want to map folder /mnt/ext4/work on host to /home/${lxcuser}/work, execute\n"
+	echo " lxc config device add ${name} mywork_share disk source=/mnt/ext4/work path=/home/${lxcuser}/work"
+fi
+
+lxc config device add mytmp sharedtmp disk source=/home/adam/Documents/praca/IMGW/mnt/imgw1 path=/home/adam/imgw
