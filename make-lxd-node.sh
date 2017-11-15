@@ -11,33 +11,33 @@ Enhances creation of an empty LXC-2 container:
 Usage:
 
 $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <fqdn>] 
-                        [-a|--autostart] [-u|--username <username>] [--ip <static ip-address>] 
-                        [-s|--grant-ssh-access-to <existing username on host>] 
-                        [-p|--apt-proxy <address of the existing apt-proxy>] 
-                        [--bridgeif <name of the bridge interface on host>] 
-                        [--private-key-path <path to the private key>]
-                        [--map-host-user <username>]
-                        [--help] [--debug] [--log <output file>]
+						[-a|--autostart] [-u|--username <username>] [--ip <static ip-address>] 
+						[-s|--grant-ssh-access-to <existing username on host>] 
+						[-p|--apt-proxy <address of the existing apt-proxy>] 
+						[--bridgeif <name of the bridge interface on host>] 
+						[--private-key-path <path to the private key>]
+						[--map-host-user <username>]
+						[--help] [--debug] [--log <output file>]
 
 where
 
- -r|--release             - Ubuntu release to be installed, e.g. trusty. 
-                            Defaults to currently used by host.
- -h|--hostname            - hostname, best if fqdn is given. Defaults to container name.
- -a|--autostart           - Flag if sets autostart for the container on host boot. Default: off.
- -u|--username            - Default username of the newly built container. Default: current user.
- --ip                     - If given, sets the static ip-address of the node. 
-                            Requires sudo privileges on host.
+ -r|--release			 - Ubuntu release to be installed, e.g. trusty. 
+							Defaults to currently used by host.
+ -h|--hostname			- hostname, best if fqdn is given. Defaults to container name.
+ -a|--autostart		   - Flag if sets autostart for the container on host boot. Default: off.
+ -u|--username			- Default username of the newly built container. Default: current user.
+ --ip					 - If given, sets the static ip-address of the node. 
+							Requires sudo privileges on host.
  -s|--grant-ssh-access-to - username which will get automatic login via ssh to that container.
-                            Defaults to `whoami`.
- -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
- --bridgeif               - If set, name of the bridge interface the container will be connected to.
-                            Defaults to the first available bridge interface used by LXD deamon.
- --private_key_path       - Path to the file with the ssh private key. If set, installs private
-                            key on the user's account in the container.
- --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+							Defaults to `whoami`.
+ -p|--apt-proxy		   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
+ --bridgeif			   - If set, name of the bridge interface the container will be connected to.
+							Defaults to the first available bridge interface used by LXD deamon.
+ --private_key_path	   - Path to the file with the ssh private key. If set, installs private
+							key on the user's account in the container.
+ --map-host-user		  - Name of the host user whose uid and gid will be mapped to the lxc user.
+ --debug				  - Flag that sets debugging mode. 
+ --log					- Path to the log file that will log all meaningful commands
 
 
 Example:
@@ -127,13 +127,13 @@ case $key in
 	shift
 	;;
 	--help)
-        echo "$usage"
-        exit 0
+		echo "$usage"
+		exit 0
 	;;
-        -*)
-        echo "Error: Unknown option: $1" >&2
-        echo "$usage" >&2
-        ;;
+		-*)
+		echo "Error: Unknown option: $1" >&2
+		echo "$usage" >&2
+		;;
 esac
 done
 
@@ -152,11 +152,11 @@ if [ -n "$internalif" ]; then
 		internalif=${BASH_REMATCH[1]}
 	else
 		errcho "The $internalif is not a bridge managed by lxc. You need to use lxc internal bridge."
-	        echo "$usage" >&2
+			echo "$usage" >&2
 		exit -1
 	fi
 else
-	tmp=$(lxc network list | grep -F "| bridge   | YES     | " | head -n 1)
+	tmp=$(lxc network list | grep -F "| bridge   | YES	 | " | head -n 1)
 	regex="\|\s+([^ ]+)\s+\|\s+bridge\s+\|\sYES"
 	if [[ $tmp =~ $regex ]]; then
 		internalif=${BASH_REMATCH[1]}
@@ -232,19 +232,19 @@ if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 else
 	logexec lxc init ubuntu-daily:${release} ${name} 
 	if ! $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
-	        errcho "Cannot create the lxc container"
-	        exit 1
+			errcho "Cannot create the lxc container"
+			exit 1
 	fi
 	if [[ -n "$hostuser" ]]; then
-	    hostuid=$(id -u ${hostuser})
-	    hostgid=$(id -g ${hostuser})
-	    if [[ $hostuid == $hostgid ]]; then
-        	logexec lxc config set ${name} raw.idmap "both ${hostuid} 1001"
-        else
-        	logexec lxc config set ${name} raw.idmap "uid ${hostuid} 1001"
-        	logexec lxc config set ${name} raw.idmap "gid ${hostgid} 1001"
-        fi
-    fi
+		hostuid=$(id -u ${hostuser})
+		hostgid=$(id -g ${hostuser})
+		if [[ $hostuid == $hostgid ]]; then
+			logexec lxc config set ${name} raw.idmap "both ${hostuid} 1001"
+		else
+			logexec lxc config set ${name} raw.idmap "uid ${hostuid} 1001"
+			logexec lxc config set ${name} raw.idmap "gid ${hostgid} 1001"
+		fi
+	fi
 #	logexec lxc stop ${name}
 fi
 
