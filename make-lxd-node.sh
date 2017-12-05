@@ -36,6 +36,7 @@ where
  --private_key_path	   - Path to the file with the ssh private key. If set, installs private
 							key on the user's account in the container.
  --map-host-user		  - Name of the host user whose uid and gid will be mapped to the lxc user.
+ --storage			 - Name of the storage to use for this container. Defaults to `default`
  --debug				  - Flag that sets debugging mode. 
  --log					- Path to the log file that will log all meaningful commands
 
@@ -92,6 +93,10 @@ case $key in
 	;;
 	-u|--username)
 	lxcuser="$1"
+	shift
+	;;
+	--storage)
+	lxd_storage="$1"
 	shift
 	;;
 	--ip)
@@ -156,7 +161,7 @@ if [ -n "$internalif" ]; then
 		exit -1
 	fi
 else
-	tmp=$(lxc network list | grep -F "| bridge   | YES	 | " | head -n 1)
+	tmp=$(lxc network list | grep -E  "\| bridge\s+\| YES\s+\| " | head -n 1)
 	regex="\|\s+([^ ]+)\s+\|\s+bridge\s+\|\sYES"
 	if [[ $tmp =~ $regex ]]; then
 		internalif=${BASH_REMATCH[1]}
@@ -216,6 +221,11 @@ fi
 
 #Jeśli kontenera nie ma, to go tworzymy
 if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
+	if [ -n" ${lxd_storage}" ]; then
+		errcho "Cannot change storage pool of an existing container"
+		exit 1
+	fi
+
 	echo "container ${name} already installed!"
 	while :
 	do
@@ -230,7 +240,12 @@ if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 		fi
 	done
 else
-	logexec lxc init ubuntu-daily:${release} ${name} 
+	if [ -n" ${lxd_storage}" ]; then
+		args="-s ${lxd_storage}"
+	else
+		args=""
+	fi
+	logexec lxc init ubuntu-daily:${release} ${name} ${args}
 	if ! $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 			errcho "Cannot create the lxc container"
 			exit 1
