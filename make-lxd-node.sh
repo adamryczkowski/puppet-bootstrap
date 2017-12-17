@@ -240,7 +240,7 @@ if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 		fi
 	done
 else
-	if [ -n" ${lxd_storage}" ]; then
+	if [ -n "${lxd_storage}" ]; then
 		args="-s ${lxd_storage}"
 	else
 		args=""
