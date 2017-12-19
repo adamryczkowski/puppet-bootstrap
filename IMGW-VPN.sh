@@ -74,20 +74,20 @@ if [ -z "$password" ]; then
 fi
 
 parse_URI $vpn_address
-            proto=${BASH_REMATCH[2]}
-            user=${BASH_REMATCH[4]}
-            ip=${BASH_REMATCH[5]}
-            port=${BASH_REMATCH[7]}
+vpnproto=${proto}
+vpnuser=${user}
+vpnip=${ip}
+vpnport=${port}
 
-if [ -z "$proto" ]; then
-	proto='ssh'
+if [ -z "$vpnproto" ]; then
+	vpnproto='https'
 fi
-if [ -z "$user" ]; then
+if [ -z "$vpnuser" ]; then
 	errcho "You must provide username for the VPN"
 	exit 1
 fi
-if [ -z "$ip" ]; then
-	ip="vpn.imgw.pl"
+if [ -z "$vpnip" ]; then
+	vpnip="vpn.imgw.pl"
 fi
 
 install_apt_package openconnect openconnect
@@ -95,8 +95,8 @@ install_apt_package openconnect openconnect
 textfile /etc/openconnect/password "${password}"
 
 prg="#!/bin/bash
-/bin/cat /etc/openconnect/password | $(which openconnect) https://${ip} -u ${user} --passwd-on-stdin"
+/bin/cat /etc/openconnect/password | $(which openconnect) https://${vpnip} -u ${vpnuser} --passwd-on-stdin"
 textfile /etc/openconnect/imgw "${prg}"
 
-simple_systemd_service IMGW_VPN "VPN of IMGW on ${ip}" "/etc/openconnect/imgw"
+simple_systemd_service IMGW_VPN "VPN of IMGW on ${vpnip}" "/etc/openconnect/imgw"
 

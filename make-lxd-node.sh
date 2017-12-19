@@ -38,7 +38,7 @@ where
  --private-key-path       - Path to the file with the ssh private key. If set, installs private
                             key on the user's account in the container.
  --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
- --storage                - Name of the storage to use for this container. Defaults to `default`
+ --storage                - Name of the storage to use for this container. Defaults to 'default'
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
 
@@ -204,9 +204,10 @@ hostlxcip=$(ifconfig $internalif  | grep 'inet addr:'| grep -v '127.0.0.1' | cut
 
 if [ -z "$aptproxy" ]; then
 	pattern='^Acquire::http::Proxy "https?://(.*)";$'
-	myproxy=$(grep -hrE "$pattern" . | head -n 1)
+	myproxy=$(grep -hrE "$pattern" /etc/apt/apt.conf.d | head -n 1)
 	if [[ $myproxy =~ $pattern ]]; then
 		aptproxy=${BASH_REMATCH[1]}
+		echo "Found aptproxy: ${aptproxy}"
 	fi
 fi
 

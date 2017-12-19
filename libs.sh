@@ -155,7 +155,7 @@ function simple_systemd_service {
 			program=$(which ${program})
 		fi
 	fi
-	logexec chmod +x ${program}
+	logexec sudo chmod +x ${program}
 	
 cat > /tmp/tmp_service <<EOT
 [Unit]
@@ -257,8 +257,12 @@ function apply_patch {
 
 function logmkdir {
 	dir=$1
+	user=$2
 	if ! [ -d "$dir" ]; then
 		logexec sudo mkdir "$dir"
+	fi
+	if [ -n "$user" ]; then
+		logexec sudo chown ${user}:${user} "$dir"
 	fi
 }
 
