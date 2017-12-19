@@ -155,6 +155,7 @@ function simple_systemd_service {
 			program=$(which ${program})
 		fi
 	fi
+	logexec chmod +x ${program}
 	
 cat > /tmp/tmp_service <<EOT
 [Unit]

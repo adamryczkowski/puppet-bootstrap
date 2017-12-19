@@ -33,7 +33,7 @@ where
  -p|--apt-proxy		   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
  --bridgeif			   - If set, name of the bridge interface the container will be connected to.
 							Defaults to the first available bridge interface used by LXD deamon.
- --private_key_path	   - Path to the file with the ssh private key. If set, installs private
+ --private-key-path	   - Path to the file with the ssh private key. If set, installs private
 							key on the user's account in the container.
  --map-host-user		  - Name of the host user whose uid and gid will be mapped to the lxc user.
  --storage			 - Name of the storage to use for this container. Defaults to `default`
@@ -127,7 +127,7 @@ case $key in
 	internalif=$1
 	shift
 	;;
-	--private_key_path)
+	--private-key-path)
 	private_key_path=$1
 	shift
 	;;
@@ -221,7 +221,7 @@ fi
 
 #Jeśli kontenera nie ma, to go tworzymy
 if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
-	if [ -n" ${lxd_storage}" ]; then
+	if [ -n "${lxd_storage}" ]; then
 		errcho "Cannot change storage pool of an existing container"
 		exit 1
 	fi
@@ -521,9 +521,9 @@ else
 	logexec lxc exec ${name} -- ssh-keygen -lvf ${sshhome}/.ssh/$(basename $private_key_path)
 fi
 
-if [ -n "${hostuser}" ]; then
+if [ "${hostuser}" != "" ]; then
 	echo "Since you map host user to lxc user, you may try folder sharing.\nFor example, if you want to map folder /mnt/ext4/work on host to /home/${lxcuser}/work, execute\n"
 	echo " lxc config device add ${name} mywork_share disk source=/mnt/ext4/work path=/home/${lxcuser}/work"
 fi
 
-lxc config device add mytmp sharedtmp disk source=/home/adam/Documents/praca/IMGW/mnt/imgw1 path=/home/adam/imgw
+#lxc config device add mytmp sharedtmp disk source=/home/adam/Documents/praca/IMGW/mnt/imgw1 path=/home/adam/imgw

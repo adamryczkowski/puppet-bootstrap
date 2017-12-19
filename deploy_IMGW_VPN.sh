@@ -28,11 +28,11 @@ where
 
 Example2:
 
-$(basename $0) https://aryczkowski@vpn.imgw.pl --password Qwerty12345 --debug
+$(basename $0) https://aryczkowski@vpn.imgw.pl --password Qwer12345679 --debug
 "
 
 if [ -z "$1" ]; then
-	echo $usage
+	echo "$usage"
 	exit 0
 fi
 vpn_address=$1
@@ -79,7 +79,7 @@ if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then
 		log=/dev/stdout
 	fi
-	external_opts="--debug"
+	external_opts="--debug --step-debug"
 fi
 
 if [ -z "$password" ]; then
@@ -88,7 +88,13 @@ if [ -z "$password" ]; then
 fi
 
 if [ -z "$ssh_address" ] &&[ -z "$lxc_name"]; then
-	execute_remotely=1
+	exec_prefix="--ssh-address ${USER}@localhost"
 else
-	execute_remotely=0
+	if [ -n "$ssh_address" ]; then
+		exec_prefix="--ssh-address ${ssh_address}"
+	else
+		exec_prefix="--lxc-name ${lxc_name}"
+	fi
 fi
+
+./execute-script-remotely.sh IMGW-VPN.sh ${exec_prefix} $external_opts -- ${vpn_address} --password ${password}
