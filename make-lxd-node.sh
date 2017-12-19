@@ -11,7 +11,8 @@ Enhances creation of an empty LXC-2 container:
 Usage:
 
 $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <fqdn>] 
-						[-a|--autostart] [-u|--username <username>] [--ip <static ip-address>] 
+						[-a|--autostart] [-u|--username <username>] 
+						[--ip <static ip-address>] 
 						[-s|--grant-ssh-access-to <existing username on host>] 
 						[-p|--apt-proxy <address of the existing apt-proxy>] 
 						[--bridgeif <name of the bridge interface on host>] 
@@ -21,24 +22,25 @@ $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <
 
 where
 
- -r|--release			 - Ubuntu release to be installed, e.g. trusty. 
-							Defaults to currently used by host.
- -h|--hostname			- hostname, best if fqdn is given. Defaults to container name.
- -a|--autostart		   - Flag if sets autostart for the container on host boot. Default: off.
- -u|--username			- Default username of the newly built container. Default: current user.
- --ip					 - If given, sets the static ip-address of the node. 
-							Requires sudo privileges on host.
+ -r|--release             - Ubuntu release to be installed, e.g. trusty. 
+                            Defaults to currently used by host.
+ -h|--hostname            - hostname, best if fqdn is given. Defaults to container name.
+ -a|--autostart           - Flag if sets autostart for the container on host boot. Default: off.
+ -u|--username            - Default username of the newly built container. Default: current user.
+ --ip                     - If given, sets the static ip-address of the node. 
+                            Requires sudo privileges on host.
  -s|--grant-ssh-access-to - username which will get automatic login via ssh to that container.
-							Defaults to `whoami`.
- -p|--apt-proxy		   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
- --bridgeif			   - If set, name of the bridge interface the container will be connected to.
-							Defaults to the first available bridge interface used by LXD deamon.
- --private-key-path	   - Path to the file with the ssh private key. If set, installs private
-							key on the user's account in the container.
- --map-host-user		  - Name of the host user whose uid and gid will be mapped to the lxc user.
- --storage			 - Name of the storage to use for this container. Defaults to `default`
- --debug				  - Flag that sets debugging mode. 
- --log					- Path to the log file that will log all meaningful commands
+                            Defaults to `whoami`.
+ -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
+                            Defaults to apt-cacher settings in the host.
+ --bridgeif               - If set, name of the bridge interface the container will be connected to.
+                            Defaults to the first available bridge interface used by LXD deamon.
+ --private-key-path       - Path to the file with the ssh private key. If set, installs private
+                            key on the user's account in the container.
+ --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
+ --storage                - Name of the storage to use for this container. Defaults to `default`
+ --debug                  - Flag that sets debugging mode. 
+ --log                    - Path to the log file that will log all meaningful commands
 
 
 Example:
@@ -200,7 +202,19 @@ sudoprefix=""
 
 hostlxcip=$(ifconfig $internalif  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}')
 
+if [ -z "$aptproxy" ]; then
+	pattern='^Acquire::http::Proxy "https?://(.*)";$'
+	myproxy=$(grep -hrE "$pattern" . | head -n 1)
+	if [[ $myproxy =~ $pattern ]]; then
+		aptproxy=${BASH_REMATCH[1]}
+	fi
+fi
+
 if [ "$aptproxy" == "auto" ]; then
+
+	grep -hrE '^Acquire::http::Proxy "(.*)";$' . | head -n 1 
+
+
 	if ! dpkg -s apt-cacher-ng>/dev/null 2>/dev/null; then
 		logexec sudo apt-get --yes install apt-cacher-ng
 	fi
