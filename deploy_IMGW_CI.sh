@@ -172,7 +172,9 @@ if [ -z "$vpn_password" ]; then
 	exit 1
 fi
 
-./execute-script-remotely.sh IMGW-VPN.sh --ssh-address ${container_ip} $external_opts -- ${vpn_username}@vpn.imgw.pl --password ${vpn_password}
+if [ -n "$vpn_password" ]; then
+	./execute-script-remotely.sh IMGW-VPN.sh --ssh-address ${container_ip} $external_opts -- ${vpn_username}@vpn.imgw.pl --password ${vpn_password}
+fi
 
 # Now we can clone the repo and install its dependencies
 
