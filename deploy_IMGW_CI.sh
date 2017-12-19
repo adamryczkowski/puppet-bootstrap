@@ -167,13 +167,13 @@ container_ip=$(lxc exec $container_name -- ifconfig eth0 | sed -En 's/127.0.0.1/
 
 # Then we install the VPN network (optionally)
 
-if [ -z "$vpn_password" ]; then
-	errcho "You must provide password"
-	exit 1
-fi
-
-if [ -n "$vpn_password" ]; then
-	./execute-script-remotely.sh IMGW-VPN.sh --ssh-address ${container_ip} $external_opts -- ${vpn_username}@vpn.imgw.pl --password ${vpn_password}
+if [ -n "$vpn_username" ]; then
+	if [ -z "$vpn_password" ]; then
+		errcho "You must provide password"
+		exit 1
+	else
+		./execute-script-remotely.sh IMGW-VPN.sh --ssh-address ${container_ip} $external_opts -- ${vpn_username}@vpn.imgw.pl --password ${vpn_password}
+	fi
 fi
 
 # Now we can clone the repo and install its dependencies
