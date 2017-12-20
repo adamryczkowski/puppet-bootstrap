@@ -1,5 +1,15 @@
 #!/bin/bash 
 
+function purge_apt_package {
+	ans=0
+	package=$1
+	if dpkg -s "$package">/dev/null  2> /dev/null; then
+		logexec sudo apt-get --yes --force-yes -q purge "$package"
+		return 0
+	fi
+	return 1
+}
+
 function install_apt_package {
 	ans=0
 	package=$1
@@ -38,9 +48,47 @@ function install_apt_packages {
 	return 1
 }  
 
+function get_ubuntu_version {
+	tmp=$(lsb_release -a 2>/dev/null | grep Release)
+	pattern='^Release:\s*([0-9]+)\.([0-9]+)$'
+	if [[ "$tmp" =~ $pattern ]]; then
+		echo ${BASH_REMATCH[1]}${BASH_REMATCH[2]}
+		return 0
+	fi
+	return 1
+}
+
+function install_apt_package_file {
+	ans=0
+	filename=$1
+	package=$2
+	if ! dpkg -s "$package">/dev/null  2> /dev/null; then
+		logexec sudo dpkg -i $filename
+		return 0
+	fi
+	return 1
+}  
+
+function install_pip3_packages {
+	ans=0
+	to_install=""
+	packages="$@"
+	for package in ${packages[@]}
+	do
+		if ! pip3 list | grep -qF "$package" >/dev/null  2> /dev/null; then
+			to_install="${to_install} ${package}"
+		fi
+	done
+	if [[ "${to_install}" != "" ]]; then
+		do_update
+		logexec sudo -H pip3 install $to_install
+		return 0
+	fi
+	return 1
+}  
 
 function do_update {
-	if [ "$flag_need_apt_update" == "1" ]; then
+	if [ "$flag_need_apt_update" == "1" ] || [ -n "$1" ]; then
 		logexec sudo apt update
 		flag_need_apt_update=0
 		return 0

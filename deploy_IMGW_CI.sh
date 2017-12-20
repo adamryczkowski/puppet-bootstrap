@@ -30,13 +30,14 @@ where
                                  Defaults to «~/propoze»
  --release <release_name>      - What Ubuntu flavour to test? Defaults to the current distro.
  --apt-proxy <proxy_address>   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
+ --use-cuda                    - Flag. If set, the container will be prepared to compile using CUDA
  --debug                       - Flag that sets debugging mode. 
  --log                         - Path to the log file that will log all meaningful commands
 
 
 Example2:
 
-$(basename $0) ci_runner_1 --vpn-username aryczkowski --vpn-password Qwer12345679 --ssh-key-path ~/.ssh/id_rsa --host-repo-path ~/CI1 --debug
+$(basename $0) runner1 --vpn-username aryczkowski --vpn-password Qwer12345679 --ssh-key-path ~/.ssh/id_rsa --host-repo-path ~/CI1 --debug
 "
 
 if [ -z "$1" ]; then
@@ -47,6 +48,8 @@ container_name=$1
 git_address='git@git.imgw.ad:aryczkowski/propoze.git'
 git_branch='develop'
 guest_path='~/propoze'
+use_cuda=0
+release=xenial
 
 shift
 
@@ -102,6 +105,9 @@ case $key in
 	--apt-proxy)
 	aptproxy=$1
 	shift
+	;;
+	--use-cuda)
+	use_cuda=1
 	;;
 	-*)
 	echo "Error: Unknown option: $1" >&2
@@ -177,12 +183,37 @@ if [ -n "$vpn_username" ]; then
 fi
 
 # Now we can clone the repo and install its dependencies
+opts=""
+if [ "$use_cuda" == "1" ]; then
+	opts="${opts}--use-cuda "
+	lxc exec ${container_name} mkdir -p /opt/sources
+	lxc file push ~/tmp/debs/cmake-3.9* ${container_name}/opt/sources/cmake.tar.gz
+	if [ "$release" == "xenial" ]; then
+		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1604*" ]; then
+			logexec pushd ~/tmp/debs
+			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
+			logexec popd
+		fi
+		lxc file push ~/tmp/debs/cuda-repo-ubuntu1604*.deb ${container_name}/opt/sources/
+	elif [ "$release" == "zesty" ]; then
+		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1704*" ]; then
+			logexec pushd ~/tmp/debs
+			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/cuda-repo-ubuntu1704_9.1.85-1_amd64.deb
+			logexec popd
+		fi
+		lxc file push ~/tmp/debs/cuda-repo-ubuntu1704*.deb ${container_name}/opt/sources/
+	else
+		errcho "Ubuntu $release is not supported by NVidia CUDA"
+		exit 1
+	fi
+fi
 
-./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}"
+./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts}
 
 if [ -n "$host_path" ]; then
 	if ! lxc config device show ${container_name} | grep -q repo_${container_name}; then
 		logexec lxc config device add ${container_name} repo_${container_name} disk source="${host_path}" path=${guest_path}
 	fi
 fi
+
 

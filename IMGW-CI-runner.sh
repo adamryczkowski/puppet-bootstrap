@@ -7,7 +7,7 @@ Deploys installs all necessary requirements, clones, compiles and tests code, al
 
 syntax:
 $(basename $0) [--slack-username <name> --slack-token <string>]
-		--git-address <path> --git-branch <branch> --repo-path <path>
+		--git-address <path> --git-branch <branch> --repo-path <path> --use-cuda
 		[--debug] [--log <log path>] [--help]
 
 
@@ -21,6 +21,7 @@ where
                             Defaults to «git@git.imgw.ad:aryczkowski/propoze.git»
  --git-branch <branch>    - Name of the branch to pull. Defaults to «develop».
  --repo-path <path>       - Place where the repository will be cloned
+ --use-cuda               - Flag. If set, the container will be prepared to compile using CUDA
  --debug                  - Flag. If set, all commands that change state of the container or
                             host machine will be displayed together with their output.
  --log                    - Redirects output from --debug into the log file.
@@ -37,6 +38,7 @@ if [ -z "$1" ]; then
 fi
 slack_token="xoxp-107142650086-107156439191-194072196055-98a4c7330ee98cfb5544da16dc19f8fa"
 slack_username=$(hostname)
+use_cuda=0
 
 while [[ $# > 0 ]]
 do
@@ -64,6 +66,9 @@ case $key in
 	slack_token="$1"
 	shift
 	;;
+	--use-cuda)
+	use_cuda=1
+	;;
 	--debug)
 	common_debug=1
 	;;
@@ -89,8 +94,34 @@ done
 sshhome=`getent passwd $USER | awk -F: '{ print $6 }'`
 
 #Only the essential dependencies
-install_apt_packages cmake build-essential gfortran git
-
+if [ "$use_cuda" == "1" ]; then
+	install_apt_packages build-essential gfortran git python3-pip
+	purge_apt_package cmake
+	if ! which "cmake">/dev/null  2> /dev/null; then
+		logmkdir /opt/sources
+		logexec pushd /opt/sources
+		if [ ! -f /opt/sources/cmake.tar.gz ]; then
+			wget -c https://cmake.org/files/v3.10/cmake-3.10.1.tar.gz
+		fi
+		logexec sudo chown -R ${USER}:${USER} /opt/sources
+		logexec tar xf /opt/sources/cmake.tar.gz
+		logexec pushd cmake*
+		logexec ./bootstrap
+		logexec make -j 4
+		logexec sudo make install
+		logexec popd
+		logexec popd
+	fi
+	if install_apt_package_file /opt/sources/cuda-repo-ubuntu$(get_ubuntu_version)*.deb cuda-repo-ubuntu$(get_ubuntu_version); then
+		do_update force
+		echo "##############################################"
+	fi
+	install_apt_package cuda-compiler-9-1 cuda-libraries-dev-9-1
+#	install_pip3_packages cmake
+else
+	install_apt_packages build-essential gfortran git
+	install_apt_package cmake cmake
+fi
 #Adding github to known hosts
 logexec ssh-keyscan -H github.com >> $sshhome/.ssh/known_hosts
 
