@@ -213,7 +213,7 @@ fi
 
 if [ "$aptproxy" == "auto" ]; then
 
-	grep -hrE '^Acquire::http::Proxy "(.*)";$' . | head -n 1 
+	grep -hrE '^Acquire::http::Proxy "(.*)";$' /etc/apt/apt.conf.d | head -n 1 
 
 
 	if ! dpkg -s apt-cacher-ng>/dev/null 2>/dev/null; then
