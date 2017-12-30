@@ -156,8 +156,9 @@ fi
 if [ -n "$internalif" ]; then
 	tmp=$(lxc network list | grep -F " $internalif " | head -n 1)
 	regex="\|\s+([^ ]+)\s+\|\s+bridge\s+\|\sYES"
-	internalif=${BASH_REMATCH[1]}
-	if [[ ! $tmp =~ $regex ]]; then
+	if [[ $tmp =~ $regex ]]; then
+		internalif=${BASH_REMATCH[1]}
+	else
 		externalif=1
 	fi
 else
