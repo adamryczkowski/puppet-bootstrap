@@ -478,7 +478,7 @@ fi
 
 if [ -n "$aptproxy" ]; then
 	$loglog
-	echo "Acquire::http { Proxy \"http://$aptproxy\"; };" | lxc exec $name -- tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
+	echo "Acquire::http::Proxy \"http://$aptproxy\";" | lxc exec $name -- tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
 fi
 
 # Creating user $lxcuser in the container
