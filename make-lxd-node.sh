@@ -18,6 +18,7 @@ $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <
 						[--bridgeif <name of the bridge interface on host>] 
 						[--private-key-path <path to the private key>]
 						[--map-host-user <username>]
+						[--authorized-key <public key>]
 						[--help] [--debug] [--log <output file>]
 
 where
@@ -38,6 +39,7 @@ where
                             It can be any bridge available to the host.
  --private-key-path       - Path to the file with the ssh private key. If set, installs private
                             key on the user's account in the container.
+ --authorized-key         - Key of other user's. This option can be specified multiple times.
  --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
  --storage                - Name of the storage to use for this container. Defaults to 'default'
  --debug                  - Flag that sets debugging mode. 
@@ -76,7 +78,7 @@ private_key_path=''
 common_debug=0
 sshuser=`whoami`
 lxcuser=`whoami`
-
+declare -a authorized_keys
 
 while [[ $# > 0 ]]
 do
@@ -100,6 +102,10 @@ case $key in
 	;;
 	--storage)
 	lxd_storage="$1"
+	shift
+	;;
+	--authorized-key)
+	authorized_keys=("${authorized_keys[@]}" "$1")
 	shift
 	;;
 	--ip)
@@ -492,6 +498,12 @@ if [ -f "$sshkey" ]; then
 	fi
 fi
 
+for key in "${authorized_keys[@]}"; do: 
+	if ! lxc exec $name -- grep -q -F "$key" $sshhome/.ssh/authorized_keys 2>/dev/null; then
+		$loglog
+		echo "$key" | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
+	fi
+done
 
 #echo "Adding the container to the hosts known_hosts file..."
 if [ ! -d $sshhome/.ssh ]; then
