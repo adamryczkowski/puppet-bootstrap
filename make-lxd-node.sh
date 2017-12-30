@@ -35,6 +35,7 @@ where
                             Defaults to apt-cacher settings in the host.
  --bridgeif               - If set, name of the bridge interface the container will be connected to.
                             Defaults to the first available bridge interface used by LXD deamon.
+                            It can be any bridge available to the host.
  --private-key-path       - Path to the file with the ssh private key. If set, installs private
                             key on the user's account in the container.
  --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
@@ -155,12 +156,9 @@ fi
 if [ -n "$internalif" ]; then
 	tmp=$(lxc network list | grep -F " $internalif " | head -n 1)
 	regex="\|\s+([^ ]+)\s+\|\s+bridge\s+\|\sYES"
-	if [[ $tmp =~ $regex ]]; then
-		internalif=${BASH_REMATCH[1]}
-	else
-		errcho "The $internalif is not a bridge managed by lxc. You need to use lxc internal bridge."
-			echo "$usage" >&2
-		exit -1
+	internalif=${BASH_REMATCH[1]}
+	if [[ ! $tmp =~ $regex ]]; then
+		externalif=1
 	fi
 else
 	tmp=$(lxc network list | grep -E  "\| bridge\s+\| YES\s+\| " | head -n 1)
@@ -279,7 +277,11 @@ else
 fi
 
 if [ -n "${internalif}" ]; then
-	logexec lxc network attach ${internalif} ${name} eth0
+	if [ -n "$externalif" ]; then
+		logexec lxc config device add ${name} eth0 nic name=eth0 nictype=bridged parent=${internalif}
+	else
+		logexec lxc network attach ${internalif} ${name} eth0
+	fi
 fi
 
 
