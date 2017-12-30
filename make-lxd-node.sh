@@ -498,7 +498,7 @@ if [ -f "$sshkey" ]; then
 	fi
 fi
 
-for key in "${authorized_keys[@]}"; do: 
+for key in "${authorized_keys[@]}"; do
 	if ! lxc exec $name -- grep -q -F "$key" $sshhome/.ssh/authorized_keys 2>/dev/null; then
 		$loglog
 		echo "$key" | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
