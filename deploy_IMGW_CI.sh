@@ -47,7 +47,7 @@ fi
 container_name=$1
 git_address='git@git.imgw.ad:aryczkowski/propoze.git'
 git_branch='develop'
-guest_path='/home/${USER}/propoze'
+guest_path="/home/${USER}/propoze"
 use_cuda=0
 release=xenial
 
@@ -208,12 +208,13 @@ if [ "$use_cuda" == "1" ]; then
 	fi
 fi
 
-./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts}
-
 if [ -n "$host_path" ]; then
 	if ! lxc config device show ${container_name} | grep -q repo_${container_name}; then
 		logexec lxc config device add ${container_name} repo_${container_name} disk source="${host_path}" path=${guest_path}
 	fi
 fi
+
+
+./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts}
 
 

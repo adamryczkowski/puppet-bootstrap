@@ -170,5 +170,7 @@ if [ -n "${app_deps}" ] || [ -n "${pip_deps}" ]; then
 	logexec cmake ..
 fi
 
-byobu-tmux new-session -d -s build -n code 'cd "$repo_path/build"; make && make test; bash'
+cpu_cures=$(grep -c ^processor /proc/cpuinfo)
+
+byobu-tmux new-session -d -s build -n code "cd \"$repo_path/build\"; make -j ${cpu_cures} && make test; bash"
 
