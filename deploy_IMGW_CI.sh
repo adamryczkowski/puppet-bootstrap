@@ -12,7 +12,7 @@ Usage:
 $(basename $0) <container_name> [--vpn-password <vpn-password> --vpn-username <vpn-username>]
 		[--git-address <address of the repo>] [--git-branch <branch>] 
 		[--ssh-key-path <path>] [--host-repo-path <path>] [--guest-repo-path <path>]
-		[--release <release_name>]
+		[--release <release_name>] [--compile-using <compiler>]
 		[--help] [--debug] [--log <output file>]
 
 
@@ -30,7 +30,15 @@ where
                                  Defaults to «~/propoze»
  --release <release_name>      - What Ubuntu flavour to test? Defaults to the current distro.
  --apt-proxy <proxy_address>   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
- --use-cuda                    - Flag. If set, the container will be prepared to compile using CUDA
+ --compile-using <compiler>    - Specify the compiler to use. 
+                                 Valid choices: 
+                                 * cuda-9
+                                 * gcc-5 (it will include gfortran-5)
+                                 * gcc-6 (it will include gfortran-6)
+                                 * gcc-7 (it will include gfortran-7)
+                                 * clang-4
+                                 * clang-5
+                                 Defaults to the gcc shipped with the system.
  --debug                       - Flag that sets debugging mode. 
  --log                         - Path to the log file that will log all meaningful commands
 
@@ -48,7 +56,6 @@ container_name=$1
 git_address='git@git.imgw.ad:aryczkowski/propoze.git'
 git_branch='develop'
 guest_path="/home/${USER}/propoze"
-use_cuda=0
 release=xenial
 
 shift
@@ -106,8 +113,9 @@ case $key in
 	aptproxy=$1
 	shift
 	;;
-	--use-cuda)
-	use_cuda=1
+	--compile-using)
+	compile_using=$1
+	shift
 	;;
 	-*)
 	echo "Error: Unknown option: $1" >&2
@@ -136,6 +144,13 @@ fi
 if [ -n "$ssh_key_path" ]; then
 	if [ ! -f "$ssh_key_path" ]; then
 		errcho "Cannot find a key specified in the --ssh-key-path"
+		exit 1
+	fi
+fi
+
+if [ -n "$compile_using" ]; then
+	if [ "$compile_using" != "cuda-9" ] && [ "$compile_using" != "gcc-5" ] && [ "$compile_using" != "gcc-6" ] && [ "$compile_using" != "gcc-7" ] && [ "$compile_using" != "clang-4" ] && [ "$compile_using" != "clang-5" ]; then
+		errcho "--compile-using must be one of the following: cuda-9, gcc-5, gcc-6, gcc-7, clang-4, clang-5"
 		exit 1
 	fi
 fi
@@ -184,8 +199,10 @@ fi
 
 # Now we can clone the repo and install its dependencies
 opts=""
-if [ "$use_cuda" == "1" ]; then
-	opts="${opts}--use-cuda "
+if [ -n "$compile_using" ]; then
+	opts="${opts}--compile-using ${compile_using}"
+fi
+if [ "$compile_using" == "cuda-9" ]; then
 	lxc exec ${container_name} mkdir -p /opt/sources
 	lxc file push ~/tmp/debs/cmake-3.9* ${container_name}/opt/sources/cmake.tar.gz
 	if [ "$release" == "xenial" ]; then
