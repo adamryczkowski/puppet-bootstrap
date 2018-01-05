@@ -47,7 +47,7 @@ fi
 container_name=$1
 git_address='git@git.imgw.ad:aryczkowski/propoze.git'
 git_branch='develop'
-guest_path='~/propoze'
+guest_path='/home/${USER}/propoze'
 use_cuda=0
 release=xenial
 
