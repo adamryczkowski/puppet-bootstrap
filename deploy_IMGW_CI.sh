@@ -203,7 +203,7 @@ if [ -n "$compile_using" ]; then
 	opts="${opts}--compile-using ${compile_using}"
 fi
 if [ "$compile_using" == "cuda-9" ]; then
-	lxc exec ${container_name} mkdir -p /opt/sources
+	lxc exec ${container_name} /bin/mkdir -p /opt/sources
 	lxc file push ~/tmp/debs/cmake-3.9* ${container_name}/opt/sources/cmake.tar.gz
 	if [ "$release" == "xenial" ]; then
 		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1604*" ]; then
