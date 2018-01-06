@@ -120,10 +120,10 @@ else
 		install_apt_packages build-essential gfortran git python3-pip
 		purge_apt_package cmake
 		if ! which "cmake">/dev/null  2> /dev/null; then
-			logmkdir /opt/sources
-			logexec pushd /opt/sources
+			logmkdir /opt/sources ${USER}
+			pushd /opt/sources
 			if [ ! -f /opt/sources/cmake.tar.gz ]; then
-				wget -c https://cmake.org/files/v3.10/cmake-3.10.1.tar.gz
+				wget -c https://cmake.org/files/v3.10/cmake-3.10.1.tar.gz --output-document=/opt/sources/cmake.tar.gz
 			fi
 			logexec sudo chown -R ${USER}:${USER} /opt/sources
 			logexec tar xf /opt/sources/cmake.tar.gz
@@ -135,6 +135,7 @@ else
 			logexec popd
 		fi
 		if install_apt_package_file /opt/sources/cuda-repo-ubuntu$(get_ubuntu_version)*.deb cuda-repo-ubuntu$(get_ubuntu_version); then
+			logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
 			do_update force
 		fi
 		install_apt_package cuda-compiler-9-1 cuda-libraries-dev-9-1
