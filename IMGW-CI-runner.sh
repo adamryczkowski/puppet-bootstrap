@@ -139,28 +139,31 @@ else
 		fi
 		install_apt_package cuda-compiler-9-1 cuda-libraries-dev-9-1
 		cmake_args="-D USE_CUDA=1"
-	elif [ "$compile_using" == "gcc-5" ]; then
-		cmake_args='-D CMAKE_C_COMPILER=$(which gcc-5) -D CMAKE_CXX_COMPILER=$(which g++-5) -D CMAKE_FORTRAN_COMPILER=$(which gfortran-5)'
-		install_apt_packages gcc-5 g++-5 gfortran-5
-		do_upgrade
-	elif [ "$compile_using" == "gcc-6" ]; then
-		cmake_args='-D CMAKE_C_COMPILER=$(which gcc-6) -D CMAKE_CXX_COMPILER=$(which g++-6) -D CMAKE_FORTRAN_COMPILER=$(which gfortran-6)'
-		install_apt_packages gcc-6 g++-6 gfortran-6
-	elif [ "$compile_using" == "gcc-7" ]; then
-		cmake_args='-D CMAKE_C_COMPILER=$(which gcc-7) -D CMAKE_CXX_COMPILER=$(which g++-7) -D CMAKE_FORTRAN_COMPILER=$(which gfortran-7)'
-		install_apt_packages gcc-7 g++-7 gfortran-7
-	elif [ "$compile_using" == "clang-4" ]; then
-		cmake_args='-D CMAKE_C_COMPILER=$(which clang-4.0) -D CMAKE_CXX_COMPILER=$(which clang++-4.0)'
-		install_apt_packages clang-4.0
-	elif [ "$compile_using" == "clang-5" ]; then
-		cmake_args='-D CMAKE_C_COMPILER=$(which clang-5.0) -D CMAKE_CXX_COMPILER=$(which clang++-5.0)'
-		install_apt_packages clang-5.0
-	elif [ "$compile_using" == "clang-3.8" ]; then
-		cmake_args='-D CMAKE_C_COMPILER=$(which clang-3.8) -D CMAKE_CXX_COMPILER=$(which clang++-3.8)'
-		install_apt_packages clang-3.8
 	else
-		errcho "Unkown compiler $compile_using"
-		exit 1
+		add_ppa ppa:ubuntu-toolchain-r/test
+		if [ "$compile_using" == "gcc-5" ]; then
+			cmake_args='-D CMAKE_C_COMPILER=$(which gcc-5) -D CMAKE_CXX_COMPILER=$(which g++-5) -D CMAKE_FORTRAN_COMPILER=$(which gfortran-5)'
+			install_apt_packages gcc-5 g++-5 gfortran-5
+			do_upgrade
+		elif [ "$compile_using" == "gcc-6" ]; then
+			cmake_args='-D CMAKE_C_COMPILER=$(which gcc-6) -D CMAKE_CXX_COMPILER=$(which g++-6) -D CMAKE_FORTRAN_COMPILER=$(which gfortran-6)'
+			install_apt_packages gcc-6 g++-6 gfortran-6
+		elif [ "$compile_using" == "gcc-7" ]; then
+			cmake_args='-D CMAKE_C_COMPILER=$(which gcc-7) -D CMAKE_CXX_COMPILER=$(which g++-7) -D CMAKE_FORTRAN_COMPILER=$(which gfortran-7)'
+			install_apt_packages gcc-7 g++-7 gfortran-7
+		elif [ "$compile_using" == "clang-4" ]; then
+			cmake_args='-D CMAKE_C_COMPILER=$(which clang-4.0) -D CMAKE_CXX_COMPILER=$(which clang++-4.0)'
+			install_apt_packages clang-4.0
+		elif [ "$compile_using" == "clang-5" ]; then
+			cmake_args='-D CMAKE_C_COMPILER=$(which clang-5.0) -D CMAKE_CXX_COMPILER=$(which clang++-5.0)'
+			install_apt_packages clang-5.0
+		elif [ "$compile_using" == "clang-3.8" ]; then
+			cmake_args='-D CMAKE_C_COMPILER=$(which clang-3.8) -D CMAKE_CXX_COMPILER=$(which clang++-3.8)'
+			install_apt_packages clang-3.8
+		else
+			errcho "Unkown compiler $compile_using"
+			exit 1
+		fi
 	fi
 fi
 
