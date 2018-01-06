@@ -207,6 +207,7 @@ if [ "$compile_using" == "cuda-9" ]; then
 	lxc file push ~/tmp/debs/cmake-3.9* ${container_name}/opt/sources/cmake.tar.gz
 	if [ "$release" == "xenial" ]; then
 		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1604*" ]; then
+			logmkdir ~/tmp/debs
 			logexec pushd ~/tmp/debs
 			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
 			logexec popd
