@@ -35,7 +35,7 @@ if [ -z "$1" ]; then
 	echo "$usage"
 	exit 0
 fi
-ssh_address=$1
+vpn_address=$1
 shift
 
 while [[ $# > 0 ]]
