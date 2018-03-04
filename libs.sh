@@ -337,3 +337,74 @@ function get_home_dir {
 	echo $( getent passwd "$USER" | cut -d: -f6 )
 }
 
+function chmod_file {
+	file=$1
+	desired_mode=$2
+	pattern='^\d+$'
+	if [[ ! "${desired_mode}" ~= $pattern ]]; then
+		errcho "Wrong file permissions. Needs octal format."
+		exit 1
+	fi
+	if [ ! -f "${file}" ]; then
+		errcho "File ${file} doesn't exist"
+		exit 1
+	fi
+	actual_mode=$(stat -c "%a" ${file})
+	if [ "${desired_mode}" != "${actual_mode}" ]; then
+		logexec chmod ${desired_mode} ${file}
+	fi
+}
+
+function smb_share_client {
+	server=$1
+	remote_name=$2
+	local_path=$3
+	credentials_file=$4
+	extra_opt=$5
+	if [ "${credentials_file}" == "auto" ]; then
+		credentials_file="/etc/samba/user"
+	fi
+	if [ -n "${extra_opt}"} ]; then
+		extra_opt=",${extra_opt}"
+	fi
+	fstab_entry ${local_path} "//${server}/${remote_name}" cifs users,credentials=${credentials_file},noexec,${extra_opt} 0 0
+}
+
+function fstab_entry {
+	spec=$1
+	file=$2
+	vfstype=$3
+	opt=$4
+	dump=$5
+	passno=$6
+	logheredoc EOT
+	cat >/tmp/fstab.augeas<<EOT
+#!/usr/bin/augtool -Asf
+
+# The -A combined with this makes things much faster
+# by loading only the required lens/file
+transform Fstab.lns incl /etc/fstab
+load
+
+# $noentry will match /files/etc/fstab only if the entry isn't there yet
+defvar noentry /files/etc/fstab[count(*[file="/mnt/ISO"])=0]
+
+# Create the entry if it's missing
+set $noentry/01/spec "${spec}"
+set $noentry/01/file "${file}"
+
+# Now amend existing entry or finish creating the missing one
+defvar entry /files/etc/fstab/*[file="${file}"]
+
+set $entry/spec "${spec}"
+set $entry/vfstype "${vfstype}"
+set $entry/opt "${opt}"
+set $entry/dump "${dump}"
+set $entry/passno "${passno}"
+EOT
+	logexec /usr/bin/augtool -Asf /tmp/fstab.augeas
+}
+
+is_host_up {
+  ping -c 1 -w 1  $1 >/dev/null
+}

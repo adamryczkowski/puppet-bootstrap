@@ -9,7 +9,8 @@ Prepares R in the server it is run on
 
 Usage:
 
-$(basename $0) [--rstudio] [--rstudio-server] [--help] [--debug] [--log <output file>]
+$(basename $0) [--rstudio] [--rstudio-server] [--repo-server <repo-address>] 
+                [--help] [--debug] [--log <output file>]
 
 
 where

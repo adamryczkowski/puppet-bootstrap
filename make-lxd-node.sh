@@ -482,7 +482,7 @@ echo "$lxcuser ALL=(ALL) NOPASSWD:ALL" | lxc exec $name -- tee /etc/sudoers.d/${
 
 logexec lxc exec $name -- apt update
 logexec lxc exec $name -- apt --yes upgrade
-logexec lxc exec $name -- apt install --yes liquidprompt byobu
+logexec lxc exec $name -- apt install --yes liquidprompt byobu mc
 logexec lxc exec $name -- liquidprompt_activate
 logexec lxc exec $name -- su -l ${lxcuser} -c liquidprompt_activate
 logexec lxc exec $name -- locale-gen en_US.UTF-8
@@ -512,7 +512,7 @@ if [ "${update_all}" == "1" ]; then
 			opts="$opts --log $log"
 		fi
 	fi
-	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip}  $opts -- 
+	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- 
 fi
 
 #lxc config device add mytmp sharedtmp disk source=/home/adam/Documents/praca/IMGW/mnt/imgw1 path=/home/adam/imgw

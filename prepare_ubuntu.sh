@@ -109,6 +109,8 @@ fi
 
 do_update
 
+install_apt_package mc mc
+
 if install_apt_package liquidprompt; then
 	liquidprompt_activate
 fi
@@ -126,7 +128,4 @@ if [ "${wormhole}" == "1" ]; then
 fi
 
 do_upgrade
-
-
-
 

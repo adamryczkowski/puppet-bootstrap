@@ -36,9 +36,9 @@ mypath=`dir_resolve $mypath`
 cd $mypath
 
 if [ "${USER}" == "root" ]; then
-	install_dir='/usr/local/lib'
+	install_dir="/usr/local/lib"
 else
-	install_dir='$(get_home_dir)/tmp'
+	install_dir="$(get_home_dir)/tmp"
 fi
 
 debug=0
@@ -80,14 +80,14 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
+logmkdir "${install_dir}" adam
+
 if [ ! -w ${install_dir} ] ; then 
 	errcho "${install_dir} is not writable for ${USER}"
 	exit 1
 fi
 
 install_apt_package git-core git
-
-logmkdir "${install_dir}"
 
 if [ -d "${install_dir}/update-all" ]; then
 	logexec pushd "${install_dir}/update-all"

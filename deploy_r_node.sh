@@ -9,16 +9,15 @@ Deploys the R in the server on the given ssh address
 
 Usage:
 
-$(basename $0) <ssh addres of the server> --n2n-server <ip:port> --n2n-password <password>
-             [--help] [--debug] [--log <output file>] 
+$(basename $0) <ssh addres of the server> --rstudio --rstudio-server
+             [--help] [--debug] [--log <output file>]  [--repo-server <repo-address>]
 
 
 where
- ssh addres of the server - Address to the server, including username, e.g. root@134.234.3.63
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
- --n2n-server <ip:port>   - IP and port of the supernode of the n2n network
- --n2n-password           - Password of the n2n network
+ ssh addres of the server      - Address to the server, including username, e.g. root@134.234.3.63
+ --debug                       - Flag that sets debugging mode. 
+ --log                         - Path to the log file that will log all meaningful commands
+ --repo-server <repo-address>  - repo-addres is an address of the repo server
 
 
 
