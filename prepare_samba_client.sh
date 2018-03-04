@@ -121,7 +121,8 @@ install_apt_package cifs-utils
 if [ -n "${password_credentials}" ]; then
 	pattern='^([^;]+);(.*)$'
 	if [[ "$password_credentials" =~ $pattern ]]; then
-		contents="username=${BASH_REMATCH[1]}\npassword=${BASH_REMATCH[2]}"
+		contents="username=${BASH_REMATCH[1]}
+password=${BASH_REMATCH[2]}"
 		textfile /etc/samba/user "${contents}"
 	fi
 fi

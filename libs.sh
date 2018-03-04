@@ -405,14 +405,14 @@ EOT
 	i=1
 	pattern='^([^=]+)=(.*)$'
 	for entry in $opt; do
-		echo "ins opt after \$entry/opt[last()]">>/tmp/fstab.augeas
+		echo "ins opt after \$entry/opt[$i]">>/tmp/fstab.augeas
 		if [[ "${entry}" =~ $pattern ]]; then
 			lhs=${BASH_REMATCH[1]}
 			rhs=${BASH_REMATCH[2]}
-			echo "set \$entry/opt[last()] \"$lhs\"">>/tmp/fstab.augeas
-			echo "set \$entry/opt[last()]/value \"${rhs}\"">>/tmp/fstab.augeas
+			echo "set \$entry/opt[$i] \"$lhs\"">>/tmp/fstab.augeas
+			echo "set \$entry/opt[$i]/value \"${rhs}\"">>/tmp/fstab.augeas
 		else
-			echo "set \$entry/opt[last()] \"$entry\"">>/tmp/fstab.augeas
+			echo "set \$entry/opt[$i] \"$entry\"">>/tmp/fstab.augeas
 		fi
 		let "i=i+1"
 	done
