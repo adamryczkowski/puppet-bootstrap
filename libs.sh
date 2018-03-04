@@ -405,6 +405,6 @@ EOT
 	logexec /usr/bin/augtool -Asf /tmp/fstab.augeas
 }
 
-is_host_up {
+function is_host_up {
   ping -c 1 -w 1  $1 >/dev/null
 }
