@@ -32,7 +32,7 @@ where
 
 Example:
 
-$(basename $0) --password-credentials adam;szakal
+$(basename $0) 192.168.10.2 other /media/adam-minipc/other --password-credentials adam;szakal
 "
 
 dir_resolve()
@@ -44,6 +44,8 @@ mypath=${0%/*}
 mypath=`dir_resolve $mypath`
 cd $mypath
 
+
+
 device_address=$1
 share_name=$2
 mount_place=$3
@@ -54,6 +56,10 @@ user=root
 
 debug=0
 
+if [ -z "${mount_place}" ]; then
+	echo "$usage"
+	exit 0
+fi
 
 while [[ $# > 0 ]]
 do
@@ -65,8 +71,8 @@ case $key in
 	debug=1
 	;;
 	--help)
-        echo "$usage"
-        exit 0
+	echo "$usage"
+	exit 0
 	;;
 	--log)
 	log=$1
