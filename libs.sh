@@ -332,3 +332,8 @@ function textfile {
 		echo "$contents" | sudo tee "${file}" >/dev/null
 	fi
 }
+
+function get_home_dir {
+	echo $( getent passwd "$USER" | cut -d: -f6 )
+}
+

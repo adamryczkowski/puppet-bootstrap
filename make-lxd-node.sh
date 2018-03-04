@@ -19,6 +19,7 @@ $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <
 						[--private-key-path <path to the private key>]
 						[--map-host-user <username>]
 						[--authorized-key <public key>]
+						[--update-all 0|1]
 						[--help] [--debug] [--log <output file>]
 
 where
@@ -42,6 +43,7 @@ where
  --authorized-key         - Key of other user's. This option can be specified multiple times.
  --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
  --storage                - Name of the storage to use for this container. Defaults to 'default'
+ --update-all             - If set, it will install the update-all script as well (defaults to yes)
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
 
@@ -78,6 +80,7 @@ private_key_path=''
 common_debug=0
 sshuser=`whoami`
 lxcuser=`whoami`
+update_all=1
 declare -a authorized_keys
 
 while [[ $# > 0 ]]
@@ -138,6 +141,10 @@ case $key in
 	;;
 	--private-key-path)
 	private_key_path=$1
+	shift
+	;;
+	--update-all)
+	update_all=$1
 	shift
 	;;
 	--help)
@@ -328,67 +335,7 @@ if [ "$lxcip" != "auto" ]; then
 		fi
 		restartcontainer=1
 	fi
-
-
-#	tmpfile=$(mktemp)
-#	$loglog
-#	sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
-#	$loglog
-#	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
-#
-#	if [ ! -d /etc/lxc ]; then
-#		logexec sudo mkdir -p /etc/lxc
-#	fi
-
-
-#	staticleases=/etc/lxc/static_leases
-#	staticleases=/var/lib/lxd/networks/${internalif}/dnsmasq.hosts
-#	if [ ! -f $staticleases ]; then
-#		logexec sudo touch $staticleases
-#	fi
-#
-#	if ! grep -q "^$lxcname,$lxcip" $staticleases; then
-#		if grep -q "$lxcip" $staticleases; then
-#			errcho "IP address $lxcip already reserved!"
-#			exit 1
-#		fi
-#		#lxc config device set ${name} eth0 ipv4.address ${lxcip}
-#
-#		if grep -q "^$lxcname,[\\s\\d\\.]+" $staticleases; then
-#			#We need to replace the line rather than append
-#			if [ "$lxcname" == "$lxcfqdn" ]; then
-#				logexec sudo sed -i -e "/^$lxcname,[\\s\\d\\.]+/$lxcname,$lxcip/" $staticleases
-#			fi
-#		else
-#			if [ "$lxcname" == "$lxcfqdn" ]; then
-#				$loglog
-#				echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
-#			else
-#				$loglog
-#				echo "$lxcname,$lxcip" | sudo tee -a $staticleases >/dev/null
-#			fi
-#		fi
-#		restartcontainer=1
-#	fi
 	logexec lxc config device set ${name} eth0 ipv4.address ${lxcip}
-
-#	if [[ "$restartcontainer" == "1" ]]; then
-#		if lxc config get ${name} volatile.last_state.power | grep -q -F "RUNNING"; then
-#			logexec lxc stop ${name}
-#		fi
-#		logexec sudo service lxd restart
-#	fi
-#fi
-
-
-#Zanim uruchomimy kontener, upewniamy się, że dostanie prawidłowy adres IP
-#if [ "$lxcip" != "auto" ]; then
-#	logexec sudo service lxd stop 
-#
-#	tmpfile=$(mktemp)
-#	logexec sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
-#	cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
-#	logexec sudo service lxd start 
 fi
 
 
@@ -554,6 +501,18 @@ fi
 if [ "${hostuser}" != "" ]; then
 	echo "Since you map host user to lxc user, you may try folder sharing.\nFor example, if you want to map folder /mnt/ext4/work on host to /home/${lxcuser}/work, execute\n"
 	echo " lxc config device add ${name} mywork_share disk source=/mnt/ext4/work path=/home/${lxcuser}/work"
+fi
+
+if [ "${update_all}" == "1" ]; then
+	if [ -n "$debug" ]; then
+		opts="$opts --debug"
+		if [ -z "$log" ]; then
+			log=/dev/stdout
+		else
+			opts="$opts --log $log"
+		fi
+	fi
+	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip}  $opts -- 
 fi
 
 #lxc config device add mytmp sharedtmp disk source=/home/adam/Documents/praca/IMGW/mnt/imgw1 path=/home/adam/imgw
