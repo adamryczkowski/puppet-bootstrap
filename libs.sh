@@ -367,7 +367,7 @@ function smb_share_client {
 	if [ -n "${extra_opt}"} ]; then
 		extra_opt=",${extra_opt}"
 	fi
-	fstab_entry "//${server}/${remote_name}" ${local_path} cifs users,credentials=${credentials_file},noexec,${extra_opt} 0 0
+	fstab_entry "//${server}/${remote_name}" ${local_path} cifs users,credentials=${credentials_file},noexec${extra_opt} 0 0
 }
 
 function fstab_entry {
@@ -407,7 +407,7 @@ EOT
 	export IFS=","
 	i=1
 	for entry in $opt; do
-		echo "set \$entry/opt[last()] \"$opt\"">>/tmp/fstab.augeas
+		echo "set \$entry/opt[last()] \"$entry\"">>/tmp/fstab.augeas
 		let "i=i+1"
 	done
 	export IFS="$OLDIFS"
