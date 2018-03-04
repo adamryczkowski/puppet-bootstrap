@@ -32,6 +32,11 @@ $(basename $0) --debug
 
 "
 
+if [ -z "$1" ]; then
+	echo "$usage" >&2
+	exit 0
+fi
+
 set -x
 
 repo_server="http://cran.us.r-project.org"
@@ -75,6 +80,7 @@ case $key in
 	-*)
 	echo "Error: Unknown option: $1" >&2
 	echo "$usage" >&2
+	exit 1
 	;;
 esac
 done

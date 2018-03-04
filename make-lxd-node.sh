@@ -20,6 +20,7 @@ $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <
 						[--map-host-user <username>]
 						[--authorized-key <public key>]
 						[--update-all 0|1]
+						[--map-host-folder <host-path> <remote-path>]
 						[--help] [--debug] [--log <output file>]
 
 where
@@ -130,6 +131,11 @@ case $key in
 	--map-host-user)
 	hostuser="$1"
 	shift
+	;;
+	--map-host-folder)
+	hostfolder=$1
+	guestfolder=$2
+	shift;shift
 	;;
 	--log)
 	log=$1
@@ -513,6 +519,13 @@ if [ "${update_all}" == "1" ]; then
 		fi
 	fi
 	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- 
+fi
+
+if [ -n "${guest_folder}" ]; then
+	sharename=$(basename host_folder)
+	if [ ! $(lxc config device list ${name} | grep -q ${sharename}) ]; then
+		logexec lxc config device add ${name} ${sharename} disk source=${host_folder} path=${guest_folder}
+	fi
 fi
 
 #lxc config device add mytmp sharedtmp disk source=/home/adam/Documents/praca/IMGW/mnt/imgw1 path=/home/adam/imgw
