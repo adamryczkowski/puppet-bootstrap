@@ -401,12 +401,13 @@ set \$entry/spec "${spec}"
 set \$entry/vfstype "${vfstype}"
 set \$entry/dump "${dump}"
 set \$entry/passno "${passno}"
+ins opt after \$entry/opt[last()]
 EOT
 	OLDIFS="$IFS"
 	export IFS=","
 	i=1
 	for entry in $opt; do
-		echo "set \$entry/opt[$i] \"${entry}\"">>/tmp/fstab.augeas
+		echo "set \$entry/opt[last()] \"$opt\"">>/tmp/fstab.augeas
 		let "i=i+1"
 	done
 	export IFS="$OLDIFS"
