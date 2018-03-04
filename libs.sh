@@ -377,6 +377,7 @@ function fstab_entry {
 	opt=$4
 	dump=$5
 	passno=$6
+	install_apt_package augeas-tools augtool
 	logheredoc EOT
 	cat >/tmp/fstab.augeas<<EOT
 #!/usr/bin/augtool -Asf
@@ -402,7 +403,7 @@ set $entry/opt "${opt}"
 set $entry/dump "${dump}"
 set $entry/passno "${passno}"
 EOT
-	logexec /usr/bin/augtool -Asf /tmp/fstab.augeas
+	logexec sudo /usr/bin/augtool -Asf /tmp/fstab.augeas
 }
 
 function is_host_up {
