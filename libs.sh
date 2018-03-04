@@ -399,10 +399,17 @@ defvar entry /files/etc/fstab/*[file="${file}"]
 
 set \$entry/spec "${spec}"
 set \$entry/vfstype "${vfstype}"
-set \$entry/opt "${opt}"
 set \$entry/dump "${dump}"
 set \$entry/passno "${passno}"
 EOT
+	OLDIFS="$IFS"
+	export IFS=","
+	i=1
+	for entry in $opt; do
+		echo "set \$entry/opt[$i] \"${entry}\"">>/tmp/fstab.augeas
+		let "i=i+1"
+	done
+	export IFS="$OLDIFS"
 	logexec sudo /usr/bin/augtool -Asf /tmp/fstab.augeas
 }
 
