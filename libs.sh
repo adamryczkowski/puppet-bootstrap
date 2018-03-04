@@ -399,8 +399,6 @@ defvar entry /files/etc/fstab/*[file="${file}"]
 
 set \$entry/spec "${spec}"
 set \$entry/vfstype "${vfstype}"
-set \$entry/dump "${dump}"
-set \$entry/passno "${passno}"
 ins opt after \$entry/opt[last()]
 EOT
 	OLDIFS="$IFS"
@@ -411,7 +409,10 @@ EOT
 		let "i=i+1"
 	done
 	export IFS="$OLDIFS"
+	echo "set \$entry/dump \"${dump}\"">>/tmp/fstab.augeas
+	echo "set \$entry/passno \"${passno}\"">>/tmp/fstab.augeas
 	logexec sudo /usr/bin/augtool -Asf /tmp/fstab.augeas
+	
 }
 
 function is_host_up {
