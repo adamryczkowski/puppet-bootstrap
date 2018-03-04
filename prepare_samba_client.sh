@@ -135,7 +135,7 @@ else
 fi
 
 logmkdir /mnt/r-repo ${user}
-smb_share_client ${device_address} ${share_name} /mnt/r-repo cifs ${auto} 
+smb_share_client ${device_address} ${share_name} /mnt/r-repo /etc/samba/user ${auto} 
 
 if [ "${mount}" == "1" ]; then
 	if ! mount | grep /mnt/r-repo >/dev/null; then
