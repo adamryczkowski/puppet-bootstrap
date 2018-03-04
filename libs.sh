@@ -391,17 +391,17 @@ load
 defvar noentry /files/etc/fstab[count(*[file="${file}"])=0]
 
 # Create the entry if it's missing
-set $noentry/01/spec "${spec}"
-set $noentry/01/file "${file}"
+set \$noentry/01/spec "${spec}"
+set \$noentry/01/file "${file}"
 
 # Now amend existing entry or finish creating the missing one
 defvar entry /files/etc/fstab/*[file="${file}"]
 
-set $entry/spec "${spec}"
-set $entry/vfstype "${vfstype}"
-set $entry/opt "${opt}"
-set $entry/dump "${dump}"
-set $entry/passno "${passno}"
+set \$entry/spec "${spec}"
+set \$entry/vfstype "${vfstype}"
+set \$entry/opt "${opt}"
+set \$entry/dump "${dump}"
+set \$entry/passno "${passno}"
 EOT
 	logexec sudo /usr/bin/augtool -Asf /tmp/fstab.augeas
 }
