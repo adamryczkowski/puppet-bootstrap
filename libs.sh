@@ -399,12 +399,12 @@ defvar entry /files/etc/fstab/*[file="${file}"]
 
 set \$entry/spec "${spec}"
 set \$entry/vfstype "${vfstype}"
-ins opt after \$entry/opt[last()]
 EOT
 	OLDIFS="$IFS"
 	export IFS=","
 	i=1
 	for entry in $opt; do
+		echo "ins opt after \$entry/opt[last()]">>/tmp/fstab.augeas
 		echo "set \$entry/opt[last()] \"$entry\"">>/tmp/fstab.augeas
 		let "i=i+1"
 	done
