@@ -341,7 +341,7 @@ function chmod_file {
 	file=$1
 	desired_mode=$2
 	pattern='^\d+$'
-	if [[ ! "${desired_mode}" ~= $pattern ]]; then
+	if [[ ! "${desired_mode}" =~ $pattern ]]; then
 		errcho "Wrong file permissions. Needs octal format."
 		exit 1
 	fi
