@@ -1,0 +1,60 @@
+Package: rdep
+Type: Package
+Title: What the Package Does (Title Case)
+Version: 0.1.0
+Author: Who wrote it
+Maintainer: The package maintainer <yourself@somewhere.net>
+Description: More about what it does (maybe more than one line)
+    Use four spaces when indenting paragraphs within the Description.
+License: What license is it under?
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 0.12.10),
+	 stringr,
+	 readxl,
+	 Hmisc,
+	 R.utils,
+	 xlsx,
+	 readODS,
+	 boot,
+	 pander,
+	 gridExtra,
+	 RColorBrewer,
+	 zipfR,
+	 ggrepel,
+	 lsr,
+	 tidyr,
+	 car,
+	 broom,
+	 ggfortify,
+	 doMC,
+	 ROCR,
+	 glmnet,
+	 lubridate,
+	 mice,
+	 rstan,
+	 HDInterval,
+	 clustertools,
+	 depwalker,
+	 danesurowe,
+	 pathcat,
+	 binnr,
+	 curl,
+	 entropy,
+	 rvest,
+	 packrat
+LinkingTo: Rcpp
+Depends:
+    data.table,
+	  dplyr,
+	  dtplyr,
+	  ggplot2,
+	  purrr
+Remotes:
+	 adamryczkowski/clustertools,
+	 adamryczkowski/depwalker,
+	 adamryczkowski/danesurowe,
+	 adamryczkowski/pathcat,
+	 adamryczkowski/relationshipMatrix,
+	 adamryczkowski/yuxiaCharts,
+	 Zelazny7/binnr

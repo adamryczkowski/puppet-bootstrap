@@ -10,15 +10,21 @@ Prepares R in the server it is run on
 Usage:
 
 $(basename $0) [--rstudio] [--rstudio-server] [--repo-server <repo-address>] 
+               [--deb-folder <deb_folder>] [--install-lib <path>]
                 [--help] [--debug] [--log <output file>]
 
 
 where
 
- --ip                     - IP address in the private network of the node. 
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
-
+ --ip                         - IP address in the private network of the node. 
+ --debug                      - Flag that sets debugging mode. 
+ --log                        - Path to the log file that will log all meaningful commands
+ --deb-folder <path>          - Path where the .deb files for rstudio and rstudio-server will
+                                be downloaded. Preferably some sort of shared folder for whole
+                                institution. 
+ --repo-server <repo-address> - Alternative CRAN address. Defaults to http://cran.us.r-project.org
+ --install-lib <path>         - Path to the source directory of the library to install.
+                                This library purpose is to install its dependencies.
 
 Example2:
 
@@ -27,6 +33,9 @@ $(basename $0) --debug
 "
 
 set -x
+
+repo_server="http://cran.us.r-project.org"
+deb_folder='/tmp'
 
 while [[ $# > 0 ]]
 do
@@ -45,11 +54,23 @@ case $key in
 	echo "$usage"
 	exit 0
 	;;
+	--install-lib)
+	install_lib=$1
+	shift
+	;;
 	--rstudio)
 	rstudio=1
 	;;
 	--rstudio-server)
 	rstudio_server=1
+	;;
+	--repo-server)
+	repo_server=$1
+	shift
+	;;
+	--deb-folder)
+	deb_folder=$1
+	shift
 	;;
 	-*)
 	echo "Error: Unknown option: $1" >&2
@@ -75,104 +96,83 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	flag_need_apt_update=1
 fi
 
-if ! install_apt_packages r-base r-cran-digest r-cran-foreign r-cran-getopt pandoc git-core r-cran-rcpp r-cran-rjava r-cran-rsqlite r-cran-rserve libxml2-dev libssl-dev libcurl4-openssl-dev sysbench; then
+if ! install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev sysbench openjdk-8-jdk; then
 	do_upgrade
-	chmod a+w /usr/local/lib/R/site-library
 fi
 
 if ! which Rscript >/dev/null; then
-	errcho "Something wrong with the R install. Abourt."
+	errcho "Something wrong with the R install. Abort."
 	exit 1
 fi
 
 logheredoc EOT
-tee /tmp/prepare_R.R <<'EOT'
-if(!require('devtools')) install.packages('devtools', Ncpus=8, repos='http://cran.us.r-project.org')
-devtools::install_github('hadley/devtools', Ncpus=8, repos='http://cran.us.r-project.org')
+tee /tmp/prepare_R.R <<EOT
+dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings = FALSE, recursive = TRUE)
+if(!require('devtools')) install.packages('devtools', Ncpus=8, repos='${repo_server}', lib = Sys.getenv("R_LIBS_USER"))
+devtools::install_github('hadley/devtools', Ncpus=8, repos='${repo_server}', lib = Sys.getenv("R_LIBS_USER"))
 EOT
 
-logexec sudo Rscript /tmp/get_rstudio_uri.R
+logexec sudo Rscript /tmp/prepare_R.R
 
 
 if [ -n "$rstudio" ]; then
-	if dpkg -s rstudio>/dev/null  2> /dev/null; then
-		ver=$(apt show rstudio | grep Version)
-		pattern='^Version: ([0-9.]+)\s*$'
-		if [[ $ver =~ $pattern ]]; then
-			ourversion=${BASH_REMATCH[1]}
-			do_check=1
-		fi
-	else
-		do_check=1
-		ourversion="0.0"
-	fi
-	if [ "$do_check" == 1 ]; then
-        netversion=$(Rscript -e 'cat(stringr::str_match(scan("https://www.rstudio.org/links/check_for_update?version=1.0.0", what = character(0), quiet=TRUE), "^[^=]+=([^\\&]+)\\&.*")[[2]])')
-        if [ "$ourversion" != "$netversion" ]; then
-        	RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
-        	tee /tmp/get_rstudio_uri.R <<'EOF'
-if(!require('rvest')) install.packages('rvest', Ncpus=8, repos='http://cran.us.r-project.org')
+	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
+		logheredoc EOT
+		tee /tmp/get_rstudio_uri.R <<EOT
+if(!require('rvest')) install.packages('rvest', Ncpus=8, repos='${repo_server}, lib = Sys.getenv("R_LIBS_USER")')
 xpath='.downloads:nth-child(2) tr:nth-child(5) a'
 url = "https://www.rstudio.com/products/rstudio/download/"
 thepage<-xml2::read_html(url)
 cat(html_node(thepage, xpath) %>% html_attr("href"))
-EOF
-			RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
-			
-			logexec wget -c --output-document /tmp/rstudio.deb "$RSTUDIO_URI"
-			logexec sudo dpkg -i /tmp/rstudio.deb
-			logexec apt install -f --yes
-			logexec rm /tmp/rstudio.deb
-			rm /tmp/get_rstudio_uri.R
+EOT
+		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
+		
+		wget -c $RSTUDIO_URI -O ${deb_folder}/rstudio_${netvesion}_amd64.deb
+		logexec dpkg -i ${deb_folder}/rstudio_${netvesion}_amd64.deb
+		if ! logexec dpkg -i ${deb_folder}/rstudio_${netvesion}_amd64.deb; then
+			logexec sudo apt install -f --yes
+		fi
 
-
-			if ! fc-list |grep -q FiraCode; then
+		if ! fc-list |grep -q FiraCode; then
 			for type in Bold Light Medium Regular Retina; do
 				logexec wget -O ~/.local/share/fonts/FiraCode-${type}.ttf "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true";
 			done
+		fi
 
-			if fc-list |grep -q FiraCode; then
-				if !grep -q "text-rendering:" /usr/lib/rstudio/www/index.htm; then
-					logexec sudo sed -i '/<head>/a<style>*{text-rendering: optimizeLegibility;}<\/style>' /usr/lib/rstudio/www/index.htm
-				fi
+		if fc-list |grep -q FiraCode; then
+			if !grep -q "text-rendering:" /usr/lib/rstudio/www/index.htm; then
+				sudo sed -i '/<head>/a<style>*{text-rendering: optimizeLegibility;}<\/style>' /usr/lib/rstudio/www/index.htm
 			fi
 		fi
 	fi
 fi
 
+
 if [ -n "$rstudio_server" ]; then
 	if dpkg -s rstudio>/dev/null  2> /dev/null; then
-		ver=$(apt show rstudio-server | grep Version)
-		pattern='^Version: ([0-9.]+)\s*$'
-		if [[ $ver =~ $pattern ]]; then
-			ourversion=${BASH_REMATCH[1]}
-			do_check=1
-		fi
-	else
-		do_check=1
-		ourversion="0.0"
-	fi
-	if [ "$do_check" == 1 ]; then
-        netversion=$(wget --no-check-certificate -qO- https://s3.amazonaws.com/rstudio-server/current.ver)
-        if [ "$ourversion" != "$netversion" ]; then
-        	tee /tmp/get_rstudio_uri.R <<'EOT'
-if(!require('rvest')) install.packages('rvest', Ncpus=8, repos='http://cran.us.r-project.org')
-if(!require('stringr')) install.packages('stringr', Ncpus=8, repos='http://cran.us.r-project.org')
+		logheredoc EOT
+		tee /tmp/get_rstudio_server_uri.R <<EOT
+if(!require('rvest')) install.packages('rvest', Ncpus=8, repos='${repo_server}', lib = Sys.getenv("R_LIBS_USER"))
+if(!require('stringr')) install.packages('stringr', Ncpus=8, repos='${repo_server}', lib = Sys.getenv("R_LIBS_USER"))
 xpath='code:nth-child(3)'
 url = "https://www.rstudio.com/products/rstudio/download-server/"
 thepage<-xml2::read_html(url)
 link<-html_node(thepage, xpath) %>% html_text()
-cat(stringr::str_match(link, '^\\$ (.*)$')[[2]])
+cat(stringr::str_match(link, '^\\$( wget)? (.*)$')[[3]])
 EOT
-			RSTUDIO_URI=$(sudo Rscript /tmp/get_rstudio_uri.R)
-			RSTUDIO_URI=$(sudo Rscript /tmp/get_rstudio_uri.R)
-			
-			logexec wget -c --output-document /tmp/rstudio-server.deb $RSTUDIO_URI 
-			logexec sudo dpkg -i /tmp/rstudio-server.deb
-			logexec apt install -f --yes
-			logexec rm /tmp/rstudio-server.deb
-			rm /tmp/get_rstudio_uri.R
+		RSTUDIO_URI=$(sudo Rscript /tmp/get_rstudio_server_uri.R)
+		logexec wget -c $RSTUDIO_URI --output-document ${deb_folder}/rstudio-server_${netversion}_amd64.deb
+		if ! logexec sudo dpkg -i ${deb_folder}/rstudio-server_${netversion}_amd64.deb; then
+			logexec sudo apt install -f --yes
 		fi
 	fi
 fi
+
+logexec sudo -H Rscript -e "update.packages(ask = FALSE, repos=\"${repo_server}\")"
+logexec Rscript -e "update.packages(ask = FALSE, repos=\"${repo_server}\", lib = Sys.getenv("R_LIBS_USER"))"
+if [ -n "${install_lib}" ]; then
+	Rscript -e "if(!require(\"devtools\")) {install.packages(\"devtools\", ask=FALSE, repos=\"${repo_server}\", lib = Sys.getenv("R_LIBS_USER"));devtools::install_github(\"hadley/devtools\", repos=\"${repo_server}\", lib = Sys.getenv("R_LIBS_USER"))}"
+	Rscript -e "devtools::install('${install_lib}', dependencies=TRUE, lib = Sys.getenv("R_LIBS_USER"), repos=\"${repo_server}\"))"
+fi
+
 

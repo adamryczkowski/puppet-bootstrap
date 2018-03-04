@@ -135,11 +135,11 @@ else
 	exit 254
 fi
 
-logmkdir /mnt/r-repo ${user}
-smb_share_client ${device_address} ${share_name} /mnt/r-repo /etc/samba/user ${auto} 
+logmkdir ${mount_place} ${user}
+smb_share_client ${device_address} ${share_name} ${mount_place} /etc/samba/user ${auto} 
 
 if [ "${mount}" == "1" ]; then
-	if ! mount | grep /mnt/r-repo >/dev/null; then
-		mount /mnt/r-repo
+	if ! mount | grep ${mount_place} >/dev/null; then
+		mount ${mount_place}
 	fi
 fi
