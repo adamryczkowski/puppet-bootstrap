@@ -388,7 +388,7 @@ transform Fstab.lns incl /etc/fstab
 load
 
 # $noentry will match /files/etc/fstab only if the entry isn't there yet
-defvar noentry /files/etc/fstab[count(*[file="/mnt/ISO"])=0]
+defvar noentry /files/etc/fstab[count(*[file="${file}"])=0]
 
 # Create the entry if it's missing
 set $noentry/01/spec "${spec}"
