@@ -367,7 +367,7 @@ function smb_share_client {
 	if [ -n "${extra_opt}"} ]; then
 		extra_opt=",${extra_opt}"
 	fi
-	fstab_entry ${local_path} "//${server}/${remote_name}" cifs users,credentials=${credentials_file},noexec,${extra_opt} 0 0
+	fstab_entry "//${server}/${remote_name}" ${local_path} cifs users,credentials=${credentials_file},noexec,${extra_opt} 0 0
 }
 
 function fstab_entry {
