@@ -10,7 +10,7 @@ Deploys the R in the server on the given ssh address
 Usage:
 
 $(basename $0) <ssh addres of the server> [--rstudio] [--rstudio-server] [--user <user>]
-             [--repo-server <repo-address>] [--deb-folder <path>]
+             [--repo-server <repo-address>] [--deb-folder <path>] [--install-lib <path>]
              [--help] [--debug] [--log <output file>]  
 
 
@@ -28,12 +28,16 @@ where
   --deb-folder <path>          - Folder where to keep the .deb files for the rstudio and rstudio-server.
                                  If auto and repo-server is smb share, it would default to the /debs folder
                                  inside the share.
+ --install-lib <path>          - Path to the source directory of the library to install.
+                                 This library purpose is to install its dependencies. The library must be 
+                                 available to the remote server.
+                                 Defaults to the rdep repository boundled with the script. 
 
 
 
 Example2:
 
-$(basename $0) root@109.74.199.59  --n2n-server 172.104.148.166:5535 --n2n-password szakal --debug
+./$(basename $0) root@109.74.199.59  --rstudio --rstudio-server --repo-server file:///mnt/repos/r-mirror --deb-folder /mnt/repos/debs
 
 "
 
@@ -46,6 +50,7 @@ fi
 username=$(whoami)
 user=auto
 deb_folder=auto
+install_lib=auto
 
 
 
@@ -74,6 +79,10 @@ case $key in
 	deb_folder=$1
 	shift
 	;;
+	--install-lib)
+	install_lib=$1
+	shift
+	;;
 	--repo-server)
 	repo_server=$1
 	shift
@@ -93,13 +102,14 @@ esac
 done
 
 opts=""
+opts2=""
 
 if [ -n "$debug" ]; then
-	opts="$opts --debug"
+	opts2="$opts2 --debug"
 	if [ -z "$log" ]; then
 		log=/dev/stdout
 	else
-		opts="$opts --log $log"
+		opts2="$opts2 --log $log"
 	fi
 fi
 
@@ -113,8 +123,6 @@ if [ "${user}" == "auto" ]; then
 	user=$(lxc exec ls -1 /home | head -n 1)
 fi
 
-./prepare_remote_ubuntu.sh $ssh_address --wormhole $opts
-
 if [ -n "${repo_server}" ]; then
 	pattern='^smb://([^/]+)/([^/])(/(.*))$'
 	if [[ "${repo_server}" =~ $pattern ]]; then
@@ -125,7 +133,6 @@ if [ -n "${repo_server}" ]; then
 		opts2="${opts2} --repo-server file:///mnt/r-repo/${smb_prefix}"
 		if [ "${deb_folder}" == "auto" ]; then
 			deb_folder=/mnt/r-repo/debs
-			opts2="${opts2}" --deb-folder ${deb_folder}
 		fi
 	else
 		if [ "${deb_folder}" == "auto" ]; then
@@ -135,4 +142,17 @@ if [ -n "${repo_server}" ]; then
 	fi
 fi
 
-./execute-script-remotely.sh prepare-R-node.sh --ssh-address $ssh_address  $opts -- $opts2 
+if [ "${deb_folder}" == "auto" ]; then
+	opts2="${opts2} --deb-folder ${deb_folder}"
+fi
+
+if [ -n "${install_lib}" ]; then
+	if [ "${install_lib}" == "auto" ]; then
+		opts="${opts} --extra-executable rdep/DESCRIPTION --extra-executable rdep/NAMESPACE"
+		opts2="${opts2} --install-lib ."
+	else
+		opts2="${opts2} --install-lib \"${install_lib}\""
+	fi
+fi
+
+./execute-script-remotely.sh prepare-R-node.sh --step-debug --ssh-address $ssh_address  $opts -- $opts2 

@@ -24,7 +24,8 @@ where
                                 institution. 
  --repo-server <repo-address> - Alternative CRAN address. Defaults to http://cran.us.r-project.org
  --install-lib <path>         - Path to the source directory of the library to install.
-                                This library purpose is to install its dependencies.
+                                This library purpose is to install its dependencies. Defaults to the
+                                rdep repository boundled with the script.
 
 Example2:
 
@@ -41,6 +42,7 @@ set -x
 
 repo_server="http://cran.us.r-project.org"
 deb_folder='/tmp'
+install_lib=auto
 
 while [[ $# > 0 ]]
 do
@@ -91,6 +93,10 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
+if [ -n "${install_lib}" ]; then
+	install_lib=$(pwd)/rdep
+fi
+
 
 if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
 	$loglog
@@ -102,7 +108,7 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	flag_need_apt_update=1
 fi
 
-if ! install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev sysbench openjdk-8-jdk; then
+if ! install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-8-jdk; then
 	do_upgrade
 fi
 
@@ -110,22 +116,22 @@ if ! which Rscript >/dev/null; then
 	errcho "Something wrong with the R install. Abort."
 	exit 1
 fi
-
+exit 0
 logheredoc EOT
 tee /tmp/prepare_R.R <<EOT
 dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings = FALSE, recursive = TRUE)
-if(!require('devtools')) install.packages('devtools', Ncpus=8, repos='${repo_server}', lib = Sys.getenv("R_LIBS_USER"))
-devtools::install_github('hadley/devtools', Ncpus=8, repos='${repo_server}', lib = Sys.getenv("R_LIBS_USER"))
+if(!require('devtools')) install.packages('devtools', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
 EOT
 
-logexec sudo Rscript /tmp/prepare_R.R
+logexec Rscript /tmp/prepare_R.R
+logexec Rscript -e "devtools::install_github('hadley/devtools', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv('R_LIBS_USER'))"
 
 
 if [ -n "$rstudio" ]; then
 	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
 		logheredoc EOT
 		tee /tmp/get_rstudio_uri.R <<EOT
-if(!require('rvest')) install.packages('rvest', Ncpus=8, repos='${repo_server}, lib = Sys.getenv("R_LIBS_USER")')
+if(!require('rvest')) install.packages('rvest', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
 xpath='.downloads:nth-child(2) tr:nth-child(5) a'
 url = "https://www.rstudio.com/products/rstudio/download/"
 thepage<-xml2::read_html(url)
@@ -158,15 +164,15 @@ if [ -n "$rstudio_server" ]; then
 	if dpkg -s rstudio>/dev/null  2> /dev/null; then
 		logheredoc EOT
 		tee /tmp/get_rstudio_server_uri.R <<EOT
-if(!require('rvest')) install.packages('rvest', Ncpus=8, repos='${repo_server}', lib = Sys.getenv("R_LIBS_USER"))
-if(!require('stringr')) install.packages('stringr', Ncpus=8, repos='${repo_server}', lib = Sys.getenv("R_LIBS_USER"))
+if(!require('rvest')) install.packages('rvest', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
+if(!require('stringr')) install.packages('stringr', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
 xpath='code:nth-child(3)'
 url = "https://www.rstudio.com/products/rstudio/download-server/"
 thepage<-xml2::read_html(url)
 link<-html_node(thepage, xpath) %>% html_text()
 cat(stringr::str_match(link, '^\\$( wget)? (.*)$')[[3]])
 EOT
-		RSTUDIO_URI=$(sudo Rscript /tmp/get_rstudio_server_uri.R)
+		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_server_uri.R)
 		logexec wget -c $RSTUDIO_URI --output-document ${deb_folder}/rstudio-server_${netversion}_amd64.deb
 		if ! logexec sudo dpkg -i ${deb_folder}/rstudio-server_${netversion}_amd64.deb; then
 			logexec sudo apt install -f --yes
@@ -174,11 +180,11 @@ EOT
 	fi
 fi
 
-logexec sudo -H Rscript -e "update.packages(ask = FALSE, repos=\"${repo_server}\")"
-logexec Rscript -e "update.packages(ask = FALSE, repos=\"${repo_server}\", lib = Sys.getenv("R_LIBS_USER"))"
+logexec sudo -H Rscript -e "update.packages(ask = FALSE, repos=setNames('${repo_server}', 'CRAN'))"
+logexec Rscript -e "update.packages(ask = FALSE, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv('R_LIBS_USER'))"
 if [ -n "${install_lib}" ]; then
-	Rscript -e "if(!require(\"devtools\")) {install.packages(\"devtools\", ask=FALSE, repos=\"${repo_server}\", lib = Sys.getenv("R_LIBS_USER"));devtools::install_github(\"hadley/devtools\", repos=\"${repo_server}\", lib = Sys.getenv("R_LIBS_USER"))}"
-	Rscript -e "devtools::install('${install_lib}', dependencies=TRUE, lib = Sys.getenv("R_LIBS_USER"), repos=\"${repo_server}\"))"
+	logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);if(!require('devtools')) {install.packages('devtools', ask=FALSE, lib = Sys.getenv('R_LIBS_USER'));devtools::install_github('hadley/devtools', lib = Sys.getenv('R_LIBS_USER'))}"
+	logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install('${install_lib}', dependencies=TRUE, lib = Sys.getenv('R_LIBS_USER'))"
 fi
 
 

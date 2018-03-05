@@ -43,6 +43,9 @@ where
                             key on the user's account in the container.
  --authorized-key         - Key of other user's. This option can be specified multiple times.
  --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
+ --map-host-folder <host-path> <remote-path>
+                          - After container's creation, map a single host folder into the guest file
+                            system. 
  --storage                - Name of the storage to use for this container. Defaults to 'default'
  --update-all             - If set, it will install the update-all script as well (defaults to yes)
  --debug                  - Flag that sets debugging mode. 
@@ -51,7 +54,8 @@ where
 
 Example:
 
-$(basename $0) mynode --release xenial --autostart --apt-proxy 192.168.10.2:3142 --private-key-path ~/.ssh/id_rsa
+./$(basename $0) mynode --release xenial --autostart --apt-proxy 192.168.10.2:3142 --private-key-path ~/.ssh/id_rsa
+./$(basename $0) probar --map-host-folder /media/adam-minipc/other /mnt/repos
 "
 
 dir_resolve()
@@ -495,7 +499,9 @@ logexec lxc exec $name -- locale-gen en_US.UTF-8
 logexec lxc exec $name -- locale-gen pl_PL.UTF-8
 
 if [ -z $private_key_path ]; then
-	logexec lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
+	if ! lxc exec ${name} ls ~/.ssh/id_ed25519; then
+		logexec lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
+	fi
 else
 	logexec lxc file push ${private_key_path} ${name}${sshhome}/.ssh/ >/dev/null
 	logexec lxc exec ${name} -- chown ${lxcuser}:${lxcuser} ${sshhome}/.ssh/$(basename $private_key_path)
@@ -521,10 +527,13 @@ if [ "${update_all}" == "1" ]; then
 	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- 
 fi
 
-if [ -n "${guest_folder}" ]; then
-	sharename=$(basename host_folder)
+if [ -n "${guestfolder}" ]; then
+	sharename=$(basename ${hostfolder})
 	if [ ! $(lxc config device list ${name} | grep -q ${sharename}) ]; then
-		logexec lxc config device add ${name} ${sharename} disk source=${host_folder} path=${guest_folder}
+		if ! lxc exec ${name} ls ${guestfolder}; then
+			logexec lxc exec ${name} -- mkdir -p ${guestfolder}
+		fi
+		logexec lxc config device add ${name} ${sharename} disk source=${hostfolder} path=${guestfolder}
 	fi
 fi
 
