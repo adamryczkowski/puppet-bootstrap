@@ -108,15 +108,14 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	flag_need_apt_update=1
 fi
 
-if ! install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-8-jdk; then
-	do_upgrade
-fi
+install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-8-jdk pkg-config libnlopt-dev
+
+logexec sudo R CMD javareconf
 
 if ! which Rscript >/dev/null; then
 	errcho "Something wrong with the R install. Abort."
 	exit 1
 fi
-exit 0
 logheredoc EOT
 tee /tmp/prepare_R.R <<EOT
 dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings = FALSE, recursive = TRUE)
@@ -124,14 +123,16 @@ if(!require('devtools')) install.packages('devtools', Ncpus=8, repos=setNames('$
 EOT
 
 logexec Rscript /tmp/prepare_R.R
-logexec Rscript -e "devtools::install_github('hadley/devtools', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv('R_LIBS_USER'))"
+logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install_github('hadley/devtools', Ncpus=8, lib = Sys.getenv('R_LIBS_USER'))"
 
 
 if [ -n "$rstudio" ]; then
 	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
 		logheredoc EOT
 		tee /tmp/get_rstudio_uri.R <<EOT
-if(!require('rvest')) install.packages('rvest', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
+repos=setNames('${repo_server}', 'CRAN')
+options(repos=repos);
+if(!require('rvest')) install.packages('rvest', Ncpus=8, lib = Sys.getenv("R_LIBS_USER"))
 xpath='.downloads:nth-child(2) tr:nth-child(5) a'
 url = "https://www.rstudio.com/products/rstudio/download/"
 thepage<-xml2::read_html(url)
@@ -164,8 +165,10 @@ if [ -n "$rstudio_server" ]; then
 	if dpkg -s rstudio>/dev/null  2> /dev/null; then
 		logheredoc EOT
 		tee /tmp/get_rstudio_server_uri.R <<EOT
-if(!require('rvest')) install.packages('rvest', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
-if(!require('stringr')) install.packages('stringr', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
+repos=setNames('${repo_server}', 'CRAN')
+options(repos=repos);
+if(!require('rvest')) install.packages('rvest', Ncpus=8, lib = Sys.getenv("R_LIBS_USER"))
+if(!require('stringr')) install.packages('stringr', Ncpus=8, lib = Sys.getenv("R_LIBS_USER"))
 xpath='code:nth-child(3)'
 url = "https://www.rstudio.com/products/rstudio/download-server/"
 thepage<-xml2::read_html(url)
@@ -181,7 +184,7 @@ EOT
 fi
 
 logexec sudo -H Rscript -e "update.packages(ask = FALSE, repos=setNames('${repo_server}', 'CRAN'))"
-logexec Rscript -e "update.packages(ask = FALSE, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv('R_LIBS_USER'))"
+logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);update.packages(ask = FALSE,lib = Sys.getenv('R_LIBS_USER'))"
 if [ -n "${install_lib}" ]; then
 	logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);if(!require('devtools')) {install.packages('devtools', ask=FALSE, lib = Sys.getenv('R_LIBS_USER'));devtools::install_github('hadley/devtools', lib = Sys.getenv('R_LIBS_USER'))}"
 	logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install('${install_lib}', dependencies=TRUE, lib = Sys.getenv('R_LIBS_USER'))"
