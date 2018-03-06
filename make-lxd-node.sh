@@ -282,8 +282,8 @@ else
 	else
 		args=""
 	fi
-	logexec lxc init ubuntu-daily:${release} ${name} ${args}
-	if ! $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
+	logexec lxc init ubuntu-daily:${release} ${name} ${args} -c security.nesting=true
+	if ! $sudoprefix lxc info ${name} >/dev/null 2>/dev/null; then
 			errcho "Cannot create the lxc container"
 			exit 1
 	fi
