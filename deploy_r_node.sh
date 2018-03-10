@@ -51,6 +51,8 @@ username=$(whoami)
 user=auto
 deb_folder=auto
 install_lib=auto
+opts=""
+opts2=""
 
 
 
@@ -101,8 +103,6 @@ case $key in
 esac
 done
 
-opts=""
-opts2=""
 
 if [ -n "$debug" ]; then
 	opts2="$opts2 --debug"
