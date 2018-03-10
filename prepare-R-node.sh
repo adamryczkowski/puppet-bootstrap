@@ -122,6 +122,7 @@ logheredoc EOT
 tee /tmp/prepare_R.R <<EOT
 dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings = FALSE, recursive = TRUE)
 if(!require('devtools')) install.packages('devtools', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
+if(!require('stringr')) install.packages('stringr', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
 EOT
 
 logexec Rscript /tmp/prepare_R.R
@@ -130,6 +131,8 @@ logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos
 
 if [ "$rstudio" == "1" ]; then
 	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
+		netversion=$(Rscript -e 'cat(stringr::str_match(scan("https://www.rstudio.org/links/check_for_update?version=1.0.0", what = character(0), quiet=TRUE), "^[^=]+=([^\\&]+)\\&.*")[[2]])')
+
 		logheredoc EOT
 		tee /tmp/get_rstudio_uri.R <<EOT
 repos=setNames('${repo_server}', 'CRAN')
@@ -165,6 +168,7 @@ fi
 
 if [ "$rstudio_server" == "1" ]; then
 	if ! dpkg -s rstudio-server>/dev/null  2> /dev/null; then
+		netversion=$(wget --no-check-certificate -qO- https://s3.amazonaws.com/rstudio-server/current.ver)
 		logheredoc EOT
 		tee /tmp/get_rstudio_server_uri.R <<EOT
 repos=setNames('${repo_server}', 'CRAN')
