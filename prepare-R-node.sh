@@ -43,6 +43,8 @@ set -x
 repo_server="http://cran.us.r-project.org"
 deb_folder='/tmp'
 install_lib=auto
+rstudio_server=0
+rstudio=0
 
 while [[ $# > 0 ]]
 do
@@ -126,7 +128,7 @@ logexec Rscript /tmp/prepare_R.R
 logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install_github('hadley/devtools', Ncpus=8, lib = Sys.getenv('R_LIBS_USER'))"
 
 
-if [ -n "$rstudio" ]; then
+if [ "$rstudio" == "1" ]; then
 	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
 		logheredoc EOT
 		tee /tmp/get_rstudio_uri.R <<EOT
@@ -161,7 +163,7 @@ EOT
 fi
 
 
-if [ -n "$rstudio_server" ]; then
+if [ "$rstudio_server" == "1" ]; then
 	if dpkg -s rstudio-server>/dev/null  2> /dev/null; then
 		logheredoc EOT
 		tee /tmp/get_rstudio_server_uri.R <<EOT
