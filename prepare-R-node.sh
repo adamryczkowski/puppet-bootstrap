@@ -146,8 +146,9 @@ EOT
 		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
 		
 		wget -c $RSTUDIO_URI -O ${deb_folder}/rstudio_${netvesion}_amd64.deb
-#		logexec sudo dpkg -i ${deb_folder}/rstudio_${netvesion}_amd64.deb
-		if ! logexec sudo dpkg -i ${deb_folder}/rstudio_${netvesion}_amd64.deb; then
+		logexec sudo dpkg -i ${deb_folder}/rstudio_${netvesion}_amd64.deb
+		out=$?
+		if [ "$out" != "0" ]; then
 			logexec sudo apt install -f --yes
 		fi
 
