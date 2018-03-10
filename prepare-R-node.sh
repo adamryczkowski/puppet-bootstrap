@@ -183,7 +183,9 @@ cat(stringr::str_match(link, '^\\\\\$( wget)? (.*)\$')[[3]])
 EOT
 		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_server_uri.R)
 		logexec wget -c $RSTUDIO_URI --output-document ${deb_folder}/rstudio-server_${netversion}_amd64.deb
-		if ! logexec sudo dpkg -i ${deb_folder}/rstudio-server_${netversion}_amd64.deb; then
+		logexec sudo dpkg -i ${deb_folder}/rstudio-server_${netversion}_amd64.deb
+		out=$?
+		if [ "$out" != "0" ]; then
 			logexec sudo apt install -f --yes
 		fi
 	fi
