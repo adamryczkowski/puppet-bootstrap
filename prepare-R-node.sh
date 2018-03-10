@@ -175,7 +175,7 @@ xpath='code:nth-child(3)'
 url = "https://www.rstudio.com/products/rstudio/download-server/"
 thepage<-xml2::read_html(url)
 link<-html_node(thepage, xpath) %>% html_text()
-cat(stringr::str_match(link, '^\\$( wget)? (.*)$')[[3]])
+cat(stringr::str_match(link, '^\\\$( wget)? (.*)\$')[[3]])
 EOT
 		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_server_uri.R)
 		logexec wget -c $RSTUDIO_URI --output-document ${deb_folder}/rstudio-server_${netversion}_amd64.deb
