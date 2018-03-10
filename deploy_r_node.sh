@@ -142,7 +142,7 @@ if [ -n "${repo_server}" ]; then
 	fi
 fi
 
-if [ "${deb_folder}" == "auto" ]; then
+if [ "${deb_folder}" != "auto" ]; then
 	opts2="${opts2} --deb-folder ${deb_folder}"
 fi
 
