@@ -164,7 +164,7 @@ fi
 
 
 if [ "$rstudio_server" == "1" ]; then
-	if dpkg -s rstudio-server>/dev/null  2> /dev/null; then
+	if ! dpkg -s rstudio-server>/dev/null  2> /dev/null; then
 		logheredoc EOT
 		tee /tmp/get_rstudio_server_uri.R <<EOT
 repos=setNames('${repo_server}', 'CRAN')
