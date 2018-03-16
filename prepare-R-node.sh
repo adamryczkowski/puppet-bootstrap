@@ -143,6 +143,7 @@ url = "https://www.rstudio.com/products/rstudio/download/"
 thepage<-xml2::read_html(url)
 cat(html_node(thepage, xpath) %>% html_attr("href"))
 EOT
+		Rscript /tmp/get_rstudio_uri.R
 		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
 		
 		wget -c $RSTUDIO_URI -O ${deb_folder}/rstudio_${netversion}_amd64.deb
@@ -182,6 +183,7 @@ thepage<-xml2::read_html(url)
 link<-html_node(thepage, xpath) %>% html_text()
 cat(stringr::str_match(link, '^\\\\\$( wget)? (.*)\$')[[3]])
 EOT
+		Rscript /tmp/get_rstudio_server_uri.R
 		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_server_uri.R)
 		logexec wget -c $RSTUDIO_URI --output-document ${deb_folder}/rstudio-server_${netversion}_amd64.deb
 		logexec sudo dpkg -i ${deb_folder}/rstudio-server_${netversion}_amd64.deb
