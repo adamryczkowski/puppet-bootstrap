@@ -145,8 +145,8 @@ cat(html_node(thepage, xpath) %>% html_attr("href"))
 EOT
 		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
 		
-		wget -c $RSTUDIO_URI -O ${deb_folder}/rstudio_${netvesion}_amd64.deb
-		logexec sudo dpkg -i ${deb_folder}/rstudio_${netvesion}_amd64.deb
+		wget -c $RSTUDIO_URI -O ${deb_folder}/rstudio_${netversion}_amd64.deb
+		logexec sudo dpkg -i ${deb_folder}/rstudio_${netversion}_amd64.deb
 		out=$?
 		if [ "$out" != "0" ]; then
 			logexec sudo apt install -f --yes
