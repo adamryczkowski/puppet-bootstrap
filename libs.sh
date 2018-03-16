@@ -109,7 +109,7 @@ function add_ppa {
 
 		install_apt_package software-properties-common add-apt-repository
 
-		logexec sudo add-apt-repository -y ppa:ubuntu-lxc/lxd-stable
+		logexec sudo add-apt-repository -y ppa:${the_ppa}
 		flag_need_apt_update=1
 		return 0
 	fi
