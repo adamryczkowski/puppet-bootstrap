@@ -1,0 +1,11 @@
+#!/bin/bash
+ip=192.168.10.2
+port=3142
+nc -w 1 $ip $port
+proxy_file="/etc/apt/apt.conf.d/30aptcacher_ng"
+if [ $? -eq 0 ]; then
+    echo "Acquire::http::Proxy \"http://$ip:$port\";" > $proxy_file
+    echo 'Acquire::https::Proxy "false"; };' >> $proxy_file
+else
+    rm -f $proxy_file
+fi
