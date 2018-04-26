@@ -228,6 +228,7 @@ function logatpreviousmsg()
 function errcho()
 {
 	logmsg $@
+	echo "ERROR: $@"
 }
 
 
