@@ -568,6 +568,7 @@ function gsettings_remove_from_array {
 						newvalue="${newvalue}${item}"
 						flag=1
 					fi
+				else
 					change=1
 				fi
 			fi
