@@ -118,7 +118,8 @@ function tweak_base  {
 
 function desktop {
 	install_apt_packages meld
-	#Usuń amazon, office i apt z paska
+	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome/Software.desktop'
+	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
 	#Autoukrywanie paska
 	#touchpad prawy margines
 }
@@ -135,8 +136,9 @@ function nemo {
 	do_update
 	install_apt_package nemo nemo
 
-	set_gsettings_value org.gnome.desktop.background show-desktop-icons false
+	gsettings_set_value org.gnome.desktop.background show-desktop-icons false
 	xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
+	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome/Nautilus.desktop'
 	#usuń nautilus z paska
 	#pokaż ukryte pliki
 }

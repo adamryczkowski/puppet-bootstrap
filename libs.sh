@@ -515,7 +515,7 @@ function get_ui_context {
 	return 0
 }
 
-function set_gsettings_value {
+function gsettings_set_value {
 	schema=$1
 	name=$2
 	value=$3
@@ -535,3 +535,46 @@ function set_mime_default {
 		logexec xdg-mime default ${value} ${filetype}
 	fi
 }
+
+function gsettings_add_to_array {
+	schema=$1
+	name=$2
+	value=$3
+	get_ui_context
+	existing_value=$(gsettings get ${schema} ${name})
+	if [ "$existing_value" != "$value" ]; then
+		logexec gsettings set ${schema} ${name} ${value}
+	fi
+}
+
+function gsettings_remove_from_array {
+	schema=$1
+	name=$2
+	value=$3
+	get_ui_context
+	existing_values=$(gsettings get ${schema} ${name})
+	change=0
+	if [ -n "${existing_values}" ]; then
+		newvalue="['"
+		flag=0
+		oldifs=${IFS}
+		export IFS="', '"
+		for item in $existing_values; do
+			if [ "${item}" != value ]; then
+				if [ "${flag}" == "1" ]; then
+					newvalue="${newvalue}', '${item}"
+				else
+					newvalue="${newvalue}${item}"
+					flag=1
+				fi
+				change=1
+			fi
+		done
+		newvalue="${newvalue}']"
+		export IFS=${oldifs}
+	fi
+	if [ "change" == "1" ]; then
+		logexec gsettings set ${schema} ${name} ${newvalue}
+	fi
+}
+
