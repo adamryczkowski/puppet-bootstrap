@@ -112,7 +112,7 @@ fi
 
 #Makes sure basic scripts are installed
 function tweak_base  {
-	install_script file/discover_session_bus_address.sh
+	install_script files/discover_session_bus_address.sh
 	install_apt_packages git
 }
 
