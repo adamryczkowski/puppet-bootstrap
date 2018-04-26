@@ -176,8 +176,8 @@ password=Zero tolerancji"
 	done
 }
 
-smb
-exit 0
+#smb
+#exit 0
 
 oldifs=${IFS}
 export IFS=","
