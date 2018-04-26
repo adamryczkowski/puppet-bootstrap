@@ -548,16 +548,16 @@ function gsettings_add_to_array {
 }
 
 function gsettings_remove_from_array {
-	schema=$1
-	name=$2
-	value=$3
+	local schema=$1
+	local name=$2
+	local value=$3
 	get_ui_context
-	existing_values=$(gsettings get ${schema} ${name})
-	change=0
+	local existing_values=$(gsettings get ${schema} ${name})
+	local change=0
 	if [ -n "${existing_values}" ]; then
-		newvalue="['"
-		flag=0
-		oldifs=${IFS}
+		local newvalue="['"
+		local flag=0
+		local oldifs=${IFS}
 		export IFS="', '"
 		for item in $existing_values; do
 			if [[ "$item" != "" && "$item" != "[" && "$item" != "]" ]]; then
