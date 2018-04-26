@@ -116,13 +116,18 @@ function tweak_base  {
 	install_apt_packages git
 }
 
-function tweak_cli {
+function desktop {
+	install_apt_packages meld
+	#Usuń amazon, office i apt z paska
+	#Autoukrywanie paska
+	#touchpad prawy margines
+}
+
+function cli {
 	tweak_base
 	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu
 	logexec liquidprompt_activate
 	logexec sudo liquidprompt_activate
-	
-	
 }
 
 function nemo {
@@ -132,6 +137,8 @@ function nemo {
 
 	set_gsettings_value org.gnome.desktop.background show-desktop-icons false
 	xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
+	#usuń nautilus z paska
+	#pokaż ukryte pliki
 }
 
 function smb {
@@ -145,8 +152,8 @@ function smb {
 	arraylength=${#folders[@]}
 	for (( i=1; i<${arraylength}+1; i++ )); do
 		folder=/media/${folders[$i-1]}
-		share=shares[$i-1]
-		logmkdir ${folder}
+		share=${shares[$i-1]}
+		logmkdir ${folder} adam
 		smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	done
 
