@@ -118,7 +118,7 @@ function tweak_base  {
 
 function desktop {
 	install_apt_packages meld
-	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome/Software.desktop'
+	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
 	#Autoukrywanie paska
 	#touchpad prawy margines
