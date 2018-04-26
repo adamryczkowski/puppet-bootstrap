@@ -143,7 +143,8 @@ function nemo {
 
 function smb {
 	install_apt_package cifs-utils
-	textfile /etc/samba/user "username=adam\npassword=Zero tolerancji"
+	textfile /etc/samba/user "username=adam
+password=Zero tolerancji"
 	
 	declare -a folders=("wielodysk/filmy" "wielodysk/niezbednik" "wielodysk/docs" "wielodysk/public" "wielodysk/zdjecia")
 	declare -a shares=("rozne" "smiecie" "docs" "public" "zdjecia")
@@ -153,8 +154,9 @@ function smb {
 	for (( i=1; i<${arraylength}+1; i++ )); do
 		folder=/media/${folders[$i-1]}
 		share=${shares[$i-1]}
-		logmkdir ${folder} adam
-		smb_share_client ${host} ${share} ${folder} /etc/samba/user
+		echo "smb_share_client ${host} ${share} ${folder} /etc/samba/user"
+#		logmkdir ${folder} adam
+#		smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	done
 
 	declare -a folders=("adam-minipc/download" "adam-minipc/other" "adam-minipc/unfinished" "adam-minipc/videos")
@@ -164,9 +166,10 @@ function smb {
 	arraylength=${#folders[@]}
 	for (( i=1; i<${arraylength}+1; i++ )); do
 		folder=/media/${folders[$i-1]}
-		share=shares[$i-1]
-		logmkdir ${folder}
-		smb_share_client ${host} ${share} ${folder} /etc/samba/user
+		share=${shares[$i-1]}
+		echo "smb_share_client ${host} ${share} ${folder} /etc/samba/user"
+#		logmkdir ${folder}
+#		smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	done
 }
 
