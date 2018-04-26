@@ -359,14 +359,14 @@ function install_script {
 			fi
 		fi
 	fi
-	if [! -f "$dest" ]; then
+	if [ ! -f "$dest" ]; then
 		if [ -w "$dest" ]; then
 			logexec cp "$input_file" "$dest"
 		else
 			logexec sudo cp "$input_file" "$dest"
 		fi
 	fi
-	if [! -f "$dest" ]; then
+	if [ ! -f "$dest" ]; then
 		errcho "Error when copying ${input_file} into ${dest}"
 		exit 1
 	fi
@@ -380,14 +380,14 @@ function install_script {
 			fi
 		fi
 	fi
-	if [[! -x "$dest" ]]; then
+	if [[ ! -x "$dest" ]]; then
 		if [ -w "$dest" ]; then
 			logexec chmod +x "$dest"
 		else
 			logexec sudo chmod +x "$dest"
 		fi
 	fi
-	if [[! -x "$dest" ]]; then
+	if [[ ! -x "$dest" ]]; then
 		errcho "Cannot set executable permission to $dest"
 		exit 1
 	fi
