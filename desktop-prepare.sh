@@ -168,8 +168,6 @@ password=Zero tolerancji"
 		folder=/media/${folders[$i-1]}
 		share=${shares[$i-1]}
 		echo "smb_share_client ${host} ${share} ${folder} /etc/samba/user"
-#		logmkdir ${folder}
-#		smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	done
 }
 
