@@ -578,7 +578,7 @@ function gsettings_remove_from_array {
 	fi
 	if [ "$change" == "1" ]; then
 		echo "gsettings set ${schema} ${name} ${newvalue}"
-		logexec gsettings set ${schema} ${name} \""${newvalue}"\"
+		gsettings set ${schema} ${name} \""${newvalue}"\"
 	fi
 }
 
