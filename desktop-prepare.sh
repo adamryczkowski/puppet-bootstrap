@@ -99,7 +99,7 @@ if [ -z "$tweaks" ]; then
 	echo "$usage"
 	exit 0
 else
-	tweaks=base,${tweaks}
+	tweaks="base,${tweaks}"
 fi
 
 home=$(get_home_dir)
