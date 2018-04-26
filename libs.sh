@@ -576,7 +576,8 @@ function gsettings_remove_from_array {
 		export IFS=${oldifs}
 	fi
 	if [ "$change" == "1" ]; then
-		logexec gsettings set ${schema} ${name} ${newvalue}
+		echo "gsettings set ${schema} ${name} ${newvalue}"
+		logexec gsettings set ${schema} ${name} "${newvalue}"
 	fi
 }
 
