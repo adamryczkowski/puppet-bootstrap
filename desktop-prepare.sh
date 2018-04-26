@@ -58,7 +58,7 @@ shift
 
 case $key in
 	--tweaks)
-	if [-z "$tweaks" ]; then
+	if [ -z "$tweaks" ]; then
 		tweaks=$1
 	else
 		tweaks=${tweaks},$1
