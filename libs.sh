@@ -278,6 +278,12 @@ function parse_URI {
     fi
 }
 
+function add_host {
+	host=$1
+	ip=$2
+	
+}
+
 function get_iface_ip {
 	iface=$1
 	if ifconfig $local_n2n_iface 2>/dev/null >/dev/null; then

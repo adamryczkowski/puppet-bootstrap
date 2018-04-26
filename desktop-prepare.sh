@@ -126,7 +126,7 @@ function desktop {
 
 function cli {
 	tweak_base
-	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu
+	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu openssh-server
 	logexec liquidprompt_activate
 	logexec sudo liquidprompt_activate
 }
@@ -156,7 +156,7 @@ password=Zero tolerancji"
 	for (( i=1; i<${arraylength}+1; i++ )); do
 		folder=/media/${folders[$i-1]}
 		share=${shares[$i-1]}
-		echo "smb_share_client ${host} ${share} ${folder} /etc/samba/user"
+#		echo "smb_share_client ${host} ${share} ${folder} /etc/samba/user"
 #		logmkdir ${folder} adam
 #		smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	done
@@ -169,7 +169,9 @@ password=Zero tolerancji"
 	for (( i=1; i<${arraylength}+1; i++ )); do
 		folder=/media/${folders[$i-1]}
 		share=${shares[$i-1]}
+		echo "exec1"
 		logmkdir ${folder}
+		echo "exec2"
 		smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	done
 }
