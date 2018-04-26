@@ -560,7 +560,7 @@ function gsettings_remove_from_array {
 		oldifs=${IFS}
 		export IFS="', '"
 		for item in $existing_values; do
-			if [[ "$item" != "" && "$item" != "[" ]]; then
+			if [[ "$item" != "" && "$item" != "[" && "$item" != "]" ]]; then
 				if [ "${item}" != "${value}" ]; then
 					if [ "${flag}" == "1" ]; then
 						newvalue="${newvalue}', '${item}"
