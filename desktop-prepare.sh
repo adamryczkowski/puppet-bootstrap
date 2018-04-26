@@ -138,7 +138,7 @@ function nemo {
 
 	gsettings_set_value org.gnome.desktop.background show-desktop-icons false
 	xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
-	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome/Nautilus.desktop'
+	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Nautilus.desktop'
 	#usuń nautilus z paska
 	#pokaż ukryte pliki
 }
