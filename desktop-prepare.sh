@@ -173,6 +173,9 @@ password=Zero tolerancji"
 	done
 }
 
+smb
+exit 0
+
 oldifs=${IFS}
 export IFS=","
 for tweak in $tweaks; do

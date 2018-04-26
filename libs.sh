@@ -577,12 +577,8 @@ function gsettings_remove_from_array {
 		export IFS=${oldifs}
 	fi
 	if [ "$change" == "1" ]; then
-		echo "DDD"
-		echo "DDD"
-		echo "DDD"
-		echo "DDD"
 		echo "gsettings set ${schema} ${name} ${newvalue}"
-		gsettings set ${schema} ${name} \""${newvalue}"\"
+		gsettings set $(echo ${schema} ${name} \""${newvalue}"\")
 	fi
 }
 
