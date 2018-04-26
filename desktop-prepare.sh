@@ -177,8 +177,9 @@ oldifs=${IFS}
 export IFS=","
 for tweak in $tweaks; do
 	export IFS=${oldifs}
+	echo "Current tweak: ${tweak}"
 	$(${tweak})
-	export IFS=","
+#	export IFS=","
 done
 export IFS=${oldifs}
 
