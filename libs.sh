@@ -307,7 +307,7 @@ function logmkdir {
 	dir=$1
 	user=$2
 	if ! [ -d "$dir" ]; then
-		logexec sudo mkdir "$dir"
+		logexec sudo mkdir -p "$dir"
 	fi
 	if [ -n "$user" ]; then
 		logexec sudo chown ${user}:${user} "$dir"
