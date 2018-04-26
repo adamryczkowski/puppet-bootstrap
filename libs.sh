@@ -333,6 +333,66 @@ function textfile {
 	fi
 }
 
+function install_script {
+	local input_file="$1"
+	local dest="$2"
+	local user=$3
+	if [ -z ${user} ]; then
+		user=auto
+	fi
+	if [ ! -f "${input_file}" ]; then
+		errcho "Cannot find ${input_file}"
+		exit 1
+	fi
+	if [ -z "$dest" ]; then
+		dest=/usr/local/bin
+	fi
+	if [ -d "$dest" ]; then
+		dest="${dest}/$(basename "$input_file")"
+	fi
+	if [ -f "$dest" ]; then
+		if ! cmp "$dest" "$input_file"; then
+			if [ -w "$dest" ]; then
+				logexec cp "$input_file" "$dest"
+			else
+				logexec sudo cp "$input_file" "$dest"
+			fi
+		fi
+	fi
+	if [! -f "$dest" ]; then
+		if [ -w "$dest" ]; then
+			logexec cp "$input_file" "$dest"
+		else
+			logexec sudo cp "$input_file" "$dest"
+		fi
+	fi
+	if [! -f "$dest" ]; then
+		errcho "Error when copying ${input_file} into ${dest}"
+		exit 1
+	fi
+	if [ $user != "auto" ]; then
+		cur_owner="$(stat --format '%U' "$dest")"
+		if [ "$user" != "$cur_owner" ]; then
+			if [ -w "$dest" ]; then
+				logexec chown $user "$dest"
+			else
+				logexec sudo chown $user "$dest"
+			fi
+		fi
+	fi
+	if [[! -x "$dest" ]]; then
+		if [ -w "$dest" ]; then
+			logexec chmod +x "$dest"
+		else
+			logexec sudo chmod +x "$dest"
+		fi
+	fi
+	if [[! -x "$dest" ]]; then
+		errcho "Cannot set executable permission to $dest"
+		exit 1
+	fi
+}
+
 function get_home_dir {
 	echo $( getent passwd "$USER" | cut -d: -f6 )
 }
@@ -424,5 +484,54 @@ EOT
 }
 
 function is_host_up {
-  ping -c 1 -w 1  $1 >/dev/null
+	ping -c 1 -w 1  $1 >/dev/null
+}
+
+function get_ui_context {
+	if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ]; then
+		compatiblePrograms=( nemo unity nautilus kdeinit kded4 pulseaudio trackerd )
+		for index in ${compatiblePrograms[@]}; do
+			PID=$(pidof -s ${index})
+			if [[ "${PID}" != "" ]]; then
+				break
+			fi
+		done
+		if [[ "${PID}" == "" ]]; then
+			ercho "Could not detect active login session"
+			return 1
+		fi
+	
+		QUERY_ENVIRON="$(tr '\0' '\n' < /proc/${PID}/environ | grep "DBUS_SESSION_BUS_ADDRESS" | cut -d "=" -f 2-)"
+		if [[ "${QUERY_ENVIRON}" != "" ]]; then
+			export DBUS_SESSION_BUS_ADDRESS="${QUERY_ENVIRON}"
+			echo "Connected to session:"
+			echo "DBUS_SESSION_BUS_ADDRESS=${DBUS_SESSION_BUS_ADDRESS}"
+		else
+			echo "Could not find dbus session ID in user environment."
+			return 1
+		fi
+	fi
+	export DISPLAY=:0
+	return 0
+}
+
+function set_gsettings_value {
+	schema=$1
+	name=$2
+	value=$3
+	get_ui_context
+	existing_value=$(gsettings get ${schema} ${name})
+	if [ "$existing_value" != "$value" ]; then
+		logexec gsettings set ${schema} ${name} ${value}
+	fi
+}
+
+function set_mime_default {
+	filetype=$1
+	value=$2
+	get_ui_context
+	existing_value=$(xdg-mime query default ${filetype})
+	if [ "$existing_value" != "$value" ]; then
+		logexec xdg-mime default ${value} ${filetype}
+	fi
 }
