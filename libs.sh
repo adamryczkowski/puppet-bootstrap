@@ -561,14 +561,15 @@ function gsettings_remove_from_array {
 		export IFS="', '"
 		for item in $existing_values; do
 			if [[ "$item" != "" && "$item" != "[" ]]; then
-			if [ "${item}" != "${value}" ]; then
-				if [ "${flag}" == "1" ]; then
-					newvalue="${newvalue}', '${item}"
-				else
-					newvalue="${newvalue}${item}"
-					flag=1
+				if [ "${item}" != "${value}" ]; then
+					if [ "${flag}" == "1" ]; then
+						newvalue="${newvalue}', '${item}"
+					else
+						newvalue="${newvalue}${item}"
+						flag=1
+					fi
+					change=1
 				fi
-				change=1
 			fi
 		done
 		newvalue="${newvalue}']"
