@@ -566,23 +566,23 @@ function load_gsettings_array {
 		done
 		export IFS=${oldifs}
 	fi
-	declare -p new_array
+	declare -p new_array | sed -e 's/^declare -a new_array=//'
 }
 
 function remove_item_from_array {
-	local array=eval($1)
+	eval "local -a input_array=${$1}"
 	local target=$2
-	local new_array=()
-	for value in "${array[@]}"; do
+	local -a output_array=()
+	for value in "${input_array[@]}"; do
 		if [[ $value != $target ]]; then
-			new_array+=($value)
+			output_array+=($value)
 		fi
 	done
-	declare -p new_array
+	declare -p output_array | sed -e 's/^declare -a output_array=//'
 }
 
 function find_item_in_array {
-	local array=eval($1)
+	eval "local -a array=${$1}"
 	local match="$2"
 	local i=1
 	for item; do
@@ -594,7 +594,7 @@ function find_item_in_array {
 }
 
 function add_item_to_array {
-	local array=eval($1)
+	eval "local -a array=${$1}"
 	local target=$2
 	local position=$3
 	
@@ -613,22 +613,23 @@ function add_item_to_array {
 	fi
 	if [ -n "${position}" ]; then
 		local new_array=( "${array[@]:0:${position}}" "${target}" "${array[@]:${position}}" )
-		declare -p new_array
+		declare -p new_array | sed -e 's/^declare -a new_array=//'
 	else
 		array+=($target)
-		declare -p array
+		declare -p array | sed -e 's/^declare -a array=//'
 	fi
 }
 
 function set_gsettings_array {
 	local schema=$1
 	local name=$2
-	local value_arr=eval($3)
+	local value_arr_str="$3"
 	local i=1
-	local old_value=$(load_gsettings_array ${schema} ${name})
-	if [ "$(declare -p old_value)" == "$(declare -p value_arr)" ]; then
+	local old_value_str=$(load_gsettings_array ${schema} ${name})
+	if [ "$old_value_str" == "$value_arr_str" ]; then
 		exit 0 #nothing to do
 	fi
+	eval "local -a value_array=${$3}"
 	local ans="['"
 	for value in "${value_array[@]}"; do
 		if [ "$i" == "1" ]; then

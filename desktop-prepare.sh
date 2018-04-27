@@ -124,8 +124,6 @@ function desktop {
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method edge-scrolling
 	gsettings_set_value org.gnome.desktop.screensaver lock-enabled false
 	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
-	
-	gsettings_add_to_array com.canonical.Unity.Launcher favorites 'application://nemo.desktop' 1
 }
 
 function laptop {
@@ -154,8 +152,9 @@ function nemo {
 	gsettings_set_value org.gnome.desktop.background show-desktop-icons false
 	xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Nautilus.desktop'
-	#usuń nautilus z paska
+	gsettings_add_to_array com.canonical.Unity.Launcher favorites 'application://nemo.desktop' 1
 	#pokaż ukryte pliki
+	#domyślnie widok kompaktowy
 }
 
 function smb {
