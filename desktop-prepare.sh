@@ -133,6 +133,8 @@ function laptop {
 
 function bumblebee {
 	install_apt_packages graphics-drivers/ppa
+	do_update
+	logexec sudo ubuntu-drivers autoinstall
 }
 
 function cli {
@@ -142,7 +144,7 @@ function cli {
 	logexec sudo liquidprompt_activate
 	home=$(get_home_dir)
 	logmkdir ${home}/tmp
-	get_git_repo https://github.com/adamryczkowski/update-all /tmp
+	get_git_repo https://github.com/adamryczkowski/update-all ${home}/tmp
 }
 
 function nemo {
@@ -191,8 +193,7 @@ password=Zero tolerancji"
 		smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	done
 }
-	get_git_repo https://github.com/adamryczkowski/update-all /tmp
-exit 0
+
 oldifs=${IFS}
 export IFS=","
 for tweak in $tweaks; do
