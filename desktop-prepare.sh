@@ -117,7 +117,7 @@ function tweak_base  {
 }
 
 function desktop {
-	install_apt_packages meld chromium-browser
+	install_apt_packages meld chromium-browser gparted
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
 	gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1

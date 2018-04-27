@@ -572,7 +572,7 @@ function load_gsettings_array {
 
 function remove_item_from_array {
 	eval "local -a input_array=$1"
-	echo "Number of elements of array: ${#array[@]}"
+	echo "Number of elements of array: ${#input_array[@]}"
 	local target=$2
 	local -a output_array=()
 	for value in "${input_array[@]}"; do
@@ -648,6 +648,7 @@ function set_gsettings_array {
 		else
 			ans="${ans}', '${value}"
 		fi 
+		((i++))
 	done
 	ans="${ans}']"
 	gsettings set ${schema} ${name} "${ans}"
@@ -672,7 +673,7 @@ function gsettings_remove_from_array {
 	
 	local existing_values_str=$(load_gsettings_array ${schema} ${name})
 	
-	local ans_str=$(remove_item_from_array "${existing_values}" "${value}")
+	local ans_str=$(remove_item_from_array "${existing_values_str}" "${value}")
 	set_gsettings_array ${schema} ${name} "${ans_str}"
 }
 
