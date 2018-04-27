@@ -672,7 +672,7 @@ function gsettings_remove_from_array {
 	
 	local existing_values_str=$(load_gsettings_array ${schema} ${name})
 	
-	local ans_str=$(remove_item_from_array ${existing_values} ${value})
+	local ans_str=$(remove_item_from_array "${existing_values}" "${value}")
 	set_gsettings_array ${schema} ${name} "${ans_str}"
 }
 
