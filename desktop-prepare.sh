@@ -117,11 +117,19 @@ function tweak_base  {
 }
 
 function desktop {
-	install_apt_packages meld
+	install_apt_packages meld chromium-browser
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
 	#Autoukrywanie paska
 	#touchpad prawy margines
+}
+
+function laptop {
+	install_apt_packages redshift_gtk
+}
+
+function bumblebee {
+	install_apt_packages graphics-drivers/ppa
 }
 
 function cli {
@@ -129,6 +137,9 @@ function cli {
 	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu openssh-server
 	logexec liquidprompt_activate
 	logexec sudo liquidprompt_activate
+	home=$(get_home_dir)
+	logmkdir ${home}/tmp
+	
 }
 
 function nemo {
