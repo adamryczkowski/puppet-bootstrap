@@ -588,9 +588,11 @@ function find_item_in_array {
 	for item; do
 		if [[ "$item" == "$match" ]]; then
 			echo $i
+			exit 0
 		fi
 	done
 	echo 0
+	exit 0
 }
 
 function add_item_to_array {
