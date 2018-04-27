@@ -566,11 +566,13 @@ function load_gsettings_array {
 		done
 		export IFS=${oldifs}
 	fi
+	(>&2 echo "Number of elements of new_array: ${#new_array[@]}")
 	declare -p new_array | sed -e 's/^declare -a new_array=//'
 }
 
 function remove_item_from_array {
 	eval "local -a input_array=($1)"
+	echo "Number of elements of array: ${#array[@]}"
 	local target=$2
 	local -a output_array=()
 	for value in "${input_array[@]}"; do
@@ -578,11 +580,13 @@ function remove_item_from_array {
 			output_array+=($value)
 		fi
 	done
+	(>&2 echo "Number of elements of output_array: ${#output_array[@]}")
 	declare -p output_array | sed -e 's/^declare -a output_array=//'
 }
 
 function find_item_in_array {
 	eval "local -a array=($1)"
+	(>&2 echo "Number of elements of array: ${#array[@]}")
 	local match="$2"
 	local i=1
 	for item in "${array[@]}"; do
@@ -597,6 +601,7 @@ function find_item_in_array {
 
 function add_item_to_array {
 	eval "local -a array=($1)"
+	(>&2 echo "Number of elements of array: ${#array[@]}")
 	local target=$2
 	local position=$3
 	
@@ -613,6 +618,7 @@ function add_item_to_array {
 			fi
 		fi
 		eval "local -a array=($(remove_item_from_array "$1" "$2")"
+		(>&2 echo "Number of elements of array: ${#array[@]}")
 	fi
 	if [ -n "${position}" ]; then
 		local new_array=( "${array[@]:0:${position}}" "${target}" "${array[@]:${position}}" )
@@ -620,6 +626,7 @@ function add_item_to_array {
 	else
 		array+=($target)
 		declare -p array | sed -e 's/^declare -a array=//'
+		(>&2 echo "Number of elements of array: ${#array[@]}")
 	fi
 }
 
