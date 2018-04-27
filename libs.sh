@@ -625,7 +625,7 @@ function set_gsettings_array {
 	local name=$2
 	local value_arr_str="$3"
 	local i=1
-	local old_value_str=$(load_gsettings_array ${schema} ${name})
+	local old_value_str="$(load_gsettings_array ${schema} ${name})"
 	if [ "$old_value_str" == "$value_arr_str" ]; then
 		exit 0 #nothing to do
 	fi
