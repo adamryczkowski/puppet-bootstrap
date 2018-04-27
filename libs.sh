@@ -598,7 +598,7 @@ function add_item_to_array {
 	local target=$2
 	local position=$3
 	
-	index=$(find_item_in_array $1 $2)
+	index=$(find_item_in_array "$1" "$2")
 	
 	if [ "$index" != "0" ]; then
 		if [ -n "${position}" ]; then
@@ -610,6 +610,7 @@ function add_item_to_array {
 				exit 0 #Element already present
 			fi
 		fi
+		eval "local -a array=($(remove_item_from_array "$1" "$2")"
 	fi
 	if [ -n "${position}" ]; then
 		local new_array=( "${array[@]:0:${position}}" "${target}" "${array[@]:${position}}" )
