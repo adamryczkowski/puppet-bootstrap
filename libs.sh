@@ -585,7 +585,7 @@ function find_item_in_array {
 	eval "local -a array=($1)"
 	local match="$2"
 	local i=1
-	for item; do
+	for item in "${array[@]}"; do
 		if [[ "$item" == "$match" ]]; then
 			echo $i
 			exit 0
