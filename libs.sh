@@ -637,7 +637,7 @@ function set_gsettings_array {
 		else
 			ans="${ans}', '${value}"
 		fi 
-	fi
+	done
 	ans="${ans}']"
 	gsettings set ${schema} ${name} "${ans}"
 }
