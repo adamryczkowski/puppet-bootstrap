@@ -572,7 +572,7 @@ function load_gsettings_array {
 
 function remove_item_from_array {
 	eval "local -a input_array=$1"
-	echo "Number of elements of array: ${#input_array[@]}"
+	(>&2 echo "Number of elements of array: ${#input_array[@]}")
 	local target=$2
 	local -a output_array=()
 	for value in "${input_array[@]}"; do
