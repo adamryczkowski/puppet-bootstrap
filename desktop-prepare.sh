@@ -120,8 +120,8 @@ function desktop {
 	install_apt_packages meld chromium-browser
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
-	#Autoukrywanie paska
-	#touchpad prawy margines
+	gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1
+	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method edge-scrolling
 }
 
 function laptop {
