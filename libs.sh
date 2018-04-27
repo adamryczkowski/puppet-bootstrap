@@ -650,7 +650,7 @@ function gsettings_add_to_array {
 	
 	local existing_values_str=$(load_gsettings_array ${schema} ${name})
 	
-	local ans_str=$(add_item_to_array ${existing_values_str} ${value} ${position})
+	local ans_str=$(add_item_to_array "${existing_values_str}" ${value} ${position})
 	set_gsettings_array ${schema} ${name} "${ans_str}"
 }
 
