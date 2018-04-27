@@ -124,6 +124,8 @@ function desktop {
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method edge-scrolling
 	gsettings_set_value org.gnome.desktop.screensaver lock-enabled false
 	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
+	
+	gsettings_add_to_array com.canonical.Unity.Launcher favorites 'application://nemo.desktop' 1
 }
 
 function laptop {

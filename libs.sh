@@ -1,5 +1,6 @@
 #!/bin/bash 
 
+
 function purge_apt_package {
 	ans=0
 	package=$1
@@ -548,18 +549,122 @@ function set_mime_default {
 	fi
 }
 
-function gsettings_add_to_array {
+function load_gsettings_array {
 	schema=$1
 	name=$2
-	value=$3
 	get_ui_context
-	existing_value=$(gsettings get ${schema} ${name})
-	if [ "$existing_value" != "$value" ]; then
-		logexec gsettings set ${schema} ${name} ${value}
+	local existing_values=$(gsettings get ${schema} ${name})
+	if [ -n "${existing_values}" ]; then
+		local new_array=()
+		local flag=0
+		local oldifs=${IFS}
+		export IFS="', '"
+		for item in $existing_values; do
+			if [[ "$item" != "" && "$item" != "[" && "$item" != "]" ]]; then
+				new_array+=($item)
+			fi
+		done
+		export IFS=${oldifs}
+	fi
+	declare -p new_array
+}
+
+function remove_item_from_array {
+	local array=eval($1)
+	local target=$2
+	local new_array=()
+	for value in "${array[@]}"; do
+		if [[ $value != $target ]]; then
+			new_array+=($value)
+		fi
+	done
+	declare -p new_array
+}
+
+function find_item_in_array {
+	local array=eval($1)
+	local match="$2"
+	local i=1
+	for item; do
+		if [[ "$item" == "$match" ]]; then
+			return $i
+		fi
+	done
+	return 0
+}
+
+function add_item_to_array {
+	local array=eval($1)
+	local target=$2
+	local position=$3
+	
+	index=$(find_item_in_array $1 $2)
+	
+	if [ "$index" != "0" ]; then
+		if [ -n "${position}" ]; then
+			if [ "$position" == "$index" ]; then
+				exit 0 #Element already present
+			fi
+		else
+			if [ "$position" == "${#array[@]}" ]; then
+				exit 0 #Element already present
+			fi
+		fi
+	fi
+	if [ -n "${position}" ]; then
+		local new_array=( "${array[@]:0:${position}}" "${target}" "${array[@]:${position}}" )
+		declare -p new_array
+	else
+		array+=($target)
+		declare -p array
 	fi
 }
 
+function set_gsettings_array {
+	local schema=$1
+	local name=$2
+	local value_arr=eval($3)
+	local i=1
+	local old_value=$(load_gsettings_array ${schema} ${name})
+	if [ "$(declare -p old_value)" == "$(declare -p value_arr)" ]; then
+		exit 0 #nothing to do
+	fi
+	local ans="['"
+	for value in "${value_array[@]}"; do
+		if [ "$i" == "1" ]; then
+			ans="${ans}${value}"
+		else
+			ans="${ans}', '${value}"
+		fi 
+	fi
+	ans="${ans}']"
+	gsettings set ${schema} ${name} "${ans}"
+}
+
+function gsettings_add_to_array {
+	local schema=$1
+	local name=$2
+	local value=$3
+	local position=$4
+	
+	local existing_values_str=$(load_gsettings_array ${schema} ${name})
+	
+	local ans_str=$(add_item_to_array ${existing_values} ${value} ${position})
+	set_gsettings_array ${schema} ${name} "${ans_str}"
+}
+
 function gsettings_remove_from_array {
+	local schema=$1
+	local name=$2
+	local value=$3
+	
+	local existing_values_str=$(load_gsettings_array ${schema} ${name})
+	
+	local ans_str=$(remove_item_from_array ${existing_values} ${value})
+	set_gsettings_array ${schema} ${name} "${ans_str}"
+}
+
+function gsettings_remove_from_array2 {
 	local schema=$1
 	local name=$2
 	local value=$3
