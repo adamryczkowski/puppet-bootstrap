@@ -349,7 +349,7 @@ function install_script {
 	fi
 	if [ ! -f "${input_file}" ]; then
 		errcho "Cannot find ${input_file}"
-		exit 1
+		return 1
 	fi
 	if [ -z "$dest" ]; then
 		dest=/usr/local/bin
@@ -375,7 +375,7 @@ function install_script {
 	fi
 	if [ ! -f "$dest" ]; then
 		errcho "Error when copying ${input_file} into ${dest}"
-		exit 1
+		return 1
 	fi
 	if [ $user != "auto" ]; then
 		cur_owner="$(stat --format '%U' "$dest")"
@@ -396,7 +396,7 @@ function install_script {
 	fi
 	if [[ ! -x "$dest" ]]; then
 		errcho "Cannot set executable permission to $dest"
-		exit 1
+		return 1
 	fi
 }
 
@@ -410,11 +410,11 @@ function chmod_file {
 	pattern='^\d+$'
 	if [[ ! "${desired_mode}" =~ $pattern ]]; then
 		errcho "Wrong file permissions. Needs octal format."
-		exit 1
+		return 1
 	fi
 	if [ ! -f "${file}" ]; then
 		errcho "File ${file} doesn't exist"
-		exit 1
+		return 1
 	fi
 	actual_mode=$(stat -c "%a" ${file})
 	if [ "${desired_mode}" != "${actual_mode}" ]; then
@@ -592,11 +592,11 @@ function find_item_in_array {
 	for item in "${array[@]}"; do
 		if [ "$item" == "$match" ]; then
 			echo $i
-			exit 0
+			return 0
 		fi
 	done
 	echo 0
-	exit 0
+	return 0
 }
 
 function add_item_to_array {
@@ -610,11 +610,11 @@ function add_item_to_array {
 	if [ "$index" != "0" ]; then
 		if [ -n "${position}" ]; then
 			if [ "$position" == "$index" ]; then
-				exit 0 #Element already present
+				return 0 #Element already present
 			fi
 		else
 			if [ "$position" == "${#array[@]}" ]; then
-				exit 0 #Element already present
+				return 0 #Element already present
 			fi
 		fi
 		eval "local -a array=$(remove_item_from_array "$1" "$2")"
@@ -637,7 +637,7 @@ function set_gsettings_array {
 	local i=1
 	local old_value_str="$(load_gsettings_array ${schema} ${name})"
 	if [ "$old_value_str" == "$value_arr_str" ]; then
-		exit 0 #nothing to do
+		return 0 #nothing to do
 	fi
 	eval "local -a value_array=$3"
 	(>&2 echo "Number of elements of value_array: ${#value_array[@]}")
@@ -731,9 +731,9 @@ function get_git_repo {
 	fi
 	local dest=${dir}/${name}
 	install_apt_package git
-	if [ -d "$dir" ]; then
+	if [ ! -d "$dir" ]; then
 		errcho "Cannot find ${dir} directory to clone git repo ${repo}"
-		exit 1
+		return 1
 	fi
 	if [ -w "$dir" ]; then
 		local prefix=""

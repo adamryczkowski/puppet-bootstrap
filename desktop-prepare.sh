@@ -124,6 +124,7 @@ function desktop {
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method edge-scrolling
 	gsettings_set_value org.gnome.desktop.screensaver lock-enabled false
 	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
+	gsettings_set_value com.canonical.Unity integrated-menus true
 }
 
 function laptop {
@@ -141,7 +142,7 @@ function cli {
 	logexec sudo liquidprompt_activate
 	home=$(get_home_dir)
 	logmkdir ${home}/tmp
-	
+	get_git_repo https://github.com/adamryczkowski/update-all /tmp
 }
 
 function nemo {
@@ -153,8 +154,9 @@ function nemo {
 	xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Nautilus.desktop'
 	gsettings_add_to_array com.canonical.Unity.Launcher favorites 'application://nemo.desktop' 1
-	#pokaż ukryte pliki
-	#domyślnie widok kompaktowy
+	gsettings_set_value org.nemo.preferences show-open-in-terminal-toolbar true
+	gsettings_set_value org.nemo.preferences default-folder-viewer "compact-view"
+	gsettings_set_value org.nemo.preferences show-hidden-files true
 }
 
 function smb {
@@ -189,7 +191,8 @@ password=Zero tolerancji"
 		smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	done
 }
-
+	get_git_repo https://github.com/adamryczkowski/update-all /tmp
+exit 0
 oldifs=${IFS}
 export IFS=","
 for tweak in $tweaks; do
