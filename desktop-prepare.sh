@@ -132,7 +132,7 @@ function laptop {
 }
 
 function bumblebee {
-	install_apt_packages graphics-drivers/ppa
+	add_ppa graphics-drivers/ppa
 	do_update
 	logexec sudo ubuntu-drivers autoinstall
 }
