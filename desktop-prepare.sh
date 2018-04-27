@@ -34,7 +34,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,laptop
 "
 
 dir_resolve()
