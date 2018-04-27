@@ -571,7 +571,7 @@ function load_gsettings_array {
 }
 
 function remove_item_from_array {
-	eval "local -a input_array=($1)"
+	eval "local -a input_array=$1"
 	echo "Number of elements of array: ${#array[@]}"
 	local target=$2
 	local -a output_array=()
@@ -585,7 +585,7 @@ function remove_item_from_array {
 }
 
 function find_item_in_array {
-	eval "local -a array=($1)"
+	eval "local -a array=$1"
 	(>&2 echo "Number of elements of array: ${#array[@]}")
 	local match="$2"
 	local i=1
@@ -600,7 +600,7 @@ function find_item_in_array {
 }
 
 function add_item_to_array {
-	eval "local -a array=($1)"
+	eval "local -a array=$1"
 	(>&2 echo "Number of elements of array: ${#array[@]}")
 	local target=$2
 	local position=$3
@@ -617,7 +617,7 @@ function add_item_to_array {
 				exit 0 #Element already present
 			fi
 		fi
-		eval "local -a array=($(remove_item_from_array "$1" "$2")"
+		eval "local -a array=$(remove_item_from_array "$1" "$2")"
 		(>&2 echo "Number of elements of array: ${#array[@]}")
 	fi
 	if [ -n "${position}" ]; then
@@ -639,7 +639,7 @@ function set_gsettings_array {
 	if [ "$old_value_str" == "$value_arr_str" ]; then
 		exit 0 #nothing to do
 	fi
-	eval "local -a value_array=($3)"
+	eval "local -a value_array=$3"
 	local ans="['"
 	for value in "${value_array[@]}"; do
 		if [ "$i" == "1" ]; then
