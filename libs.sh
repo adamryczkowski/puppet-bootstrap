@@ -590,7 +590,7 @@ function find_item_in_array {
 	local match="$2"
 	local i=1
 	for item in "${array[@]}"; do
-		if [[ "$item" == "$match" ]]; then
+		if [ "$item" == "$match" ]; then
 			echo $i
 			exit 0
 		fi
@@ -640,6 +640,7 @@ function set_gsettings_array {
 		exit 0 #nothing to do
 	fi
 	eval "local -a value_array=$3"
+	(>&2 echo "Number of elements of value_array: ${#value_array[@]}")
 	local ans="['"
 	for value in "${value_array[@]}"; do
 		if [ "$i" == "1" ]; then
