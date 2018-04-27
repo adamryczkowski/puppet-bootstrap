@@ -122,6 +122,8 @@ function desktop {
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
 	gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method edge-scrolling
+	gsettings_set_value org.gnome.desktop.screensaver lock-enabled false
+	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
 }
 
 function laptop {
