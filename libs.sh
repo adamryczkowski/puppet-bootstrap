@@ -587,10 +587,10 @@ function find_item_in_array {
 	local i=1
 	for item; do
 		if [[ "$item" == "$match" ]]; then
-			return $i
+			echo $i
 		fi
 	done
-	return 0
+	echo 0
 }
 
 function add_item_to_array {
