@@ -131,29 +131,26 @@ function desktop {
 function blender {
 	install_dir="/opt/blender"
 	if [ ! -f "${install_dir}/blender" ]; then
-		if [ -f "${repo_path}" ]; then
-			file=$(ls "${repo_path} | grep Blender")
-			if [ -n "${file}" ]; then
-				source="${repo_path}/${file}"
-			else
-				file="BlenderFracture-2.79a-linux64-glibc219.tar.xz"
-				logexec wget -c http://blenderphysics.com/?ddownload=4225 -O "${file}"
-			fi
-			if [ ! -f "${file}" ]; then
-				errcho "Cannot acces BlenderFracture"
-				exit 1
-			fi
-		else
-			errcho "This function is not available if you don't specify repo directory"
-		fi
+		file="BlenderFracture-2.79a-linux64-glibc219.tar.xz"
+		file_path=$(get_chached_file "${file}" http://blenderphysics.com/?ddownload=4225)
 		install_apt_packages xz-utils
 		logmkdir /opt/blender
-		logexec sudo tar xf ${repo_path}/${file} -C ${install_dir}
+		logexec sudo tar xf ${file_path} -C ${install_dir}
 	fi
 }
 
 function office2007 {
 	echo "#TODO"
+	release_key=$(get_chached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/Release.key)
+	logexec sudo apt-key add "${release_key}"
+	add_apt_source_manual winehq 'deb https://dl.winehq.org/wine-builds/ubuntu/ xenial main'
+	
+	release_key=$(get_chached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
+	logexec sudo apt-key add "${release_key}"
+	add_apt_source_manual playonlinux 'deb http://deb.playonlinux.com/ xenial main'
+	
+	do_update
+	install_apt_package winehq-devel playonlinux
 }
 
 function laptop {
@@ -161,12 +158,26 @@ function laptop {
 }
 
 function bumblebee {
+	return 1 #not ready
 	add_ppa graphics-drivers/ppa
 	add_ppa bumblebee/testing
+	install_apt_package_file "cuda-repo-ubuntu1604_9.1.85-1_amd64.deb" "cuda-repo-ubuntu1604" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
+	if [ "$?" == "0" ]; then
+		logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+	fi
+	
 	do_update
+	
 	logexec sudo ubuntu-drivers autoinstall
-	
-	
+	nvidia_package=$(apt list --installed |grep -E 'nvidia-[0-9]+/')
+	pattern='nvidia-([0-9]+)/'
+	if [[ "${nvidia_package}" =~ $pattern ]]; then
+		nvidia_version=${BASH_REMATCH[1]}
+	else
+		errcho "Unexpected error"
+		exit 1
+	fi
+	#TODO: https://gist.github.com/whizzzkid/37c0d365f1c7aa555885d102ec61c048
 }
 
 function cli {
@@ -181,7 +192,7 @@ function cli {
 }
 
 function rdesktop {
-	reposerver="$(basename ${repo_path})/r-mirror"
+	reposerver="$(dirname ${repo_path})/r-mirror"
 	$mypath/prepare-R-node.sh --rstudio --repo-server file://${reposerver} --deb-folder ${repo_path} --debug
 }
 

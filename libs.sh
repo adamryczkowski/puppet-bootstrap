@@ -60,15 +60,25 @@ function get_ubuntu_version {
 }
 
 function install_apt_package_file {
-	ans=0
-	filename=$1
-	package=$2
+	local ans=0
+	local filename=$1
+	local package=$2
+	local source="$3"
 	if ! dpkg -s "$package">/dev/null  2> /dev/null; then
-		logexec sudo dpkg -i $filename
+		local tmp=$(dirname ${filename})
+		if [ "${tmp}" == "." ]; then
+			local cfilename=$(get_chached_file "${filename}" "$source")
+			if [ ! -f "${cfilename}" ]; then
+				errcho "Cannot find ${filename}"
+				return 255
+			fi
+			filename="${cfilename}"
+		fi 
+		logexec sudo dpkg -i "$filename"
 		return 0
 	fi
 	return 1
-}  
+}
 
 function install_pip3_packages {
 	ans=0
@@ -115,6 +125,12 @@ function add_ppa {
 		return 0
 	fi
 	return 1
+}
+
+function add_apt_source_manual {
+	filename="$1"
+	contents="$2"
+	textfile "/etc/apt/sources.d/${filename}.list" "${contents}"
 }
 
 function edit_bash_augeas {
@@ -752,4 +768,28 @@ function get_git_repo {
 
 function modify_desktop {
 	#TODO - należy stworzyć plik desktop i go umieścić
+}
+
+# returns path
+function get_chached_file {
+	local filename="$1"
+	local download_link="$2"
+	if [ -d "${repo_path}" ]; then
+		if [ ! -w "${repo_path}" ]; then
+			errcho "Cannot write to the repo"
+			local repo_path="/tmp/repo_path"
+			mkdir -p /tmp/repo_path
+		fi
+	else
+		mkdir -p /tmp/repo_path
+		local repo_path="/tmp/repo_path"
+	fi
+	if [ ! -f "${repo_path}/${filename}" ]; then
+		logexec wget -c "${download_link}" -O "${filename}"
+	fi
+	if [ ! -f "${repo_path}/${filename}" ]; then
+		errcho "Cannot download the file"
+		return 1
+	fi
+	echo "${repo_path}/${filename}"
 }
