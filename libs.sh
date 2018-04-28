@@ -786,7 +786,7 @@ function get_cached_file {
 		local repo_path="/tmp/repo_path"
 	fi
 	if [ ! -f "${repo_path}/${filename}" ]; then
-		logexec wget -c "${download_link}" -O "${repo_path}/${filename}"
+		wget -c "${download_link}" -O "${repo_path}/${filename}"
 	fi
 	if [ ! -f "${repo_path}/${filename}" ]; then
 		errcho "Cannot download the file"
