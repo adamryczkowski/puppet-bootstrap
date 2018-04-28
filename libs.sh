@@ -130,7 +130,7 @@ function add_ppa {
 function add_apt_source_manual {
 	filename="$1"
 	contents="$2"
-	textfile "/etc/apt/sources.d/${filename}.list" "${contents}"
+	textfile "/etc/apt/sources.list.d/${filename}.list" "${contents}"
 }
 
 function edit_bash_augeas {
