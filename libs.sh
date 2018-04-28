@@ -768,6 +768,7 @@ function get_git_repo {
 
 function modify_desktop {
 	#TODO - należy stworzyć plik desktop i go umieścić
+	echo "bla"
 }
 
 # returns path
