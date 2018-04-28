@@ -128,6 +128,34 @@ function desktop {
 	gsettings_set_value com.canonical.Unity integrated-menus true
 }
 
+function blender {
+	install_dir="/opt/blender"
+	if [ ! -f "${install_dir}/blender" ]; then
+		if [ -f "${repo_path}" ]; then
+			file=$(ls "${repo_path} | grep Blender")
+			if [ -n "${file}" ]; then
+				source="${repo_path}/${file}"
+			else
+				file="BlenderFracture-2.79a-linux64-glibc219.tar.xz"
+				logexec wget -c http://blenderphysics.com/?ddownload=4225 -O "${file}"
+			fi
+			if [ ! -f "${file}" ]; then
+				errcho "Cannot acces BlenderFracture"
+				exit 1
+			fi
+		else
+			errcho "This function is not available if you don't specify repo directory"
+		fi
+		install_apt_packages xz-utils
+		logmkdir /opt/blender
+		logexec sudo tar xf ${repo_path}/${file} -C ${install_dir}
+	fi
+}
+
+function office2007 {
+
+}
+
 function laptop {
 	install_apt_packages redshift_gtk
 }
@@ -192,6 +220,8 @@ password=Zero tolerancji"
 		share=${shares[$i-1]}
 		logmkdir ${folder}
 		smb_share_client ${host} ${share} ${folder} /etc/samba/user
+		foldername=$(dirname ${folers})
+		gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 	done
 }
 
