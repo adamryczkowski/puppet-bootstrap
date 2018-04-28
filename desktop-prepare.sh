@@ -132,7 +132,7 @@ function blender {
 	install_dir="/opt/blender"
 	if [ ! -f "${install_dir}/blender" ]; then
 		file="BlenderFracture-2.79a-linux64-glibc219.tar.xz"
-		file_path=$(get_chached_file "${file}" http://blenderphysics.com/?ddownload=4225)
+		file_path=$(get_cached_file "${file}" http://blenderphysics.com/?ddownload=4225)
 		install_apt_packages xz-utils
 		logmkdir /opt/blender
 		logexec sudo tar xf ${file_path} -C ${install_dir}
@@ -141,11 +141,11 @@ function blender {
 
 function office2007 {
 	echo "#TODO"
-	release_key=$(get_chached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/Release.key)
+	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/Release.key)
 	logexec sudo apt-key add "${release_key}"
 	add_apt_source_manual winehq 'deb https://dl.winehq.org/wine-builds/ubuntu/ xenial main'
 	
-	release_key=$(get_chached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
+	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
 	logexec sudo apt-key add "${release_key}"
 	add_apt_source_manual playonlinux 'deb http://deb.playonlinux.com/ xenial main'
 	

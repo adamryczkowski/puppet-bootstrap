@@ -771,7 +771,7 @@ function modify_desktop {
 }
 
 # returns path
-function get_chached_file {
+function get_cached_file {
 	local filename="$1"
 	local download_link="$2"
 	if [ -d "${repo_path}" ]; then
