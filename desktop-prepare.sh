@@ -226,7 +226,7 @@ password=Zero tolerancji"
 		share=${shares[$i-1]}
 		logmkdir ${folder}
 		smb_share_client ${host} ${share} ${folder} /etc/samba/user
-		foldername=$(dirname ${folers})
+		foldername=$(basename ${folder})
 		gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 	done
 
@@ -241,7 +241,7 @@ password=Zero tolerancji"
 		share=${shares[$i-1]}
 		logmkdir ${folder}
 		smb_share_client ${host} ${share} ${folder} /etc/samba/user
-		foldername=$(dirname ${folers})
+		foldername=$(basename ${folder})
 		gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 	done
 }
