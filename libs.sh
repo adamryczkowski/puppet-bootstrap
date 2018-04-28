@@ -131,6 +131,9 @@ function add_apt_source_manual {
 	filename="$1"
 	contents="$2"
 	textfile "/etc/apt/sources.list.d/${filename}.list" "${contents}"
+	if [ "$?" == "0" ]; then
+		flag_need_apt_update=1
+	fi
 }
 
 function edit_bash_augeas {
@@ -353,7 +356,9 @@ function textfile {
 	if [ "$flag" == "1" ]; then
 		loglog
 		echo "$contents" | sudo tee "${file}" >/dev/null
+		return 0
 	fi
+	return 1
 }
 
 function install_script {
