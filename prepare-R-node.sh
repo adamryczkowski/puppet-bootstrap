@@ -11,7 +11,8 @@ Usage:
 
 $(basename $0) [--rstudio] [--rstudio-server] [--repo-server <repo-address>] 
                [--deb-folder <deb_folder>] [--install-lib <path>]
-                [--help] [--debug] [--log <output file>]
+               [--rstudio] [--rstudio-server]
+                [--help] [--debug] [--log <output file>] 
 
 
 where
@@ -26,10 +27,11 @@ where
  --install-lib <path>         - Path to the source directory of the library to install.
                                 This library purpose is to install its dependencies. Defaults to the
                                 rdep repository boundled with the script.
+  --rstudio, --rstudio-server - Whether to install this component
 
 Example2:
 
-$(basename $0) --debug
+$(basename $0) --rstudio --rstudio-server --repo-server file:///media/adam-minipc/other/r-mirror --deb-folder /media/adam-minipc/other/debs --debug
 
 "
 

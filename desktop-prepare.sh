@@ -153,7 +153,7 @@ function blender {
 }
 
 function office2007 {
-
+	echo "#TODO"
 }
 
 function laptop {
@@ -162,8 +162,11 @@ function laptop {
 
 function bumblebee {
 	add_ppa graphics-drivers/ppa
+	add_ppa bumblebee/testing
 	do_update
 	logexec sudo ubuntu-drivers autoinstall
+	
+	
 }
 
 function cli {
@@ -174,6 +177,12 @@ function cli {
 	home=$(get_home_dir)
 	logmkdir ${home}/tmp
 	get_git_repo https://github.com/adamryczkowski/update-all ${home}/tmp
+	#youtube-dl
+}
+
+function rdesktop {
+	reposerver="$(basename ${repo_path})/r-mirror"
+	$mypath/prepare-R-node.sh --rstudio --repo-server file://${reposerver} --deb-folder ${repo_path} --debug
 }
 
 function nemo {
@@ -206,7 +215,8 @@ password=Zero tolerancji"
 		share=${shares[$i-1]}
 		logmkdir ${folder}
 		smb_share_client ${host} ${share} ${folder} /etc/samba/user
-		echo "CURRENT i:$i"
+		foldername=$(dirname ${folers})
+		gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 	done
 
 	declare -a folders=("adam-minipc/download" "adam-minipc/other" "adam-minipc/unfinished" "adam-minipc/videos")
