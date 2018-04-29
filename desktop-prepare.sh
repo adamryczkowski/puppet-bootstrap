@@ -118,7 +118,8 @@ function tweak_base  {
 
 function desktop {
 	add_ppa fixnix/netspeed
-	install_apt_packages meld chromium-browser gparted indicator-netspeed-unity
+	add_ppa yktooo/ppa
+	install_apt_packages meld chromium-browser gparted indicator-netspeed-unity indicator-sound-switcher
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
 	gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1
@@ -155,6 +156,7 @@ function office2007 {
 
 function laptop {
 	install_apt_packages redshift_gtk
+	desktop
 }
 
 function bumblebee {
@@ -194,6 +196,15 @@ function cli {
 function rdesktop {
 	reposerver="$(dirname ${repo_path})/r-mirror"
 	$mypath/prepare-R-node.sh --rstudio --repo-server file://${reposerver} --deb-folder ${repo_path} --debug
+}
+
+function virtualbox {
+	release_key=$(get_cached_file Oracle_2016_Release.key https://www.virtualbox.org/download/oracle_vbox_2016.asc)
+	logexec sudo apt-key add "${release_key}"
+	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
+	logexec sudo apt-key add "${release_key}"
+	add_apt_source_manual winehq 'deb https://download.virtualbox.org/virtualbox/debian xenial contrib'
+	install_apt_packages virtualbox-5.2
 }
 
 function nemo {
