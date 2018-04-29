@@ -219,7 +219,7 @@ function virtualbox {
 	
 		#sudo VBoxManage extpack uninstall "Oracle VM VirtualBox Extension Pack"
 		$loglog
-		echo "y" |sudo VBoxManage extpack install virtualbox_extension --replace
+		echo "y" |sudo VBoxManage extpack install ${virtualbox_extension} --replace
 	fi
 }
 
