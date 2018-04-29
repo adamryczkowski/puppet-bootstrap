@@ -127,6 +127,8 @@ function desktop {
 	gsettings_set_value org.gnome.desktop.screensaver lock-enabled false
 	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
 	gsettings_set_value com.canonical.Unity integrated-menus true
+	
+	install_apt_package_file "${skype_deb}" skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
 }
 
 function blender {
