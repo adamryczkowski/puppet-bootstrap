@@ -66,7 +66,7 @@ function install_apt_package_file {
 	local source="$3"
 	if ! dpkg -s "$package">/dev/null  2> /dev/null; then
 		local tmp=$(dirname ${filename})
-		if [ "${tmp}" == "" ]; then
+		if [ "${tmp}" == "." ]; then
 			local cfilename=$(get_cached_file "${filename}" "$source")
 			if [ ! -f "${cfilename}" ]; then
 				errcho "Cannot find ${filename}"
