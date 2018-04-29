@@ -222,6 +222,10 @@ function virtualbox {
 		$loglog
 		echo "y" |sudo VBoxManage extpack install ${virtualbox_extension} --replace
 	fi
+	homedir=$(get_home_dir)
+	if [ ! -f "${homedir}/.config/autostart/indicator-virtual-box.py.desktop" ]; then
+		logexec cp /usr/share/applications/indicator-virtual-box.py.desktop "${homedir}/.config/autostart/indicator-virtual-box.py.desktop"
+	fi
 }
 
 function nemo {
