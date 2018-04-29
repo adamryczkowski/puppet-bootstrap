@@ -205,6 +205,22 @@ function virtualbox {
 	logexec sudo apt-key add "${release_key}"
 	add_apt_source_manual winehq 'deb https://download.virtualbox.org/virtualbox/debian xenial contrib'
 	install_apt_packages virtualbox-5.2
+	
+	if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack" >/dev/null; then
+		version=$(VBoxManage -v)
+		echo $version
+		var1=$(echo $version | cut -d 'r' -f 1)
+		echo $var1
+		var2=$(echo $version | cut -d 'r' -f 2)
+		echo $var2
+		virtualbox_extension="Oracle_VM_VirtualBox_Extension_Pack-$var1-$var2.vbox-extpack"
+	
+		virtualbox_extension=$(get_cached_file ${virtualbox_extension} http://download.virtualbox.org/virtualbox/$var1/$virtualbox_extension)
+	
+		#sudo VBoxManage extpack uninstall "Oracle VM VirtualBox Extension Pack"
+		$loglog
+		echo "y" |sudo VBoxManage extpack install virtualbox_extension --replace
+	fi
 }
 
 function nemo {

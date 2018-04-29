@@ -105,7 +105,7 @@ fi
 if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
 	$loglog
 	echo "deb https://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee /etc/apt/sources.list.d/r.list
-	logexec gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9
+	logexec sudo gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9
 	$loglog
 	gpg -a --export E084DAB9 | sudo apt-key add -
 	#logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
