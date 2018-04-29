@@ -204,7 +204,8 @@ function virtualbox {
 	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
 	logexec sudo apt-key add "${release_key}"
 	add_apt_source_manual winehq 'deb https://download.virtualbox.org/virtualbox/debian xenial contrib'
-	install_apt_packages virtualbox-5.2
+	add_ppa thebernmeister/ppa
+	install_apt_packages virtualbox-5.2 indicator-virtual-box
 	
 	if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack" >/dev/null; then
 		version=$(VBoxManage -v)
