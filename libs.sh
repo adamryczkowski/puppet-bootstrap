@@ -354,8 +354,13 @@ function textfile {
 		fi
 	fi
 	if [ "$flag" == "1" ]; then
-		loglog
-		echo "$contents" | sudo tee "${file}" >/dev/null
+		if [ -w ${file} ]; then
+			loglog
+			echo "$contents" | tee "${file}" >/dev/null
+		else
+			loglog
+			echo "$contents" | sudo tee "${file}" >/dev/null
+		fi
 		return 0
 	fi
 	return 1

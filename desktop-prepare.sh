@@ -230,6 +230,41 @@ function virtualbox {
 	fi
 }
 
+function kodi {
+	add_ppa ppa:team-xbmc/ppa
+	install_apt_package kodi
+	home="$(get_home_dir)"
+	logmkdir "${home}/.kodi/userdata" ${USER}
+	textfile "${home}/.kodi/userdata/advancedsettings.xml" "\
+<advancedsettings>
+  <videodatabase>
+    <type>mysql</type>
+    <host>192.168.10.8</host>
+    <port>3306</port>
+    <user>kodi</user>
+    <pass>kodi</pass>
+  </videodatabase> 
+  <musicdatabase>
+    <type>mysql</type>
+    <host>192.168.10.8</host>
+    <port>3306</port>
+    <user>kodi</user>
+    <pass>kodi</pass>
+  </musicdatabase>
+  <videolibrary>
+    <importwatchedstate>true</importwatchedstate>
+    <importresumepoint>true</importresumepoint>
+  </videolibrary>
+</advancedsettings>"
+	textfile "${home}/.kodi/userdata/passwords.xml" "\
+<passwords>
+    <path>
+        <from pathversion="1">smb://ADAM-990FX/rozne</from>
+        <to pathversion="1">smb://adam:Zero%20tolerancji@ADAM-990FX/rozne/</to>
+    </path>
+</passwords>"
+}
+
 function nemo {
 	add_ppa ppa:webupd8team/nemo3
 	do_update
