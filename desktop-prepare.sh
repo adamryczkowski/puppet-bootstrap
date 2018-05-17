@@ -234,6 +234,7 @@ function kodi {
 	add_ppa ppa:team-xbmc/ppa
 	install_apt_package kodi
 	home="$(get_home_dir)"
+	logmkdir "${home}/.kodi" ${USER}
 	logmkdir "${home}/.kodi/userdata" ${USER}
 	textfile "${home}/.kodi/userdata/advancedsettings.xml" "\
 <advancedsettings>

@@ -354,7 +354,7 @@ function textfile {
 		fi
 	fi
 	if [ "$flag" == "1" ]; then
-		if [ -w ${file} ]; then
+		if [ -w "${file}" ]; then
 			loglog
 			echo "$contents" | tee "${file}" >/dev/null
 		else
