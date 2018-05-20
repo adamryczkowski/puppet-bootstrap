@@ -597,6 +597,7 @@ function load_gsettings_array {
 }
 
 function remove_item_from_array {
+	get_ui_context
 	eval "local -a input_array=$1"
 	(>&2 echo "Number of elements of array: ${#input_array[@]}")
 	local target=$2
@@ -611,6 +612,7 @@ function remove_item_from_array {
 }
 
 function find_item_in_array {
+	get_ui_context
 	eval "local -a array=$1"
 	(>&2 echo "Number of elements of array: ${#array[@]}")
 	local match="$2"
@@ -626,6 +628,7 @@ function find_item_in_array {
 }
 
 function add_item_to_array {
+	get_ui_context
 	eval "local -a array=$1"
 	(>&2 echo "Number of elements of array: ${#array[@]}")
 	local target=$2
@@ -657,6 +660,7 @@ function add_item_to_array {
 }
 
 function set_gsettings_array {
+	get_ui_context
 	local schema=$1
 	local name=$2
 	local value_arr_str="$3"
