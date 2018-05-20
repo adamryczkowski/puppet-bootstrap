@@ -527,20 +527,33 @@ function is_host_up {
 }
 
 function get_ui_context {
+	user=$1
+	if [ -z "$user" ]; then
+		user=$USER
+	fi
 	if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ]; then
 		compatiblePrograms=( nemo unity nautilus kdeinit kded4 pulseaudio trackerd )
 		for index in ${compatiblePrograms[@]}; do
-			PID=$(pidof -s ${index})
-			if [[ "${PID}" != "" ]]; then
-				break
+			PIDS=$(pidof -s ${index})
+			if [[ "${PIDS}" != "" ]]; then
+				for PID in ${PIDS[@]}; do
+					uid=$(awk '/^Uid:/{print $2}' /proc/${PID}/status)
+					piduser=$(getent passwd "$uid" | awk -F: '{print $1}')
+					if [[ "$piduser" == ${user} ]]; then
+						break;
+					fi
+				done
 			fi
 		done
 		if [[ "${PID}" == "" ]]; then
 			ercho "Could not detect active login session"
 			return 1
 		fi
-	
-		QUERY_ENVIRON="$(tr '\0' '\n' < /proc/${PID}/environ | grep "DBUS_SESSION_BUS_ADDRESS" | cut -d "=" -f 2-)"
+		if [ -r /proc/${PID}/environ ]; then
+			QUERY_ENVIRON="$(cat /proc/${PID}/environ | tr '\0' '\n' | grep "DBUS_SESSION_BUS_ADDRESS" | cut -d "=" -f 2-)"
+		else
+			QUERY_ENVIRON="$(sudo cat /proc/${PID}/environ | tr '\0' '\n' | grep "DBUS_SESSION_BUS_ADDRESS" | cut -d "=" -f 2-)"
+		fi
 		if [[ "${QUERY_ENVIRON}" != "" ]]; then
 			export DBUS_SESSION_BUS_ADDRESS="${QUERY_ENVIRON}"
 			echo "Connected to session:"
