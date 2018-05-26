@@ -84,6 +84,7 @@ case $key in
 	--deb-folder)
 	deb_folder=$1
 	shift
+	;;
 	--user)
 	user=$1
 	shift
