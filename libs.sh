@@ -853,7 +853,7 @@ function cp_file {
 	i=$((${#dest}-1))
 	last="${dest:$i:1}"
 	if [ "$last" == "/" ]; then
-		destdir="${dest:1:$i}"
+		destdir="${dest:0:$i}"
 		destfile="$(basename $source)"
 	else
 		destdir="$(dirname $dest)"
