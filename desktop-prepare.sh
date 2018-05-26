@@ -150,11 +150,17 @@ function desktop {
 function blender {
 	install_dir="/opt/blender"
 	if [ ! -f "${install_dir}/blender" ]; then
-		file="BlenderFracture-2.79a-linux64-glibc219.tar.xz"
-		file_path=$(get_cached_file "${file}" http://blenderphysics.com/?ddownload=4225)
-		install_apt_packages xz-utils
-		logmkdir /opt/blender
-		logexec sudo tar xf ${file_path} -C ${install_dir}
+		if [ ! -d /opt/blender/blender_fracture_modifier ]; then
+			file="BlenderFracture-2.79a-linux64-glibc219.tar.xz"
+			file_path=$(get_cached_file "${file}" http://blenderphysics.com/?ddownload=4225)
+			install_apt_packages xz-utils
+			logmkdir /opt/blender
+			logexec sudo tar xf ${file_path} -C ${install_dir}
+		fi
+		if [ -d /opt/blender/blender_fracture_modifier ]; then
+			logexec sudo mv /opt/blender/blender_fracture_modifier/* /opt/blender
+			logexec sudo rmdir /opt/blender/blender_fracture_modifier
+		fi
 	fi
 	if [ ! -f "/opt/blender/blender.desktop" ]; then
 		errcho "Something wrong with the Blender installation process. blender.desktop is missing."
