@@ -18,6 +18,11 @@ where
  --tweaks                 - Name of the tweaks. Currently implemented:
                                - cli (htop, byobu, liquidprompt, etc.)
                                - nemo (nemo3)
+                               - desktop (common Ubuntu desktop applications)
+                               - blender
+                               - bumblebee
+                               - rdesktop
+                               - virtualbox
                                - smb (smb shares the connect to my media servers)
                                - mod3 (switching workspaces with mod3 key)
                                - kodi
@@ -34,7 +39,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,laptop
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop
 "
 
 dir_resolve()
@@ -114,6 +119,13 @@ fi
 function tweak_base  {
 	install_script files/discover_session_bus_address.sh
 	install_apt_packages git
+	if [ ! -d "$mountpoint" ]; then
+		mountpoint="$repo_path"
+		while [ ! -d "$mountpoint" ]; do
+			mountpoint=$(dirname "$mountpoint")
+		done
+		logexec mount "$mountpoint"
+	fi
 }
 
 function desktop {
@@ -157,7 +169,7 @@ function office2007 {
 }
 
 function laptop {
-	install_apt_packages redshift_gtk
+	install_apt_packages redshift-gtk
 	desktop
 }
 
@@ -278,6 +290,10 @@ function nemo {
 	gsettings_set_value org.nemo.preferences show-open-in-terminal-toolbar true
 	gsettings_set_value org.nemo.preferences default-folder-viewer "compact-view"
 	gsettings_set_value org.nemo.preferences show-hidden-files true
+}
+
+function mod3 {
+	gsettings_set_value org.nemo.preferences show-open-in-terminal-toolbar true
 }
 
 function smb {
