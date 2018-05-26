@@ -74,7 +74,7 @@ function install_apt_package_file {
 			fi
 			filename="${cfilename}"
 		fi 
-		logexec sudo dpkg -i "$filename"
+		logexec sudo gdebi "$filename"
 		return 0
 	fi
 	return 1
@@ -793,9 +793,30 @@ function get_git_repo {
 	fi
 }
 
-function modify_desktop {
-	#TODO - należy stworzyć plik desktop i go umieścić
-	echo "bla"
+function make_desktop_non_script {
+	execpath="$1"
+	title="$2"
+	description="$3"
+	icon="$4"
+	
+	if [ -f "$icon" ]; then
+		icon_dir="/usr/share/icons/myicon"
+		cp_file "$icon" "${icon_dir}/" root
+		icon="$(basename "$icon")"
+	fi
+	
+	contents="
+[Desktop Entry]
+Version=1.0
+Name=${title}
+Comment=${description}
+Exec=${execpath}
+Icon=${icon}
+Terminal=false
+Type=Application
+Categories=Application;"
+	filename=$(echo "$execpath" | awk '{print $1;}')
+	textfile "/usr/share/applications/${filename}.desktop" "$contents"
 }
 
 # returns path
@@ -820,4 +841,37 @@ function get_cached_file {
 		return 1
 	fi
 	echo "${repo_path}/${filename}"
+}
+
+function cp_file {
+	local source="$1"
+	local dest="$2"
+	local user="$3"
+	if [ -z "$user" ]; then
+		errcho "No username!"
+	fi
+	i=$((${#dest}-1))
+	last="${dest:$i:1}"
+	if [ "$last" == "/" ]; then
+		destdir="${dest:1:$i}"
+		destfile="$(basename $source)"
+	else
+		destdir="$(dirname $dest)"
+		destfile="$(basename $dest)"
+	fi
+	if [ ! -d "$destdir" ]; then
+		logmkdir "$destdir" "$user"
+	fi
+	if [ -w "$destdir" ]; then
+		local prefix=""
+	else
+		local prefix="sudo"
+	fi
+	if [ ! -f "${destdir}/${destfile}" ]; then
+		logexec ${prefix} cp "${source}" "${dest}"
+	fi
+	owner=$(stat -c '%U' "${destdir}/${destfile}")
+	if [ "$owner" != "$user" ]; then
+		logexec chmod -R "${user}" "${destdir}/${destfile}"
+	fi
 }

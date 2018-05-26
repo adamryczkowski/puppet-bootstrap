@@ -21,7 +21,8 @@ where
                                - desktop (common Ubuntu desktop applications)
                                - blender
                                - bumblebee
-                               - rdesktop
+                               - nvidia (installs latest nvidia drivers + cuda)
+                               - rdesktop (R desktop)
                                - virtualbox
                                - smb (smb shares the connect to my media servers)
                                - mod3 (switching workspaces with mod3 key)
@@ -118,7 +119,7 @@ fi
 #Makes sure basic scripts are installed
 function tweak_base  {
 	install_script files/discover_session_bus_address.sh
-	install_apt_packages git
+	install_apt_packages git gdebi-core
 	if [ ! -d "$mountpoint" ]; then
 		mountpoint="$repo_path"
 		while [ ! -d "$mountpoint" ]; do
@@ -141,6 +142,9 @@ function desktop {
 	gsettings_set_value com.canonical.Unity integrated-menus true
 	
 	install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
+	
+	install_apt_packages redshift-gtk
+	redshift-gtk &
 }
 
 function blender {
@@ -152,6 +156,11 @@ function blender {
 		logmkdir /opt/blender
 		logexec sudo tar xf ${file_path} -C ${install_dir}
 	fi
+	if [ ! -f "/opt/blender/blender.desktop" ]; then
+		errcho "Something wrong with the Blender installation process. blender.desktop is missing."
+	fi
+	cp_file "/opt/blender/blender.desktop" /usr/share/applications/ root
+	cp_file "/opt/blender/blender.svg" /usr/share/icons/blender/ root
 }
 
 function office2007 {
@@ -169,8 +178,27 @@ function office2007 {
 }
 
 function laptop {
-	install_apt_packages redshift-gtk
 	desktop
+}
+
+function nvidia {
+	add_ppa graphics-drivers/ppa
+	install_apt_package_file "cuda-repo-ubuntu1604_9.1.85-1_amd64.deb" "cuda-repo-ubuntu1604" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
+	if [ "$?" == "0" ]; then
+		logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+	fi
+	
+	do_update
+	
+	logexec sudo ubuntu-drivers autoinstall
+	nvidia_package=$(apt list --installed |grep -E 'nvidia-[0-9]+/')
+	pattern='nvidia-([0-9]+)/'
+	if [[ "${nvidia_package}" =~ $pattern ]]; then
+		nvidia_version=${BASH_REMATCH[1]}
+	else
+		errcho "Unexpected error"
+		exit 1
+	fi
 }
 
 function bumblebee {

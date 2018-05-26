@@ -11,7 +11,7 @@ Usage:
 
 $(basename $0) [--rstudio] [--rstudio-server] [--repo-server <repo-address>] 
                [--deb-folder <deb_folder>] [--install-lib <path>]
-               [--rstudio] [--rstudio-server]
+               [--rstudio] [--rstudio-server] [--user <username>]
                 [--help] [--debug] [--log <output file>] 
 
 
@@ -20,6 +20,7 @@ where
  --ip                         - IP address in the private network of the node. 
  --debug                      - Flag that sets debugging mode. 
  --log                        - Path to the log file that will log all meaningful commands
+ --user <username>            - Name of the user to install the fira font. Defaults to the current user.
  --deb-folder <path>          - Path where the .deb files for rstudio and rstudio-server will
                                 be downloaded. Preferably some sort of shared folder for whole
                                 institution. 
@@ -47,6 +48,7 @@ deb_folder='/tmp'
 install_lib=auto
 rstudio_server=0
 rstudio=0
+user="$USER"
 
 while [[ $# > 0 ]]
 do
@@ -82,6 +84,9 @@ case $key in
 	--deb-folder)
 	deb_folder=$1
 	shift
+	--user)
+	user=$1
+	shift
 	;;
 	-*)
 	echo "Error: Unknown option: $1" >&2
@@ -107,7 +112,7 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	echo "deb https://cran.rstudio.com/bin/linux/ubuntu xenial/" | sudo tee /etc/apt/sources.list.d/r.list
 	logexec sudo gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9
 	$loglog
-	gpg -a --export E084DAB9 | sudo apt-key add -
+	sudo gpg -a --export E084DAB9 | sudo apt-key add -
 	#logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
 	flag_need_apt_update=1
 fi
@@ -154,10 +159,13 @@ EOT
 		if [ "$out" != "0" ]; then
 			logexec sudo apt install -f --yes
 		fi
-
+		homedir="$(get_home_dir)"
+		dest_dir="${homedir}/.local/share/fonts"
 		if ! fc-list |grep -q FiraCode; then
 			for type in Bold Light Medium Regular Retina; do
-				logexec wget -O ~/.local/share/fonts/FiraCode-${type}.ttf "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true";
+				src_file=$(get_cached_file "FiraCode-${type}.ttf" "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true")
+				cp_file "$src_file" "$dest_dir" "$user"
+				# logexec wget -O ~/.local/share/fonts/FiraCode-${type}.ttf "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true";
 			done
 		fi
 
