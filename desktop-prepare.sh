@@ -166,7 +166,7 @@ function blender {
 		errcho "Something wrong with the Blender installation process. blender.desktop is missing."
 	fi
 	cp_file "/opt/blender/blender.desktop" /usr/share/applications/ root
-	cp_file "/opt/blender/blender.svg" /usr/share/icons/blender/ root
+	cp_file "/opt/blender/blender.svg" /usr/share/icons/hicolor/scalable/apps/ root
 }
 
 function office2007 {
