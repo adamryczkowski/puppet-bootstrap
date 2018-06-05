@@ -330,6 +330,13 @@ function mod3 {
 	gsettings_set_value org.nemo.preferences show-open-in-terminal-toolbar true
 }
 
+function zulip {
+	logexec sudo apt-key adv --keyserver pool.sks-keyservers.net --recv 69AD12704E71A4803DCA3A682424BE5AE9BD10D9
+	textfile /etc/apt/sources.list.d/zulip.list "deb https://dl.bintray.com/zulip/debian/ stable main"
+	flag_need_apt_update=1
+	install_apt_package zulip
+}
+
 function smb {
 	install_apt_package cifs-utils
 	textfile /etc/samba/user "username=adam
