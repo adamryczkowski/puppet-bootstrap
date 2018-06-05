@@ -303,7 +303,8 @@ function add_host {
 	ip=$2
 	HOSTS_LINE="${ip} ${host}"
 	if [ ! -n "$(grep $HOST /etc/hosts)" ]; then
-		sudo -- sh -c -e "echo '$HOSTS_LINE' >> /etc/hosts";
+		$loglog
+		echo "$HOSTS_LINE" | sudo tee -a /etc/hosts
 	fi
 }
 
