@@ -299,9 +299,12 @@ function parse_URI {
 }
 
 function add_host {
-	host=$1
+	hostname=$1
 	ip=$2
-	
+	HOSTS_LINE="${ip}\t${hostname}"
+	if [ ! -n "$(grep $HOSTNAME /etc/hosts)" ]; then
+		sudo -- sh -c -e "echo '$HOSTS_LINE' >> /etc/hosts";
+	fi
 }
 
 function get_iface_ip {

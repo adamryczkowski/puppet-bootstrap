@@ -335,6 +335,7 @@ function zulip {
 	textfile /etc/apt/sources.list.d/zulip.list "deb https://dl.bintray.com/zulip/debian/ stable main"
 	flag_need_apt_update=1
 	install_apt_package zulip
+	add_host zulip.statystyka.net 10.55.181.62
 }
 
 function smb {
