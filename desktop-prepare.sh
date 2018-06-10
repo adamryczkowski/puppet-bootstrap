@@ -341,14 +341,15 @@ function zulip {
 function owncloud {
 	ver=$(get_ubuntu_version)
 	if [[ "$ver" == "16.04" ]]; then
-		contents='deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_18.04/ /'
+		contents='deb http://download.owncloud.org/download/repositories/10.0/Ubuntu_16.04/ /'
+		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.owncloud.org/download/repositories/10.0/Ubuntu_18.04/Release.key ownCloud_Release.key
 	elif [[ "$ver" == "18.04" ]]; then
-		contents='deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_18.04/ /'
+		contents='deb http://download.owncloud.org/download/repositories/10.0/Ubuntu_18.04/ /'
+		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.owncloud.org/download/repositories/10.0/Ubuntu_16.04/Release.key ownCloud_Release.key
 	else
 		errcho "Unsupported UBUNTU!!"
 	fi
-	add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_18.04/Release.key ownCloud_Release.key
-	install_apt_package owncloud-client
+	install_apt_package owncloud-files
 }
 
 function smb {
