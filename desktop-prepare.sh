@@ -349,7 +349,7 @@ function owncloud {
 	else
 		errcho "Unsupported UBUNTU!!"
 	fi
-	install_apt_package owncloud-files
+	install_apt_package owncloud-client
 }
 
 function smb {

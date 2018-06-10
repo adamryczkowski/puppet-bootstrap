@@ -49,7 +49,7 @@ function install_apt_packages {
 	return 1
 }  
 
-#Gets ubuntu version in format e.g. 18.04 or 16.04
+#Gets ubuntu version in format e.g. 1804 or 1604
 function get_ubuntu_version {
 	tmp=$(lsb_release -a 2>/dev/null | grep Release)
 	pattern='^Release:\s*([0-9]+)\.([0-9]+)$'
