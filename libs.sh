@@ -73,13 +73,11 @@ function apply_patch {
 	if [[ -f "$file" ]] && [[ -f "$patchfile" ]]; then
 		shasum=$(calcshasum "$file")
 		if [[ "$shasum"=="$hash_orig" ]]; then
-			if patch --dry-run <$patchfile >/dev/null; then
+			if patch --dry-run "$file" "$patchfile" >/dev/null; then
 				if [ -w "$file" ]; then
-					$loglog
-					patch < "$file"
+					logexec patch "$file" "$patchfile"
 				else
-					$loglog
-					sudo patch < "$file"
+					logexec sudo patch "$file" "$patchfile"
 				fi
 			else
 				errcho "Error while applying the patch"
