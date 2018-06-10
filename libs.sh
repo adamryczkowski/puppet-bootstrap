@@ -62,6 +62,7 @@ function calcshasum {
 	else
 		shasum=""
 	fi
+	echo $shasum
 }
 
 function apply_patch {
