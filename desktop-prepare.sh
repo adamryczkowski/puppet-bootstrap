@@ -40,7 +40,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud
 "
 
 dir_resolve()
@@ -327,7 +327,30 @@ function nemo {
 }
 
 function mod3 {
-	gsettings_set_value org.nemo.preferences show-open-in-terminal-toolbar true
+	patch="--- orig.txt	2018-06-10 15:36:53.479009368 +0200
++++ mod.txt	2018-06-10 15:42:08.995666676 +0200
+@@ -34,8 +34,9 @@
+     // Beginning of modifier mappings.
+     modifier_map Shift  { Shift_L, Shift_R };
+     modifier_map Lock   { Caps_Lock };
+-    modifier_map Control{ Control_L, Control_R };
++    modifier_map Control{ Control_L };
+     modifier_map Mod2   { Num_Lock };
++    modifier_map Mod3   { Control_R };
+     modifier_map Mod4   { Super_L, Super_R };
+ 
+     // Fake keys for virtual<->real modifiers mapping:"
+	echo "$patch">/tmp/symbols_pc.patch
+	apply_patch /usr/share/X11/xkb/symbols/pc 2019c40a10ccb69d6b1d95c5762f8c3a09fce64b 63867d13946f00aa9017937ef0b4d3aad25caa52 /tmp/symbols_pc.patch
+	gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-down "['<Shift><Mod3>Down']"
+	gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-left "['<Shift><Mod3>Left']"
+	gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-up "['<Shift><Mod3>Up']"
+	gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-right "['<Shift><Mod3>Right']"
+
+	gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-down "['<Mod3>Down']"
+	gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Mod3>Left']"
+	gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-up "['<Mod3>Up']"
+	gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Mod3>Right']"
 }
 
 function zulip {

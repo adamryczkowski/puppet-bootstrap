@@ -47,7 +47,53 @@ function install_apt_packages {
 		return 0
 	fi
 	return 1
-}  
+}
+
+function shasum {
+	file="$1"
+	if [ -f "$file" ]; then 
+		shasum=$(shasum "$file")
+		pattern='^([^ ]+) '
+		if [[ "$shasum" =~ $pattern ]]; then
+			shasum=${BASH_REMATCH[1]}
+		else
+			errcho "Wrong shasum format"
+		fi
+	else
+		shasum=""
+	fi
+}
+
+function apply_patch {
+	file="$1"
+	hash_orig="$2"
+	hash_dest="$3"
+	patchfile="$4"
+	if [[ -f "$file" && -f "$patchfile" ]]; then
+		if [[ "$(shasum "$file")"=="$hash_orig" ]]; then
+			if patch --dry-run <$file >/dev/null; then
+				if [ -w "$file" ]; then
+					$loglog
+					patch < "$file"
+				else
+					$loglog
+					sudo patch < "$file"
+				fi
+			else
+				errcho "Error while applying the patch"
+			fi
+		elif [[ "$(shasum "$file")"=="$hash_dest" ]]; then
+			#Do nothing. Work is already done
+			return 0
+		else
+			errcho "Wrong contents of the $file. Expected hash $hash_orig."
+			return 1
+		fi
+	else
+		errcho "Missing $file"
+		return 1
+	fi
+}
 
 #Gets ubuntu version in format e.g. 1804 or 1604
 function get_ubuntu_version {
