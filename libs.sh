@@ -49,6 +49,7 @@ function install_apt_packages {
 	return 1
 }  
 
+#Gets ubuntu version in format e.g. 18.04 or 16.04
 function get_ubuntu_version {
 	tmp=$(lsb_release -a 2>/dev/null | grep Release)
 	pattern='^Release:\s*([0-9]+)\.([0-9]+)$'
@@ -127,13 +128,43 @@ function add_ppa {
 	return 1
 }
 
+#Adds apt source. filename must exclude the extension .list. 
 function add_apt_source_manual {
 	filename="$1"
 	contents="$2"
+	release_key_URI="$3"
+	cached_release_key="$4"
 	textfile "/etc/apt/sources.list.d/${filename}.list" "${contents}"
 	if [ "$?" == "0" ]; then
 		flag_need_apt_update=1
 	fi
+	if [ -n "$release_key_URI" ]; then
+		if [ -n "$cached_release_key" ]; then
+			release_key=$(get_cached_file "${cached_release_key}" "${release_key_URI}")
+		else
+			release_key=$(get_cached_file /tmp/tmp.key "${release_key_URI}")
+		fi
+		fingerpr=$(get_key_fingerprint)
+		if ! apt-key finger | grep "$fingerpr" > /dev/null; then
+			logexec sudo apt-key add "${release_key}"
+		fi
+	fi
+}
+
+function get_key_fingerprint {
+	keyfile="$1"
+	if [ -f "${keyfile}" ]; then
+		fingerpr=$(cat "${keyfile}" | gpg --with-fingerprint | grep "Key fingerprint")
+		pattern='^\s*Key fingerprint = ([0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4}  [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4})$'
+		if [[ "$fingerpr" =~ $pattern ]]; then
+			fingerpr=${BASH_REMATCH[1]}
+		else
+			fingerpr="error"
+		fi
+	else
+		fingerpr='missing'
+	fi
+	echo "${fingerpr}"
 }
 
 function edit_bash_augeas {
