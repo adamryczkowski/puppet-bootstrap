@@ -69,7 +69,7 @@ function apply_patch {
 	hash_orig="$2"
 	hash_dest="$3"
 	patchfile="$4"
-	if [[ -f "$file" && -f "$patchfile" ]]; then
+	if [[ -f "$file" ]] && [[ -f "$patchfile" ]]; then
 		if [[ $(shasum "$file")==$hash_orig ]]; then
 			if patch --dry-run <$file >/dev/null; then
 				if [ -w "$file" ]; then
