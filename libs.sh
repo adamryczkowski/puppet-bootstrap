@@ -396,20 +396,6 @@ function get_iface_ip {
 
 }
 
-function apply_patch {
-	orig=$1
-	patch=$2
-	tmp=/tmp/tmp_patched
-	patch --batch $orig -i $patch -o $tmp 2>/dev/null
-	if ! cmp -s $tmp $orig; then
-		cp $orig $tmp
-		logexec cat $patch
-		logexec sudo patch --batch $tmp -i $patch -o $orig
-		return $?
-	fi
-	return 1
-}
-
 function logmkdir {
 	dir=$1
 	user=$2
