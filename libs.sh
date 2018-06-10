@@ -49,7 +49,7 @@ function install_apt_packages {
 	return 1
 }
 
-function shasum {
+function calcshasum {
 	file="$1"
 	if [ -f "$file" ]; then 
 		shasum=$(shasum "$file")
@@ -70,7 +70,7 @@ function apply_patch {
 	hash_dest="$3"
 	patchfile="$4"
 	if [[ -f "$file" ]] && [[ -f "$patchfile" ]]; then
-		shasum=$(shasum "$file")
+		shasum=$(calcshasum "$file")
 		if [[ "$shasum"=="$hash_orig" ]]; then
 			if patch --dry-run <$file >/dev/null; then
 				if [ -w "$file" ]; then
