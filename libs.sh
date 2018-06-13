@@ -107,7 +107,7 @@ function get_ubuntu_version {
 }
 
 function get_ubuntu_codename {
-	tmp=$(lsb_release --codename 2>/dev/null | grep Release)
+	tmp=$(lsb_release --codename 2>/dev/null | grep Codename)
 	pattern='^Codename:\s*([^ ]+)$'
 	if [[ "$tmp" =~ $pattern ]]; then
 		echo ${BASH_REMATCH[1]}
