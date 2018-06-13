@@ -106,6 +106,16 @@ function get_ubuntu_version {
 	return 1
 }
 
+function get_ubuntu_codename {
+	tmp=$(lsb_release --codename 2>/dev/null | grep Release)
+	pattern='^Codename:\s*([^ ]+)$'
+	if [[ "$tmp" =~ $pattern ]]; then
+		echo ${BASH_REMATCH[1]}
+		return 0
+	fi
+	return 1
+}
+
 function install_apt_package_file {
 	local ans=0
 	local filename=$1
