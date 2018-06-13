@@ -159,7 +159,7 @@ do_upgrade
 #fi
 
 
-if install_apt_package lxc2; then
+if install_apt_package lxd; then
 	if mount |grep " /home " | grep -q btrfs; then
 		logexec sudo lxd init --auto --storage-backend=btrfs
 	else
