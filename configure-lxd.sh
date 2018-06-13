@@ -143,7 +143,7 @@ if ! grep -q "root:$UID:1" /etc/subgid; then
     echo "root:$UID:1" | sudo tee -a /etc/subgid
 fi
 
-the_ppa=ubuntu-lxc/lxc-stable
+the_ppa=ubuntu-lxc/lxc-git-stable-2.0
 add_ppa $the_ppa
 do_upgrade
 
