@@ -323,6 +323,7 @@ function setup {
 	logexec sudo chmod +x /usr/local/lib/adam/mounter.sh
 	release=$(get_ubuntu_codename)
 	if [ "$release" == "bionic" ]; then
+		echo "TODO"
 		#TODO: dodać do skryptów uruchamianych podczas logowania
 	else
 		linetextfile /etc/pam.d/common-session "session optional	pam_exec.so	/bin/sh /usr/local/lib/adam/mounter.sh"
@@ -339,15 +340,15 @@ function setup {
 }
 
 
-if [ "$mode" == "keygen "]; then
+if [ "$mode" == "keygen" ]; then
 	keygen
 fi
 
-if [ "$mode" == "format "]; then
+if [ "$mode" == "format" ]; then
 	format
 fi
 
-if [ "$mode" == "setup "]; then
+if [ "$mode" == "setup" ]; then
 	setup
 fi
 
