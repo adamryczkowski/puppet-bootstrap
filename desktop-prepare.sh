@@ -120,13 +120,7 @@ fi
 function tweak_base  {
 	install_script files/discover_session_bus_address.sh
 	install_apt_packages git gdebi-core
-	mountpoint="$repo_path"
-	if [ ! -d "$mountpoint" ]; then
-		while [ ! -d "$mountpoint" ]; do
-			mountpoint=$(dirname "$mountpoint")
-		done
-		logexec mount "$mountpoint"
-	fi
+	mount_smb_share "$repo_path"
 }
 
 function desktop {

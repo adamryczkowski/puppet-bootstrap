@@ -540,6 +540,16 @@ function smb_share_client {
 	fstab_entry "//${server}/${remote_name}" ${local_path} cifs users,credentials=${credentials_file},noexec,noauto${extra_opt} 0 0
 }
 
+function mount_smb_share {
+	mountpoint=$1
+	if [ ! -d "$mountpoint" ]; then
+		while [ ! -d "$mountpoint" ]; do
+			mountpoint=$(dirname "$mountpoint")
+		done
+		logexec mount "$mountpoint"
+	fi
+}
+
 function fstab_entry {
 	spec=$1
 	file=$2
