@@ -323,7 +323,7 @@ function setup {
 			pattern='^/dev/mapper/(.*)$'
 			if [[ "$actual_dmdevice" =~ $pattern ]]; then
 				actual_dmdevice="${BASH_REMATCH[1]}"
-				actual_device=$(device_from_crypt_dmapper ${actual_dmdevice})
+				actual_device=$(device_from_crypt_dmapper "/dev/mapper/${actual_dmdevice}")
 				if [ -n "${actual_device}" ]; then
 					if [ "${actual_device}" != "$device" ]; then
 						errcho "Different documents are mounted right now. Exiting."
