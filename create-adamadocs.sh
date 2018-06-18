@@ -342,14 +342,14 @@ function setup {
 
 
 if [ "$mode" == "keygen" ]; then
-	keygen
+	keygen "$@"
 fi
 
 if [ "$mode" == "format" ]; then
-	format
+	format "$@"
 fi
 
 if [ "$mode" == "setup" ]; then
-	setup
+	setup "$@"
 fi
 
