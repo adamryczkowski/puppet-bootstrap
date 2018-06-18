@@ -523,8 +523,8 @@ function get_home_dir {
 }
 
 function get_special_dir {
-	user=$1
-	dirtype=$2
+	dirtype=$1
+	user=$2
 	ans=""
 	HOME=$(get_home_dir $user)
 	if [ -f "${HOME}/.config/user-dirs.dirs" ]; then
@@ -582,6 +582,26 @@ function mount_smb_share {
 			mountpoint=$(dirname "$mountpoint")
 		done
 		logexec mount "$mountpoint"
+	fi
+}
+
+function is_mounted {
+	device=$1
+	mountpoint=$2
+	if [ -n "$device" ] && [ -n "$mountpoint" ]; then
+		ans=$(mount | grep -F "${device} on ${mountpoint}")
+	else if [ -n "$device" ]; then
+		ans=$(mount | grep -F "${device} on ")
+	else if [ -n "$mountpoint" ]; then
+		ans=$(mount | grep -F " on ${mountpoint}")
+	else
+		errcho "is_mounted called with no arguments"
+		return -1
+	fi
+	if [ "$ans" != "" ]; then
+		return 0
+	else
+		return -1
 	fi
 }
 

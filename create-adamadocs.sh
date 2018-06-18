@@ -316,6 +316,24 @@ function setup {
 	esac
 	done
 	
+	mounted=0
+	if is_mounted "" "$mount_point"; then
+		backend=$(sudo cryptsetup status $device | grep -F "device:")
+		pattern='device: *()[^ ]+)$'
+		if [[ "${backend}" =~ $pattern ]]; then
+			backend=${BASH_REMATCH[1]}
+			if [ "$backend" != "$device" ]; then
+				errcho "Different documents are mounted right now. Exiting."
+				exit 1
+			else
+				mounted=1
+			fi
+		else
+			errcho "Something else is mounted under ${mount_point}. Exiting."
+			exit 2
+		fi
+	fi
+	
 	if [[ ! "$key" = /* ]]; then
 		home=$(get_home_dir $user)
 		key="${home}/${key}"
@@ -325,8 +343,6 @@ function setup {
 		exit 1
 	fi
 	
-	logmkdir "$mount_point"
-	
 	logmkdir /usr/local/lib/adam/mounter
 	textfile /usr/local/lib/adam/mounter.sh "#!/bin/bash
 /bin/sleep 1
@@ -335,6 +351,33 @@ function setup {
 /bin/chmod 0775 /home/Docs
 /bin/sync" 
 	logexec sudo chmod +x /usr/local/lib/adam/mounter.sh
+	
+	if [ "$mounted" == "0" ]; then
+		logmkdir "$mount_point"
+		logexec /usr/local/lib/adam/mounter.sh
+		
+		mounted=0
+		if is_mounted "" "$mount_point"; then
+			backend=$(sudo cryptsetup status $device | grep -F "device:")
+			pattern='device: *()[^ ]+)$'
+			if [[ "${backend}" =~ $pattern ]]; then
+				backend=${BASH_REMATCH[1]}
+				if [ "$backend" != "$device" ]; then
+					errcho "Different documents are mounted right now. Exiting."
+					exit 1
+				else
+					mounted=1
+				fi
+			else
+				errcho "Something else is mounted under ${mount_point}. Exiting."
+				exit 2
+			fi
+		fi
+		if [ "$mounted" == "0" ]; then
+			errcho "Something wrong while mounting the ${mount_point}. Exiting."
+		fi
+	fi
+	
 	release=$(get_ubuntu_codename)
 	if [ "$release" == "bionic" ]; then
 		echo "TODO"
