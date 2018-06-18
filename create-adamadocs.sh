@@ -318,24 +318,30 @@ function setup {
 	
 	mounted=0
 	if is_mounted "" "$mount_point"; then
-		if sudo cryptsetup status $device>/dev/null 2>/dev/null; then
-			backend=$(sudo cryptsetup status $device | grep -F "device:")
-			pattern='device: *()[^ ]+)$'
-			if [[ "${backend}" =~ $pattern ]]; then
-				backend=${BASH_REMATCH[1]}
-				if [ "$backend" != "$device" ]; then
-					errcho "Different documents are mounted right now. Exiting."
-					exit 1
+		actual_dmdevice=$(find_device_from_mountpoint "${mount_point}")
+		if [ -n "${actual_dmdevice}" ]; then
+			pattern='^/dev/mapper/(.*)$'
+			if [[ "$actual_dmdevice" =~ $pattern ]]; then
+				actual_dmdevice="${BASH_REMATCH[1]}"
+				actual_device=device_from_crypt_dmapper ${actual_dmdevice}
+				if [ -n "${actual_device}" ]; then
+					if [ "${actual_device}" != "$device" ]; then
+						errcho "Different documents are mounted right now. Exiting."
+						exit 1
+					else
+						mounted=1
+					fi
 				else
-					mounted=1
+					errcho "The device mounted under ${mount_point} is not Luks. Exiting."
+					exit 3
 				fi
 			else
 				errcho "Something else is mounted under ${mount_point}. Exiting."
 				exit 2
 			fi
 		else
-			errcho "Something else is mounted under ${mount_point}. Exiting."
-			exit 2
+			errcho "Internal error. Exiting."
+			exit -1
 		fi
 	fi
 	
@@ -361,24 +367,7 @@ function setup {
 		logmkdir "$mount_point"
 		logexec /usr/local/lib/adam/mounter.sh
 		
-		mounted=0
-		if is_mounted "" "$mount_point"; then
-			backend=$(sudo cryptsetup status $device | grep -F "device:")
-			pattern='device: *()[^ ]+)$'
-			if [[ "${backend}" =~ $pattern ]]; then
-				backend=${BASH_REMATCH[1]}
-				if [ "$backend" != "$device" ]; then
-					errcho "Different documents are mounted right now. Exiting."
-					exit 1
-				else
-					mounted=1
-				fi
-			else
-				errcho "Something else is mounted under ${mount_point}. Exiting."
-				exit 2
-			fi
-		fi
-		if [ "$mounted" == "0" ]; then
+		if ! backing_luks_device_from_mount_point "${mount_point}"; then
 			errcho "Something wrong while mounting the ${mount_point}. Exiting."
 		fi
 	fi

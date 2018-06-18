@@ -601,26 +601,6 @@ function mount_smb_share {
 	fi
 }
 
-function is_mounted {
-	local device=$1
-	local mountpoint=$2
-	if [ -n "$device" ] && [ -n "$mountpoint" ]; then
-		ans=$(mount | grep -F "${device} on ${mountpoint}")
-	elif [ -n "$device" ]; then
-		ans=$(mount | grep -F "${device} on ")
-	elif [ -n "$mountpoint" ]; then
-		ans=$(mount | grep -F " on ${mountpoint}")
-	else
-		errcho "is_mounted called with no arguments"
-		return -1
-	fi
-	if [ "$ans" != "" ]; then
-		return 0
-	else
-		return -1
-	fi
-}
-
 function fstab_entry {
 	local spec=$1
 	local file=$2
@@ -1031,5 +1011,102 @@ function cp_file {
 	owner=$(stat -c '%U' "${destdir}/${destfile}")
 	if [ "$owner" != "$user" ]; then
 		logexec chmod -R "${user}" "${destdir}/${destfile}"
+	fi
+}
+
+#Iterates over all devices managed by dmsetup and returns true, if found the device with the given path
+function find_device_in_dmapper {
+	local target="$1"
+	local pattern1='^([^ ]+ +)'
+	local pattern2='device: *()[^ ]+)$'
+	local line
+	local device
+	local backend
+	sudo dmsetup ls | while read line; do
+		if [[ "$line" =~ $pattern1 ]]; then
+			device=${BASH_REMATCH[1]}
+			backend=$(sudo cryptsetup status $device | grep -F "device:")
+			if [[ "${backend}" =~ $pattern2 ]]; then
+				device=${BASH_REMATCH[1]}
+				if [ "$device" == "$target" ]; then
+					echo "$device"
+					return 0
+				fi
+			fi
+		else
+			errcho "Syntax error of the output of dmsetup."
+		fi
+	done
+	return -1 #not found
+}
+
+function is_mounted {
+	local device=$1
+	local mountpoint=$2
+	if [ -n "$device" ] && [ -n "$mountpoint" ]; then
+		ans=$(mount | grep -F "${device} on ${mountpoint}")
+	elif [ -n "$device" ]; then
+		ans=$(mount | grep -F "${device} on ")
+	elif [ -n "$mountpoint" ]; then
+		ans=$(mount | grep -F " on ${mountpoint}")
+	else
+		errcho "is_mounted called with no arguments"
+		return -1
+	fi
+	if [ "$ans" != "" ]; then
+		return 0
+	else
+		return -1
+	fi
+}
+
+function find_device_from_mountpoint {
+	local mountpoint="$1"
+	local pattern="^(.*) on (${mountpoint}) type "
+	local ans
+	ans=$(mount | grep -E " on ${mountpoint} ")
+	if [[ "$ans" =~ $pattern ]]; then
+		echo "${BASH_REMATCH[1]}"
+		return 0
+	fi
+	return -1
+}
+
+#Gets the backing device from the dm device if it uses cryptsetup
+function device_from_crypt_dmapper {
+	local dmdevice=$1
+	local pattern='device: *()[^ ]+)$'
+	local backend_line=$(sudo cryptsetup status "/dev/mapper/${device}" | grep -F "device:")
+	if [[ "$backend_line" =~ $pattern ]]; then
+		echo "${BASH_REMATCH[1]}"
+		return 0
+	else
+		echo ""
+		return -1
+	fi
+}
+
+function backing_luks_device_from_mount_point {
+	local mountpoint="$1"
+	local pattern='^/dev/mapper/(.*)$'
+	local actual_dmdevice=$(find_device_from_mountpoint "${mount_point}")
+	if [ -n "${actual_dmdevice}" ]; then
+		if [[ "$actual_dmdevice" =~ $pattern ]]; then
+			local actual_dmdevice="${BASH_REMATCH[1]}"
+			local actual_device=device_from_crypt_dmapper ${actual_dmdevice}
+			if [ -n "${actual_device}" ]; then
+				echo "$actual_device"
+				return 0
+			else
+				errcho "The device mounted under ${mount_point} is not Luks. Exiting."
+				return 3
+			fi
+		else
+			errcho "Something else is mounted under ${mount_point}. Exiting."
+			return 2
+		fi
+	else
+		errcho "Mount point not found. Exiting."
+		return 1
 	fi
 }
