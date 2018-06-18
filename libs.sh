@@ -590,9 +590,9 @@ function is_mounted {
 	mountpoint=$2
 	if [ -n "$device" ] && [ -n "$mountpoint" ]; then
 		ans=$(mount | grep -F "${device} on ${mountpoint}")
-	else if [ -n "$device" ]; then
+	elif [ -n "$device" ]; then
 		ans=$(mount | grep -F "${device} on ")
-	else if [ -n "$mountpoint" ]; then
+	elif [ -n "$mountpoint" ]; then
 		ans=$(mount | grep -F " on ${mountpoint}")
 	else
 		errcho "is_mounted called with no arguments"
