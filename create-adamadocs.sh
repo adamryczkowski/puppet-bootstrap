@@ -60,6 +60,7 @@ fi
 user="$USER"
 
 
+
 function keygen {
 	key="$1"
 	if [ -z "$key" ]; then
@@ -316,7 +317,7 @@ function setup {
 	textfile /usr/local/lib/adam/mounter.sh "#!/bin/bash
 /bin/sleep 1
 /sbin/cryptsetup luksOpen --key-file \"$key\" \"$device\" crypt-docs
-/bin/mount -t btrfs -o compress,rw,noacl,noatime,autodefrag,ssd  /dev/mapper/crypt-docs "$mount_point"
+/bin/mount -t btrfs -o compress,rw,noacl,noatime,autodefrag,ssd  /dev/mapper/crypt-docs \"$mount_point\"
 /bin/chmod 0775 /home/Docs
 /bin/sync" 
 	logexec sudo chmod +x /usr/local/lib/adam/mounter.sh
@@ -336,4 +337,17 @@ function setup {
 		link_folder PICTURE "${user_docs_prefix}/linux/Pictures" $user
 	fi
 }
+
+
+if [ "$mode" == "keygen "]; then
+	keygen
+fi
+
+if [ "$mode" == "format "]; then
+	format
+fi
+
+if [ "$mode" == "setup "]; then
+	setup
+fi
 
