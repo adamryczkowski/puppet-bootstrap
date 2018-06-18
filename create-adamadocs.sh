@@ -325,6 +325,8 @@ function setup {
 		exit 1
 	fi
 	
+	logmkdir "$mount_point"
+	
 	logmkdir /usr/local/lib/adam/mounter
 	textfile /usr/local/lib/adam/mounter.sh "#!/bin/bash
 /bin/sleep 1
