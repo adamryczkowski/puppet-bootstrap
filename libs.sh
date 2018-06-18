@@ -372,17 +372,17 @@ function random_mac {
 
 function parse_URI {
 	URI="$1"
-    pattern='^(([[:alnum:]]+)://)?(([[:alnum:]]+)@)?([^:^@]+)(:([[:digit:]]+))?$'
-    if [[ "$URI" =~ $pattern ]]; then
-            proto=${BASH_REMATCH[2]}
-            user=${BASH_REMATCH[4]}
-            ip=${BASH_REMATCH[5]}
-            port=${BASH_REMATCH[7]}
-            return 0
-    else
-            errcho "You must put proper address of the ssh server in the first argument, e.g. user@host.com:2022"
-            return 1
-    fi
+	pattern='^(([[:alnum:]]+)://)?(([[:alnum:]]+)@)?([^:^@]+)(:([[:digit:]]+))?$'
+	if [[ "$URI" =~ $pattern ]]; then
+		proto=${BASH_REMATCH[2]}
+		user=${BASH_REMATCH[4]}
+		ip=${BASH_REMATCH[5]}
+		port=${BASH_REMATCH[7]}
+		return 0
+	else
+		errcho "You must put proper address of the ssh server in the first argument, e.g. user@host.com:2022"
+		return 1
+	fi
 }
 
 function add_host {
@@ -414,6 +414,20 @@ function logmkdir {
 	fi
 	if [ -n "$user" ]; then
 		logexec sudo chown ${user}:${user} "$dir"
+	fi
+}
+
+function linetextfile {
+	file="$1"
+	line="$2"
+	if ! grep -qF -- "$line" "$file"; then
+		if [ -w "$file" ]; then
+			$loglog
+			echo "$line" >> "$file"
+		else
+			$loglog
+			echo "$line" | sudo tee -a "$file"
+		fi
 	fi
 }
 
@@ -506,6 +520,26 @@ function install_script {
 function get_home_dir {
 	echo $( getent passwd "$USER" | cut -d: -f6 )
 }
+
+function get_special_dir {
+	user=$1
+	dirtype=$2
+	ans=""
+	HOME=$(get_home_dir $user)
+	if [ -f "${HOME}/.config/user-dirs.dirs" ]; then
+		line=$(grep "^[^#].*${dirtype}" "${HOME}/.config/user-dirs.dirs")
+		pattern="^.*${dirtype}.*=\"?([^\"]+)\"?$"
+		if [[ "$line" =~ $pattern ]]; then
+			folder=${BASH_REMATCH[1]}
+			ans=$(echo $folder | envsubst )
+			if [ "$ans" == "$HOME" ]; then
+				ans=""
+			fi
+		fi
+	fi
+	echo "$ans"
+}
+
 
 function chmod_file {
 	file=$1
