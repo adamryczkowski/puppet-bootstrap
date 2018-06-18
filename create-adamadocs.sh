@@ -318,16 +318,20 @@ function setup {
 	
 	mounted=0
 	if is_mounted "" "$mount_point"; then
-		echo
-		backend=$(sudo cryptsetup status $device | grep -F "device:")
-		pattern='device: *()[^ ]+)$'
-		if [[ "${backend}" =~ $pattern ]]; then
-			backend=${BASH_REMATCH[1]}
-			if [ "$backend" != "$device" ]; then
-				errcho "Different documents are mounted right now. Exiting."
-				exit 1
+		if sudo cryptsetup status $device>/dev/null 2>/dev/null; then
+			backend=$(sudo cryptsetup status $device | grep -F "device:")
+			pattern='device: *()[^ ]+)$'
+			if [[ "${backend}" =~ $pattern ]]; then
+				backend=${BASH_REMATCH[1]}
+				if [ "$backend" != "$device" ]; then
+					errcho "Different documents are mounted right now. Exiting."
+					exit 1
+				else
+					mounted=1
+				fi
 			else
-				mounted=1
+				errcho "Something else is mounted under ${mount_point}. Exiting."
+				exit 2
 			fi
 		else
 			errcho "Something else is mounted under ${mount_point}. Exiting."
