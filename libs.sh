@@ -518,6 +518,7 @@ function install_script {
 }
 
 function get_home_dir {
+	USER=$1
 	echo $( getent passwd "$USER" | cut -d: -f6 )
 }
 

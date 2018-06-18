@@ -171,18 +171,20 @@ function format {
 	esac
 	done
 	
-	if [ -n "$use_block" ]; then
-		errcho "Error: No backing device. You must provide either --file or --device argument."
-		exit 1
-	fi
-	
 	if [[ ! "$key" = /* ]]; then
-		key="${HOME}/${key}"
+		home=$(get_home_dir $user)
+		key="${home}/${key}"
 	fi
 	if [! -f "$key" ]; then
 		errcho "Error: There is no key in $key. Please specify a path (can be relative to $HOME) with the key. The key can be any random bytes. Only first 512 bytes will be used."
 		exit 1
 	fi
+	
+	if [ -n "$use_block" ]; then
+		errcho "Error: No backing device. You must provide either --file or --device argument."
+		exit 1
+	fi
+	
 	
 	if [ "$use_block" == "1" ]; then
 		if [ ! -b "$device" ]; then
@@ -313,6 +315,15 @@ function setup {
 		;;
 	esac
 	done
+	
+	if [[ ! "$key" = /* ]]; then
+		home=$(get_home_dir $user)
+		key="${home}/${key}"
+	fi
+	if [! -f "$key" ]; then
+		errcho "Error: There is no key in $key. Please specify a path (can be relative to $HOME) with the key. The key can be any random bytes. Only first 512 bytes will be used."
+		exit 1
+	fi
 	
 	logmkdir /usr/local/lib/adam/mounter
 	textfile /usr/local/lib/adam/mounter.sh "#!/bin/bash
