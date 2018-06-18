@@ -384,6 +384,7 @@ function setup {
 	if [ -n "$user_docs_prefix" ]; then
 		user_docs_prefix="${mount_point}/${user_docs_prefix}"
 		link_folder DESKTOP "${user_docs_prefix}/Desktop" $user
+		link_folder DESKTOP "${user_docs_prefix}/Pulpit" $user
 		link_folder DOWNLOAD "${user_docs_prefix}/linux/Downloads" $user
 		link_folder DOCUMENT "${user_docs_prefix}/MyDocs" $user
 		link_folder MUSIC "${user_docs_prefix}/linux/Music" $user
