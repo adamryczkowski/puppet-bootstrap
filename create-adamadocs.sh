@@ -349,7 +349,7 @@ function setup {
 		home=$(get_home_dir $user)
 		key="${home}/${key}"
 	fi
-	if [! -f "$key" ]; then
+	if [ ! -f "$key" ]; then
 		errcho "Error: There is no key in $key. Please specify a path (can be relative to $HOME) with the key. The key can be any random bytes. Only first 512 bytes will be used."
 		exit 1
 	fi
