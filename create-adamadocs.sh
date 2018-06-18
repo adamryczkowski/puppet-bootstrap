@@ -50,6 +50,7 @@ fi
 set -x
 
 mode="$1"
+shift
 
 if [ "$mode" != "keygen" ] && [ "$mode" != "format" ] && [ "$mode" != "setup" ]; then
 	errcho "Unkown mode. First argument must be format, keygen or setup."
