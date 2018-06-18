@@ -318,6 +318,7 @@ function setup {
 	
 	mounted=0
 	if is_mounted "" "$mount_point"; then
+		echo
 		backend=$(sudo cryptsetup status $device | grep -F "device:")
 		pattern='device: *()[^ ]+)$'
 		if [[ "${backend}" =~ $pattern ]]; then

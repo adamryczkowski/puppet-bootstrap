@@ -2,8 +2,8 @@
 
 
 function purge_apt_package {
-	ans=0
-	package=$1
+	local ans=0
+	local package=$1
 	if dpkg -s "$package">/dev/null  2> /dev/null; then
 		logexec sudo apt-get --yes --force-yes -q purge "$package"
 		return 0
@@ -12,9 +12,9 @@ function purge_apt_package {
 }
 
 function install_apt_package {
-	ans=0
-	package=$1
-	command=$2
+	local ans=0
+	local package=$1
+	local command=$2
 	if [ -n "$command" ]; then
 		if ! which "$command">/dev/null  2> /dev/null; then
 			do_update
@@ -32,9 +32,9 @@ function install_apt_package {
 }  
 
 function install_apt_packages {
-	ans=0
-	to_install=""
-	packages="$@"
+	local ans=0
+	local to_install=""
+	local packages="$@"
 	for package in ${packages[@]}
 	do
 		if ! dpkg -s "$package">/dev/null  2> /dev/null; then
@@ -52,8 +52,8 @@ function install_apt_packages {
 function calcshasum {
 	file="$1"
 	if [ -f "$file" ]; then 
-		shasum=$(shasum "$file")
-		pattern='^([^ ]+) '
+		local shasum=$(shasum "$file")
+		local pattern='^([^ ]+) '
 		if [[ "$shasum" =~ $pattern ]]; then
 			shasum=${BASH_REMATCH[1]}
 		else
@@ -66,12 +66,12 @@ function calcshasum {
 }
 
 function apply_patch {
-	file="$1"
-	hash_orig="$2"
-	hash_dest="$3"
-	patchfile="$4"
+	local file="$1"
+	local hash_orig="$2"
+	local hash_dest="$3"
+	local patchfile="$4"
 	if [[ -f "$file" ]] && [[ -f "$patchfile" ]]; then
-		shasum=$(calcshasum "$file")
+		local shasum=$(calcshasum "$file")
 		if [[ "$shasum"=="$hash_orig" ]]; then
 			if patch --dry-run "$file" "$patchfile" >/dev/null; then
 				if [ -w "$file" ]; then
@@ -97,8 +97,8 @@ function apply_patch {
 
 #Gets ubuntu version in format e.g. 1804 or 1604
 function get_ubuntu_version {
-	tmp=$(lsb_release -a 2>/dev/null | grep Release)
-	pattern='^Release:\s*([0-9]+)\.([0-9]+)$'
+	local tmp=$(lsb_release -a 2>/dev/null | grep Release)
+	local pattern='^Release:\s*([0-9]+)\.([0-9]+)$'
 	if [[ "$tmp" =~ $pattern ]]; then
 		echo ${BASH_REMATCH[1]}${BASH_REMATCH[2]}
 		return 0
@@ -107,8 +107,8 @@ function get_ubuntu_version {
 }
 
 function get_ubuntu_codename {
-	tmp=$(lsb_release --codename 2>/dev/null | grep Codename)
-	pattern='^Codename:\s*([^ ]+)$'
+	local tmp=$(lsb_release --codename 2>/dev/null | grep Codename)
+	local pattern='^Codename:\s*([^ ]+)$'
 	if [[ "$tmp" =~ $pattern ]]; then
 		echo ${BASH_REMATCH[1]}
 		return 0
@@ -138,9 +138,9 @@ function install_apt_package_file {
 }
 
 function install_pip3_packages {
-	ans=0
-	to_install=""
-	packages="$@"
+	local ans=0
+	local to_install=""
+	local packages="$@"
 	for package in ${packages[@]}
 	do
 		if ! pip3 list | grep -qF "$package" >/dev/null  2> /dev/null; then
@@ -171,7 +171,7 @@ function do_upgrade {
 }
 
 function add_ppa {
-	the_ppa=$1
+	local the_ppa=$1
 	
 	if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
 
@@ -186,10 +186,11 @@ function add_ppa {
 
 #Adds apt source. filename must exclude the extension .list. 
 function add_apt_source_manual {
-	filename="$1"
-	contents="$2"
-	release_key_URI="$3"
-	cached_release_key="$4"
+	local filename="$1"
+	local contents="$2"
+	local release_key_URI="$3"
+	local cached_release_key="$4"
+	local release_key
 	textfile "/etc/apt/sources.list.d/${filename}.list" "${contents}"
 	if [ "$?" == "0" ]; then
 		flag_need_apt_update=1
@@ -208,7 +209,9 @@ function add_apt_source_manual {
 }
 
 function get_key_fingerprint {
-	keyfile="$1"
+	local keyfile="$1"
+	local fingerpr
+	local pattern
 	if [ -f "${keyfile}" ]; then
 		fingerpr=$(cat "${keyfile}" | gpg --with-fingerprint | grep "Key fingerprint")
 		pattern='^\s*Key fingerprint = ([0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4}  [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4})$'
@@ -224,25 +227,29 @@ function get_key_fingerprint {
 }
 
 function edit_bash_augeas {
-	file=$1
-	var=$2
-	value=$3
+	local file=$1
+	local var=$2
+	local value=$3
 	install_apt_package augeas-tools augtool
-	oldvalue=$(sudo augtool -L -A --transform "Shellvars incl $file" get "/files${file}/${var}" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
+	local oldvalue=$(sudo augtool -L -A --transform "Shellvars incl $file" get "/files${file}/${var}" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
 	if [ "$value" != "$oldvalue" ]; then
 		logexec sudo augtool -L -A --transform "Shellvars incl $file" set "/files${file}/${var}" "${value}" >/dev/null
 	fi
 }
 
 function add_dhcpd_entry {
-	subnet=$1
-	netmask=$2
-	range_from=$3
-	range_to=$4
+	local subnet=$1
+	local netmask=$2
+	local range_from=$3
+	local range_to=$4
+	local dirty
+	local oldvalue
+	local oldvalue1
+	local oldvalue2
 	install_apt_package augeas-tools augtool
 	if ! augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" match "/files/etc/dhcp/dhcpd.conf/subnet/network" | grep -q $subnet; then
-	logheredoc EOT
-	sudo augtool -L -A --transform 'Dhcpd incl /etc/dhcp/dhcpd.conf' <<EOT >/dev/null
+		logheredoc EOT
+		sudo augtool -L -A --transform 'Dhcpd incl /etc/dhcp/dhcpd.conf' <<EOT >/dev/null
 clear '/files/etc/dhcp/dhcpd.conf/subnet[last() + 1]'
 set "/files/etc/dhcp/dhcpd.conf/subnet[last()]/network" "$subnet"
 set "/files/etc/dhcp/dhcpd.conf/subnet[last()]/netmask" "$netmask"
@@ -276,8 +283,8 @@ EOT
 }
 
 function edit_dhcpd {
-	key=$1
-	value=$2
+	local key=$1
+	local value=$2
 	if [ "${value}" == "<ON>" ]; then
 		if augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/${key}" | grep -q '(o)'; then
 			logexec sudo augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" clear "/files/etc/dhcp/dhcpd.conf/option/${key}" >/dev/null
@@ -299,11 +306,12 @@ function edit_dhcpd {
 }
 
 function simple_systemd_service {
-	name=$1
-	description="$2"
-	program=$3
+	local name=$1
+	local description="$2"
+	local program=$3
 	shift;shift;shift
-	args="$@"
+	local args="$@"
+	local is_active
 	
 	if [ ! -f "$program" ]; then
 		if which $program >/dev/null; then
@@ -349,8 +357,11 @@ EOT
 }
 
 function random_mac {
-	prefix=$1
-	len=${#prefix}
+	local prefix=$1
+	local len=${#prefix}
+	local infix
+	local hexchars
+	local end
 	if [ $len -lt 3 ]; then
 		infix=":"
 	else
@@ -371,8 +382,8 @@ function random_mac {
 }
 
 function parse_URI {
-	URI="$1"
-	pattern='^(([[:alnum:]]+)://)?(([[:alnum:]]+)@)?([^:^@]+)(:([[:digit:]]+))?$'
+	local URI="$1"
+	local pattern='^(([[:alnum:]]+)://)?(([[:alnum:]]+)@)?([^:^@]+)(:([[:digit:]]+))?$'
 	if [[ "$URI" =~ $pattern ]]; then
 		proto=${BASH_REMATCH[2]}
 		user=${BASH_REMATCH[4]}
@@ -386,9 +397,9 @@ function parse_URI {
 }
 
 function add_host {
-	host=$1
-	ip=$2
-	HOSTS_LINE="${ip} ${host}"
+	local host=$1
+	local ip=$2
+	local HOSTS_LINE="${ip} ${host}"
 	if [ ! -n "$(grep ${host} /etc/hosts)" ]; then
 		$loglog
 		echo "$HOSTS_LINE" | sudo tee -a /etc/hosts
@@ -396,7 +407,7 @@ function add_host {
 }
 
 function get_iface_ip {
-	iface=$1
+	local iface=$1
 	if ifconfig $local_n2n_iface 2>/dev/null >/dev/null; then
 		ip addr show $1 | awk '$1 == "inet" {gsub(/\/.*$/, "", $2); print $2}'
 		return 0
@@ -407,8 +418,8 @@ function get_iface_ip {
 }
 
 function logmkdir {
-	dir=$1
-	user=$2
+	local dir=$1
+	local user=$2
 	if ! [ -d "$dir" ]; then
 		logexec sudo mkdir -p "$dir"
 	fi
@@ -418,8 +429,8 @@ function logmkdir {
 }
 
 function linetextfile {
-	file="$1"
-	line="$2"
+	local file="$1"
+	local line="$2"
 	if ! grep -qF -- "$line" "$file"; then
 		if [ -w "$file" ]; then
 			$loglog
@@ -432,8 +443,9 @@ function linetextfile {
 }
 
 function textfile {
-	file=$1
-	contents=$2
+	local file=$1
+	local contents=$2
+	local flag
 	logmkdir $(dirname ${file})
 	if [ ! -f "${file}" ]; then
 		flag=1
@@ -518,14 +530,17 @@ function install_script {
 }
 
 function get_home_dir {
-	USER=$1
+	local USER=$1
 	echo $( getent passwd "$USER" | cut -d: -f6 )
 }
 
 function get_special_dir {
-	dirtype=$1
-	user=$2
-	ans=""
+	local dirtype=$1
+	local user=$2
+	local ans=""
+	local HOME
+	local pattern
+	local folder
 	HOME=$(get_home_dir $user)
 	if [ -f "${HOME}/.config/user-dirs.dirs" ]; then
 		line=$(grep "^[^#].*${dirtype}" "${HOME}/.config/user-dirs.dirs")
@@ -543,9 +558,10 @@ function get_special_dir {
 
 
 function chmod_file {
-	file=$1
-	desired_mode=$2
-	pattern='^\d+$'
+	local file=$1
+	local desired_mode=$2
+	local pattern='^\d+$'
+	local actual_mode
 	if [[ ! "${desired_mode}" =~ $pattern ]]; then
 		errcho "Wrong file permissions. Needs octal format."
 		return 1
@@ -561,11 +577,11 @@ function chmod_file {
 }
 
 function smb_share_client {
-	server=$1
-	remote_name=$2
-	local_path=$3
-	credentials_file=$4
-	extra_opt=$5
+	local server=$1
+	local remote_name=$2
+	local local_path=$3
+	local credentials_file=$4
+	local extra_opt=$5
 	if [ "${credentials_file}" == "auto" ]; then
 		credentials_file="/etc/samba/user"
 	fi
@@ -576,7 +592,7 @@ function smb_share_client {
 }
 
 function mount_smb_share {
-	mountpoint=$1
+	local mountpoint=$1
 	if [ ! -d "$mountpoint" ]; then
 		while [ ! -d "$mountpoint" ]; do
 			mountpoint=$(dirname "$mountpoint")
@@ -586,8 +602,8 @@ function mount_smb_share {
 }
 
 function is_mounted {
-	device=$1
-	mountpoint=$2
+	local device=$1
+	local mountpoint=$2
 	if [ -n "$device" ] && [ -n "$mountpoint" ]; then
 		ans=$(mount | grep -F "${device} on ${mountpoint}")
 	elif [ -n "$device" ]; then
@@ -606,12 +622,12 @@ function is_mounted {
 }
 
 function fstab_entry {
-	spec=$1
-	file=$2
-	vfstype=$3
-	opt=$4
-	dump=$5
-	passno=$6
+	local spec=$1
+	local file=$2
+	local vfstype=$3
+	local opt=$4
+	local dump=$5
+	local passno=$6
 	install_apt_package augeas-tools augtool
 	logheredoc EOT
 	cat >/tmp/fstab.augeas<<EOT
@@ -669,7 +685,7 @@ function is_host_up {
 }
 
 function get_ui_context {
-	user=$1
+	local user=$1
 	if [ -z "$user" ]; then
 		user=$USER
 	fi
@@ -710,9 +726,9 @@ function get_ui_context {
 }
 
 function gsettings_set_value {
-	schema=$1
-	name=$2
-	value=$3
+	local schema=$1
+	local name=$2
+	local value=$3
 	get_ui_context
 	existing_value=$(gsettings get ${schema} ${name})
 	if [ "$existing_value" != "$value" ]; then
@@ -721,8 +737,8 @@ function gsettings_set_value {
 }
 
 function set_mime_default {
-	filetype=$1
-	value=$2
+	local filetype=$1
+	local value=$2
 	get_ui_context
 	existing_value=$(xdg-mime query default ${filetype})
 	if [ "$existing_value" != "$value" ]; then
@@ -731,8 +747,8 @@ function set_mime_default {
 }
 
 function load_gsettings_array {
-	schema=$1
-	name=$2
+	local schema=$1
+	local name=$2
 	get_ui_context
 	local existing_values=$(gsettings get ${schema} ${name})
 	if [ -n "${existing_values}" ]; then
@@ -936,10 +952,10 @@ function get_git_repo {
 }
 
 function make_desktop_non_script {
-	execpath="$1"
-	title="$2"
-	description="$3"
-	icon="$4"
+	local execpath="$1"
+	local title="$2"
+	local description="$3"
+	local icon="$4"
 	
 	if [ -f "$icon" ]; then
 		icon_dir="/usr/share/icons/myicon"
