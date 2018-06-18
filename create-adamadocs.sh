@@ -72,10 +72,10 @@ function keygen {
 	shift
 	
 	while [[ $# > 0 ]]; do
-	key="$1"
+	arg="$1"
 	shift
 
-	case $key in
+	case $arg in
 		--debug)
 		debug=1
 		;;
@@ -122,10 +122,10 @@ function format {
 	shift
 	
 	while [[ $# > 0 ]]; do
-	key="$1"
+	arg="$1"
 	shift
 
-	case $key in
+	case $arg in
 		--debug)
 		debug=1
 		;;
@@ -276,9 +276,9 @@ function setup {
 	shift
 	
 	while [[ $# > 0 ]]; do
-	key="$1"
+	arg="$1"
 	shift
-	case $key in
+	case $arg in
 		--debug)
 		debug=1
 		;;
