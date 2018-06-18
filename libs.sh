@@ -1075,7 +1075,7 @@ function find_device_from_mountpoint {
 #Gets the backing device from the dm device if it uses cryptsetup
 function device_from_crypt_dmapper {
 	local dmdevice=$1
-	local pattern='device: *()[^ ]+)$'
+	local pattern='device: *([^ ]+)$'
 	local backend_line=$(sudo cryptsetup status "/dev/mapper/${dmdevice}" | grep -F "device:")
 	if [[ "$backend_line" =~ $pattern ]]; then
 		echo "${BASH_REMATCH[1]}"
