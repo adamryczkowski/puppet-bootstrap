@@ -254,6 +254,8 @@ function link_folder {
 					else
 						logexec sudo -u $user rmdir "$source"
 					fi
+				else
+					logexec sudo rmdir "${source}" 
 				fi
 			else
 				if [ "$(readlink "$source")" != "$dest" ]; then
