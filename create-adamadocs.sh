@@ -242,7 +242,7 @@ function link_folder {
 	dest="$2"
 	user="$3"
 	
-	source=$(get_special_dir $user $mode)
+	source=$(get_special_dir $mode $user)
 	if [ "$source" != "" ]; then
 		if [ -d "$source" ] && [ -d $dest ]; then
 			tmpname=$(mktemp -d --dry-run "${source}.XXX")
