@@ -226,7 +226,7 @@ function bumblebee {
 
 function cli {
 	tweak_base
-	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu openssh-server
+	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu openssh-server silversearcher-ag
 	logexec liquidprompt_activate
 	logexec sudo liquidprompt_activate
 	home=$(get_home_dir)

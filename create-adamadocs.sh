@@ -374,13 +374,7 @@ function setup {
 		fi
 	fi
 	
-	release=$(get_ubuntu_codename)
-	if [ "$release" == "bionic" ]; then
-		echo "TODO"
-		#TODO: dodać do skryptów uruchamianych podczas logowania
-	else
-		linetextfile /etc/pam.d/common-session "session optional	pam_exec.so	/bin/sh /usr/local/lib/adam/mounter.sh"
-	fi
+	linetextfile /etc/pam.d/common-session "session optional	pam_exec.so	/bin/sh /usr/local/lib/adam/mounter.sh"
 	if [ -n "$user_docs_prefix" ]; then
 		user_docs_prefix="${mount_point}/${user_docs_prefix}"
 		link_folder DESKTOP "${user_docs_prefix}/Desktop" $user
