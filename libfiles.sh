@@ -252,6 +252,7 @@ function uncompress_cached_file {
 		user=$USER
 	fi
 	
+	
 	path_filename=$(get_cached_file "$filename")
 	if [ -z "$path_filename" ]; then
 		return 1
@@ -259,15 +260,28 @@ function uncompress_cached_file {
 	if [ -z "$destination" ]; then
 		return 2
 	fi
+	moddate_remote=$(stat -c %y "$filename")
+	if [ -f "${destination}/.timestamp" ]; then
+		moddate_hdd=$(cat "${destination}/.timestamp")
+		if [ "$moddate_hdd" == "$moddate_remote" ]; then
+			return 0
+		fi
+	fi
 	if is_folder_writable "$destination" "$user"; then
 		if [ "$user" == "$USER" ]; then
 			logexec tar -xvf "$path_filename" -C "$destination"
+			$loglog
+			echo "$moddate_remote" | tee "${destination}/.timestamp"
 		else
 			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
+			$loglog
+			echo "$moddate_remote" | sudo -u "$user" -- tee "${destination}/.timestamp"
 		fi
 	else
 		logexec sudo tar -xvf "$path_filename" -C "$destination"
 		logexec sudo chown -R "$user" "$destination"
+		$loglog
+		echo "$moddate_remote" | sudo -u "$user" -- tee "${destination}/.timestamp"
 	fi
 }
 
