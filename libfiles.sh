@@ -308,8 +308,6 @@ function is_folder_writable {
 	local folder="$1"
 	local user="$2"
 	
-	USER=johndoe
-DIR=/path/to/somewhere
 	#source: https://stackoverflow.com/questions/14103806/bash-test-if-a-directory-is-writable-by-a-given-uid
 	# Use -L to get information about the target of a symlink,
 	# not the link itself, as pointed out in the comments
