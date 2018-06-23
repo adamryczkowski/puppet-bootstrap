@@ -171,7 +171,7 @@ function install_script {
 function chmod_file {
 	local file=$1
 	local desired_mode=$2
-	local pattern='^\d+$'
+	local pattern='^[[:digit:]]+$'
 	local actual_mode
 	if [[ ! "${desired_mode}" =~ $pattern ]]; then
 		errcho "Wrong file permissions. Needs octal format."
