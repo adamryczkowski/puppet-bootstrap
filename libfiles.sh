@@ -311,7 +311,7 @@ function is_folder_writable {
 	#source: https://stackoverflow.com/questions/14103806/bash-test-if-a-directory-is-writable-by-a-given-uid
 	# Use -L to get information about the target of a symlink,
 	# not the link itself, as pointed out in the comments
-	INFO=( $(stat -L -c "%a %G %U" $folder) )
+	INFO=( $(stat -L -c "0%a %G %U" $folder) )
 	PERM=${INFO[0]}
 	GROUP=${INFO[1]}
 	OWNER=${INFO[2]}
