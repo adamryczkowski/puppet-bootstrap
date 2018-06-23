@@ -410,10 +410,10 @@ function owncloud {
 	ver=$(get_ubuntu_version)
 	if [[ "$ver" == "1604" ]]; then
 		contents='deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_16.04/ /'
-		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_16.04/Release.key ownCloud_Release.key
+		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_16.04/Release.key ownCloud_16.04_Release.key
 	elif [[ "$ver" == "1804" ]]; then
 		contents='deb http://download.owncloud.org/download/repositories/10.0/Ubuntu_18.04/ /'
-		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.owncloud.org/download/repositories/10.0/Ubuntu_16.04/Release.key ownCloud_Release.key
+		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.owncloud.org/download/repositories/10.0/Ubuntu_16.04/Release.key ownCloud_18.04_Release.key
 	else
 		errcho "Unsupported UBUNTU!!"
 	fi
