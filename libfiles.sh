@@ -266,8 +266,8 @@ function uncompress_cached_file {
 			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
 		fi
 	else
-		sudo logexec sudo tar -xvf "$path_filename" -C "$destination"
-		sudo logexec chown -R "$user" "$destination"
+		logexec sudo tar -xvf "$path_filename" -C "$destination"
+		logexec sudo chown -R "$user" "$destination"
 	fi
 }
 
