@@ -192,7 +192,7 @@ function chmod_dir {
 	local desired_mode_dir=$2
 	local desired_mode_file=$3
 	local desired_mode_exec_file=$4
-	local pattern='^\d+$'
+	local pattern='^[[:digit:]]+$'
 	local actual_mode
 	if [[ ! "${desired_mode_file}" =~ $pattern ]]; then
 		errcho "Wrong file permissions. Needs octal format."
