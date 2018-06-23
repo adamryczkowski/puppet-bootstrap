@@ -30,7 +30,7 @@ case $1 in
 	word)
 	prg="WINWORD.EXE"
 	;;
-	powerpooint)
+	powerpoint)
 	prg="POWERPNT.EXE"
 	;;
 	*)
