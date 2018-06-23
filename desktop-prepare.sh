@@ -175,6 +175,51 @@ function office2007 {
 	
 	do_update
 	install_apt_package winehq-devel playonlinux
+	
+	uncompress_cached_file office2007_pl.tar.xz "/opt/" "$user"
+	#Make sure all office is writable by anyone with execute permission preserverd
+	chmod_dir /opt/Office2007 777 666 777
+	
+	install_script files/launch_office.sh /usr/local/bin/launch_office
+
+	local office_install="/opt/Office2007"
+	textfile /usr/share/applications/excel.desktop "#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=Microsoft Excel
+Exec=/usr/local/bin/launch_office.sh excel %U
+Type=Application
+StartupNotify=true
+Path=${office_install}/drive_c/Program Files/Microsoft Office/Office12
+Icon=${office_install}/Microsoft Office Excel 2007
+StartupWMClass=EXCEL.EXE
+Terminal=false
+MimeType=application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.spreadsheet-template;application/vnd.sun.xml.calc;application/vnd.sun.xml.calc.template;application/msexcel;application/vnd.ms-excel;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.ms-excel.sheet.macroenabled.12;application/vnd.openxmlformats-officedocument.spreadsheetml.template;application/vnd.ms-excel.template.macroenabled.12;application/vnd.ms-excel.sheet.binary.macroenabled.12;text/csv;application/x-dbf;text/spreadsheet;application/csv;application/excel;application/tab-separated-values;application/vnd.lotus-1-2-3;application/vnd.oasis.opendocument.chart;application/vnd.oasis.opendocument.chart-template;application/x-dbase;application/x-dos_ms_excel;application/x-excel;application/x-msexcel;application/x-ms-excel;application/x-quattropro;application/x-123;text/comma-separated-values;text/tab-separated-values;text/x-comma-separated-values;text/x-csv;application/vnd.oasis.opendocument.spreadsheet-flat-xml;application/vnd.ms-works;application/clarisworks;application/x-iwork-numbers-sffnumbers;"
+
+	textfile /usr/share/applications/powerpoint.desktop "#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=Microsoft Powerpoint
+Exec=/usr/local/bin/launch_office.sh powerpoint %U
+Type=Application
+StartupNotify=true
+Path=${office_install}/drive_c/Program Files/Microsoft Office/Office12
+Icon=${office_install}/Microsoft Office PowerPoint 2007
+StartupWMClass=POWERPNT.EXE
+Terminal=false
+Name[en_US]=Microsoft PowerPoint"
+
+	textfile /usr/share/applications/word.desktop "#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=Microsoft Word
+Exec=/usr/local/bin/launch_office.sh word %U
+Type=Application
+StartupNotify=true
+Path=${office_install}/drive_c/Program Files/Microsoft Office/Office12
+Icon=${office_install}/Microsoft Office Word 2007
+StartupWMClass=WINWORD.EXE
+Terminal=false
+Name[en_US]=Microsoft Word
+MimeType=application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocument.text-template;application/vnd.oasis.opendocument.text-web;application/vnd.oasis.opendocument.text-master;application/vnd.oasis.opendocument.text-master-template;application/vnd.sun.xml.writer;application/vnd.sun.xml.writer.template;application/vnd.sun.xml.writer.global;application/msword;application/vnd.ms-word;application/x-doc;application/x-hwp;application/rtf;text/rtf;application/vnd.wordperfect;application/wordperfect;application/vnd.lotus-wordpro;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.ms-word.document.macroenabled.12;application/vnd.openxmlformats-officedocument.wordprocessingml.template;application/vnd.ms-word.template.macroenabled.12;application/vnd.ms-works;application/vnd.stardivision.writer-global;application/x-extension-txt;application/x-t602;text/plain;application/vnd.oasis.opendocument.text-flat-xml;application/x-fictionbook+xml;application/macwriteii;application/x-aportisdoc;application/prs.plucker;application/vnd.palm;application/clarisworks;application/x-sony-bbeb;application/x-abiword;application/x-iwork-pages-sffpages;application/x-mswrite;application/x-starwriter;"
+
 }
 
 function laptop {
