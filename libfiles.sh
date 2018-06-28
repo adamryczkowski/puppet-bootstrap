@@ -107,7 +107,7 @@ function textfile {
 			echo "$contents" | tee "${file}" >/dev/null
 		else
 			loglog
-			echo "$contents" | sudo -u tee "$user" "${file}" >/dev/null
+			echo "$contents" | sudo -u "$user" -- tee "${file}" >/dev/null
 		fi
 		return 0
 	fi
