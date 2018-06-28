@@ -3,6 +3,7 @@
 source libapt.sh
 source libfiles.sh
 source libgsettings.sh
+source libgit.sh
 source libmount.sh
 source libnet.sh
 
