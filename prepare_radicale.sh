@@ -9,12 +9,13 @@ Prepares the radicale calendar server
 
 Usage:
 
-$(basename $0)  [--cal_user <user>:<password>] 
+$(basename $0)  [--cal-user <user>:<password>] 
                 [--help] [--debug] [--log <output file>] 
 
 
 where
 
+ --cal-user <user>:<password> - Username and password of first calendar user
  --debug                      - Flag that sets debugging mode. 
  --log                        - Path to the log file that will log all meaningful commands
 
@@ -55,7 +56,7 @@ case $key in
 	echo "$usage"
 	exit 0
 	;;
-	--cal_user)
+	--cal-user)
 	cal_user=$1
 	shift
 	;;
@@ -71,6 +72,7 @@ done
 install_apt_packages python3-pip apache2-utils git
 install_pip3_packages radicale[bcrypt]
 
+#logmkdir /var/lib/radicale/collections root
 make_service_user radicale /var/lib/radicale/collections
 make_sure_git_exists /var/lib/radicale/collections radicale
 
@@ -119,6 +121,11 @@ if [ -n "$cal_user" ]; then
 		logexec sudo htpasswd -B $infix -b /etc/radicale/users $cal_user $cal_password
 	fi
 fi
+
+textfile /etc/gitconfig "[user]
+	email = radicale@localhost
+	name = Radicale server" root
+
 
 custom_systemd_service radicale "[Unit]
 Description=A simple CalDAV (calendar) and CardDAV (contact) server
