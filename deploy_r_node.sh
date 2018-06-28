@@ -155,4 +155,4 @@ if [ -n "${install_lib}" ]; then
 	fi
 fi
 
-./execute-script-remotely.sh prepare-R-node.sh --step-debug --ssh-address $ssh_address  $opts -- $opts2 --debug
+./execute-script-remotely.sh prepare_R-node.sh --step-debug --ssh-address $ssh_address  $opts -- $opts2 --debug

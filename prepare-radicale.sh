@@ -9,12 +9,13 @@ Prepares the radicale calendar server
 
 Usage:
 
-$(basename $0)  [--cal_user <user>:<password>] 
+$(basename $0)  [--cal-user <user>:<password>] 
                 [--help] [--debug] [--log <output file>] 
 
 
 where
 
+ --cal-user <user>:<password> - Username and password of first calendar user
  --debug                      - Flag that sets debugging mode. 
  --log                        - Path to the log file that will log all meaningful commands
 
@@ -55,7 +56,7 @@ case $key in
 	echo "$usage"
 	exit 0
 	;;
-	--cal_user)
+	--cal-user)
 	cal_user=$1
 	shift
 	;;
@@ -78,7 +79,7 @@ textfile /var/lib/radicale/collections/.git ".Radicale.cache
 .Radicale.lock
 .Radicale.tmp-*" radicale
 
-textfile /etc/radicale/conf "[auth]
+textfile /etc/radicale/config "[auth]
 type = htpasswd
 htpasswd_filename = /etc/radicale/users
 # encryption method used in the htpasswd file
