@@ -116,7 +116,7 @@ if [ -n "$cal_user" ]; then
 	fi 
 	
 	if ! grep -Exq "^${cal_user}:}" /etc/radicale/users; then
-		logexec sudo -u $user htpasswd -B $infix -b /etc/radicale/users $cal_user $cal_password
+		logexec sudo -u radicale htpasswd -B $infix -b /etc/radicale/users $cal_user $cal_password
 	fi
 fi
 
