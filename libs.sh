@@ -207,6 +207,6 @@ function make_service_user {
 		homedir=" --home-dir \"$homedir\""
 	fi
 	if ! id -u $username 2>/dev/null; then
-		logexec sudo useradd -r --shell $homedir /bin/false $username 
+		logexec sudo useradd -r $homedir --shell /bin/false $username 
 	fi
 }

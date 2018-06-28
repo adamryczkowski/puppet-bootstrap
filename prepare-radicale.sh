@@ -72,6 +72,7 @@ done
 install_apt_packages python3-pip apache2-utils git
 install_pip3_packages radicale[bcrypt]
 
+logmkdir /var/lib/radicale/collections root
 make_service_user radicale /var/lib/radicale/collections
 make_sure_git_exists /var/lib/radicale/collections radicale
 
