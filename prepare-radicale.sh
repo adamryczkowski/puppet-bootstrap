@@ -121,6 +121,11 @@ if [ -n "$cal_user" ]; then
 	fi
 fi
 
+textfile /etc/gitconfig "[user]
+	email = radicale@localhost
+	name = Radicale server" root
+
+
 custom_systemd_service radicale "[Unit]
 Description=A simple CalDAV (calendar) and CardDAV (contact) server
 After=network.target
