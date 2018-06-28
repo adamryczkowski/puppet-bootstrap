@@ -238,7 +238,7 @@ Categories=Application;"
 }
 
 function make_service_user {
-	local username $1
+	local username=$1
 	if ! id -u name 2>/dev/null; then
 		logexec sudo useradd -r --shell /bin/false $username 
 	fi
