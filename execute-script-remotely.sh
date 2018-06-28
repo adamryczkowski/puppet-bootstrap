@@ -86,7 +86,7 @@ if [ -z "$exec_script" ]; then
 fi
 shift
 
-exec_extrascripts="$exec_script common.sh libs.sh"
+exec_extrascripts="$exec_script common.sh lib*.sh"
 
 if [ ! -f "$exec_script" ]; then
 	errcho "Cannot find script at location $exec_script"
