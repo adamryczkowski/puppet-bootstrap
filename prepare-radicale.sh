@@ -100,7 +100,7 @@ hook = git add -A && (git diff --cached --quiet || git commit -m \"Changes by \"
 " radicale
 
 if [ -n "$cal_user" ]; then
-	pattern='^([^:]):(.*)$'
+	pattern='^([^:]+):(.*)$'
 	if [[ "$cal_user" =~ $pattern ]]; then
 		cal_user=${BASH_REMATCH[1]}
 		cal_password=${BASH_REMATCH[2]}
