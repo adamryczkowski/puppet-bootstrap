@@ -50,6 +50,7 @@ Description=$description
 
 [Service]
 ExecStart="$program" $args
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
@@ -72,6 +73,26 @@ EOT
 			logexec sudo systemctl enable $name
 		fi
 	fi 
+
+	if ! systemctl status $name | grep -q running; then
+		logexec sudo service $name start
+		return 0
+	fi
+	return 1
+}
+
+
+function custom_systemd_service {
+	local name=$1
+	local contents="$2"
+	local is_active
+	
+	textfile /lib/systemd/system/${name}.service "${contents}" root
+	logexec sudo systemctl daemon-reload
+	is_active=$(systemctl is-active $name)
+	if [ ! "$is_active" == "active" ]; then
+		logexec sudo systemctl enable $name
+	fi
 
 	if ! systemctl status $name | grep -q running; then
 		logexec sudo service $name start
@@ -216,4 +237,9 @@ Categories=Application;"
 	textfile "/usr/share/applications/${filename}.desktop" "$contents"
 }
 
-
+function make_service_user {
+	local username $1
+	if ! id -u name 2>/dev/null; then
+		logexec sudo useradd -r --shell /bin/false $username 
+	fi
+}

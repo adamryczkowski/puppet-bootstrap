@@ -84,8 +84,14 @@ function linetextfile {
 function textfile {
 	local file=$1
 	local contents=$2
+	local user=$3
+	
+	if [ -z "$user" ]; then
+		user="$USER"
+	fi
+	
 	local flag
-	logmkdir $(dirname ${file})
+	logmkdir $(dirname ${file}) $user
 	if [ ! -f "${file}" ]; then
 		flag=1
 	else
@@ -96,12 +102,12 @@ function textfile {
 		fi
 	fi
 	if [ "$flag" == "1" ]; then
-		if [ -w "${file}" ]; then
+		if [ -w "${file}" ] && [ "$user" == "$USER" ]; then
 			loglog
 			echo "$contents" | tee "${file}" >/dev/null
 		else
 			loglog
-			echo "$contents" | sudo tee "${file}" >/dev/null
+			echo "$contents" | sudo tee -u "$user" "${file}" >/dev/null
 		fi
 		return 0
 	fi
@@ -213,6 +219,30 @@ function chmod_dir {
 		logexec sudo find "$file" -type f -perm /111 -not -perm "$desired_mode_exec_file" -exec chmod "$desired_mode_exec_file" {} \;
 		logexec sudo find "$file" -type f -not -perm /111 -not -perm "$desired_mode_file" -exec chmod "$desired_mode_file" {} \;
 	fi
+}
+
+function chown_dir {
+	local file=$1
+	local user=$2
+	local group=$3
+	
+	if [ -z "$group" ]; then
+		group="$user"
+	fi
+	
+	if [ -z "$user" ]; then
+		errcho "No user name exitting"
+		exit 1
+	fi
+	if [ -z "$file" ]; then
+		errcho "No path. Exiting"
+		exit 1
+	fi
+	if [ ! -d "${file}" ]; then
+		errcho "File ${file} doesn't exist"
+		return 1
+	fi
+	logexec sudo find "$file" -not -user "$user"  -group "$group" -exec chown "${user}:${group}" {} \;
 }
 
 # returns path
