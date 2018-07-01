@@ -363,7 +363,7 @@ function setup {
 /bin/sleep 1
 for file in /usr/local/lib/adam/mounter/*.link; do
 	if [ -r "\$file" ]; then
-		key=$file
+		key=\$(cat \$file)
 		break
 	fi
 done
