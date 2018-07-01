@@ -361,7 +361,7 @@ function setup {
 	logmkdir /usr/local/lib/adam/mounter
 	textfile /usr/local/lib/adam/mounter/mounter.sh "#!/bin/bash
 /bin/sleep 1
-for file in ls /usr/local/lib/adam/mounter/*.link; do
+for file in /usr/local/lib/adam/mounter/*.link; do
 	if [ -r "\$file" ]; then
 		key=$file
 		break
