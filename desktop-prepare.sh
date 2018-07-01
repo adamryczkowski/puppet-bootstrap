@@ -140,7 +140,11 @@ function desktop {
 		install_apt_package gnome-tweak-tool
 		ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
 		install_gnome_extension ${ext_path}
+		
+		gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
+		gsettings_set_value org.gnome.mutter dynamic-workspaces false
 	fi
+	gsettings_set_value org.gnome.desktop.wm.preferences num-workspaces 9
 	install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
 	
 	install_apt_packages redshift-gtk

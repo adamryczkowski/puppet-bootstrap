@@ -199,6 +199,7 @@ function install_gnome_extension {
 			fi
 			gsettings_add_to_array org.gnome.shell enabled-extensions "$ext_id" 1
 			dconf update
+			logexec gnome-shell-extension-tool -e "$ext_id"
 		fi
 	fi
 }
