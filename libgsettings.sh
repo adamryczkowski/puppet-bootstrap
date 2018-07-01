@@ -188,3 +188,27 @@ function gsettings_remove_from_array2 {
 	fi
 }
 
+function install_gnome_extension {
+	local ext_path="$1"
+	if [ -r "$ext_path" ]; then
+		local ext_id=$(unzip -c "$ext_path" metadata.json | grep uuid | cut -d \" -f4)
+		if [ $! ]; then
+			local ext_target_path="/usr/share/gnome-shell/extensions/${ext_id}"
+			if [ ! -d "$ext_target_path" ]; then
+				logexec unzip -q "$ext_path" -d "${ext_target_path}/"
+			fi
+			gsettings_add_to_array org.gnome.shell enabled_extensions "$ext_id" 1
+			dconf update
+		fi
+	fi
+}
+
+function gsettings_set_global_value {
+	#TODO
+	logmkdir /etc/dconf/profile
+	textfile /etc/dconf/profile/user "user-db:user
+system-db:local" root
+#TODO: 1. Read the old value and see if it has to be changed
+			
+	textfile /etc/dconf/db/local.d/00-extensions:
+}

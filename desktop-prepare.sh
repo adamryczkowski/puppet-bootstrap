@@ -135,6 +135,12 @@ function desktop {
 	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
 	gsettings_set_value com.canonical.Unity integrated-menus true
 	
+	release=$(get_ubuntu_codename)
+	if [ "$release" == "bionic" ]; then
+		install_apt_package gnome-tweak-tool
+		ext_path=$(get_cached_file gnome_extensions/workspace-grid-for-3.16-to-3.26.zip "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
+		install_gnome_extension ${ext_path}
+	fi
 	install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
 	
 	install_apt_packages redshift-gtk
@@ -230,6 +236,13 @@ MimeType=application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocum
 
 function laptop {
 	desktop
+	gsettings_set_value org.gnome.desktop.peripherals.touchpad click-method "fingers"
+	gsettings_set_value org.gnome.desktop.peripherals.touchpad edge-scrolling-enabled true
+	gsettings_set_value org.gnome.desktop.peripherals.touchpad two-finger-scrolling-enabled false
+	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method 'edge-scrolling'
+	gsettings_set_value org.gnome.desktop.peripherals.touchpad tap-to-click true
+	gsettings_set_value org.gnome.desktop.peripherals.touchpad natural-scroll false
+
 }
 
 function nvidia {

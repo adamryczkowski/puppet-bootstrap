@@ -382,3 +382,15 @@ function is_folder_writable {
 		return 1
 	fi
 }
+
+function get_files_matching_regex {
+	local path="$1"
+	local regex="$2"
+	local recurse="$3"
+	
+	if [ -z "$recurse" ]; then
+		grep -HiRE "$regex" "$path" #H for file printing, i for case-insensitive, R for recursive search, E for regex 
+	else
+		grep -HiE "$regex" "$path" #H for file printing, i for case-insensitive, R for recursive search, E for regex 
+	fi
+}
