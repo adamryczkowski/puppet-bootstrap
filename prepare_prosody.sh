@@ -15,7 +15,7 @@ $(basename $0) <server_name> [--add-user <user>:<password>]
 
 where
  <server_name>                - Name of the server. All clients should identify the server by its name otherwise the certificate wouldn't work
- --ad-user <user>:<password>  - Adds user with on each run
+ --add-user <user>:<password>  - Adds user with on each run
  --debug                      - Flag that sets debugging mode. 
  --log                        - Path to the log file that will log all meaningful commands
 
@@ -68,7 +68,7 @@ add_apt_source_manual prosody "deb https://packages.prosody.im/debian xenial mai
 
 install_apt_packages prosody
 
-prosody_config=$(cat prosody.config.lua | envsubst)
+prosody_config=$(cat files/prosody.config.lua | envsubst)
 
 textfile /etc/prosody/prosody.cfg.lua "$prosody_config" root
 luac -p /etc/prosody/prosody.cfg.lua
@@ -81,20 +81,21 @@ ${server_name}
 
 
 
-" | prosodyctl cert generate "${server_name}"
+" | sudo prosodyctl cert generate "${server_name}"
 fi
 
 if [ -n "$add_user_txt" ]; then
 	pattern='^([^:]+):(.*)$'
-	if [[ "$cal_user_txt" =~ $pattern ]]; then
+	if [[ "$add_user_txt" =~ $pattern ]]; then
 		add_user=${BASH_REMATCH[1]}
 		add_password=${BASH_REMATCH[2]}
 	else
 		errcho "Wrong format of --add_user argument. Please use \"user:pa\$\$word\"."
 		exit 1
 	fi
-	logexec sudo prosodyctl adduser "${add_user}@${server_name}"
-	echo "$add_password" | sudo prosodyctl passwd "${add_user}@${server_name}"
+	echo "$add_password
+$add_password" | sudo prosodyctl adduser "${add_user}@${server_name}"
+# sudo prosodyctl passwd "${add_user}@${server_name}"
 fi
 
-
+sudo systemctl restart prosody

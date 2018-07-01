@@ -170,7 +170,7 @@ VirtualHost "${server_name}"
 
 ---Set up a MUC (multi-user chat) room server on conference.example.com:
 --Component "conference.example.com" "muc"
-Component "conference.${server_name}.com" "muc"
+--Component "conference.${server_name}.com" "muc"
 
 ---Set up an external component (default component port is 5347)
 --
