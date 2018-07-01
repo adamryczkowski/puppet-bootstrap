@@ -359,12 +359,21 @@ function setup {
 	fi
 	
 	logmkdir /usr/local/lib/adam/mounter
-	textfile /usr/local/lib/adam/mounter.sh "#!/bin/bash
+	textfile /usr/local/lib/adam/mounter/mounter.sh "#!/bin/bash
 /bin/sleep 1
-/sbin/cryptsetup luksOpen --key-file \"$key\" \"$device\" crypt-docs
-/bin/mount -t btrfs -o compress,rw,noacl,noatime,autodefrag,ssd  /dev/mapper/crypt-docs \"$mount_point\"
-/bin/chmod 0775 /home/Docs
-/bin/sync" 
+for file in ls /usr/local/lib/adam/mounter/*.link; do
+	if [ -r "\$file" ]; then
+		key=$file
+		break
+	fi
+done
+if [ -n "\$key" ]; then
+	/sbin/cryptsetup luksOpen --key-file \"$key\" \"$device\" crypt-docs
+	/bin/mount -t btrfs -o compress,rw,noacl,noatime,autodefrag,ssd  /dev/mapper/crypt-docs \"$mount_point\"
+	/bin/chmod 0775 /home/Docs
+	/bin/sync
+fi" 
+	textfile /usr/local/lib/adam/mounter/"${user}.link" "$key"
 	logexec sudo chmod +x /usr/local/lib/adam/mounter.sh
 	
 	if [ "$mounted" == "0" ]; then
