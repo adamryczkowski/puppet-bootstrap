@@ -195,7 +195,7 @@ function install_gnome_extension {
 		if [ -n "$ext_id" ]; then
 			local ext_target_path="/usr/share/gnome-shell/extensions/${ext_id}"
 			if [ ! -d "$ext_target_path" ]; then
-				logexec unzip -q "$ext_path" -d "${ext_target_path}/"
+				logexec sudo unzip -q "$ext_path" -d "${ext_target_path}/"
 			fi
 			gsettings_add_to_array org.gnome.shell enabled_extensions "$ext_id" 1
 			dconf update
