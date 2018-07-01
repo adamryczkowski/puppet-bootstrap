@@ -109,8 +109,12 @@ function add_ppa {
 	if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
 
 		install_apt_package software-properties-common add-apt-repository
-
-		logexec sudo add-apt-repository -y ppa:${the_ppa}
+		release=$(get_ubuntu_codename)
+		if [ "$release" =="xenial" ]; then
+			logexec sudo add-apt-repository -y ppa:${the_ppa}
+		else
+			logexec sudo add-apt-repository --no-update -y ppa:${the_ppa}
+		fi
 		flag_need_apt_update=1
 		return 0
 	fi
