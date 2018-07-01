@@ -326,6 +326,7 @@ function setup {
 			if [[ "$actual_dmdevice" =~ $pattern ]]; then
 				actual_dmdevice="${BASH_REMATCH[1]}"
 				actual_device=$(device_from_crypt_dmapper "${actual_dmdevice}")
+				actual_device=$(readlink -f actual_device)
 				if [ -n "${actual_device}" ]; then
 					if [ "${actual_device}" != "$device" ]; then
 						errcho "Different documents are mounted right now. Exiting."
