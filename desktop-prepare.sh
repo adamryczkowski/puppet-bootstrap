@@ -138,7 +138,7 @@ function desktop {
 	release=$(get_ubuntu_codename)
 	if [ "$release" == "bionic" ]; then
 		install_apt_package gnome-tweak-tool
-		ext_path=$(get_cached_file gnome_extensions/workspace-grid-for-3.16-to-3.26.zip "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
+		ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
 		install_gnome_extension ${ext_path}
 	fi
 	install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
