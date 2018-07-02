@@ -189,7 +189,7 @@ function chmod_file {
 	fi
 	actual_mode=$(stat -c "%a" ${file})
 	if [ "${desired_mode}" != "${actual_mode}" ]; then
-		logexec chmod ${desired_mode} ${file}
+		logexec sudo chmod ${desired_mode} ${file}
 	fi
 }
 
