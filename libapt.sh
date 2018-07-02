@@ -128,7 +128,7 @@ function add_apt_source_manual {
 	local release_key_URI="$3"
 	local cached_release_key="$4"
 	local release_key
-	textfile "/etc/apt/sources.list.d/${filename}.list" "${contents}"
+	textfile "/etc/apt/sources.list.d/${filename}.list" "${contents}" root
 	if [ "$?" == "0" ]; then
 		flag_need_apt_update=1
 	fi
