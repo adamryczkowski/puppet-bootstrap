@@ -66,6 +66,28 @@ function get_best_wine_path {
 	echo "$best_answer"
 }
 
+function get_special_dir {
+	local dirtype=$1
+	local user=$2
+	local ans=""
+	local HOME
+	local pattern
+	local folder
+	HOME=$(get_home_dir $user)
+	if [ -f "${HOME}/.config/user-dirs.dirs" ]; then
+		line=$(grep "^[^#].*${dirtype}" "${HOME}/.config/user-dirs.dirs")
+		pattern="^.*${dirtype}.*=\"?([^\"]+)\"?$"
+		if [[ "$line" =~ $pattern ]]; then
+			folder=${BASH_REMATCH[1]}
+			ans=$(echo $folder | envsubst )
+			if [ "$ans" == "$HOME" ]; then
+				ans=""
+			fi
+		fi
+	fi
+	echo "$ans"
+}
+
 
 doc_dir=$(get_special_dir DOCUMENTS "$USER")
 desktop_dir=$(get_special_dir DOCUMENTS "$USER")
@@ -75,8 +97,6 @@ declare -a args
 for var in "$@"
 do
 	arg=$(readlink -f "$var")
-#	openin=`dirname "${arg}"`
-	#echo "arg: ${arg}" >/tmp/kiki
 	if [ -n "$arg" ]; then
 		docpath=$(get_best_wine_path "${arg}")
 		args+=("$docpath")

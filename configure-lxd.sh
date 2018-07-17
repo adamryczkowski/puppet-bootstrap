@@ -143,9 +143,12 @@ if ! grep -q "root:$UID:1" /etc/subgid; then
     echo "root:$UID:1" | sudo tee -a /etc/subgid
 fi
 
-the_ppa=ubuntu-lxc/lxc-git-stable-2.0
-add_ppa $the_ppa
-do_upgrade
+release=$(get_ubuntu_codename)
+if [ "$release" == "xenial" ]; then
+	the_ppa=ubuntu-lxc/lxc-git-stable-2.0
+	add_ppa $the_ppa
+	do_upgrade
+fi
 
 #if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
 

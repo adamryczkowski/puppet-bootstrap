@@ -175,6 +175,7 @@ function blender {
 }
 
 function office2007 {
+	
 	echo "#TODO"
 #	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/Release.key)
 #	logexec sudo apt-key add "${release_key}"
@@ -187,7 +188,10 @@ function office2007 {
 	do_update
 	install_apt_package winehq-devel playonlinux
 	
-	uncompress_cached_file office2007_pl.tar.xz "/opt/" "$user"
+	add_group wine_office
+	add_usergroup "$user" wine_office
+	uncompress_cached_file office2007_pl.tar.xz "/opt/" "${user}:wine_office"
+	chown_dir /opt/Office2007 "${user}" wine_office
 	#Make sure all office is writable by anyone with execute permission preserverd
 	chmod_dir /opt/Office2007 777 666 777
 	

@@ -110,7 +110,7 @@ function add_ppa {
 
 		install_apt_package software-properties-common add-apt-repository
 		release=$(get_ubuntu_codename)
-		if [ "$release" =="xenial" ]; then
+		if [ "$release" == "xenial" ]; then
 			logexec sudo add-apt-repository -y ppa:${the_ppa}
 		else
 			logexec sudo add-apt-repository --no-update -y ppa:${the_ppa}

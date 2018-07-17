@@ -242,7 +242,7 @@ function chown_dir {
 		errcho "File ${file} doesn't exist"
 		return 1
 	fi
-	logexec sudo find "$file" -not -user "$user"  -group "$group" -exec chown "${user}:${group}" {} \;
+	logexec sudo find "$file" -not -user "$user" -or -not -group "$group" -exec chown "${user}:${group}" {} \;
 }
 
 # returns path
@@ -276,10 +276,21 @@ function get_cached_file {
 function uncompress_cached_file {
 	local filename="$1"
 	local destination="$2"
-	local user="$3"
+	local usergr="$3"
 	local timestamp_path="${destination}/${filename}.timestamp"
-	if [ -z "$user" ]; then
+	if [ -z "$usergr" ]; then
 		user=$USER
+		usergr=$user
+		group=""
+	else
+		local pattern='^([^:]+):([^:]+)$'
+		if [[ "$usergr" =! $pattern ]]; then
+			group=${BASH_REMATCH[2]}
+			user=${BASH_REMATCH[1]}
+		else
+			group=""
+			user=$user
+		fi
 	fi
 	
 	
@@ -307,7 +318,7 @@ function uncompress_cached_file {
 		fi
 	else
 		logexec sudo tar -xvf "$path_filename" -C "$destination"
-		logexec sudo chown -R "$user" "$destination"
+		logexec sudo chown -R "$usergr" "$destination"
 		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path"
 	fi
 }

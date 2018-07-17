@@ -210,3 +210,19 @@ function make_service_user {
 		logexec sudo useradd -r $homedir --shell /bin/false $username 
 	fi
 }
+
+
+function add_group {
+	local groupname=$1
+	if ! grep -q "^$groupname:" /etc/group; then
+		logexec sudo groupadd $groupname
+	fi
+}
+
+function add_usergroup {
+	local username=$1
+	local groupname=$1
+	if ! groups $username | grep -q "\b${groupname}\b" ;then
+		logexec sudo usermod -a -G ${groupname} ${username}
+	fi
+}
