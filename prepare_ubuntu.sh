@@ -245,7 +245,8 @@ fi
 
 if [ "${install_diff}" == "1" ]; then
 	plik=$(get_cached_file diff-so-fancy https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy)
-	cp_file "${plik}" /usr/local/bin/diff-so-fancy
+	install_script "${plik}" /usr/local/bin/diff-so-fancy
+	
 fi
 
 if [ "${install_find}" == "1" ]; then
