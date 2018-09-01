@@ -280,6 +280,7 @@ if [ "${install_entr}" == "1" ]; then
 	tmp=$(mktemp -d)
 	uncompress_cached_file entr-4.1.tar.gz $tmp
 	logexec pushd ${tmp}/eradman-entr-f4e2cbe57708
+	install_apt_packages build-essential
 	logexec ./configure
 	logexec make
 	logexec sudo make install
@@ -287,13 +288,8 @@ if [ "${install_entr}" == "1" ]; then
 fi
 
 if [ "${install_noti}" == "1" ]; then
+	install_apt_packages golang-go
 	go get -u github.com/variadico/noti/cmd/noti
-fi
-
-if [ "${install_noti}" == "1" ]; then
-	if which go 2>/dev/null; then
-		go get -u github.com/variadico/noti/cmd/noti
-	fi
 fi
 
 if [ "${install_mc}" == "1" ]; then
