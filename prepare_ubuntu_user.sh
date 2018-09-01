@@ -184,7 +184,7 @@ if [ -n "$user" ]; then
 		fi
 	fi
 	
-	linetextfile ${sshhome}/.bashrc 'mkcdir() {mkdir -p -- "$1" && cd -P -- "$1";}'
+	linetextfile ${sshhome}/.bashrc 'mkcdir() { mkdir -p -- "$1" && cd -P -- "$1"; }'
 	
 	if [ "${install_bat}" == "1" ]; then
 		tmp=$(mktemp)
