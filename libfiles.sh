@@ -68,21 +68,21 @@ function logmkdir {
 }
 
 function linetextfile {
-	local file="$1"
+	local plik="$1"
 	local line="$2"
-	if ! grep -qF -- "$line" "$file"; then
-		if [ -w "$file" ]; then
+	if ! grep -qF -- "$line" "$plik"; then
+		if [ -w "$plik" ]; then
 			$loglog
-			echo "$line" >> "$file"
+			echo "$line" >> "$plik"
 		else
 			$loglog
-			echo "$line" | sudo tee -a "$file"
+			echo "$line" | sudo tee -a "$plik"
 		fi
 	fi
 }
 
 function textfile {
-	local file=$1
+	local plik=$1
 	local contents=$2
 	local user=$3
 	
@@ -91,23 +91,23 @@ function textfile {
 	fi
 	
 	local flag
-	logmkdir $(dirname ${file}) $user
-	if [ ! -f "${file}" ]; then
+	logmkdir $(dirname ${plik}) $user
+	if [ ! -f "${plik}" ]; then
 		flag=1
 	else
 		tmpfile=$(mktemp)
 		echo "$contents" > "${tmpfile}"
-		if ! cmp $tmpfile $file; then
+		if ! cmp $tmpfile $plik; then
 			flag=1
 		fi
 	fi
 	if [ "$flag" == "1" ]; then
-		if [ -w "${file}" ] && [ "$user" == "$USER" ]; then
+		if [ -w "${plik}" ] && [ "$user" == "$USER" ]; then
 			loglog
-			echo "$contents" | tee "${file}" >/dev/null
+			echo "$contents" | tee "${plik}" >/dev/null
 		else
 			loglog
-			echo "$contents" | sudo -u "$user" -- tee "${file}" >/dev/null
+			echo "$contents" | sudo -u "$user" -- tee "${plik}" >/dev/null
 		fi
 		return 0
 	fi
