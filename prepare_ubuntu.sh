@@ -267,6 +267,7 @@ if [ "${install_du}" == "1" ]; then
 fi
 
 if [ "${install_tldr}" == "1" ]; then
+	install_apt_packages python3-pip
 	install_pip3_packages tldr
 fi
 
