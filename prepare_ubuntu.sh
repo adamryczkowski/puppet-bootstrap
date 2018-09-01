@@ -279,7 +279,7 @@ if [ "${install_entr}" == "1" ]; then
 	get_cached_file entr-4.1.tar.gz http://entrproject.org/code/entr-4.1.tar.gz
 	tmp=$(mktemp -d)
 	uncompress_cached_file entr-4.1.tar.gz $tmp
-	logexec pushd $tmp
+	logexec pushd ${tmp}/eradman-entr-f4e2cbe57708
 	logexec ./configure
 	logexec make
 	logexec sudo make install
