@@ -107,20 +107,27 @@ case $key in
 	;;
 	--cli_improved)
 	install_bat=1
+	user_opts="${user_opts} --bat"
 	install_ping=1
+	user_opts="${user_opts} --ping"
 	install_fzf=1
+	user_opts="${user_opts} --fzf"
 	install_htop=1
 	install_diff=1
+	user_opts="${user_opts} --diff"
 	install_find=1
 	install_du=1
+	user_opts="${user_opts} --du"
 	install_tldr=1
 	install_ag=1
 	install_entr=1
 	install_noti=1
 	install_mc=1
 	install_liquidprompt=1
+	user_opts="${user_opts} --liquidprompt"
 	install_byobu=1
 	install_autojump=1
+	user_opts="${user_opts} --autojump"
 	;;
 	--bat)
 	install_bat=1
@@ -211,6 +218,7 @@ EOF
 fi
 
 do_update
+do_upgrade
 
 install_apt_packages bash-completion
 
@@ -307,5 +315,13 @@ if [ "${wormhole}" == "1" ]; then
 		logexec sudo -H pip3 install magic-wormhole
 	fi
 fi
-do_upgrade
 
+if [ -n "$user_opts" ]; then
+	if [ -n "$debug" ]; then
+		user_opts="--debug ${user_opts}"
+	fi
+	if [ -n "$log" ]; then
+		user_opts="--log ${log} ${user_opts}"
+	fi
+	./prepare_ubuntu_user.sh ${user_opts}
+fi
