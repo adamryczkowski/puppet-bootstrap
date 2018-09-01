@@ -258,8 +258,8 @@ if [ "${install_du}" == "1" ]; then
 	get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.13.tar.gz
 	tmp=$(mktemp -d)
 	uncompress_cached_file ncdu.tar.gz $tmp
-	logexec pushd $tmp
-	logexec ${tmp}/configure
+	logexec pushd ${tmp}/ncdu-1.13
+	logexec ./configure
 	logexec make
 	logexec sudo make install
 	logexec popd
@@ -277,9 +277,10 @@ fi
 
 if [ "${install_entr}" == "1" ]; then
 	get_cached_file entr-4.1.tar.gz http://entrproject.org/code/entr-4.1.tar.gz
-	uncompress_cached_file entr-4.1.tar.gz /usr/local/lib/entr
-	logexec pushd /usr/local/lib/entr
-	logexec /usr/local/lib/entr/configure
+	tmp=$(mktemp -d)
+	uncompress_cached_file entr-4.1.tar.gz $tmp
+	logexec pushd $tmp
+	logexec ./configure
 	logexec make
 	logexec sudo make install
 	logexec popd
