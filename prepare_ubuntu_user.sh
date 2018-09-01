@@ -23,12 +23,33 @@ where
                             populates authorized_keys
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
+ --bat                    - cat replacement (bat)
+ --ping                   - prettyping (ping),
+ --fzf                    - fzf (for bash ctr+r)
+ --diff                   - diff-so-fancy (diff),
+ --find                   - fd (replaces find)
+ --du                     - ncdu (replaces du), 
+ --tldr                   - tldr,
+ --ag                     - ag (the silver searcher), 
+ --entr                   - entr (watch), 
+ --noti                   - noti (notification when something is done)
+ --mc                     - mc (Midnight Commander)
+ --liquidprompt           - liquidprompt
+ --byobu                  - byobu
 
 
 Example:
 
 $(basename $0) adam --private-key-path /tmp/id_rsa --external-key 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKw6Iu/QmWP0Qb5vHDK+dj7eFEPxhEl2x2JuE/t5D0PV adam@adam-gs40'
 "
+
+install_bat=0
+install_ping=0
+install_fzf=0
+install_diff=0
+install_du=0
+install_liquidprompt=0
+
 
 dir_resolve()
 {
@@ -75,10 +96,28 @@ case $key in
 	private_key_path=$1
 	shift
 	;;
-        -*)
-        echo "Error: Unknown option: $1" >&2
-        echo "$usage" >&2
-        ;;
+	--bat)
+	install_bat=1
+	;;
+	--ping)
+	install_ping=1
+	;;
+	--fzf)
+	install_fzf=1
+	;;
+	--diff)
+	install_diff=1
+	;;
+	--du)
+	install_du=1
+	;;
+	--liquidprompt)
+	install_liquidprompt=1
+	;;
+	-*)
+	echo "Error: Unknown option: $1" >&2
+	echo "$usage" >&2
+	;;
 esac
 done
 
@@ -135,18 +174,65 @@ if [ -n "$user" ]; then
 		if [ $? -ne 0 ]; then
 			exit 1
 		fi
-                if [[ "$user" != "root" ]]; then
-        		logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519"
-        		logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519.pub"
-	        fi
+				if [[ "$user" != "root" ]]; then
+				logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519"
+				logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519.pub"
+		fi
 	fi
-	if dpkg -s liquidprompt >/dev/null 2>/dev/null; then
-                if [[ "$user" != "root" ]]; then
-                        logexec sudo -Hu $user liquidprompt_activate
-                else
-                        logexec liquidprompt_activate
-                fi
-        fi
+	
+	linetextfile ${sshome}/.bashrc 'mkcdir() {mkdir -p -- "$1" && cd -P -- "$1"}'
+	
+	if [ "${install_bat}" == "1" ]; then
+		linetextfile ${sshome}/bin/less 'less --tabs 4 -RF "$@"'
+		linetextfile ${sshome}/.bashrc 'alias cat="bat"'
+	fi
+	
+	if [ "${install_ping}" == "1" ]; then
+		linetextfile ${sshome}/.bashrc 'alias ping="prettyping --nolegend"'
+	fi
+
+	if [ "${install_fzf}" == "1" ]; then
+		linetextfile ${sshome}/.bashrc "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\""
+		logexec /usr/local/lib/fzf/install --all --xdg
+	fi
+	
+	if [ "${install_diff}" == "1" ]; then
+		if [ which git 2>/dev/null ]; then
+			git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
+			git config --global color.ui true
+
+			git config --global color.diff-highlight.oldNormal    "red bold"
+			git config --global color.diff-highlight.oldHighlight "red bold 52"
+			git config --global color.diff-highlight.newNormal    "green bold"
+			git config --global color.diff-highlight.newHighlight "green bold 22"
+
+			git config --global color.diff.meta       "yellow"
+			git config --global color.diff.frag       "magenta bold"
+			git config --global color.diff.commit     "yellow bold"
+			git config --global color.diff.old        "red bold"
+			git config --global color.diff.new        "green bold"
+			git config --global color.diff.whitespace "red reverse"
+		fi
+	fi
+	
+	if [ "${install_ping}" == "1" ]; then
+		linetextfile ${sshome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
+	fi
+	
+	if [ "${install_ping}" == "1" ]; then
+		linetextfile ${sshome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
+	fi
+	
+	if ["${install_liquidprompt}" == "1" ]; then
+		if dpkg -s liquidprompt >/dev/null 2>/dev/null; then
+			if [[ "$user" != "root" ]]; then
+				logexec sudo -Hu $user liquidprompt_activate
+			else
+				logexec liquidprompt_activate
+			fi
+		fi
+	fi
+
 fi
 
 

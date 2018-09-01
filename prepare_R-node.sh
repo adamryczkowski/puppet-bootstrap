@@ -141,7 +141,7 @@ if(!require('stringr')) install.packages('stringr', Ncpus=8, repos=setNames('${r
 EOT
 
 logexec Rscript /tmp/prepare_R.R
-logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install_github('hadley/devtools', Ncpus=8, lib = Sys.getenv('R_LIBS_USER'))"
+# logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install_github('hadley/devtools', Ncpus=8, lib = Sys.getenv('R_LIBS_USER'))"
 
 
 if [ "$rstudio" == "1" ]; then
