@@ -326,6 +326,6 @@ if [ -n "$user_opts" ] && [ -n "$users" ] ; then
 		user_opts="--log ${log} ${user_opts}"
 	fi
 	for user in ${users[*]}; do
-		./prepare_ubuntu_user.sh ${user} ${user_opts}
+		bash ./prepare_ubuntu_user.sh ${user} ${user_opts}
 	done
 fi

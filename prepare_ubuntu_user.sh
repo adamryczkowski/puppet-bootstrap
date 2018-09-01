@@ -184,19 +184,19 @@ if [ -n "$user" ]; then
 		fi
 	fi
 	
-	linetextfile ${sshome}/.bashrc 'mkcdir() {mkdir -p -- "$1" && cd -P -- "$1"}'
+	linetextfile ${sshhome}/.bashrc 'mkcdir() {mkdir -p -- "$1" && cd -P -- "$1"}'
 	
 	if [ "${install_bat}" == "1" ]; then
-		linetextfile ${sshome}/bin/less 'less --tabs 4 -RF "$@"'
-		linetextfile ${sshome}/.bashrc 'alias cat="bat"'
+		linetextfile ${sshhome}/bin/less 'less --tabs 4 -RF "$@"'
+		linetextfile ${sshhome}/.bashrc 'alias cat="bat"'
 	fi
 	
 	if [ "${install_ping}" == "1" ]; then
-		linetextfile ${sshome}/.bashrc 'alias ping="prettyping --nolegend"'
+		linetextfile ${sshhome}/.bashrc 'alias ping="prettyping --nolegend"'
 	fi
 
 	if [ "${install_fzf}" == "1" ]; then
-		linetextfile ${sshome}/.bashrc "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\""
+		linetextfile ${sshhome}/.bashrc "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\""
 		logexec /usr/local/lib/fzf/install --all --xdg
 	fi
 	
@@ -220,11 +220,11 @@ if [ -n "$user" ]; then
 	fi
 	
 	if [ "${install_ping}" == "1" ]; then
-		linetextfile ${sshome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
+		linetextfile ${sshhome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
 	fi
 	
 	if [ "${install_ping}" == "1" ]; then
-		linetextfile ${sshome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
+		linetextfile ${sshhome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
 	fi
 	
 	if [ "${install_liquidprompt}" == "1" ]; then
@@ -239,7 +239,7 @@ if [ -n "$user" ]; then
 
 	if [ "${install_autojump}" == "1" ]; then
 		if dpkg -s autojump >/dev/null 2>/dev/null; then
-			linetextfile ${sshome}/.bashrc 'source /usr/share/autojump/autojump.sh'
+			linetextfile ${sshhome}/.bashrc 'source /usr/share/autojump/autojump.sh'
 		fi
 	fi
 
