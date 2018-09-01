@@ -284,7 +284,7 @@ function uncompress_cached_file {
 		group=""
 	else
 		local pattern='^([^:]+):([^:]+)$'
-		if [[ "$usergr" =! $pattern ]]; then
+		if [[ "$usergr" != $pattern ]]; then
 			group=${BASH_REMATCH[2]}
 			user=${BASH_REMATCH[1]}
 		else
