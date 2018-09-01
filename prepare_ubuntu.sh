@@ -231,8 +231,8 @@ if [ "${install_bat}" == "1" ]; then
 fi
 
 if [ "${install_ping}" == "1" ]; then
-	local file=$(get_cached_file prettyping https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping)
-	cp_file "${file}" /usr/local/bin/prettyping root
+	plik=$(get_cached_file prettyping https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping)
+	cp_file "${plik}" /usr/local/bin/prettyping root
 fi
 
 if [ "${install_fzf}" == "1" ]; then
@@ -244,8 +244,8 @@ if [ "${install_htop}" == "1" ]; then
 fi
 
 if [ "${install_diff}" == "1" ]; then
-	local file=$(get_cached_file diff-so-fancy https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy)
-	cp_file "${file}" /usr/local/bin/diff-so-fancy
+	plik=$(get_cached_file diff-so-fancy https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy)
+	cp_file "${plik}" /usr/local/bin/diff-so-fancy
 fi
 
 if [ "${install_find}" == "1" ]; then
