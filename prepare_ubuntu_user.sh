@@ -227,7 +227,7 @@ if [ -n "$user" ]; then
 		linetextfile ${sshome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
 	fi
 	
-	if ["${install_liquidprompt}" == "1" ]; then
+	if [ "${install_liquidprompt}" == "1" ]; then
 		if dpkg -s liquidprompt >/dev/null 2>/dev/null; then
 			if [[ "$user" != "root" ]]; then
 				logexec sudo -Hu $user liquidprompt_activate
@@ -237,7 +237,7 @@ if [ -n "$user" ]; then
 		fi
 	fi
 
-	if ["${install_autojump}" == "1" ]; then
+	if [ "${install_autojump}" == "1" ]; then
 		if dpkg -s autojump >/dev/null 2>/dev/null; then
 			linetextfile ${sshome}/.bashrc 'source /usr/share/autojump/autojump.sh'
 		fi
