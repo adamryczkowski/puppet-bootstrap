@@ -256,9 +256,10 @@ fi
 
 if [ "${install_du}" == "1" ]; then
 	get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.13.tar.gz
-	uncompress_cached_file ncdu.tar.gz /usr/local/lib/ncdu
-	logexec pushd /usr/local/lib/ncdu
-	logexec /usr/local/lib/ncdu/configure
+	tmp=$(mktemp -d)
+	uncompress_cached_file ncdu.tar.gz $tmp
+	logexec pushd $tmp
+	logexec ${tmp}/configure
 	logexec make
 	logexec sudo make install
 	logexec popd
