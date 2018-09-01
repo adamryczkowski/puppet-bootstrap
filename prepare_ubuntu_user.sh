@@ -200,7 +200,6 @@ if [ -n "$user" ]; then
 
 	if [ "${install_fzf}" == "1" ]; then
 		linetextfile ${sshhome}/.bashrc "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\""
-		logexec /usr/local/lib/fzf/install --all --xdg
 	fi
 	
 	if [ "${install_diff}" == "1" ]; then
