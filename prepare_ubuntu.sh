@@ -1,6 +1,6 @@
 #!/bin/bash
 cd `dirname $0`
-basedir=$(`dirname $0`)
+basedir=$(dirname $0)
 . ./common.sh
 
 usage="
