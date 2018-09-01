@@ -74,6 +74,7 @@ install_byobu=0
 install_autojump=0
 
 user_opts=""
+users=()
 
 while [[ $# > 0 ]]
 do
@@ -94,6 +95,10 @@ case $key in
 	;;
 	--apt-proxy)
 	aptproxy=$1
+	shift
+	;;
+	--users)
+	users+=("$1")
 	shift
 	;;
 	--wormhole)
@@ -185,7 +190,7 @@ case $key in
 esac
 done
 
-
+user += ("$USER")
 
 if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then
@@ -313,12 +318,14 @@ if [ "${wormhole}" == "1" ]; then
 	fi
 fi
 
-if [ -n "$user_opts" ]; then
+if [ -n "$user_opts" ] && [ -n "$users" ] ; then
 	if [ -n "$debug" ]; then
 		user_opts="--debug ${user_opts}"
 	fi
 	if [ -n "$log" ]; then
 		user_opts="--log ${log} ${user_opts}"
 	fi
-	./prepare_ubuntu_user.sh ${user_opts}
+	for user in ${users[*]}; do
+		./prepare_ubuntu_user.sh ${user} ${user_opts}
+	done
 fi
