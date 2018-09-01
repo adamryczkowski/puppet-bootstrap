@@ -1,6 +1,5 @@
 #!/bin/bash
 cd `dirname $0`
-basedir=$(dirname $0)
 . ./common.sh
 
 usage="
@@ -326,7 +325,7 @@ if [ -n "$user_opts" ] && [ -n "$users" ] ; then
 	if [ -n "$log" ]; then
 		user_opts="--log ${log} ${user_opts}"
 	fi
-	pushd "$basedir"
+	pushd "$DIR"
 
 	for user in ${users[*]}; do
 		bash -x ./prepare_ubuntu_user.sh ${user} ${user_opts}
