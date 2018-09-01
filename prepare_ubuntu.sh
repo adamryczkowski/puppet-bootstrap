@@ -222,7 +222,7 @@ fi
 do_update
 do_upgrade
 
-install_apt_packages bash-completion gdebi
+install_apt_packages bash-completion
 
 #	install_byobu=1
 
