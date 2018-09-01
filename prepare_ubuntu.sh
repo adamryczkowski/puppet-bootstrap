@@ -10,9 +10,6 @@ installs byobu, htop and mcedit
 
 The script must be run as a root.
 
-
-
-
 Usage:
 
 $(basename $0) <user-name> [--apt-proxy IP:PORT] [--wormhole] [--need-apt-update]
@@ -220,7 +217,7 @@ fi
 do_update
 do_upgrade
 
-install_apt_packages bash-completion
+install_apt_packages bash-completion gdebi
 
 #	install_byobu=1
 
