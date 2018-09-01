@@ -232,7 +232,7 @@ fi
 
 if [ "${install_ping}" == "1" ]; then
 	plik=$(get_cached_file prettyping https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping)
-	cp_file "${plik}" /usr/local/bin/prettyping root
+	install_script "${plik}" /usr/local/bin/prettyping root
 fi
 
 if [ "${install_fzf}" == "1" ]; then

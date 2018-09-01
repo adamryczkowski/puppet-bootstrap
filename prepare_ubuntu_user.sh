@@ -222,12 +222,12 @@ if [ -n "$user" ]; then
 		fi
 	fi
 	
-	if [ "${install_ping}" == "1" ]; then
+	if [ "${install_du}" == "1" ]; then
 		linetextfile ${sshhome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
 	fi
 	
 	if [ "${install_ping}" == "1" ]; then
-		linetextfile ${sshhome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
+		linetextfile ${sshhome}/.bashrc 'alias ping="prettyping"'
 	fi
 	
 	if [ "${install_liquidprompt}" == "1" ]; then
