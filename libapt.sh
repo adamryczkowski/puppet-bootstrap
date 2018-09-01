@@ -64,7 +64,8 @@ function install_apt_package_file {
 			fi
 			filename="${cfilename}"
 		fi 
-		logexec sudo gdebi "$filename" --n
+		logexec sudo dpkg -i "$filename"
+		logexec sudo apt install -f --yes
 		return 0
 	fi
 	return 1

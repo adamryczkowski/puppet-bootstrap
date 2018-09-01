@@ -258,7 +258,7 @@ if [ "${install_du}" == "1" ]; then
 fi
 
 fi [ "${tldr}" == "1" ]; then
-	if [ which pip 2>/dev/null ]; then
+	if which pip 2>/dev/null ; then
 		logexec sudo -H pip install tldr
 	fi
 fi
