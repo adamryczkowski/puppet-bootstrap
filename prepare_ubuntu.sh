@@ -258,6 +258,7 @@ if [ "${install_du}" == "1" ]; then
 	get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.13.tar.gz
 	tmp=$(mktemp -d)
 	uncompress_cached_file ncdu.tar.gz $tmp
+	install_apt_packages build-essential libncurses5-dev
 	logexec pushd ${tmp}/ncdu-1.13
 	logexec ./configure
 	logexec make
@@ -266,9 +267,7 @@ if [ "${install_du}" == "1" ]; then
 fi
 
 if [ "${install_tldr}" == "1" ]; then
-	if which pip 2>/dev/null ; then
-		logexec sudo -H pip install tldr
-	fi
+	install_pip3_packages tldr
 fi
 
 if [ "${install_ag}" == "1" ]; then
