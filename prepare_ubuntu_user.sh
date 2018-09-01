@@ -200,10 +200,11 @@ if [ -n "$user" ]; then
 
 	if [ "${install_fzf}" == "1" ]; then
 		linetextfile ${sshhome}/.bashrc "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\""
+		linetextfile ${sshhome}/.bashrc "[ -f \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash ] && source \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash"
 	fi
 	
 	if [ "${install_diff}" == "1" ]; then
-		if [ which git 2>/dev/null ]; then
+		if [ ! which git 2>/dev/null ]; then
 			git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
 			git config --global color.ui true
 
