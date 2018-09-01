@@ -190,7 +190,7 @@ case $key in
 esac
 done
 
-user += ("$USER")
+users+=("$USER")
 
 if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then
