@@ -204,7 +204,7 @@ if [ -n "$user" ]; then
 	fi
 	
 	if [ "${install_diff}" == "1" ]; then
-		if [ ! which git 2>/dev/null ]; then
+		if which git 2>/dev/null; then
 			git config --global core.pager "diff-so-fancy | less --tabs=4 -RFX"
 			git config --global color.ui true
 
