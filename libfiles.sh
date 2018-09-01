@@ -72,10 +72,10 @@ function linetextfile {
 	local line="$2"
 	if ! grep -qF -- "$line" "$plik"; then
 		if [ -w "$plik" ]; then
-			$loglog
+#			$loglog
 			echo "$line" >> "$plik"
 		else
-			$loglog
+#			$loglog
 			echo "$line" | sudo tee -a "$plik"
 		fi
 	fi
