@@ -41,6 +41,7 @@ where
  --mc                     - mc (Midnight Commander)
  --liquidprompt           - liquidprompt
  --byobu                  - byobu
+ --autojump               - autojump (cd replacement)
 
 Example:
 
@@ -73,6 +74,7 @@ install_noti=0
 install_mc=0
 install_liquidprompt=0
 install_byobu=0
+install_autojump=0
 
 user_opts=""
 
@@ -118,6 +120,7 @@ case $key in
 	install_mc=1
 	install_liquidprompt=1
 	install_byobu=1
+	install_autojump=1
 	;;
 	--bat)
 	install_bat=1
@@ -166,6 +169,10 @@ case $key in
 	;;
 	--byobu)
 	install_byobu=1
+	;;
+	--autojump)
+	install_autojump=1
+	user_opts="${user_opts} --autojump"
 	;;
     -*)
     echo "Error: Unknown option: $1" >&2
@@ -285,6 +292,10 @@ fi
 
 if [ "${install_byobu}" == "1" ]; then
 	install_apt_package byobu
+fi
+
+if [ "${install_autojump}" == "1" ]; then
+	install_apt_package autojump
 fi
 
 if [ "${wormhole}" == "1" ]; then

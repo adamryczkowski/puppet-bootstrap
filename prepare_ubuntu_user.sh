@@ -36,6 +36,7 @@ where
  --mc                     - mc (Midnight Commander)
  --liquidprompt           - liquidprompt
  --byobu                  - byobu
+ --autojump               - autojump (cd replacement)
 
 
 Example:
@@ -49,7 +50,7 @@ install_fzf=0
 install_diff=0
 install_du=0
 install_liquidprompt=0
-
+install_autojump=0
 
 dir_resolve()
 {
@@ -110,6 +111,9 @@ case $key in
 	;;
 	--du)
 	install_du=1
+	;;
+	--autojump)
+	install_autojump=1
 	;;
 	--liquidprompt)
 	install_liquidprompt=1
@@ -230,6 +234,12 @@ if [ -n "$user" ]; then
 			else
 				logexec liquidprompt_activate
 			fi
+		fi
+	fi
+
+	if ["${install_autojump}" == "1" ]; then
+		if dpkg -s autojump >/dev/null 2>/dev/null; then
+			linetextfile ${sshome}/.bashrc 'source /usr/share/autojump/autojump.sh'
 		fi
 	fi
 
