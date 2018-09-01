@@ -262,7 +262,7 @@ if [ "${install_du}" == "1" ]; then
 	logexec popd
 fi
 
-if [ "${tldr}" == "1" ]; then
+if [ "${install_tldr}" == "1" ]; then
 	if which pip 2>/dev/null ; then
 		logexec sudo -H pip install tldr
 	fi

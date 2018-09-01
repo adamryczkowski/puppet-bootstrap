@@ -187,7 +187,7 @@ if [ -n "$user" ]; then
 	linetextfile ${sshhome}/.bashrc 'mkcdir() {mkdir -p -- "$1" && cd -P -- "$1"}'
 	
 	if [ "${install_bat}" == "1" ]; then
-		local tmp=$(mktemp)
+		tmp=$(mktemp)
 		textfile $tmp "#!/bin/bash
 less --tabs 4 -RF \"$@\"" $USER
 		install_script $tmp ${sshhome}/bin/less $user
