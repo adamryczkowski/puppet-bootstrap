@@ -125,7 +125,7 @@ case $exec_key in
 	debug=1
 	;;
 	--extra-executable)
-	exec_extrascripts+=("$exec_extrascripts")
+	exec_extrascripts+=("$1")
 	shift
 	;;
 	--ssh-address)
