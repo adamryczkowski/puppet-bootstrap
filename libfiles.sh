@@ -276,7 +276,7 @@ function uncompress_cached_file {
 	local filename="$1"
 	local destination="$2"
 	local usergr="$3"
-	local timestamp_path="${destination}/${filename}.timestamp"
+	local timestamp_path="${destination}/$(basename ${filename}).timestamp"
 	if [ -z "$usergr" ]; then
 		user=$USER
 		usergr=$user
@@ -292,8 +292,11 @@ function uncompress_cached_file {
 		fi
 	fi
 	
-	
-	path_filename=$(get_cached_file "$filename")
+	if [ ! -f "$filename" ]; then
+		path_filename=$(get_cached_file "$filename")
+	else
+		path_filename="$filename"
+	fi
 	if [ -z "$path_filename" ]; then
 		return 1
 	fi

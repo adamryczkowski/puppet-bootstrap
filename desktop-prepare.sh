@@ -29,6 +29,7 @@ where
                                - kodi
                                - office2007
                                - docs
+                               - gedit (gedit plugins)
  --user <user name>       - Name of user. If specified, some extra user-specific tasks
                             will be performed for most of the tricks.
  --repo-path              - Path to the repository. Some tweaks require it.
@@ -40,7 +41,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit
 "
 
 dir_resolve()
@@ -476,6 +477,45 @@ password=Zero tolerancji"
 		foldername=$(basename ${folder})
 		gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 	done
+}
+
+function gedit {
+	if [ ! -f "~/.local/share/gedit/plugins/pair_char_completion.py" ]; then
+		plik=$(get_cached_file gedit-pair-char-completion-1.0.6-gnome3.tar.gz https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/gedit-pair-char-autocomplete/gedit-pair-char-completion-1.0.6-gnome3.tar.gz)
+		tmpdir=$(mktemp -d)
+		uncompress_cached_file $plik $tmpdir
+		logexec ${tmpdir}/gedit-pair-char-completion-1.0.6-gnome3/install.sh
+		gsettings_add_to_array org.gnome.gedit.plugins active-plugins pair_char_completion
+	fi
+	
+	if [ ! -f "~/.local/share/gedit/plugins/ex-mortis.plugin" ]; then
+		plik=$(get_cached_file gedit-ex-mortis.tar.gz https://github.com/jefferyto/gedit-ex-mortis/archive/master.tar.gz)
+		tmpdir=$(mktemp -d)
+		uncompress_cached_file $plik $tmpdir
+		logexec cp -R ${tmpdir}/gedit-ex-mortis-master/ex-mortis ~/.local/share/gedit/plugins
+		logexec cp ${tmpdir}/gedit-ex-mortis-master/ex-mortis.plugin ~/.local/share/gedit/plugins
+		gsettings_add_to_array org.gnome.gedit.plugins active-plugins ex-mortis
+	fi
+	
+	if [ ! -d "/usr/share/gedit/plugins/crypto" ]; then
+		plik=$(get_cached_file gedit-crypto.deb http://pietrobattiston.it/_media/gedit-crypto:gedit-crypto-plugin_0.5-1_all.deb)
+		install_apt_package_file $plik gedit-crypto-plugin
+		gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
+	fi
+	
+	if [ ! -f "~/.local/share/gedit/plugins/controlyourtabs.plugin" ]; then
+		plik=$(get_cached_file gedit-control-your-tabs.tar.gz https://github.com/jefferyto/gedit-control-your-tabs/archive/master.tar.gz)
+		tmpdir=$(mktemp -d)
+		uncompress_cached_file $plik $tmpdir
+		logexec cp -R ${tmpdir}/gedit-control-your-tabs-master/controlyourtabs ~/.local/share/gedit/plugins
+		logexec cp ${tmpdir}/gedit-control-your-tabs-master/controlyourtabs.plugin ~/.local/share/gedit/plugins
+		gsettings_add_to_array org.gnome.gedit.plugins active-plugins controlyourtabs
+	fi
+	install_apt_package gedit-plugins
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins git
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins textsize
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins spell
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins codecomment
 }
 
 oldifs=${IFS}
