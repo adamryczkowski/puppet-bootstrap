@@ -21,6 +21,7 @@ where
                             account in the container.
  --external-key <string>  - Sets external public key to access the account. It
                             populates authorized_keys
+ --repo-path              - Path to the common repository
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
  --bat                    - cat replacement (bat)
@@ -70,6 +71,7 @@ fi
 
 shift
 debug=0
+repo_path=""
 
 
 while [[ $# > 0 ]]
@@ -87,6 +89,10 @@ case $key in
 	;;
 	--log)
 	log=$1
+	shift
+	;;
+	--repo-path)
+	repo_path="$1"
 	shift
 	;;
 	--external-key)

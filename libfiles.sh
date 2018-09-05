@@ -249,13 +249,7 @@ function chown_dir {
 function get_cached_file {
 	local filename="$1"
 	local download_link="$2"
-	if [ -d "${repo_path}" ]; then
-		if [ ! -w "${repo_path}" ]; then
-			errcho "Cannot write to the repo"
-			local repo_path="/tmp/repo_path"
-			mkdir -p /tmp/repo_path
-		fi
-	else
+	if [ ! -d "${repo_path}" ]; then
 		mkdir -p /tmp/repo_path
 		local repo_path="/tmp/repo_path"
 	fi
@@ -263,6 +257,11 @@ function get_cached_file {
 		if [ -z "$download_link" ]; then
 			errcho "File is missing from cache"
 			return 1
+		fi
+		if [ ! -w "${repo_path}" ]; then
+			echo "Cannot write to the repo ${repo_path}" >/dev/stderr
+			local repo_path="/tmp/repo_path"
+			mkdir -p /tmp/repo_path
 		fi
 		wget -c "${download_link}" -O "${repo_path}/${filename}"
 	fi
@@ -403,5 +402,18 @@ function get_files_matching_regex {
 		grep -HiRE "$regex" "$path" #H for file printing, i for case-insensitive, R for recursive search, E for regex 
 	else
 		grep -HiE "$regex" "$path" #H for file printing, i for case-insensitive, R for recursive search, E for regex 
+	fi
+}
+
+function get_relative_path {
+	local base_path="$1"
+	local target_path="$2"
+	python -c "import os.path; print os.path.relpath('$base_path', '$target_path')"
+}
+
+function guess_repo_path {
+	local guess="$1"
+	if [ -f "${guess}/repo_path" ]; then
+		export repo_path="$guess"
 	fi
 }

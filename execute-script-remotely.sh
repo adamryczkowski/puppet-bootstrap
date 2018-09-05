@@ -5,7 +5,7 @@ cd `dirname $0`
 
 case $- in *x*) USE_X="-x";; *) USE_X=;; esac
 
-set +x
+#set +x
 
 #echo "#@@@@@@#@@@@@@#@@@@@# $@ #@@@@@@#@@@@@@#@@@@@#"
 
@@ -38,7 +38,7 @@ Usage:
 
 $(basename $0) <script path> [--ssh-address <host_address>]  
                [--lxc-name <lxcname>] [--username <user>] 
-               [--debug] [--step-debug] [--extra-executable] 
+               [--debug] [--step-debug] [--extra-executable] [--use-repo]
                -- <arguments that will get send to the remote script>
                
 where
@@ -55,6 +55,10 @@ where
                       user in case of ssh, and root in case of lxc.
  --step-debug       - Will run the target script with bash -x, 
                       the line debugging option.
+ --repo-path        - Will use repo_path environment variable to use local file repository.
+                      Will temporarily mount the folder, when used with lxc,
+                      Do nothing when used locally
+                      And mount using sshfs when used remotely via ssh.
  --extra-executable - Extra file(s) that will be transfered to the remote host. 
                       Each instantion of this parameter will add another file. 
 
@@ -86,8 +90,6 @@ if [ -z "$exec_script" ]; then
 fi
 shift
 
-exec_extrascripts="$exec_script common.sh lib*.sh"
-
 if [ ! -f "$exec_script" ]; then
 	errcho "Cannot find script at location $exec_script"
 	exit 1
@@ -103,8 +105,13 @@ exec_lxcname=""
 exec_opts=""
 log=""
 exec_user=""
+use_repo=0
 exec_debug=0
 exec_port=22
+exec_extrascripts=()
+exec_extrascripts+=("$exec_script")
+exec_extrascripts+=("lib*.sh")
+exec_extrascripts+=("common.sh")
 
 
 while [[ $# > 0 ]]
@@ -118,7 +125,7 @@ case $exec_key in
 	debug=1
 	;;
 	--extra-executable)
-	exec_extrascripts="$exec_extrascripts $1"
+	exec_extrascripts+=("$exec_extrascripts")
 	shift
 	;;
 	--ssh-address)
@@ -134,6 +141,10 @@ case $exec_key in
 	;;
 	--lxc-name)
 	exec_lxcname=$1
+	shift
+	;;
+	--repo-path)
+	repo_path="$1"
 	shift
 	;;
 	--)
@@ -163,12 +174,12 @@ if [ -n "$debug" ]; then
 fi
 
 
-if [ -z "${ssh_address}" ] && [ -z "${lxc_name}" ]; then
+if [ -z "${ssh_address}" ] && [ -z "${exec_lxcname}" ]; then
         errcho "You must provide either --ssh-address or --lxc-name argument."
         exit 1
 fi
 
-if [ -n "${ssh_address}" ] && [ -n "${lxc_name}" ]; then
+if [ -n "${ssh_address}" ] && [ -n "${exec_lxcname}" ]; then
         errcho "You must provide only one, either --ssh-address or --lxc-name argument."
         exit 1
 fi
@@ -241,12 +252,12 @@ if [ -n "$log" ]; then
 fi
 
 if [ -n "$exec_lxcname" ]; then
-        if lxc info ${exec_lxcname}>/dev/null 2>/dev/null; then
+	if lxc info ${exec_lxcname}>/dev/null 2>/dev/null; then
 		exec_sshhome=`getent passwd $(whoami) | awk -F: '{ print $6 }'`
 		exec_lxcsudo=""
-        else
-	        errcho "Cannot find lxc container with name $exec_lxcname"
-	        exit 1
+	else
+		errcho "Cannot find lxc container with name $exec_lxcname"
+		exit 1
 	fi
 	exec_mode=3
 fi
@@ -258,11 +269,11 @@ case $exec_mode in
 	exec_prefix=""
 	exec_remote_dir="`mktemp -d`"
 	exec_remote_path="$exec_remote_dir/`basename $exec_script`"
-	for exec_file in $exec_extrascripts; do
+	for exec_file in ${exec_extrascripts[*]}; do
 		if [ "$exec_file" == "$exec_script" ]; then
 			exec_rpath=$exec_remote_path
 		else
-			exec_rpath=$exec_remote_dir/$exec_file
+			exec_rpath=$exec_remote_dir/$(basename "${exec_file}")
 			if [ ! -d "`dirname $exec_rpath`" ]; then
 				mkdir -p `dirname $exec_rpath`
 			fi
@@ -302,11 +313,11 @@ case $exec_mode in
 #ssh
 	exec_remote_dir=`ssh ${sshuser}@${exec_host} ${exec_portarg1} mktemp -d`
 	exec_remote_path="$exec_remote_dir/`basename $exec_script`"
-	for exec_file in $exec_extrascripts; do
+	for exec_file in ${exec_extrascripts[*]}; do
 		if [ "$exec_file" == "$exec_script" ]; then
 			exec_rpath=$exec_remote_path
 		else
-			exec_rpath=$exec_remote_dir/$exec_file
+			exec_rpath=$exec_remote_dir/$(basename "${exec_file}")
 			exec_command="if [ ! -d "`dirname $exec_rpath`" ]; then mkdir -p `dirname $exec_rpath`; fi"
 			logexec ssh $exec_portarg1 $sshuser@$exec_host $exec_command
 		fi
@@ -330,43 +341,38 @@ case $exec_mode in
 	logexec ssh $exec_portarg1 $sshuser@$exec_host chmod -R +x $exec_remote_dir
 	logexec ssh $exec_portarg1 $sshuser@$exec_host chmod +x $exec_remote_path
 	exec_prefix="ssh $exec_portarg1 $sshuser@$exec_host -- sudo -Hu $exec_user -- "
+	
+	if [ "$use_repo" == "1" ]; then
+		errcho "--use-repo not supported when calling via ssh."
+#		if !ssh ${sshuser}@${exec_host} ${exec_portarg1} -- dpkg -s "$package">/dev/null  2> /dev/null; then
+#			logexec ssh ${sshuser}@${exec_host} ${exec_portarg1} -- sudo apt-get --yes --force-yes -q  install sshfs
+#		fi
+		exit 1
+	fi
 	;;
 	3)
 #lxc
-TODODOTODODOTODO
-	exec_full_remote_dir=`mktemp --suffix=.ssh -d --tmpdir=$exec_lxcprefix/var/tmp`
+	exec_full_remote_dir=$(lxc exec ${exec_lxcname} -- mktemp -d)
 	exec_full_remote_path="$exec_full_remote_dir/`basename $exec_script`"
 	exec_uid=`grep $exec_user $exec_lxcprefix/etc/passwd | awk -F: '{ print $3 }'`
-	for exec_file in $exec_extrascripts; do
+	for exec_file in ${exec_extrascripts[*]}; do
 		if [ "$exec_file" == "$exec_script" ]; then
 			exec_rpath=$exec_full_remote_path
 		else
-			exec_rpath=$exec_full_remote_dir/$exec_file
-			if [ ! -d "`dirname $exec_rpath`" ]; then
-				mkdir -p `dirname $exec_rpath`
-			fi
+			exec_rpath=$exec_full_remote_dir/$(basename "${exec_file}")
+			mkdir -p "$(dirname $exec_rpath)"
 		fi
-		cp $exec_file $exec_rpath
+		lxc file push ${exec_file} ${exec_lxcname}/${exec_rpath}
 	done
-	exec_remote_path=/`python -c "import os.path; print os.path.relpath('$exec_full_remote_path', '$exec_lxcprefix')"`
-	exec_remote_dir=/`python -c "import os.path; print os.path.relpath('$exec_full_remote_dir', '$exec_lxcprefix')"`
-	if [ -n "$log" ]; then
-		#echo "Script $exec_script on `hostname`: ">>$exec_full_remote_dir/log.log
-		#echo >>$exec_full_remote_dir/log.log
-		if [ "$log" == "/dev/stdout" ]; then
-			exec_opts="$exec_opts --log /dev/stdout"
-		else
-			exec_opts="$exec_opts --log $exec_remote_dir/log.log"
+	lxc exec ${exec_lxcname} -- chmod +x "${exec_full_remote_dir}"
+	if [ ! "$repo_path" == "" ]; then
+		if ! lxc config device list ${exec_lxcname} | grep tmprepo; then
+			lxc exec ${exec_lxcname} -- mkdir -p ${repo_path}
+			lxc config device add ${exec_lxcname} tmprepo disk path="${repo_path}" source="${repo_path}"
 		fi
 	fi
-	sudo chown -R 10$exec_uid:10$exec_uid $exec_full_remote_dir
-	sudo chmod -R +x $exec_full_remote_dir
-	if [ $? -ne 0 ]; then
-		errcho "Cannot find uid of the user $exec_user"
-		exit 1
-	fi
-	exec_prefix="$exec_lxcsudo lxc-attach -n $exec_lxcname -- sudo -i -u $exec_user --"
-	exec_postfix=""
+	exec_prefix="lxc exec ${exec_lxcname} -- "
+	exec_remote_path="$exec_full_remote_path"
 	;;
 	*)
 	echo "Error. Aborting."

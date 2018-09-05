@@ -47,6 +47,7 @@ where
                           - After container's creation, map a single host folder into the guest file
                             system. 
  --storage                - Name of the storage to use for this container. Defaults to 'default'
+ --repo-path              - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
  --update-all             - If set, it will install the update-all script as well (defaults to yes)
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
@@ -86,7 +87,8 @@ common_debug=0
 sshuser=`whoami`
 lxcuser=`whoami`
 update_all=1
-declare -a authorized_keys
+use_repo=""
+authorized_keys=()
 
 while [[ $# > 0 ]]
 do
@@ -112,8 +114,12 @@ case $key in
 	lxd_storage="$1"
 	shift
 	;;
+	--repo-path)
+	repo_path="$1"
+	shift
+	;;
 	--authorized-key)
-	authorized_keys=("${authorized_keys[@]}" "$1")
+	authorized_keys+=("$1")
 	shift
 	;;
 	--ip)
@@ -168,6 +174,13 @@ case $key in
 esac
 done
 
+if [ "$repo_path" == "" ]; then
+	guess_repo_path /media/adam-minipc/other/debs
+fi
+
+if [ ! "$repo_path" == "" ]; then
+	repopath_arg="--repo-path ${repo_path}"
+fi
 
 
 if [ -n "$common_debug" ]; then
@@ -434,9 +447,14 @@ fi
 
 
 if [ -n "$aptproxy" ]; then
-	$loglog
-	echo "Acquire::http::Proxy \"http://$aptproxy\";" | lxc exec $name -- tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
+	aptproxy="--apt-proxy $aptproxy"
 fi
+
+if [ -n "$private_key_path" ]; then
+	extras="--extra-executable $private_key_path"
+else
+	extras=""
+fi 
 
 # Creating user $lxcuser in the container
 if [ "$lxcuser" != "ubuntu" ]; then
@@ -449,6 +467,7 @@ logexec lxc exec ${name} -- usermod -aG sudo  $lxcuser
 
 if [ -f "$sshkey" ]; then
 	mypubkey=$(cat $sshhome/.ssh/id_ed25519.pub)
+	authorized_keys+=("$mypubkey")
 	if ! lxc exec $name -- grep -q -F "$mypubkey" $sshhome/.ssh/authorized_keys 2>/dev/null; then
 		$loglog
 		cat $sshhome/.ssh/id_ed25519.pub | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
@@ -484,19 +503,9 @@ if [ -n "$actual_ip" ]; then
 	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
 fi
 
-#Echo Adding non-password sudo entry for our user
-$loglog
-echo "$lxcuser ALL=(ALL) NOPASSWD:ALL" | lxc exec $name -- tee /etc/sudoers.d/${lxcuser}_nopasswd 
 
-#Updating, upgrading, installing simple stuff
 
-logexec lxc exec $name -- apt update
-logexec lxc exec $name -- apt --yes upgrade
-logexec lxc exec $name -- apt install --yes liquidprompt byobu mc
-logexec lxc exec $name -- liquidprompt_activate
-logexec lxc exec $name -- su -l ${lxcuser} -c liquidprompt_activate
-logexec lxc exec $name -- locale-gen en_US.UTF-8
-logexec lxc exec $name -- locale-gen pl_PL.UTF-8
+bash -x ./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --extra-executable prepare_ubuntu_user.sh $extras -- $lxcuser ${repopath_arg} --cli_improved $aptproxy --need-apt-update
 
 if [ -z $private_key_path ]; then
 	if ! lxc exec ${name} ls ~/.ssh/id_ed25519; then

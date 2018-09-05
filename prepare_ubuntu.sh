@@ -19,8 +19,12 @@ where
  --wormhole               - Install magic wormhole (app for easy sending files)
  -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
  --need-apt-update        - If the flag is set the script will assume the apt cache needs apdate. 
+ --private_key_path       - This argument gets handled to 'prepare_ubuntu_user' for the first given user.
+ --external-key <string>  - Sets external public key to access the account. It
+                            populates authorized_keys
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
+ --repo-path              - Path to the common repository
  --user <username>        - Additional user to install the tricks to. Can be specified
                             multiple times, each time adding another user.
  --cli_improved           - Install all the following recommended command line tools:
@@ -57,6 +61,7 @@ cd $mypath
 
 debug=0
 wormhole=0
+repo_path=""
 install_bat=0
 install_ping=0
 install_fzf=0
@@ -93,8 +98,20 @@ case $key in
 	log=$1
 	shift
 	;;
+	--repo-path)
+	repo_path="$1"
+	shift
+	;;
 	--apt-proxy)
 	aptproxy=$1
+	shift
+	;;
+	--external-key)
+	user_opts="${--external-key} $1"
+	shift
+	;;
+	--private-key-path)
+	private_key_path="--private-key-path $1"
 	shift
 	;;
 	--users)
@@ -205,7 +222,7 @@ fi
 
 if [ -n "$aptproxy" ]; then
 	$loglog
-	echo "Acquire::http { Proxy \"http://$aptproxy\"; };" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
+	echo "Acquire::http::Proxy \"http://$aptproxy\";" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
 	flag_need_apt_update=1
 fi
 
@@ -326,8 +343,8 @@ if [ -n "$user_opts" ] && [ -n "$users" ] ; then
 		user_opts="--log ${log} ${user_opts}"
 	fi
 	pushd "$DIR"
-
-	for user in ${users[*]}; do
+	bash -x ./prepare_ubuntu_user.sh ${users[1]} ${user_opts} ${private_key_path}
+	for user in ${users[@]:1}; do
 		bash -x ./prepare_ubuntu_user.sh ${user} ${user_opts}
 	done
 	popd
