@@ -314,6 +314,7 @@ if [ "${install_mc}" == "1" ]; then
 fi
 
 if [ "${install_liquidprompt}" == "1" ]; then
+	install_apt_packages liquidprompt
 	logexec sudo -H liquidprompt_activate
 fi
 
