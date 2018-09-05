@@ -505,7 +505,7 @@ fi
 
 
 
-bash -x ./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --extra-executable prepare_ubuntu_user.sh $extras -- $lxcuser ${repopath_arg} --cli_improved $aptproxy --need-apt-update
+bash -x ./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --extra-executable prepare_ubuntu_user.sh $extras -- $lxcuser ${repopath_arg} --bat --ping --fzf --htop --find --ag --mc --liquidprompt --byobu --autojump --wormhole $aptproxy --need-apt-update
 
 if [ -z $private_key_path ]; then
 	if ! lxc exec ${name} ls ~/.ssh/id_ed25519; then
