@@ -59,9 +59,9 @@ mypath=`dir_resolve $mypath`
 cd $mypath
 
 users=()
-pattern='^--([[:alnum:]]+)$'
-if [[ "$1" =~ $pattern ]]; then
-	users+=(${BASH_REMATCH[1]})
+pattern='^--.*$'
+if [[ ! "$1" =~ $pattern ]]; then
+	users+=($1)
 	shift
 fi
 
