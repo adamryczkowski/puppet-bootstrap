@@ -61,7 +61,7 @@ cd $mypath
 users=()
 pattern='^--.*$'
 if [[ ! "$1" =~ $pattern ]]; then
-	users+=($1)
+	users+=("$1")
 	shift
 fi
 
@@ -349,7 +349,7 @@ if [ -n "$user_opts" ] && [ -n "$users" ] ; then
 		user_opts="--log ${log} ${user_opts}"
 	fi
 	pushd "$DIR"
-	bash -x ./prepare_ubuntu_user.sh ${users[1]} ${user_opts} ${private_key_path}
+	bash -x ./prepare_ubuntu_user.sh ${users[0]} ${user_opts} ${private_key_path}
 	for user in ${users[@]:1}; do
 		bash -x ./prepare_ubuntu_user.sh ${user} ${user_opts}
 	done
