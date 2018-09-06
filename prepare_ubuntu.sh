@@ -58,6 +58,12 @@ mypath=${0%/*}
 mypath=`dir_resolve $mypath`
 cd $mypath
 
+users=()
+pattern='^--([[:alnum:]]+)$'
+if [[ "$1" =~ $pattern ]]; then
+	users+=(${BASH_REMATCH[1]})
+	shift
+fi
 
 debug=0
 wormhole=0
@@ -79,7 +85,6 @@ install_byobu=0
 install_autojump=0
 
 user_opts=""
-users=()
 
 while [[ $# > 0 ]]
 do
