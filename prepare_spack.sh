@@ -90,10 +90,9 @@ if [ ! -d "${spack_location}" ]; then
 	logexec git clone --depth 1 https://github.com/spack/spack ${spack_location}
 	need_bootstrap=1
 fi
-	logexec pushd "${spack_location}"
-	logexec git pull
-	source "${spack_location}/share/spack/setup-env.sh"
-fi
+logexec pushd "${spack_location}"
+logexec git pull
+source "${spack_location}/share/spack/setup-env.sh"
 
 if [ "$spack_mirror" != "" ]; then
 	if ! spack mirror list | grep ${spack_mirror} >/dev/null; then
