@@ -24,6 +24,8 @@ where
  --spack-location           - Name of the directory to install spack into. Defaults to ~/tmp/spack
  --spack-load <module>      - Package to preload with spack. If more than one module is needed,
                               put this option multiple times.
+ --source-dir <path>        - Relative path to the source directory. Script will build this source in
+                              created subdirectory \"build\". Defaults to the root of the repository.
  --debug                    - Flag. If set, all commands that change state of the container or
                               host machine will be displayed together with their output.
  --log                      - Redirects output from --debug into the log file.
@@ -43,6 +45,7 @@ slack_token="xoxp-107142650086-107156439191-194072196055-98a4c7330ee98cfb5544da1
 slack_username=$(hostname)
 sshhome=$(get_home_dir $USER)
 spack_location=${sshhome}/tmp/spack
+source_dir=""
 
 while [[ $# > 0 ]]
 do
@@ -76,6 +79,10 @@ case $key in
 	;;
 	--spack-location)
 	spack_location="$1"
+	shift
+	;;
+	--source-dir)
+	source_dir="$1"
 	shift
 	;;
 	--debug)
@@ -209,25 +216,30 @@ if [ -d "${repo_path}/.git" ]; then
 	logexec git submodule update
 	popd
 else
-	logexec git clone --recursive --depth 1  git@git.imgw.ad:aryczkowski/propoze.git "$repo_path" --branch $git_branch
+	logexec git clone --recursive --depth 1 ${git-address} "$repo_path" --branch $git_branch
 fi
 
-logmkdir "$repo_path/$build_dir" ${USER}
+if [ ! -d "${repo_path}/${source_dir}" ]; then
+	errcho "Cannot find path ${repo_path}/${source_dir}"
+	exit 1
+fi
+build_dir="${repo_path}/${source_dir}/build"
+logmkdir "$build_dir" ${USER}
 
-logexec cd "$repo_path/$build_dir"
+logexec cd "$build_dir"
 
-logexec rm "$repo_path/$build_dir/apt_dependencies.txt" "$repo_path/$build_dir/pip_dependencies.txt"
+logexec rm "${build_dir}/apt_dependencies.txt" "${build_dir}/pip_dependencies.txt" "${build_dir}/spack_dependencies.txt"
 logexec cmake .. ${cmake_args}
 
-if [ ! -f "$repo_path/$build_dir/apt_dependencies.txt" ]; then
+if [ ! -f "${build_dir}/apt_dependencies.txt" ]; then
 	errcho "Some serious problem with project configuration"
 	exit 1
 fi
 
 #xargs to trim the white spaces
-app_deps=$(cat "$repo_path/$build_dir/apt_dependencies.txt" | xargs) 
-pip_deps=$(cat "$repo_path/$build_dir/pip_dependencies.txt" | xargs)
-spack_deps=$(cat "$repo_path/$build_dir/pip_dependencies.txt" | xargs)
+app_deps=$(cat "${build_dir}/apt_dependencies.txt" | xargs) 
+pip_deps=$(cat "${build_dir}/pip_dependencies.txt" | xargs)
+spack_deps=$(cat "${build_dir}/pip_dependencies.txt" | xargs)
 
 if [ -n "${app_deps}" ]; then
 	install_apt_packages ${app_deps}
@@ -252,9 +264,9 @@ fi
 
 cpu_cures=$(grep -c ^processor /proc/cpuinfo)
 
-rm "${repo_path}/${build_dir}/CMakeCache.txt"
-cd "${repo_path}/${build_dir}"
-cmake .. ${cmake_args} && make -j ${cpu_cures} && make test
+#rm "${repo_path}/${build_dir}/CMakeCache.txt"
+#cd "${repo_path}/${build_dir}"
+#cmake .. ${cmake_args} && make -j ${cpu_cures} && make test
 
-#byobu-tmux new-session -d -s $build_dir -n code "cd \"$repo_path/$build_dir\"; cmake .. ${cmake_args} && make -j ${cpu_cures} && make test; bash"
+byobu-tmux new-session -d -s ${build_dir} -n code "cd \"${build_dir}\"; cmake .. ${cmake_args} && make -j ${cpu_cures} && make test; bash"
 
