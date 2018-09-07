@@ -35,7 +35,7 @@ where
  --repo-path                   - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
  --spack-location              - Name of the directory to install spack into. Defaults to ~/tmp/spack
                                  Needed only, when --preinstall-spack any package.
- --spack_mirror                - Location of local spack mirror
+ --spack_mirror                - Location of local spack mirror. Mirror will be shared with the container.
                                  Needed only, when --preinstall-spack any package.
  --preinstall-apt              - Name of the packages to pre-install using package manager
 
@@ -131,7 +131,8 @@ case $key in
 	shift
 	;;
 	--spack-mirror)
-	spack_opts="${spack_opts} --spack-mirro $1"
+	spack_opts="${spack_opts} --spack-mirror $1"
+	makelxd_opts="${makelxd_opts} --map-host-folder $1 $1"
 	shift
 	;;
 	--preinstall-apt)

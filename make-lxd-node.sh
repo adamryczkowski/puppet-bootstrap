@@ -175,14 +175,12 @@ esac
 done
 
 if [ "$repo_path" == "" ]; then
-	guess_repo_path /media/adam-minipc/other
-	if [ ! "$repo_path" == "" ]; then
-		repopath_arg="--repo-path /media/adam-minipc/other/debs"
-	fi
-else
-	repopath_arg="--repo-path ${repo_path}"
+	guess_repo_path /media/adam-minipc/other/debs
 fi
 
+if [ ! "$repo_path" == "" ]; then
+	repopath_arg="--repo-path ${repo_path}"
+fi
 
 if [ -n "$common_debug" ]; then
 	if [ -z "$log" ]; then
