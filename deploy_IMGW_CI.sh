@@ -247,8 +247,8 @@ opts=""
 if [ -n "$host_path" ]; then
 	if ! lxc config device show ${container_name} | grep -q repo_${container_name}; then
 		if ! lxc exec ${container_name} -- ls ${guest_path}; then
-			logexec exec ${container_name} -- mkdir -p ${guest_path}
-			logexec exec ${container_name} -- chown ${USER} ${guest_path}
+			logexec lxc exec ${container_name} -- mkdir -p ${guest_path}
+			logexec lxc exec ${container_name} -- chown ${USER} ${guest_path}
 		fi
 		logexec lxc config device add ${container_name} repo_${container_name} disk source="${host_path}" path=${guest_path}
 	fi
