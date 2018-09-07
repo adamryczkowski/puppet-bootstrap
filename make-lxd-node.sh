@@ -175,10 +175,11 @@ esac
 done
 
 if [ "$repo_path" == "" ]; then
-	guess_repo_path /media/adam-minipc/other/debs
-fi
-
-if [ ! "$repo_path" == "" ]; then
+	guess_repo_path /media/adam-minipc/other
+	if [ ! "$repo_path" == "" ]; then
+		repopath_arg="--repo-path /media/adam-minipc/other/debs"
+	fi
+else
 	repopath_arg="--repo-path ${repo_path}"
 fi
 
@@ -542,7 +543,7 @@ if [ -n "${guestfolder}" ]; then
 		if ! lxc exec ${name} ls ${guestfolder}; then
 			logexec lxc exec ${name} -- mkdir -p ${guestfolder}
 		fi
-		logexec lxc config device add ${name} ${sharename} disk source=$(dirname ${hostfolder}) path=$(dirname ${guestfolder})
+		logexec lxc config device add ${name} ${sharename} disk source=${hostfolder} path=${guestfolder}
 	fi
 fi
 
