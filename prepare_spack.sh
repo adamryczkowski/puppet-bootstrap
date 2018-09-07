@@ -103,7 +103,7 @@ if [ "$spack_mirror" != "" ]; then
 		if [[ $spack_mirror =~ $pattern ]]; then
 			spack_mirror="${BASH_REMATCH[1]}"
 		fi
-		logexec spack mirror add custom_mirror file:/${spack_mirror}
+		logexec spack mirror add custom_mirror file://${spack_mirror}
 	fi
 fi
 
