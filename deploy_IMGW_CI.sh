@@ -30,15 +30,15 @@ where
                                  Defaults to «~/propoze»
  --release <release_name>      - What Ubuntu flavour to test? Defaults to the current distro.
  --apt-proxy <proxy_address>   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
- --compile-using <compiler>    - Specify the compiler to use. 
-                                 Valid choices: 
-                                 * cuda-9
-                                 * gcc-5 (it will include gfortran-5)
-                                 * gcc-6 (it will include gfortran-6)
-                                 * gcc-7 (it will include gfortran-7)
-                                 * clang-4
-                                 * clang-5
-                                 Defaults to the gcc shipped with the system.
+ --preinstall-spack            - Name of the package to pre-install using spack
+                                 (e.g. --preinstall-spack cmake --preinstall-spack gcc@6.4.0)
+ --repo-path                   - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
+ --spack-location              - Name of the directory to install spack into. Defaults to ~/tmp/spack
+                                 Needed only, when --preinstall-spack any package.
+ --spack_mirror                - Location of local spack mirror
+                                 Needed only, when --preinstall-spack any package.
+ --preinstall-apt              - Name of the packages to pre-install using package manager
+
  --debug                       - Flag that sets debugging mode. 
  --log                         - Path to the log file that will log all meaningful commands
 
@@ -57,6 +57,10 @@ git_address='git@git.imgw.ad:aryczkowski/propoze.git'
 git_branch='develop'
 guest_path="/home/${USER}/propoze"
 release=xenial
+spack_opts=""
+install_spack=0
+preinstall_apt=()
+repo_path_opts=""
 
 shift
 
@@ -76,6 +80,10 @@ case $key in
 	--help)
         echo "$usage"
         exit 0
+	;;
+	--repo-path)
+	repo_path_opts="--repo-path $1"
+	shift
 	;;
 	--vpn-password)
 	vpn_password=$1
@@ -113,8 +121,21 @@ case $key in
 	aptproxy=$1
 	shift
 	;;
-	--compile-using)
-	compile_using=$1
+	--preinstall-spack)
+	spack_opts="${spack_opts} --pre-install $1"
+	install_spack=1
+	shift
+	;;
+	--spack-location)
+	spack_opts="${spack_opts} --spack-location $1"
+	shift
+	;;
+	--spack-mirror)
+	spack_opts="${spack_opts} --spack-mirro $1"
+	shift
+	;;
+	--preinstall-apt)
+	preinstall_apt+=($1)
 	shift
 	;;
 	-*)
@@ -148,13 +169,6 @@ if [ -n "$ssh_key_path" ]; then
 	fi
 fi
 
-if [ -n "$compile_using" ]; then
-	if [ "$compile_using" != "cuda-9" ] && [ "$compile_using" != "gcc-5" ] && [ "$compile_using" != "gcc-6" ] && [ "$compile_using" != "gcc-7" ] && [ "$compile_using" != "clang-4" ] && [ "$compile_using" != "clang-5" ]; then
-		errcho "--compile-using must be one of the following: cuda-9, gcc-5, gcc-6, gcc-7, clang-4, clang-5"
-		exit 1
-	fi
-fi
-
 opts=""
 
 if [ -n "$release" ]; then
@@ -179,7 +193,7 @@ if [ -n "$debug" ]; then
 fi
 
 # First we make the container
-./execute-script-remotely.sh make-lxd-node.sh --ssh-address ${USER}@localhost $external_opts -- ${container_name} ${opts}
+./execute-script-remotely.sh make-lxd-node.sh --ssh-address ${USER}@localhost $external_opts -- ${container_name} ${opts} ${repo_path_opts}
 
 #get the IP of the running container
 container_ip=$(lxc exec $container_name -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
@@ -199,32 +213,32 @@ fi
 
 # Now we can clone the repo and install its dependencies
 opts=""
-if [ -n "$compile_using" ]; then
-	opts="${opts}--compile-using ${compile_using}"
-fi
-if [ "$compile_using" == "cuda-9" ]; then
-	lxc exec ${container_name} /bin/mkdir -p /opt/sources
-	lxc file push ~/tmp/debs/cmake-3.9* ${container_name}/opt/sources/cmake.tar.gz
-	if [ "$release" == "xenial" ]; then
-		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1604*" ]; then
-			logmkdir ~/tmp/debs ${USER}
-			logexec pushd ~/tmp/debs
-			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
-			logexec popd
-		fi
-		lxc file push ~/tmp/debs/cuda-repo-ubuntu1604*.deb ${container_name}/opt/sources/
-	elif [ "$release" == "zesty" ]; then
-		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1704*" ]; then
-			logexec pushd ~/tmp/debs
-			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/cuda-repo-ubuntu1704_9.1.85-1_amd64.deb
-			logexec popd
-		fi
-		lxc file push ~/tmp/debs/cuda-repo-ubuntu1704*.deb ${container_name}/opt/sources/
-	else
-		errcho "Ubuntu $release is not supported by NVidia CUDA"
-		exit 1
-	fi
-fi
+#if [ -n "$compile_using" ]; then
+#	opts="${opts}--compile-using ${compile_using}"
+#fi
+#if [ "$compile_using" == "cuda-9" ]; then
+#	lxc exec ${container_name} /bin/mkdir -p /opt/sources
+#	lxc file push ~/tmp/debs/cmake-3.9* ${container_name}/opt/sources/cmake.tar.gz
+#	if [ "$release" == "xenial" ]; then
+#		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1604*" ]; then
+#			logmkdir ~/tmp/debs ${USER}
+#			logexec pushd ~/tmp/debs
+#			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
+#			logexec popd
+#		fi
+#		lxc file push ~/tmp/debs/cuda-repo-ubuntu1604*.deb ${container_name}/opt/sources/
+#	elif [ "$release" == "zesty" ]; then
+#		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1704*" ]; then
+#			logexec pushd ~/tmp/debs
+#			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/cuda-repo-ubuntu1704_9.1.85-1_amd64.deb
+#			logexec popd
+#		fi
+#		lxc file push ~/tmp/debs/cuda-repo-ubuntu1704*.deb ${container_name}/opt/sources/
+#	else
+#		errcho "Ubuntu $release is not supported by NVidia CUDA"
+#		exit 1
+#	fi
+#fi
 
 if [ -n "$host_path" ]; then
 	if ! lxc config device show ${container_name} | grep -q repo_${container_name}; then
@@ -232,6 +246,9 @@ if [ -n "$host_path" ]; then
 	fi
 fi
 
+if [ "$install_spack" != 0 ]; then
+	./execute-script-remotely.sh prepare_spack.sh --ssh-address ${container_ip} $external_opts --  ${opts} ${spack_opts}
+fi
 
 ./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts}
 
