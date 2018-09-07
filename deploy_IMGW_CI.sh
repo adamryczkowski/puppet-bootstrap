@@ -199,12 +199,10 @@ if [ -n "$debug" ]; then
 fi
 
 # First we make the container
-./execute-script-remotely.sh make-lxd-node.sh --ssh-address ${USER}@localhost $external_opts --step-debug -- ${container_name} ${opts} ${repo_path_opts}
+./make-lxd-node.sh ${container_name} ${opts} ${repo_path_opts}
 
 #get the IP of the running container
 container_ip=$(lxc exec $container_name -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
-
-
 
 # Then we install the VPN network (optionally)
 
