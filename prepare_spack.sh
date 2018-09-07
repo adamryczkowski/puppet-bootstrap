@@ -87,6 +87,7 @@ if [ ! -d "${spack_location}" ]; then
 		logexec mkdir -p $base_location
 	fi
 	logexec pushd "${base_location}"
+	logexec sudo chown ${USER} ${spack_location}
 	logexec git clone --depth 1 https://github.com/spack/spack ${spack_location}
 	need_bootstrap=1
 fi
