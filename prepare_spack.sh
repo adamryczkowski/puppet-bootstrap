@@ -108,9 +108,9 @@ if [ "$spack_mirror" != "" ]; then
 fi
 
 if [ "$need_bootstrap" == "1" ]; then
-	logexec spack bootstrap
+	spack bootstrap
 fi
 
 for spack_mod in ${pre_install[*]}; do
-	logexec spack install ${spack_mod}
+	spack install ${spack_mod}
 done
