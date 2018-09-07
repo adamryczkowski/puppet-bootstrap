@@ -34,8 +34,7 @@ function install_apt_packages {
 	local ans=0
 	local to_install=""
 	local packages="$@"
-	for package in ${packages[@]}
-	do
+	for package in ${packages[@]}; do
 		if ! dpkg -s "$package">/dev/null  2> /dev/null; then
 			to_install="${to_install} ${package}"
 		fi
@@ -74,8 +73,7 @@ function install_pip3_packages {
 	local ans=0
 	local to_install=""
 	local packages="$@"
-	for package in ${packages[@]}
-	do
+	for package in ${packages[@]}; do
 		if ! pip3 list | grep -qF "$package" >/dev/null  2> /dev/null; then
 			to_install="${to_install} ${package}"
 		fi

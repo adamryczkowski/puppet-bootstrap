@@ -38,7 +38,6 @@ where
  --spack_mirror                - Location of local spack mirror. Mirror will be shared with the container.
                                  Needed only, when --preinstall-spack any package.
  --preinstall-apt              - Name of the packages to pre-install using package manager
-
  --debug                       - Flag that sets debugging mode. 
  --log                         - Path to the log file that will log all meaningful commands
 
@@ -59,7 +58,7 @@ guest_path="/home/${USER}/propoze"
 release=xenial
 spack_opts=""
 install_spack=0
-preinstall_apt=()
+apt_opts=""
 repo_path_opts=""
 
 shift
@@ -136,7 +135,7 @@ case $key in
 	shift
 	;;
 	--preinstall-apt)
-	preinstall_apt+=($1)
+	apt_opts="${apt_opts} $1"
 	shift
 	;;
 	-*)
@@ -245,6 +244,10 @@ if [ -n "$host_path" ]; then
 	if ! lxc config device show ${container_name} | grep -q repo_${container_name}; then
 		logexec lxc config device add ${container_name} repo_${container_name} disk source="${host_path}" path=${guest_path}
 	fi
+fi
+
+if [ "$apt_opts" != "" ]; then
+	./execute-script-remotely.sh install_apt_packages.sh --ssh-address ${container_ip} $external_opts --  ${apt_opts}
 fi
 
 if [ "$install_spack" != 0 ]; then

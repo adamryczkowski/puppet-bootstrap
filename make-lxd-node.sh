@@ -538,7 +538,7 @@ fi
 if [ -n "${guestfolder}" ]; then
 	sharename=$(basename ${hostfolder})
 	if [ ! $(lxc config device list ${name} | grep -q ${sharename}) ]; then
-		if ! lxc exec ${name} ls ${guestfolder}; then
+		if ! lxc exec ${name} ls ${guestfolder} >/dev/null; then
 			logexec lxc exec ${name} -- mkdir -p ${guestfolder}
 		fi
 		logexec lxc config device add ${name} ${sharename} disk source=${hostfolder} path=${guestfolder}
