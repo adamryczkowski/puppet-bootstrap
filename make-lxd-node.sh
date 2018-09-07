@@ -542,7 +542,7 @@ if [ -n "${guestfolder}" ]; then
 		if ! lxc exec ${name} ls ${guestfolder}; then
 			logexec lxc exec ${name} -- mkdir -p ${guestfolder}
 		fi
-		logexec lxc config device add ${name} ${sharename} disk source=${hostfolder} path=${guestfolder}
+		logexec lxc config device add ${name} ${sharename} disk source=$(dirname ${hostfolder}) path=$(dirname ${guestfolder})
 	fi
 fi
 

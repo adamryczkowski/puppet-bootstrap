@@ -97,13 +97,13 @@ source "${spack_location}/share/spack/setup-env.sh"
 if [ "$spack_mirror" != "" ]; then
 	if ! spack mirror list | grep ${spack_mirror} >/dev/null; then
 		if spack mirror list | grep "^custom_mirror " >/dev/null; then
-			spack mirror remove custom_mirror
+			logexec spack mirror remove custom_mirror
 		fi
 		pattern='^file:/(/.*)$'
 		if [[ $spack_mirror =~ $pattern ]]; then
 			spack_mirror="${BASH_REMATCH[1]}"
 		fi
-		spack mirror add custom_mirror file:/${spack_mirror}
+		logexec spack mirror add custom_mirror file:/${spack_mirror}
 	fi
 fi
 
@@ -112,5 +112,5 @@ if [ "$need_bootstrap" == "1" ]; then
 fi
 
 for spack_mod in ${pre_install[*]}; do
-	spack install ${spack_mod}
+	logexec spack install ${spack_mod}
 done
