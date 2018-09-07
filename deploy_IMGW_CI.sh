@@ -199,7 +199,7 @@ if [ -n "$debug" ]; then
 fi
 
 # First we make the container
-./make-lxd-node.sh ${container_name} ${opts} ${repo_path_opts}
+./make-lxd-node.sh ${container_name} ${opts} ${repo_path_opts} ${makelxd_opts}
 
 #get the IP of the running container
 container_ip=$(lxc exec $container_name -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
@@ -246,6 +246,10 @@ opts=""
 
 if [ -n "$host_path" ]; then
 	if ! lxc config device show ${container_name} | grep -q repo_${container_name}; then
+		if ! lxc exec ${container_name} -- ls ${guest_path}; then
+			logexec exec ${container_name} -- mkdir -p ${guest_path}
+			logexec exec ${container_name} -- chown ${USER} ${guest_path}
+		fi
 		logexec lxc config device add ${container_name} repo_${container_name} disk source="${host_path}" path=${guest_path}
 	fi
 fi
