@@ -211,7 +211,7 @@ logexec ssh-keyscan -H git.imgw.ad >> $sshhome/.ssh/known_hosts
 
 if [ -d "${repo_path}/.git" ]; then
 	pushd "$repo_path"
-	logexec git pull
+	logexec git pull --all
 	logexec git checkout ${git_branch}
 	logexec git submodule update
 	popd
