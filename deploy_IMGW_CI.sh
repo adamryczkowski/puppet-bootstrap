@@ -199,7 +199,7 @@ if [ -n "$debug" ]; then
 fi
 
 # First we make the container
-./execute-script-remotely.sh make-lxd-node.sh --ssh-address ${USER}@localhost $external_opts -- ${container_name} ${opts} ${repo_path_opts}
+./execute-script-remotely.sh make-lxd-node.sh --ssh-address ${USER}@localhost $external_opts --step-debug -- ${container_name} ${opts} ${repo_path_opts}
 
 #get the IP of the running container
 container_ip=$(lxc exec $container_name -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
@@ -213,7 +213,7 @@ if [ -n "$vpn_username" ]; then
 		errcho "You must provide password"
 		exit 1
 	else
-		./execute-script-remotely.sh IMGW-VPN.sh --ssh-address ${container_ip} $external_opts -- ${vpn_username}@vpn.imgw.pl --password ${vpn_password}
+		./execute-script-remotely.sh IMGW-VPN.sh --ssh-address ${container_ip} $external_opts --step-debug -- ${vpn_username}@vpn.imgw.pl --password ${vpn_password}
 	fi
 fi
 
@@ -253,13 +253,13 @@ if [ -n "$host_path" ]; then
 fi
 
 if [ "$apt_opts" != "" ]; then
-	./execute-script-remotely.sh install_apt_packages.sh --ssh-address ${container_ip} $external_opts --  ${apt_opts}
+	./execute-script-remotely.sh install_apt_packages.sh --ssh-address ${container_ip} $external_opts --step-debug --  ${apt_opts}
 fi
 
 if [ "$install_spack" != 0 ]; then
-	./execute-script-remotely.sh prepare_spack.sh --ssh-address ${container_ip} $external_opts --  ${opts} ${spack_opts}
+	./execute-script-remotely.sh prepare_spack.sh --ssh-address ${container_ip} $external_opts --step-debug --  ${opts} ${spack_opts}
 fi
 
-./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts} ${CI_opts}
+./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts --step-debug -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts} ${CI_opts}
 
 
