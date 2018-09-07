@@ -28,6 +28,8 @@ where
                                  the script will pull the code.
  --guest-repo-path <path>      - Where the repository will be available in the guest.
                                  Defaults to «~/propoze»
+ --source-dir <path>           - Relative path to the source directory. Script will build this source in
+                                 created subdirectory \"build\". Defaults to the root of the repository.
  --release <release_name>      - What Ubuntu flavour to test? Defaults to the current distro.
  --apt-proxy <proxy_address>   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
  --preinstall-spack            - Name of the package to pre-install using spack
@@ -110,6 +112,10 @@ case $key in
 	;;
 	--guest-repo-path)
 	guest_path=$1
+	shift
+	;;
+	--source-dir)
+	CI_opts="${CI_opts} --source-dir $1"
 	shift
 	;;
 	--release)
@@ -254,6 +260,6 @@ if [ "$install_spack" != 0 ]; then
 	./execute-script-remotely.sh prepare_spack.sh --ssh-address ${container_ip} $external_opts --  ${opts} ${spack_opts}
 fi
 
-./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts}
+./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts} ${CI_opts}
 
 
