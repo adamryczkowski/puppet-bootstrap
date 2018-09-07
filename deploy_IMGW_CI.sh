@@ -57,7 +57,7 @@ container_name=$1
 git_address='git@git.imgw.ad:aryczkowski/propoze.git'
 git_branch='develop'
 guest_path="/home/${USER}/propoze"
-release=xenial
+release_opts=""
 spack_opts=""
 install_spack=0
 apt_opts=""
@@ -119,7 +119,7 @@ case $key in
 	shift
 	;;
 	--release)
-	release=$1
+	release_opts="--release $1"
 	shift
 	;;
 	--apt-proxy)
@@ -177,10 +177,6 @@ fi
 
 opts=""
 
-if [ -n "$release" ]; then
-	opts="${opts}--release ${release} "
-fi
-
 if [ -n "$aptproxy" ]; then
 	opts="${opts}--apt-proxy ${aptproxy} "
 fi
@@ -199,7 +195,7 @@ if [ -n "$debug" ]; then
 fi
 
 # First we make the container
-./make-lxd-node.sh ${container_name} ${opts} ${repo_path_opts} ${makelxd_opts}
+./make-lxd-node.sh ${container_name} ${opts} ${repo_path_opts} ${makelxd_opts} ${release_opts}
 
 #get the IP of the running container
 container_ip=$(lxc exec $container_name -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
