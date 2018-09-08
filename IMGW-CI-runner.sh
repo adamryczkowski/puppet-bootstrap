@@ -113,6 +113,8 @@ done
 #	fi
 #fi
 
+invocation="cd \"${build_dir}\";"
+
 if [ "${#spack_load[@]}" != "0" ]; then
 	source "${spack_location}/share/spack/setup-env.sh"
 	spack_sourced=1
@@ -121,6 +123,8 @@ if [ "${#spack_load[@]}" != "0" ]; then
 			logexec spack install ${spack_mod}
 		fi
 		spack load ${spack_mod}
+		echo " LOADING ${spack_mod} USING SPACK!"
+		invocation="${invocation} spack load ${spack_mod};"
 	done
 else
 	spack_sourced=0
@@ -249,6 +253,7 @@ if [ -n "${pip_deps}" ]; then
 	sudo -H pip3 install ${pip_deps}
 fi
 
+
 if [ -n "${spack_deps}" ]; then
 	if [ "$spack_sourced" != "1" ]; then
 		source "${spack_location}/share/spack/setup-env.sh"
@@ -259,6 +264,8 @@ if [ -n "${spack_deps}" ]; then
 			logexec spack install ${spack_mod}
 		fi
 		spack load ${spack_mod}
+		echo " LOADING ${spack_mod} USING SPACK!"
+		invocation="${invocation} spack load ${spack_mod};"
 	done
 fi
 
@@ -268,5 +275,5 @@ cpu_cures=$(grep -c ^processor /proc/cpuinfo)
 #cd "${repo_path}/${build_dir}"
 #cmake .. ${cmake_args} && make -j ${cpu_cures} && make test
 
-byobu-tmux new-session -d -s ${build_dir} -n code "cd \"${build_dir}\"; cmake .. ${cmake_args} && make -j ${cpu_cures} && make test; bash"
+byobu-tmux new-session -d -s ${build_dir} -n code "${invocation} cmake .. ${cmake_args} && make -j ${cpu_cures} && make test; bash"
 
