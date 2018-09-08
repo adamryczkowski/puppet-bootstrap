@@ -128,6 +128,7 @@ case $key in
 	;;
 	--preinstall-spack)
 	spack_opts="${spack_opts} --pre-install $1"
+	CI_opts="${CI_opts} --spack-load $1"
 	install_spack=1
 	shift
 	;;
@@ -259,5 +260,4 @@ if [ "$install_spack" != 0 ]; then
 fi
 
 ./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts --step-debug -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts} ${CI_opts}
-
 
