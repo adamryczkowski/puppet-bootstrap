@@ -234,6 +234,8 @@ logexec cd "$build_dir"
 
 logexec rm "${build_dir}/apt_dependencies.txt" "${build_dir}/pip_dependencies.txt" "${build_dir}/spack_dependencies.txt"
 logexec cmake .. ${cmake_args}
+logexec rm "${build_dir}/CMakeCache.txt"
+
 
 if [ ! -f "${build_dir}/apt_dependencies.txt" ]; then
 	errcho "Some serious problem with project configuration"
