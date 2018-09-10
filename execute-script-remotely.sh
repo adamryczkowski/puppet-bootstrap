@@ -83,6 +83,11 @@ exec_mypath=`dir_resolve $exec_mypath`
 cd $exec_mypath
 exec_host=localhost
 
+if [ "$1" == "--help" ]; then
+	echo "$usage"
+	exit 0
+fi
+
 exec_script=$1
 if [ -z "$exec_script" ]; then
 	echo "$usage"
