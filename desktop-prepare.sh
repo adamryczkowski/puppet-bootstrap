@@ -484,7 +484,9 @@ function gedit {
 		plik=$(get_cached_file gedit-pair-char-completion-1.0.6-gnome3.tar.gz https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/gedit-pair-char-autocomplete/gedit-pair-char-completion-1.0.6-gnome3.tar.gz)
 		tmpdir=$(mktemp -d)
 		uncompress_cached_file $plik $tmpdir
+		pushd $tmpdir/gedit-pair-char-completion-1.0.6-gnome3
 		logexec ${tmpdir}/gedit-pair-char-completion-1.0.6-gnome3/install.sh
+		popd
 		gsettings_add_to_array org.gnome.gedit.plugins active-plugins pair_char_completion
 	fi
 	
