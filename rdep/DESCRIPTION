@@ -9,6 +9,33 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
+Imports:
+doParallel,
+caret,bookdown
+	R6
+	ggplot2
+	AppliedPredictiveModeling
+	mlbench
+	earth,e1071,ggthemes
+	proxy
+	latticeExtra
+	gbm
+	klaR,
+	pROC,
+	DT,
+	networkD3,
+	heatmaply,
+	DMwR,
+	ROSE,
+	randomForest,
+	doMC
+	QSARdata,mboost
+	sessioninfo
+	TH.data,
+	party,
+	desirability,
+	MLmetrics,
+	C50
 Remotes:
 	 adamryczkowski/clustertools,
 	 adamryczkowski/depwalker,
