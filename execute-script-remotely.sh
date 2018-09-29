@@ -269,85 +269,30 @@ if [ -n "$exec_lxcname" ]; then
 	exec_mode=3
 fi
 
-#Teraz kopiujemy skrypt i nadajemy mu uprawnienia
 case $exec_mode in
 	1)
 #localhost
-	exec_prefix=""
-	exec_remote_dir="`mktemp -d`"
-	exec_remote_path="$exec_remote_dir/`basename $exec_script`"
-	for exec_file in ${dependencies[@]}; do
-		if [ "$exec_file" == "$exec_script" ]; then
-			exec_rpath=$exec_remote_path
-		else
-			exec_rpath=$exec_remote_dir/$(basename "${exec_file}")
-			if [ ! -d "`dirname $exec_rpath`" ]; then
-				mkdir -p `dirname $exec_rpath`
-			fi
-		fi
-		cp $exec_file $exec_rpath
-	done
-	if [ -n "$log" ]; then
-		#echo "Script $exec_script on `hostname`: ">$exec_remote_dir/log.log
-		if [ "$log" == "/dev/stdout" ]; then
-			exec_opts="$exec_opts --log /dev/stdout"
-			if [ -n "$exec_user" ]; then
-				pushd /dev >/dev/null
-				exec_prevlink="$log"
-				exec_link="$log"
-				while exec_nextlink=$(readlink $exec_link); do
-					exec_prevlink="$exec_link"
-					exec_link="$exec_nextlink"
-				done
-				sudo chmod 777 $exec_prevlink
-				popd >/dev/null
-			fi
-		else
-			exec_opts="$exec_opts --log $exec_remote_dir/log.log"
-		fi
-	fi
-	if [ "$exec_user" != "`whoami`" ]; then
-		sudo chown -R $exec_user $exec_remote_dir
-	fi
-	sudo chmod -R +x $exec_remote_dir
-	if [ "$exec_user" != "`whoami`" ]; then
-		exec_prefix="sudo -i -u $exec_user --"
+	remote_dir=$(mktemp -d)
+	rsync -avPR ${dependencies[@]} $tmpdir
+	if [ "$exec_user" != "$(whoami)" ]; then
+		exec_prefix="sudo -i -u ${exec_user} -- "
+		sudo chown -R ${exec_user} $remote_dir
 	else
 		exec_prefix=""
 	fi
 	;;
 	2)
 #ssh
-	exec_remote_dir=`ssh ${sshuser}@${exec_host} ${exec_portarg1} mktemp -d`
-	exec_remote_path="$exec_remote_dir/`basename $exec_script`"
-	for exec_file in ${dependencies[@]}; do
-		if [ "$exec_file" == "$exec_script" ]; then
-			exec_rpath=$exec_remote_path
-		else
-			exec_rpath=$exec_remote_dir/$(basename "${exec_file}")
-			exec_command="if [ ! -d "`dirname $exec_rpath`" ]; then mkdir -p `dirname $exec_rpath`; fi"
-			logexec ssh $exec_portarg1 $sshuser@$exec_host $exec_command
-		fi
-		logexec scp $exec_portarg2 $exec_file $sshuser@$exec_host:$exec_rpath >/dev/null
-	done
-	if [ -n "$log" ]; then
-		#ssh $exec_user@$exec_host "echo \"Script $exec_script on \$(hostname): \" >$exec_remote_dir/log.log"
-		if [ "$log" == "/dev/stdout" ]; then
-			exec_opts="$exec_opts --log /dev/stdout"
-		else
-			exec_opts="$exec_opts --log $exec_remote_dir/log.log"
-		fi
+	if [ "${sshuser}" == "${exec_user}" ]; then
+		exec_prefix="ssh ${exec_portarg1} $sshuser@$exec_host  -- "
+	else
+		exec_prefix="ssh ${exec_portarg1} $sshuser@$exec_host -- sudo -Hu $exec_user -- "
 	fi
-	if [ "$exec_user" != "$sshuser" ]; then
-		if ! ssh $exec_portarg1 $sshuser@$exec_host sudo chown -R $exec_user $exec_remote_dir; then
-        		if ! ssh $exec_portarg1 $sshuser@$exec_host chown -R $exec_user $exec_remote_dir; then
-        		        errcho "Warning: insufficient privileges to change ownership of the file"
-        		fi
-                fi
+	remote_dir=$(ssh ${exec_portarg1} ${sshuser}@${exec_host} -- mktemp -d)
+	rsync -avPR ${dependencies[@]} ${sshuser}@${exec_host}:${tmpdir}
+	if [ "${sshuser}" != "${exec_user}" ]; then
+		ssh ${exec_portarg1} ${sshuser}@${exec_host} -- chown -R ${exec_user} ${remote_dir}
 	fi
-	logexec ssh $exec_portarg1 $sshuser@$exec_host chmod -R +x $exec_remote_dir
-	logexec ssh $exec_portarg1 $sshuser@$exec_host chmod +x $exec_remote_path
-	exec_prefix="ssh $exec_portarg1 $sshuser@$exec_host -- sudo -Hu $exec_user -- "
 	
 	if [ "$use_repo" == "1" ]; then
 		errcho "--use-repo not supported when calling via ssh."
@@ -356,36 +301,33 @@ case $exec_mode in
 #		fi
 		exit 1
 	fi
+
 	;;
 	3)
 #lxc
-	exec_full_remote_dir=$(lxc exec ${exec_lxcname} -- mktemp -d)
-	exec_full_remote_path="$exec_full_remote_dir/`basename $exec_script`"
-	exec_uid=`grep $exec_user $exec_lxcprefix/etc/passwd | awk -F: '{ print $3 }'`
-	for exec_file in ${dependencies[@]}; do
-		if [ "$exec_file" == "$exec_script" ]; then
-			exec_rpath=$exec_full_remote_path
-		else
-			exec_rpath=$exec_full_remote_dir/$(basename "${exec_file}")
-			mkdir -p "$(dirname $exec_rpath)"
-		fi
-		lxc file push ${exec_file} ${exec_lxcname}/${exec_rpath}
+	remote_dir=$(lxc exec ${exec_lxcname} -- mktemp -d)
+	exec_prefix="lxc exec ${exec_lxcname} -- "
+	for plik in ${dependencies[@]}; do
+		lxc exec ${exec_lxcname} mkdir -p "$(dirname ${exec_lxcname}/${plik})"
+		lxc file push ${plik} ${exec_lxcname}/${plik}
 	done
-	lxc exec ${exec_lxcname} -- chmod +x "${exec_full_remote_dir}"
+	if [ "root" != "${exec_user}" ]; then
+		${exec_prefix} chown -R ${exec_user} ${remote_dir}
+	fi
+	
 	if [ ! "$repo_path" == "" ]; then
 		if ! lxc config device list ${exec_lxcname} | grep tmprepo; then
 			lxc exec ${exec_lxcname} -- mkdir -p ${repo_path}
 			lxc config device add ${exec_lxcname} tmprepo disk path="${repo_path}" source="${repo_path}"
 		fi
 	fi
-	exec_prefix="lxc exec ${exec_lxcname} -- "
-	exec_remote_path="$exec_full_remote_path"
-	;;
-	*)
-	echo "Error. Aborting."
-	exit 1
+
 	;;
 esac
+
+
+
+
 
 
 
@@ -395,18 +337,18 @@ function appendlog ()
 	if [ -n "$log" ] && [ "$log" != "/dev/stdout" ]; then
 		case $exec_mode in
 			1)
-			cat $exec_remote_dir/log.log >>$log
+			cat $remote_dir/log.log >>$log
 			;;
 			2)
 			#ssh
-			exec_locallog=`mktemp --dry-run --suffix .log`
-			scp $sshuser@$exec_host:$exec_remote_dir/log.log $exec_locallog >/dev/null
-			cat $exec_locallog >>$log
-			rm $exec_locallog
+			ssh $sshuser@$exec_host cat $remote_dir/log.log >>$log
 			;;
 			3)
 			#lxc
-			sudo cat $exec_full_remote_dir/log.log >>$log
+			lxc exec ${exec_lxcname} cat $remote_dir/log.log >>$log
+			if [ ! "$repo_path" == "" ]; then
+				lxc config device remove ${exec_lxcname} tmprepo disk
+			fi
 			;;
 			*)
 			echo "Error. Aborting."
@@ -422,16 +364,16 @@ function appendlog ()
 #A teraz wykonujemy skrypt
 if [ -n "$log" ] && [ "$log" != "/dev/stdout" ] ; then
 	trap 'appendlog' ERR
-#	logheading $exec_prefix $exec_remote_path $exec_opts
-#	echo "$exec_prefix $exec_remote_path $exec_opts"
+#	logheading $exec_prefix $remote_dir $exec_opts
+#	echo "$exec_prefix $remote_dir $exec_opts"
 fi
 if [ "$exec_fulldebug" -eq "1" ]; then
 #	if [ "$exec_fulldebug" -eq "1" ]; then
-#		echo "EXECUTING $exec_prefix bash -x -- $exec_remote_path $exec_opts"
+#		echo "EXECUTING $exec_prefix bash -x -- $remote_dir $exec_opts"
 #	fi
-	$exec_prefix bash -x -- $exec_remote_path $exec_opts
+	$exec_prefix bash -x -- $remote_dir $exec_opts
 else
-	$exec_prefix bash -- $exec_remote_path $exec_opts
+	$exec_prefix bash -- $remote_dir $exec_opts
 fi
 exec_err=$?
 trap 'errorhdl' ERR
@@ -441,4 +383,5 @@ appendlog
 if [ $exec_err -ne 0 ]; then
 	exit $exec_err
 fi
+
 
