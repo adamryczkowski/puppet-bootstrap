@@ -33,7 +33,7 @@ function add_dependency {
 
 function collect_dependencies {
 	local input_file="$1"
-	dependencies=()
+	dependencies=("$input_file")
 	read_file_header $input_file
 	local dep_len=${#dependencies[@]}
 	local old_dep_len=0
@@ -51,5 +51,3 @@ function collect_dependencies {
 		fi
 	done
 }
-
-
