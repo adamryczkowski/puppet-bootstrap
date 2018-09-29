@@ -37,7 +37,7 @@ This script sends script to the remote machine either by lxc send or ssh.
 Usage:
 
 $(basename $0) <script path> [--ssh-address <host_address>]  
-               [--lxc-name <lxcname>] [--username <user>] 
+               [--lxc-name <lxcname>] [--user <user>] 
                [--debug] [--step-debug] [--extra-executable] [--use-repo]
                -- <arguments that will get send to the remote script>
                
@@ -50,7 +50,7 @@ where
  --lxc-name         - name of the lxc container to send the command to. 
                       The command will be transfered by and executed 
                       by means of the lxc api.
- --username         - name of the user, on behalf of which the script 
+ --user             - name of the user, on behalf of which the script 
                       will be run. The username defaults to the connected 
                       user in case of ssh, and root in case of lxc.
  --step-debug       - Will run the target script with bash -x, 
