@@ -309,7 +309,7 @@ case $exec_mode in
 	exec_prefix="lxc exec ${exec_lxcname} -- "
 	for plik in ${dependencies[@]}; do
 		lxc exec ${exec_lxcname} mkdir -p "$(dirname ${exec_lxcname}/${plik})"
-		lxc file push ${plik} ${exec_lxcname}/${plik}
+		lxc file push ${plik} ${exec_lxcname}/${remote_dir}/${plik}
 	done
 	if [ "root" != "${exec_user}" ]; then
 		${exec_prefix} chown -R ${exec_user} ${remote_dir}
