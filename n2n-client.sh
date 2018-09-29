@@ -1,4 +1,7 @@
 #!/bin/bash
+
+## dependency: files/n2n
+
 cd `dirname $0`
 . ./common.sh
 
