@@ -289,7 +289,7 @@ case $exec_mode in
 		exec_prefix="ssh ${exec_portarg1} $sshuser@$exec_host -- sudo -Hu $exec_user -- "
 	fi
 	remote_dir=$(ssh ${exec_portarg1} ${sshuser}@${exec_host} -- mktemp -d)
-	rsync -avPR ${dependencies[@]} ${sshuser}@${exec_host}:${tmpdir}
+	rsync -avPR ${dependencies[@]} ${sshuser}@${exec_host}:${remote_dir}
 	if [ "${sshuser}" != "${exec_user}" ]; then
 		ssh ${exec_portarg1} ${sshuser}@${exec_host} -- chown -R ${exec_user} ${remote_dir}
 	fi
