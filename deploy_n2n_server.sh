@@ -1,6 +1,10 @@
 #!/bin/bash
+
+## dependency: n2n-client.sh
+## dependency: n2n-server.sh
 cd `dirname $0`
 . ./common.sh
+
 
 
 usage="
@@ -74,4 +78,4 @@ if [ -z "$ip" ]; then
 fi
 
 
-./execute-script-remotely.sh n2n-server.sh --ssh-address $ssh_address --extra-executable n2n-client.sh --extra-executable files/n2n $opts -- $all_opts
+./execute-script-remotely.sh n2n-server.sh --ssh-address $ssh_address --extra-executable files/n2n $opts -- $all_opts

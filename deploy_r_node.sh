@@ -2,6 +2,8 @@
 cd `dirname $0`
 . ./common.sh
 
+## dependency: prepare_R-node.sh
+## dependency: prepare_samba_client.sh
 
 usage="
 Deploys the R in the server on the given ssh address

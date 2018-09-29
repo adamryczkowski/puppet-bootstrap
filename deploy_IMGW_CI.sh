@@ -1,4 +1,10 @@
 #!/bin/bash
+
+## dependency: IMGW-VPN.sh
+## dependency: make-lxd-node.sh
+## dependency: install_apt_packages.sh
+## dependency: prepare_spack.sh
+## dependency: IMGW-CI-runner.sh
 cd `dirname $0`
 . ./common.sh
 

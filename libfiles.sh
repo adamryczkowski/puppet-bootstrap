@@ -1,4 +1,5 @@
 #!/bin/bash
+
 function calcshasum {
 	file="$1"
 	if [ -f "$file" ]; then 

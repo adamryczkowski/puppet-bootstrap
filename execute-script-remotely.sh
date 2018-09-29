@@ -113,11 +113,13 @@ exec_user=""
 use_repo=0
 exec_debug=0
 exec_port=22
-exec_extrascripts=()
-exec_extrascripts+=("$exec_script")
-exec_extrascripts+=("lib*.sh")
-exec_extrascripts+=("common.sh")
 
+collect_dependencies "$exec_script"
+
+add_dependency "common.sh"
+for plik in lib*.sh; do
+  add_dependency "$plik"
+done
 
 while [[ $# > 0 ]]
 do
@@ -130,7 +132,7 @@ case $exec_key in
 	debug=1
 	;;
 	--extra-executable)
-	exec_extrascripts+=("$1")
+	add_dependency "$1"
 	shift
 	;;
 	--ssh-address)
@@ -274,7 +276,7 @@ case $exec_mode in
 	exec_prefix=""
 	exec_remote_dir="`mktemp -d`"
 	exec_remote_path="$exec_remote_dir/`basename $exec_script`"
-	for exec_file in ${exec_extrascripts[*]}; do
+	for exec_file in ${dependencies[@]}; do
 		if [ "$exec_file" == "$exec_script" ]; then
 			exec_rpath=$exec_remote_path
 		else
@@ -318,7 +320,7 @@ case $exec_mode in
 #ssh
 	exec_remote_dir=`ssh ${sshuser}@${exec_host} ${exec_portarg1} mktemp -d`
 	exec_remote_path="$exec_remote_dir/`basename $exec_script`"
-	for exec_file in ${exec_extrascripts[*]}; do
+	for exec_file in ${dependencies[@]}; do
 		if [ "$exec_file" == "$exec_script" ]; then
 			exec_rpath=$exec_remote_path
 		else
@@ -360,7 +362,7 @@ case $exec_mode in
 	exec_full_remote_dir=$(lxc exec ${exec_lxcname} -- mktemp -d)
 	exec_full_remote_path="$exec_full_remote_dir/`basename $exec_script`"
 	exec_uid=`grep $exec_user $exec_lxcprefix/etc/passwd | awk -F: '{ print $3 }'`
-	for exec_file in ${exec_extrascripts[*]}; do
+	for exec_file in ${dependencies[@]}; do
 		if [ "$exec_file" == "$exec_script" ]; then
 			exec_rpath=$exec_full_remote_path
 		else

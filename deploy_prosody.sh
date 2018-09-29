@@ -1,7 +1,9 @@
 #!/bin/bash
+
+## dependency: prepare_prosody.sh
+
 cd `dirname $0`
 . ./common.sh
-
 
 usage="
 Deploys the prosody XMPP IM server

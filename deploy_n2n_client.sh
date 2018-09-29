@@ -1,6 +1,10 @@
 #!/bin/bash
+## dependency: n2n-client.sh
+
 cd `dirname $0`
 . ./common.sh
+
+
 
 
 usage="

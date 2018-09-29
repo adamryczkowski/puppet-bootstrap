@@ -1,7 +1,9 @@
 #!/bin/bash
+
+## dependency: prepare_R-node.sh
+
 cd `dirname $0`
 . ./common.sh
-
 
 usage="
 Prepares an Ubuntu installation with common tweaks.

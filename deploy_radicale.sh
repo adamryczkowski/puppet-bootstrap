@@ -2,6 +2,7 @@
 cd `dirname $0`
 . ./common.sh
 
+## dependency: prepare_radicale.sh
 
 usage="
 Deploys calendar server radicale on the given ssh address

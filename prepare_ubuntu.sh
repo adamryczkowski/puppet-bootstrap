@@ -1,4 +1,5 @@
 #!/bin/bash
+## dependency: prepare_ubuntu_user.sh
 cd `dirname $0`
 . ./common.sh
 
