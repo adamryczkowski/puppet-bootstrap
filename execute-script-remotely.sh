@@ -371,9 +371,9 @@ if [ "$exec_fulldebug" -eq "1" ]; then
 #	if [ "$exec_fulldebug" -eq "1" ]; then
 #		echo "EXECUTING $exec_prefix bash -x -- $remote_dir $exec_opts"
 #	fi
-	$exec_prefix bash -x -- $remote_dir $exec_opts
+	$exec_prefix bash -x -- ${remote_dir}/${exec_script} $exec_opts
 else
-	$exec_prefix bash -- $remote_dir $exec_opts
+	$exec_prefix bash -- ${remote_dir}/${exec_script} $exec_opts
 fi
 exec_err=$?
 trap 'errorhdl' ERR
