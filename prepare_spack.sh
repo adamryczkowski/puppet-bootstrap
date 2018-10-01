@@ -110,6 +110,7 @@ fi
 
 if [ "$need_bootstrap" == "1" ]; then
 	spack bootstrap
+	source "${spack_location}/share/spack/setup-env.sh"
 fi
 
 for spack_mod in ${pre_install[*]}; do

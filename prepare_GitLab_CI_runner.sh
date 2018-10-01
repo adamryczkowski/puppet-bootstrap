@@ -53,7 +53,7 @@ key="$1"
 shift
 
 case $key in
-	--username)
+	--user)
 	username="$1"
 	shift
 	;;
@@ -112,7 +112,7 @@ if [ -z "${gitlab_token}" ]; then
 fi
 
 if [ "${max_mem}" == "auto" ]; then
-	max_mem=$(($(grep MemTotal /proc/meminfo | awk '{print $2}'  )/1024))
+	max_mem=$(($(grep MemTotal /proc/meminfo | awk '{print $2}'  )/1024 - 1024))
 fi
 
 if [ "$max_threads" == "auto" ]; then
@@ -122,13 +122,22 @@ fi
 
 invocation="cd \"${build_dir}\";"
 
-if [ -f "/etc/apt/sources.list.d/runner_gitlab-runner.list"]
+if [ ! -f "/etc/apt/sources.list.d/runner_gitlab-runner.list" ]; then
 	wget https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh -O /tmp/script.deb.sh
 
-	loglxc bash /tmp/script.deb.sh
+	logexec bash /tmp/script.deb.sh
 fi
 
-apt-install_apt_package gitlab-runner gitlab-runner
+install_apt_package gitlab-runner gitlab-runner
 
-logexec gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --token ${gitlab_token} --executor shell ${opts} --env "MAX_MEM=${max_mem} MAX_THREADS=${max_threads}"
+if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
+	logexec logmkdir /usr/share/ca-certificates/extra
+#	$loglog
+	echo -n | openssl s_client -connect git1.imgw.pl:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee /usr/share/ca-certificates/extra/imgwpl.crt
+	logexec sudo dpkg-reconfigure -f ca-certificates
+fi
+
+
+logexec gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "MAX_MEM=${max_mem} MAX_THREADS=${max_threads}" 
+
 
