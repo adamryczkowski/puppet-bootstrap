@@ -189,7 +189,7 @@ function office2007 {
 	add_apt_source_manual playonlinux 'deb http://deb.playonlinux.com/ xenial main' http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
 	
 	do_update
-	install_apt_package winehq-devel playonlinux
+	install_apt_packages winehq-devel playonlinux
 	
 	add_group wine_office
 	add_usergroup "$user" wine_office
