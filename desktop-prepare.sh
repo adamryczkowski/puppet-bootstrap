@@ -194,7 +194,7 @@ function office2007 {
 	add_group wine_office
 	add_usergroup "$user" wine_office
 	uncompress_cached_file office2007_pl.tar.xz "/opt/" "${user}:wine_office"
-	chown_dir /opt/Office2007 "${user}" wine_office
+	chown_dir /opt/Office2007 "$user" wine_office
 	#Make sure all office is writable by anyone with execute permission preserverd
 	chmod_dir /opt/Office2007 777 666 777
 	
