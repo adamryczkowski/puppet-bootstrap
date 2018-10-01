@@ -422,3 +422,26 @@ function guess_repo_path {
 		export repo_path="$guess"
 	fi
 }
+
+function make_symlink {
+	local source="$1"
+	local dest="$2"
+	if [ ! -f "$source" ] && [ ! -d "$source" ]; then
+		errcho "$source does not exist"
+		exit 1
+	fi
+	if [ -L "$dest" ]; then
+		if [ "$(readlink -f $dest)"!="$(readlink -f $source)" ]; then
+			logexec rm $dest
+			logexec ln -s $source $dest
+		fi
+		return 0
+	else
+		if [ -f "$dest" ] || [ -d "$dest" ]; then
+			errcho "$dest already exists"
+			exit 1
+		fi
+		logexec ln -s $source $dest
+		return 0
+	fi
+}

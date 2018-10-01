@@ -18,34 +18,37 @@ case $1 in
 esac
 shift
 
-declare -a args
 
-for var in "$@"; do
-	arg=$(readlink -f "$var")
-#	openin=`dirname "${arg}"`
-	#echo "arg: ${arg}" >/tmp/kiki
-	if [ -n "$arg" ]; then
-		drives="${WINEPREFIX}/dosdevices/?:"
-		for drive in $drives; do
-			basepath=$(readlink "$drive")
-			drive=$(basename $drive)
-#			basepath='/home/Adama-docs/Adam'
-			if [ -n "$basepath" ]; then
-				if [[ $arg == "${basepath}"* ]]; then
-					basepath=${basepath//\//\\\/}
-					docpath=${arg/${basepath}/H:}
-					break;
-#				else
-#					docpath="${drive}/${arg}"
-				fi
-			fi
-		done
-		#bash inline string replacement. Replaces / ("\/") with \ ("\\")
-		docpath=${docpath//\//\\}
-	fi
-	args+=("$docpath")
-done
 cd "${WINEPREFIX}/drive_c/Program Files/Microsoft Office/Office12"
-#wine "${prg}" "${args[@]}" 
-wine "start" "${args[@]}" 
+if [ "$@" != "" ]; then
+	declare -a args
 
+	for var in "$@"; do
+		arg=$(readlink -f "$var")
+	#	openin=`dirname "${arg}"`
+		#echo "arg: ${arg}" >/tmp/kiki
+		if [ -n "$arg" ]; then
+			drives="${WINEPREFIX}/dosdevices/?:"
+			for drive in $drives; do
+				basepath=$(readlink "$drive")
+				drive=$(basename $drive)
+	#			basepath='/home/Adama-docs/Adam'
+				if [ -n "$basepath" ]; then
+					if [[ $arg == "${basepath}"* ]]; then
+						basepath=${basepath//\//\\\/}
+						docpath=${arg/${basepath}/H:}
+						break;
+	#				else
+	#					docpath="${drive}/${arg}"
+					fi
+				fi
+			done
+			#bash inline string replacement. Replaces / ("\/") with \ ("\\")
+			docpath=${docpath//\//\\}
+		fi
+		args+=("$docpath")
+	done
+	wine "start" "${args[@]}" 
+else
+	wine "${prg}" "${args[@]}" 
+fi
