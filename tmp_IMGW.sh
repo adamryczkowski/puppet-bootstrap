@@ -11,8 +11,8 @@ reset; ./make-lxd-node.sh ci-runner --private-key-path /home/adam/tmp/puppet-boo
 reset; ./execute-script-remotely.sh prepare_spack.sh --lxc-name ci-runner --user adam -- --spack-mirror /media/adam-minipc/other/spack-mirror --pre-install cmake
 reset; ./execute-script-remotely.sh prepare_for_imgw.sh --lxc-name ci-runner --user adam --step-debug  -- --gcc6
 #reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --lxc-name ci-runner --user adam --step-debug  -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name koszmarny
-ip=10.0.19.181
-reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable id_ed25519 --ssh-address adam@${ip} --step-debug -- --user adam --ssh-identity id_ed25519 --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name upiorny2
+ip=10.0.19.81
+reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable id_ed25519 --ssh-address adam@${ip} --step-debug -- --user adam --ssh-identity id_ed25519 --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name szalony
 
 reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable id_ed25519 --lxc-name ci-runner --user adam --step-debug  -- --ssh-identity id_ed25519 --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name upiorny
 

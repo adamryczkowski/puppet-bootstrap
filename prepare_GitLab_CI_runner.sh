@@ -57,7 +57,7 @@ shift
 case $key in
 	--user)
 	username="$1"
-	opts="${opts} --user ${username}"
+#	opts="${opts} --user ${username}"
 	sudoprefix=""
 	shift
 	;;
