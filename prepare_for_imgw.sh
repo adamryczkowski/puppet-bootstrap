@@ -30,7 +30,7 @@ Example2:
 $(basename $0) --docs --debug
 "
 
-home=$(get_home_dir)
+home=$(get_home_dir ${USER})
 spack_location=${home}/tmp/spack
 use_gcc5=0
 use_gcc6=0
@@ -194,8 +194,9 @@ fi
 #install_apt_packages git cmake build-essential gfortran libboost-program-options-dev jq libboost-filesystem-dev libboost-system-dev libboost-log-dev libboost-date-time-dev libboost-thread-dev libboost-chrono-dev libboost-atomic-dev
 
 #Adding github to known hosts
-logexec ssh-keyscan -H github.com >> $home/.ssh/known_hosts
+ssh-keyscan -H github.com | sudo -u ${USER} -- tee -a $home/.ssh/known_hosts
 
 #Adding gitlab to known hosts:
-logexec ssh-keyscan -H git1.imgw.pl >> $home/.ssh/known_hosts
+ssh-keyscan -H git1.imgw.pl | sudo -u ${USER} -- tee -a $home/.ssh/known_hosts
+
 
