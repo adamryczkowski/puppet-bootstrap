@@ -151,9 +151,14 @@ if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 #	rm $tmp
 fi
 
-echo ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" 
+env_opts=$(echo ${env_opts} | xargs)
+if [[ -n "$env_opts" ]]; then
+	opts="$opts --env \"$env_opts\""
+fi
 
-logexec ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" 
+echo ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts}
+
+logexec ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} 
 
 #logexec sudo -H -u ${USER} -- gitlab-runner run &
 if [[ -n "${username}" ]]; then
