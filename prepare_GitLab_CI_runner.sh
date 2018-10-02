@@ -127,7 +127,7 @@ fi
 if [ ! -f "/etc/apt/sources.list.d/runner_gitlab-runner.list" ]; then
 	wget https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh -O /tmp/script.deb.sh
 
-	logexec bash /tmp/script.deb.sh
+	logexec sudo bash /tmp/script.deb.sh
 fi
 
 install_apt_package gitlab-runner gitlab-runner
