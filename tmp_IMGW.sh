@@ -7,9 +7,9 @@ reset; ./execute-script-remotely.sh IMGW-VPN.sh --ssh-address 10.51.192.109 -- h
 reset; bash -x ./deploy_IMGW_CI.sh xen --vpn-password AeXw13589123 --vpn-username aryczkowski --git-address git@git.imgw.ad:aryczkowski/propoze.git --git-branch CEfused --ssh-key-path /home/adam/tmp/puppet-bootstrap/id_ed25519 --host-repo-path /home/adam/tmp/all1 --guest-repo-path /home/adam/tmp/propoze --preinstall-spack boost --repo-path /media/adam-minipc/other/debs --spack-mirror /media/adam-minipc/other/spack-mirror  --source-dir tests/mpdata-gauge
 
 
-reset; bash -x ./make-lxd-node.sh ci-runner --private-key-path /home/adam/tmp/puppet-bootstrap/id_ed25519 --map-host-folder /media/adam-minipc/other /media/adam-minipc/other
+reset; ./make-lxd-node.sh ci-runner --private-key-path /home/adam/tmp/puppet-bootstrap/id_ed25519 --map-host-folder /media/adam-minipc/other /media/adam-minipc/other
 reset; ./execute-script-remotely.sh prepare_spack.sh --lxc-name ci-runner --user adam -- --spack-mirror /media/adam-minipc/other/spack-mirror --pre-install cmake
 reset; ./execute-script-remotely.sh prepare_for_imgw.sh --lxc-name ci-runner --user adam --step-debug  -- --gcc6
-reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --lxc-name ci-runner --user adam --step-debug  -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name laptop-adama 
+reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --lxc-name ci-runner --user adam --step-debug  -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name potworny
 
 

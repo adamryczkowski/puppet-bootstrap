@@ -133,7 +133,19 @@ if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 	logexec logmkdir /usr/share/ca-certificates/extra
 #	$loglog
 	echo -n | openssl s_client -connect git1.imgw.pl:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee /usr/share/ca-certificates/extra/imgwpl.crt
-	logexec sudo dpkg-reconfigure -f ca-certificates
+	linetextfile /etc/ca-certificates.conf extra/imgwpl.crt
+	logexec sudo update-ca-certificates
+#	install_apt_package debconf-utils debconf-get-selections
+#	current=$(debconf-get-selections |grep ca-certificates/enable_crts)
+#	pattern='^(ca-certificates	ca-certificates/enable_crts	multiselect)	(.*)$'
+#	if ! [[ "$current" =~ $pattern ]]; then
+#		echo "ERROR"
+#		exit 1
+#	fi
+#	tmp=$(mktemp)
+#	echo "${BASH_REMATCH[1]} extra/imgwpl.crt, ${BASH_REMATCH[2]}">$tmp
+#	logexec sudo debconf-set-selections $tmp
+#	rm $tmp
 fi
 
 
