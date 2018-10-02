@@ -42,6 +42,7 @@ if [ -z "$1" ]; then
 fi
 username="$USER"
 opts=""
+env_opts=""
 runner_name=$(hostname)
 gitlab_server="https://git1.imgw.pl"
 max_mem="auto"
@@ -74,7 +75,8 @@ case $key in
 	shift
 	;;
 	--build-dir)
-	opts="${opts} --builds-dir $1"
+	build_dir="$1"
+	env_opts="${env_opts} BUILD_DIR=$1"
 	shift
 	;;
 	--max-mem)
@@ -111,16 +113,13 @@ if [ -z "${gitlab_token}" ]; then
 	errcho $usage
 fi
 
-if [ "${max_mem}" == "auto" ]; then
-	max_mem=$(($(grep MemTotal /proc/meminfo | awk '{print $2}'  )/1024 - 1024))
+if [ "${max_mem}" != "auto" ]; then
+	env_opts="${env_opts} MAX_MEM=${max_mem}"
 fi
 
-if [ "$max_threads" == "auto" ]; then
-	max_threads=$(cat /proc/cpuinfo | awk '/^processor/{print $3}' | wc -l)
+if [ "$max_threads" != "auto" ]; then
+	env_opts="${env_opts} MAX_THREADS=${max_threads}"
 fi
-
-
-invocation="cd \"${build_dir}\";"
 
 if [ ! -f "/etc/apt/sources.list.d/runner_gitlab-runner.list" ]; then
 	wget https://packages.gitlab.com/install/repositories/runner/gitlab-runner/script.deb.sh -O /tmp/script.deb.sh
@@ -138,6 +137,6 @@ if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 fi
 
 
-logexec gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "MAX_MEM=${max_mem} MAX_THREADS=${max_threads}" 
+logexec gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" 
 
 

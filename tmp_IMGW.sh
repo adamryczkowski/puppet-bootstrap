@@ -12,3 +12,4 @@ reset; ./execute-script-remotely.sh prepare_spack.sh --lxc-name ci-runner --user
 reset; ./execute-script-remotely.sh prepare_for_imgw.sh --lxc-name ci-runner --user adam --step-debug  -- --gcc6
 reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --lxc-name ci-runner --user adam --step-debug  -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name laptop-adama 
 
+

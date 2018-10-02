@@ -5,7 +5,9 @@ cd `dirname $0`
 
 usage="
 Prepares the machine for compilation of the IMGW PROPOZE code. It tries to load the essential packages via spack (if found),
-otherwise it installs them from packages (requires root)
+otherwise it installs them from packages (requires root). 
+
+TODO: Update packages as well
 
 
 Usage:
@@ -30,6 +32,7 @@ $(basename $0) --docs --debug
 
 home=$(get_home_dir)
 spack_location=${home}/tmp/spack
+use_gcc5=0
 use_gcc6=0
 use_gcc7=0
 force_spack=0
@@ -43,6 +46,9 @@ case $key in
 	--spack-location)
 	spack_location="$1"
 	shift
+	;;
+	--gcc5)
+	use_gcc5=1
 	;;
 	--gcc6)
 	use_gcc6=1
@@ -82,8 +88,8 @@ if [ -n "$debug" ]; then
 	external_opts="--debug"
 fi
 
-if [ "$use_gcc6" == "0" ] && [ "$use_gcc7" == "0" ]; then
-	errcho "Must specify either --gcc6 or --gcc7. Or both."
+if [ "$use_gcc5" == "0" ] && [ "$use_gcc6" == "0" ] && [ "$use_gcc7" == "0" ]; then
+	errcho "Must specify at least on of --gcc6, --gcc6 or --gcc7. "
 	echo "$usage"
 	exit 1
 fi
@@ -91,6 +97,11 @@ fi
 install_cmake=1
 if which cmake>/dev/null; then
 	install_cmake=0
+fi
+
+install_gcc5=1
+if which gfortran-5>/dev/null && which gcc-5>/dev/null && which g++-5>/dev/null; then
+	install_gcc5=0
 fi
 
 install_gcc6=1
@@ -111,6 +122,9 @@ if [ -f "${spack_location}/share/spack/setup-env.sh" ]; then
 		install_cmake=0
 	fi
 	
+	if ! spack find gcc@5 | grep "No package matches the query"; then
+		install_gcc5=0
+	fi
 	if ! spack find gcc@6 | grep "No package matches the query"; then
 		install_gcc6=0
 	fi
@@ -132,6 +146,20 @@ if [ "$install_cmake" == "1" ]; then
 		spack install cmake
 	else
 		install_apt_package cmake
+	fi
+fi
+
+if [ "$use_gcc5" == "1" ]; then
+	if [ "$install_gcc5" == "1" ]; then
+		if [ "$force_spack" == "1" ]; then
+			spack install gcc@5.5.0
+		else
+#			ubuntu_code=$(get_ubuntu_codename)
+#			if [ "$ubuntu_code" == "xenial" ]; then
+#				add_ppa ubuntu-toolchain-r/test
+#			fi
+			install_apt_package gcc-5 g++-5 gfortran-5
+		fi
 	fi
 fi
 
@@ -165,4 +193,9 @@ if [ "$use_gcc7" == "1" ]; then
 fi
 #install_apt_packages git cmake build-essential gfortran libboost-program-options-dev jq libboost-filesystem-dev libboost-system-dev libboost-log-dev libboost-date-time-dev libboost-thread-dev libboost-chrono-dev libboost-atomic-dev
 
+#Adding github to known hosts
+logexec ssh-keyscan -H github.com >> $home/.ssh/known_hosts
+
+#Adding gitlab to known hosts:
+logexec ssh-keyscan -H git1.imgw.pl >> $home/.ssh/known_hosts
 
