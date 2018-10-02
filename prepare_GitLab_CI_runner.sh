@@ -47,6 +47,7 @@ runner_name=$(hostname)
 gitlab_server="https://git1.imgw.pl"
 max_mem="auto"
 max_threads="auto"
+sudoprefix="sudo "
 
 while [[ $# > 0 ]]
 do
@@ -56,6 +57,8 @@ shift
 case $key in
 	--user)
 	username="$1"
+	opts="${opts} --user ${username}"
+	sudoprefix=""
 	shift
 	;;
 	--gitlab-server)
@@ -148,9 +151,10 @@ if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 #	rm $tmp
 fi
 
-logexec sudo -H -u ${USER} -- gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" --user ${username}
+
+logexec ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" 
 
 #logexec sudo -H -u ${USER} -- gitlab-runner run &
-
-logexec sudo -H -u ${USER} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
-
+if [[ -n "${username}" ]]; then
+	logexec sudo -H -u ${username} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
+fi
