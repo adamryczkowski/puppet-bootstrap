@@ -151,6 +151,7 @@ if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 #	rm $tmp
 fi
 
+echo ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" 
 
 logexec ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" 
 
