@@ -148,7 +148,9 @@ if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 #	rm $tmp
 fi
 
+logexec sudo -H -u ${USER} -- gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" --user ${username}
 
-logexec gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --env "${env_opts}" 
+#logexec sudo -H -u ${USER} -- gitlab-runner run &
 
+logexec sudo -H -u ${USER} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
 
