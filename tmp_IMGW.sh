@@ -10,6 +10,7 @@ reset; bash -x ./deploy_IMGW_CI.sh xen --vpn-password AeXw13589123 --vpn-usernam
 reset; ./make-lxd-node.sh ci-runner --private-key-path /home/adam/tmp/puppet-bootstrap/id_ed25519 --map-host-folder /media/adam-minipc/other /media/adam-minipc/other
 reset; ./execute-script-remotely.sh prepare_spack.sh --lxc-name ci-runner --user adam -- --spack-mirror /media/adam-minipc/other/spack-mirror --pre-install cmake
 reset; ./execute-script-remotely.sh prepare_for_imgw.sh --lxc-name ci-runner --user adam --step-debug  -- --gcc6
-reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --lxc-name ci-runner --user adam --step-debug  -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name koszmarny
+#reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --lxc-name ci-runner --user adam --step-debug  -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name koszmarny
+reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --lxc-name ci-runner --user adam --step-debug  -- --ssh-identity id_ed25519 --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name koszmarny
 
 
