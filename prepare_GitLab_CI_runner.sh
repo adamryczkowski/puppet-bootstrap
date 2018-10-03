@@ -175,9 +175,9 @@ if [[ -n "$env_opts" ]]; then
 	opts="$opts --env \"$env_opts\""
 fi
 
-echo ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts}
+echo ${sudoprefix} gitlab-runner register --non-interactive --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts}
 
-logexec ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} 
+logexec ${sudoprefix} gitlab-runner register --non-interactive  --builds-dir "${build_dir}"--run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} 
 
 #logexec sudo -H -u ${USER} -- gitlab-runner run &
 if [[ -n "${username}" ]]; then
