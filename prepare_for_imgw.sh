@@ -12,14 +12,14 @@ TODO: Update packages as well
 
 Usage:
 
-$(basename $0) [--spack-location <path> [--force-spack] ] (--gcc6|--gcc7) 
+$(basename $0) [--spack-location <path> [--force-spack] ] --gcc <number>
                [--help] [--debug] [--log <output file>]
 
 
 where
  --spack-location         - Location of Spack installation. Defaults to $HOME/tmp/spack
- --gcc6                   - Flag. If set, will prepare gcc6
- --gcc7                   - Flag. If set, will prepare gcc7
+ --gcc <version>          - Flag. If set, will prepare gcc in the specified version. 
+                            Valid numbers: 5, 6 and 7.
  --force-spack            - Flag. If set, installation will be done using spack.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
@@ -32,9 +32,7 @@ $(basename $0) --docs --debug
 
 home=$(get_home_dir ${USER})
 spack_location=${home}/tmp/spack
-use_gcc5=0
-use_gcc6=0
-use_gcc7=0
+use_gcc=""
 force_spack=0
 
 while [[ $# > 0 ]]
@@ -47,14 +45,9 @@ case $key in
 	spack_location="$1"
 	shift
 	;;
-	--gcc5)
-	use_gcc5=1
-	;;
-	--gcc6)
-	use_gcc6=1
-	;;
-	--gcc7)
-	use_gcc7=1
+	--gcc)
+	use_gcc="$1"
+	shift
 	;;
 	--force-spack)
 	force_spack=1
@@ -88,8 +81,8 @@ if [ -n "$debug" ]; then
 	external_opts="--debug"
 fi
 
-if [ "$use_gcc5" == "0" ] && [ "$use_gcc6" == "0" ] && [ "$use_gcc7" == "0" ]; then
-	errcho "Must specify at least on of --gcc6, --gcc6 or --gcc7. "
+if [ "$use_gcc" != "5" ] && [ "$use_gcc" != "6" ] && [ "$use_gcc" != "7" ]; then
+	errcho "Must specify --gcc <N> with version number N 5, 6 or 7"
 	echo "$usage"
 	exit 1
 fi
@@ -149,7 +142,7 @@ if [ "$install_cmake" == "1" ]; then
 	fi
 fi
 
-if [ "$use_gcc5" == "1" ]; then
+if [ "$use_gcc" == "5" ]; then
 	if [ "$install_gcc5" == "1" ]; then
 		if [ "$force_spack" == "1" ]; then
 			spack install gcc@5.5.0
@@ -162,14 +155,16 @@ if [ "$use_gcc5" == "1" ]; then
 			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-5) 20
 			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-5) 20
 			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-5) 20
-			logexec sudo update-alternatives --set g++ $(which g++-5)
-			logexec sudo update-alternatives --set gcc $(which gcc-5)
-			logexec sudo update-alternatives --set gfortran $(which gfortran-5)
 		fi
+	fi
+	if [ "$force_spack" == "0" ]; then
+		logexec sudo update-alternatives --set g++ $(which g++-5)
+		logexec sudo update-alternatives --set gcc $(which gcc-5)
+		logexec sudo update-alternatives --set gfortran $(which gfortran-5)
 	fi
 fi
 
-if [ "$use_gcc6" == "1" ]; then
+if [ "$use_gcc" == "6" ]; then
 	if [ "$install_gcc6" == "1" ]; then
 		if [ "$force_spack" == "1" ]; then
 			spack install gcc@6.4.0
@@ -182,15 +177,17 @@ if [ "$use_gcc6" == "1" ]; then
 			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-6) 15
 			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-6) 15
 			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-6) 15
-			logexec sudo update-alternatives --set g++ $(which g++-6)
-			logexec sudo update-alternatives --set gcc $(which gcc-6)
-			logexec sudo update-alternatives --set gfortran $(which gfortran-6)
 		fi
+	fi
+	if [ "$force_spack" == "0" ]; then
+		logexec sudo update-alternatives --set g++ $(which g++-6)
+		logexec sudo update-alternatives --set gcc $(which gcc-6)
+		logexec sudo update-alternatives --set gfortran $(which gfortran-6)
 	fi
 fi
 
 
-if [ "$use_gcc7" == "1" ]; then
+if [ "$use_gcc" == "7" ]; then
 	if [ "$install_gcc7" == "1" ]; then
 		if [ "$force_spack" == "1" ]; then
 			spack install gcc@7.3.0
@@ -203,10 +200,12 @@ if [ "$use_gcc7" == "1" ]; then
 			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-7) 10
 			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-7) 10
 			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-7) 10
-			logexec sudo update-alternatives --set g++ $(which g++-7)
-			logexec sudo update-alternatives --set gcc $(which gcc-7)
-			logexec sudo update-alternatives --set gfortran $(which gfortran-7)
 		fi
+	fi
+	if [ "$force_spack" == "0" ]; then
+		logexec sudo update-alternatives --set g++ $(which g++-7)
+		logexec sudo update-alternatives --set gcc $(which gcc-7)
+		logexec sudo update-alternatives --set gfortran $(which gfortran-7)
 	fi
 fi
 #install_apt_packages git cmake build-essential gfortran libboost-program-options-dev jq libboost-filesystem-dev libboost-system-dev libboost-log-dev libboost-date-time-dev libboost-thread-dev libboost-chrono-dev libboost-atomic-dev
