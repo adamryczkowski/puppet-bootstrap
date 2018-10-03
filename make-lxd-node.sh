@@ -21,7 +21,7 @@ $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <
 						[-s|--grant-ssh-access-to <existing username on host>] 
 						[-p|--apt-proxy <address of the existing apt-proxy>] 
 						[--bridgeif <name of the bridge interface on host>] 
-						[--private-key-path <path to the private key>]
+						[--private-key-path <path to the private key> [--public-key-path <path>] ]
 						[--map-host-user <username>]
 						[--authorized-key <public key>]
 						[--update-all 0|1]
@@ -45,6 +45,8 @@ where
                             Defaults to the first available bridge interface used by LXD deamon.
                             It can be any bridge available to the host.
  --private-key-path       - Path to the file with the ssh private key. If set, installs private
+                            key on the user's account in the container.
+ --public-key-path <path> - Path to the file with the ssh public key. If set, installs private
                             key on the user's account in the container.
  --authorized-key         - Key of other user's. This option can be specified multiple times.
  --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
@@ -162,6 +164,10 @@ case $key in
 	;;
 	--private-key-path)
 	private_key_path=$1
+	shift
+	;;
+	--public-key-path)
+	public_key_path=$1
 	shift
 	;;
 	--update-all)
@@ -454,12 +460,6 @@ if [ -n "$aptproxy" ]; then
 	aptproxy="--apt-proxy $aptproxy"
 fi
 
-if [ -n "$private_key_path" ]; then
-	extras="--extra-executable $private_key_path"
-else
-	extras=""
-fi 
-
 # Creating user $lxcuser in the container
 if [ "$lxcuser" != "ubuntu" ]; then
 	logexec lxc exec $name -- adduser --quiet $lxcuser --disabled-password --gecos ""
@@ -509,16 +509,21 @@ fi
 
 
 
-./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts $extras -- $lxcuser ${repopath_arg} --bat --ping --fzf --htop --find --ag --mc --liquidprompt --byobu --autojump --wormhole $aptproxy --need-apt-update
+./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --bat --ping --fzf --htop --find --ag --mc --liquidprompt --byobu --autojump --wormhole $aptproxy --need-apt-update
 
-if [ -z $private_key_path ]; then
+if [ ! -f "$private_key_path" ]; then
 	if ! lxc exec ${name} ls ~/.ssh/id_ed25519; then
 		logexec lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
 	fi
 else
 	logexec lxc file push ${private_key_path} ${name}${sshhome}/.ssh/ >/dev/null
 	logexec lxc exec ${name} -- chown ${lxcuser}:${lxcuser} ${sshhome}/.ssh/$(basename $private_key_path)
-	logexec lxc exec ${name} -- chmod 0400 ${sshhome}/.ssh/$(basename $private_key_path)
+	logexec lxc exec ${name} -- chmod 0600 ${sshhome}/.ssh/$(basename $private_key_path)
+	if [ -f "$public_key_path" ]; then
+		logexec lxc file push ${public_key_path} ${name}${sshhome}/.ssh/ >/dev/null
+		logexec lxc exec ${name} -- chown ${lxcuser}:${lxcuser} ${sshhome}/.ssh/$(basename $public_key_path)
+		logexec lxc exec ${name} -- chmod 0644 ${sshhome}/.ssh/$(basename $public_key_path)
+	fi
 	logexec echo "Installed the following ssh key:"
 	logexec lxc exec ${name} -- ssh-keygen -lvf ${sshhome}/.ssh/$(basename $private_key_path)
 fi

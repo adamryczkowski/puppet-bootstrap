@@ -352,7 +352,7 @@ if [ -n "$user_opts" ] && [ -n "$users" ] ; then
 	pushd "$DIR"
 	bash -x ./prepare_ubuntu_user.sh ${users[0]} ${user_opts} ${private_key_path}
 	for user in ${users[@]:1}; do
-		bash -x ./prepare_ubuntu_user.sh ${user} ${user_opts}
+		sudo -H -u ${user} -- bash -x ./prepare_ubuntu_user.sh ${user} ${user_opts}
 	done
 	popd
 
