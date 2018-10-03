@@ -12,7 +12,7 @@ reset; ./execute-script-remotely.sh prepare_spack.sh --lxc-name ci-runner --user
 reset; ./execute-script-remotely.sh prepare_for_imgw.sh --lxc-name ci-runner --user adam --step-debug  -- --gcc6
 #reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --lxc-name ci-runner --user adam --step-debug  -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name koszmarny
 ip=10.0.19.34
-reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable id_ed25519 --ssh-address adam@${ip} --step-debug -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name wariat
+reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --ssh-address adam@${ip} --step-debug -- --user adam --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name wariat
 
 reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable id_ed25519 --lxc-name ci-runner --user adam --step-debug  -- --ssh-identity id_ed25519 --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name upiorny
 

@@ -48,6 +48,7 @@ gitlab_server="https://git1.imgw.pl"
 max_mem="auto"
 max_threads="auto"
 sudoprefix="sudo "
+build_dir="auto"
 
 while [[ $# > 0 ]]
 do
@@ -79,7 +80,6 @@ case $key in
 	;;
 	--build-dir)
 	build_dir="$1"
-	env_opts="${env_opts} BUILD_DIR=$1"
 	shift
 	;;
 	--max-mem)
@@ -110,6 +110,25 @@ esac
 done
 
 sshhome=$(get_home_dir $username)
+
+if [[ -n "${username}" ]]; then
+	if [ "$build_dir" == "auto" ]; then
+		build_dir="${sshhome}/build"
+		mkdir -p ${build_dir}
+	else
+		ln -s "${build_dir}" "${sshhome}/build"
+		build_dir="${sshhome}/build"
+	fi
+else
+	if [ "$build_dir" == "auto" ]; then
+		build_dir="/opt/build"
+		sudo mkdir -p ${build_dir}
+	else
+		sudo ln -s "${build_dir}" "/opt/build"
+		build_dir="${sshhome}/build"
+	fi
+fi
+env_opts="${env_opts} CI_BUILD_DIR=$1"
 
 if [ -z "${gitlab_token}" ]; then
 	errcho "No --gitlab-token. It is a required argument."
