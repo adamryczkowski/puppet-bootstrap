@@ -159,6 +159,12 @@ if [ "$use_gcc5" == "1" ]; then
 #				add_ppa ubuntu-toolchain-r/test
 #			fi
 			install_apt_packages gcc-5 g++-5 gfortran-5
+			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-5) 20
+			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-5) 20
+			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-5) 20
+			logexec sudo update-alternatives --set g++ $(which g++-5)
+			logexec sudo update-alternatives --set gcc $(which gcc-5)
+			logexec sudo update-alternatives --set gfortran $(which gfortran-5)
 		fi
 	fi
 fi
@@ -173,6 +179,12 @@ if [ "$use_gcc6" == "1" ]; then
 				add_ppa ubuntu-toolchain-r/test
 			fi
 			install_apt_packages gcc-6 g++-6 gfortran-6
+			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-6) 15
+			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-6) 15
+			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-6) 15
+			logexec sudo update-alternatives --set g++ $(which g++-6)
+			logexec sudo update-alternatives --set gcc $(which gcc-6)
+			logexec sudo update-alternatives --set gfortran $(which gfortran-6)
 		fi
 	fi
 fi
@@ -188,6 +200,12 @@ if [ "$use_gcc7" == "1" ]; then
 				add_ppa ubuntu-toolchain-r/test
 			fi
 			install_apt_packages gcc-7 g++-7 gfortran-7
+			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-7) 10
+			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-7) 10
+			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-7) 10
+			logexec sudo update-alternatives --set g++ $(which g++-7)
+			logexec sudo update-alternatives --set gcc $(which gcc-7)
+			logexec sudo update-alternatives --set gfortran $(which gfortran-7)
 		fi
 	fi
 fi
