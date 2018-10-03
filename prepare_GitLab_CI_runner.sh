@@ -172,7 +172,7 @@ fi
 
 env_opts=$(echo ${env_opts} | xargs)
 if [[ -n "$env_opts" ]]; then
-	opts="$opts --env \"$env_opts\""
+	opts="$opts --env $env_opts"
 fi
 
 echo ${sudoprefix} gitlab-runner register --non-interactive --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts}
