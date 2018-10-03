@@ -128,7 +128,7 @@ else
 		build_dir="${sshhome}/build"
 	fi
 fi
-env_opts="${env_opts} CI_BUILD_DIR=$1"
+env_opts="${env_opts} CI_BUILD_DIR=${build_dir}"
 
 if [ -z "${gitlab_token}" ]; then
 	errcho "No --gitlab-token. It is a required argument."
