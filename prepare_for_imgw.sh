@@ -158,7 +158,7 @@ if [ "$use_gcc5" == "1" ]; then
 #			if [ "$ubuntu_code" == "xenial" ]; then
 #				add_ppa ubuntu-toolchain-r/test
 #			fi
-			install_apt_package gcc-5 g++-5 gfortran-5
+			install_apt_packages gcc-5 g++-5 gfortran-5
 		fi
 	fi
 fi
@@ -172,7 +172,7 @@ if [ "$use_gcc6" == "1" ]; then
 			if [ "$ubuntu_code" == "xenial" ]; then
 				add_ppa ubuntu-toolchain-r/test
 			fi
-			install_apt_package gcc-6 g++-6 gfortran-6
+			install_apt_packages gcc-6 g++-6 gfortran-6
 		fi
 	fi
 fi
@@ -187,7 +187,7 @@ if [ "$use_gcc7" == "1" ]; then
 			if [ "$ubuntu_code" == "xenial" ]; then
 				add_ppa ubuntu-toolchain-r/test
 			fi
-			install_apt_package gcc-7 g++-7 gfortran-7
+			install_apt_packages gcc-7 g++-7 gfortran-7
 		fi
 	fi
 fi
