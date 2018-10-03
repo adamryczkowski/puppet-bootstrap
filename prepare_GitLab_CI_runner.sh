@@ -163,10 +163,10 @@ logexec ${sudoprefix} gitlab-runner register --non-interactive --run-untagged --
 #logexec sudo -H -u ${USER} -- gitlab-runner run &
 if [[ -n "${username}" ]]; then
 	#Adding github to known hosts
-	ssh-keyscan -H github.com | sudo -u ${username} -- tee -a $home/.ssh/known_hosts
+	ssh-keyscan -H github.com | sudo -u ${username} -- tee -a ${sshhome}/.ssh/known_hosts
 
 	#Adding gitlab to known hosts:
-	ssh-keyscan -H git1.imgw.pl | sudo -u ${username} -- tee -a $home/.ssh/known_hosts
+	ssh-keyscan -H git1.imgw.pl | sudo -u ${username} -- tee -a ${sshhome}/.ssh/known_hosts
 
 	logexec sudo -H -u ${username} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
 fi
