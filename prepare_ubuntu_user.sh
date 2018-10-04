@@ -25,17 +25,12 @@ where
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
  --bat                    - cat replacement (bat)
- --ping                   - prettyping (ping),
  --fzf                    - fzf (for bash ctr+r)
  --diff                   - diff-so-fancy (diff),
  --find                   - fd (replaces find)
  --du                     - ncdu (replaces du), 
- --tldr                   - tldr,
- --ag                     - ag (the silver searcher), 
- --entr                   - entr (watch), 
- --noti                   - noti (notification when something is done)
- --mc                     - mc (Midnight Commander)
  --liquidprompt           - liquidprompt
+ --git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
  --byobu                  - byobu
  --autojump               - autojump (cd replacement)
 
@@ -50,6 +45,7 @@ install_ping=0
 install_fzf=0
 install_diff=0
 install_du=0
+install_git_extra=0
 install_liquidprompt=0
 install_autojump=0
 
@@ -117,6 +113,9 @@ case $key in
 	;;
 	--du)
 	install_du=1
+	;;
+	--git-extra)
+	install_git_extra=1
 	;;
 	--autojump)
 	install_autojump=1
@@ -230,6 +229,10 @@ if [ -n "$user" ]; then
 	
 	if [ "${install_du}" == "1" ]; then
 		linetextfile ${sshhome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
+	fi
+	
+	if [ "${install_git_extra}" == "1" ]; then
+		linetextfile ${sshhome}/.bashrc 'export PATH="$PATH:/usr/local/lib/git-extra-commands/bin"'
 	fi
 	
 	if [ "${install_ping}" == "1" ]; then

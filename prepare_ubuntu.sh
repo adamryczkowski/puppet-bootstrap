@@ -41,6 +41,7 @@ where
  --entr                   - entr (watch), 
  --noti                   - noti (notification when something is done)
  --mc                     - mc (Midnight Commander)
+ --git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
  --liquidprompt           - liquidprompt
  --byobu                  - byobu
  --autojump               - autojump (cd replacement)
@@ -81,6 +82,7 @@ install_ag=0
 install_entr=0
 install_noti=0
 install_mc=0
+install_git_extra=0
 install_liquidprompt=0
 install_byobu=0
 install_autojump=0
@@ -194,6 +196,10 @@ case $key in
 	;;
 	--mc)
 	install_mc=1
+	;;
+	--git-extra)
+	install_git_extra=1
+	user_opts="${user_opts} --git-extra"
 	;;
 	--liquidprompt)
 	install_liquidprompt=1
@@ -317,6 +323,10 @@ fi
 
 if [ "${install_mc}" == "1" ]; then
 	install_apt_package mc
+fi
+
+if [ "${install_git_extra}" == "1" ]; then
+	get_git_repo https://github.com/unixorn/git-extra-commands.git /usr/local/lib git-extra-commands
 fi
 
 if [ "${install_liquidprompt}" == "1" ]; then
