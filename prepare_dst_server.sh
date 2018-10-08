@@ -107,8 +107,10 @@ install_apt_packages lib32gcc1 libcurl4-gnutls-dev:i386
 install_script files/dont-starve-headless.sh ${home}
 install_script files/update-dont-starve.sh ${home}
 
-logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}"
+logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/Main"
 
 linetextfile ${home}/.klei/DoNotStarveTogether/${cluster_name}/dedicated_server_mods_setup.lua "ServerModCollectionSetup(\"${server_mod_collection}\")"
 
 install_file files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini
+install_file files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/MAIN/modoverrides.lua
+#textfile files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini
