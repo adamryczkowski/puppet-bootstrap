@@ -99,4 +99,4 @@ home=$(get_home_dir ${USER})
 install_script files/dont-starve-headless.sh ${home}
 install_script files/update-dont-starve.sh ${home}
 
-logmkdir "${home}.klei/DoNotStarveTogether/${cluster_name}"
+logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}"
