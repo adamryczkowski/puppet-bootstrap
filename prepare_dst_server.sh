@@ -112,5 +112,5 @@ logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/Main"
 linetextfile ${home}/.klei/DoNotStarveTogether/${cluster_name}/dedicated_server_mods_setup.lua "ServerModCollectionSetup(\"${server_mod_collection}\")"
 
 install_file files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini
-install_file files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/MAIN/modoverrides.lua
+install_file files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua
 #textfile files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini
