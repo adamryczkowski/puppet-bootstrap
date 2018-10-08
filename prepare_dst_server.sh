@@ -70,6 +70,8 @@ if ! dpkg -s "steamcmd">/dev/null  2> /dev/null; then
 	sudo debconf-set-selections <<< 'steamcmd steam/license boolean true'
 	sudo debconf-set-selections <<< 'steamcmd steam/question string I AGREE'
 
+	add_apt_source_manual partner "deb http://archive.canonical.com/ubuntu $(get_ubuntu_codename) partner" 
+
 	install_apt_packages steamcmd
 fi
 

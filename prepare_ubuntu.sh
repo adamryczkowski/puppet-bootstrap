@@ -40,6 +40,7 @@ where
  --ag                     - ag (the silver searcher), 
  --entr                   - entr (watch), 
  --noti                   - noti (notification when something is done)
+ --aptitude               - aptitude
  --mc                     - mc (Midnight Commander)
  --git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
  --liquidprompt           - liquidprompt
@@ -81,6 +82,7 @@ install_tldr=0
 install_ag=0
 install_entr=0
 install_noti=0
+install_aptitude=0
 install_mc=0
 install_git_extra=0
 install_liquidprompt=0
@@ -150,6 +152,7 @@ case $key in
 	install_entr=1
 	install_noti=1
 	install_mc=1
+	install_aptitude=1
 	install_liquidprompt=1
 	user_opts="${user_opts} --liquidprompt"
 	install_byobu=1
@@ -196,6 +199,9 @@ case $key in
 	;;
 	--mc)
 	install_mc=1
+	;;
+	--aptitude)
+	install_aptitude=1
 	;;
 	--git-extra)
 	install_git_extra=1
@@ -325,6 +331,10 @@ if [ "${install_mc}" == "1" ]; then
 	install_apt_package mc
 fi
 
+if [ "${install_aptitude}" == "1" ]; then
+	install_apt_package aptitude
+fi
+
 if [ "${install_git_extra}" == "1" ]; then
 	get_git_repo https://github.com/unixorn/git-extra-commands.git /usr/local/lib git-extra-commands
 fi
@@ -365,5 +375,4 @@ if [ -n "$user_opts" ] && [ -n "$users" ] ; then
 		sudo -H -u ${user} -- bash -x ./prepare_ubuntu_user.sh ${user} ${user_opts}
 	done
 	popd
-
 fi
