@@ -107,27 +107,27 @@ install_apt_packages lib32gcc1 libcurl4-gnutls-dev:i386
 install_script files/dont-starve-headless.sh ${home}
 install_script files/update-dont-starve.sh ${home}
 
-logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/Main"
-logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/11"
-logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/12"
-logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/13"
+logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/Main" ${USER}
+logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/11" ${USER}
+logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/12" ${USER}
+logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}/13" ${USER}
 
 linetextfile ${home}/.klei/DoNotStarveTogether/${cluster_name}/dedicated_server_mods_setup.lua "ServerModCollectionSetup(\"${server_mod_collection}\")"
 
-install_file files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini
-install_file files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua
-#textfile files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini
-install_file files/dst_server1.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/server.ini
-install_file files/dst_server2.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/server.ini
-install_file files/dst_server3.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/server.ini
-install_file files/dst_server4.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/server.ini
+install_file files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini ${USER}
+install_file files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${USER}
+#textfile files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini 
+install_file files/dst_server1.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/server.ini ${USER}
+install_file files/dst_server2.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/server.ini ${USER}
+install_file files/dst_server3.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/server.ini ${USER}
+install_file files/dst_server4.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/server.ini ${USER}
 
-install_file files/dst_worldgenoverride1.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/dst_worldgenoverride.lua
-install_file files/dst_worldgenoverride2.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/dst_worldgenoverride.lua
-install_file files/dst_worldgenoverride3.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/dst_worldgenoverride.lua
-install_file files/dst_worldgenoverride4.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/dst_worldgenoverride.lua
+install_file files/dst_worldgenoverride1.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/worldgenoverride.lua ${USER}
+install_file files/dst_worldgenoverride2.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/worldgenoverride.lua ${USER}
+install_file files/dst_worldgenoverride3.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/worldgenoverride.lua ${USER}
+install_file files/dst_worldgenoverride4.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/worldgenoverride.lua ${USER}
 
-make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/modoverrides.lua
-make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/modoverrides.lua
-make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/modoverrides.lua
+make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/modoverrides.lua
+make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/modoverrides.lua
+make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/modoverrides.lua
 
