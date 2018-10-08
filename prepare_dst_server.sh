@@ -127,3 +127,7 @@ install_file files/dst_worldgenoverride2.lua ${home}/.klei/DoNotStarveTogether/$
 install_file files/dst_worldgenoverride3.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/dst_worldgenoverride.lua
 install_file files/dst_worldgenoverride4.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/dst_worldgenoverride.lua
 
+make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/modoverrides.lua
+make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/modoverrides.lua
+make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/modoverrides.lua
+
