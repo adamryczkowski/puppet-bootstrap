@@ -14,13 +14,14 @@ Prepares Don't Starve Together dedicated server.
 
 Usage:
 
-$(basename $0)  [--cluster-token <token>] [--cluster-name <name>]
+$(basename $0)  [--cluster-token <token>] [--cluster-name <name>] [--server-mod-collection <nr>]
                 [--help] [--debug] [--log <output file>] 
 
 
 where
  --cluster-token <token>      - Cluster token (defaults to 'gpMrs7hckCBAnHn2lAdcgEQFcbTigcxv')
  --cluster-name <name>        - Name of the clustre (defaults to WAM)
+ --server-mod-collection <nr> - Steam number of the mod collection to install on server
  --debug                      - Flag that sets debugging mode. 
  --log                        - Path to the log file that will log all meaningful commands
 
@@ -41,6 +42,7 @@ set -x
 user="$USER"
 cluster_token="gpMrs7hckCBAnHn2lAdcgEQFcbTigcxv"
 cluster_name="WAM"
+server_mod_collection="404903250"
 
 while [[ $# > 0 ]]
 do
@@ -65,6 +67,10 @@ case $key in
 	;;
 	--cluster-name)
 	cluster_name="$1"
+	shift
+	;;
+	--server-mod-collection)
+	server_mod_collection="$1"
 	shift
 	;;
 	-*)
@@ -100,3 +106,5 @@ install_script files/dont-starve-headless.sh ${home}
 install_script files/update-dont-starve.sh ${home}
 
 logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}"
+
+linetextfile /opt/dst/mods/dedicated_server_mods_setup.lua "ServerModCollectionSetup(\"${server_mod_collection}\")"
