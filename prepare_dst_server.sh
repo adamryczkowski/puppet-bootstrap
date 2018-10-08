@@ -88,6 +88,8 @@ if [ ! -f /opt/dst/bin/dontstarve_dedicated_server_nullrenderer ]; then
 	logexec steamcmd +login anonymous +force_install_dir /opt/dst +app_update 343050 validate +quit
 fi
 
+home=$(get_home_dir ${USER})
+
 install_script files/dont-starve-headless.sh ${home}
 install_script files/update-dont-starve.sh ${home}
 
