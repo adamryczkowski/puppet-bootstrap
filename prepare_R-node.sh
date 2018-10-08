@@ -214,7 +214,7 @@ EOT
 	fi
 fi
 
-logexec sudo -H Rscript -e "update.packages(ask = FALSE, repos=setNames('${repo_server}', 'CRAN'))"
+logexec Rscript -e "update.packages(ask = FALSE, repos=setNames('${repo_server}', 'CRAN'))"
 logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);update.packages(ask = FALSE,lib = Sys.getenv('R_LIBS_USER'))"
 if [ -n "${install_lib}" ]; then
 	logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);if(!require('devtools')) {install.packages('devtools', ask=FALSE, lib = Sys.getenv('R_LIBS_USER'));devtools::install_github('hadley/devtools', lib = Sys.getenv('R_LIBS_USER'))}"

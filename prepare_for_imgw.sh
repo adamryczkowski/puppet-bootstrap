@@ -208,6 +208,12 @@ if [ "$use_gcc" == "7" ]; then
 		logexec sudo update-alternatives --set gfortran $(which gfortran-7)
 	fi
 fi
+
+if [ -f "${spack_location}/share/spack/setup-env.sh" ]; then
+	#First try using spack
+	spack compiler find
+fi
+
 #install_apt_packages git cmake build-essential gfortran libboost-program-options-dev jq libboost-filesystem-dev libboost-system-dev libboost-log-dev libboost-date-time-dev libboost-thread-dev libboost-chrono-dev libboost-atomic-dev
 
 #Adding github to known hosts

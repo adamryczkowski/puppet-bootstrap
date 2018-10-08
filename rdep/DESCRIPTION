@@ -9,17 +9,65 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Encoding: UTF-8
 LazyData: true
-Imports:
-doParallel,
-caret,bookdown
-	R6
-	ggplot2
-	AppliedPredictiveModeling
-	mlbench
-	earth,e1071,ggthemes
-	proxy
-	latticeExtra
-	gbm
+Imports: Rcpp (>= 0.12.10),
+	 stringr,
+	 readxl,
+	 Hmisc,
+	 R.utils,
+	 xlsx,
+	 readODS,
+	 boot,
+	 pander,
+	 gridExtra,
+	 RColorBrewer,
+	 zipfR,
+	 ggrepel,
+	 lsr,
+	 tidyr,
+	 car,
+	 broom,
+	 ggfortify,
+	 doMC,
+	 ROCR,
+	 glmnet,
+	 lubridate,
+	 mice,
+	 rstan,
+	 HDInterval,
+	 curl,
+	 entropy,
+	 rvest,
+	 packrat,
+	 devtools,
+	 sessioninfo,
+	 usethis,
+	 clustertools,
+	 depwalker,
+	 danesurowe,
+	 pathcat,
+	 binnr,
+	 relationshipMatrix,
+	 dbcasereport,
+	 itemNaming,
+	 lists2df,
+	 objectstorage,
+	 PostHocGroups,
+	 rectpartitions,
+	 ReportGatherer,
+	 yuxiaCharts,
+	doParallel,
+	bookdown,
+	R6,
+	caret,
+	ggplot2,
+	AppliedPredictiveModeling,
+	mlbench,
+	earth,
+	e1071,
+	ggthemes,
+	proxy,
+	latticeExtra,
+	gbm,
 	klaR,
 	pROC,
 	DT,
@@ -28,19 +76,34 @@ caret,bookdown
 	DMwR,
 	ROSE,
 	randomForest,
-	doMC
-	QSARdata,mboost
-	sessioninfo
+	doMC,
+	QSARdata,
+	mboost,
+	sessioninfo,
 	TH.data,
 	party,
 	desirability,
 	MLmetrics,
 	C50
+LinkingTo: Rcpp
+Depends:
+    data.table,
+	  dplyr,
+	  dtplyr,
+	  ggplot2,
+	  purrr
 Remotes:
 	 adamryczkowski/clustertools,
 	 adamryczkowski/depwalker,
 	 adamryczkowski/danesurowe,
 	 adamryczkowski/pathcat,
 	 adamryczkowski/relationshipMatrix,
+	 adamryczkowski/dbcasereport,
+	 adamryczkowski/itemNaming,
+	 adamryczkowski/lists2df,
+	 adamryczkowski/objectstorage,
+	 adamryczkowski/PostHocGroups,
+	 adamryczkowski/rectpartitions,
+	 adamryczkowski/ReportGatherer,
 	 adamryczkowski/yuxiaCharts,
-
+	 Zelazny7/binnr
