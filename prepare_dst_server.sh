@@ -1,4 +1,9 @@
 #!/bin/bash
+
+## dependency: files/dont-starve-headless.sh
+## dependency: files/update-dont-starve.sh
+
+
 cd `dirname $0`
 . ./common.sh
 
@@ -79,6 +84,11 @@ if [ ! -d /opt/dst ]; then
 	logmkdir /opt/dst $USER
 fi
 
-steamcmd +login anonymous +force_install_dir /opt/dst +app_update 343050 validate +quit
+if [ ! -f /opt/dst/bin/dontstarve_dedicated_server_nullrenderer ]; then
+	logexec steamcmd +login anonymous +force_install_dir /opt/dst +app_update 343050 validate +quit
+fi
+
+install_script files/dont-starve-headless.sh ${home}
+install_script files/update-dont-starve.sh ${home}
 
 
