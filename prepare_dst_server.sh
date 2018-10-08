@@ -109,4 +109,4 @@ install_script files/update-dont-starve.sh ${home}
 
 logmkdir "${home}/.klei/DoNotStarveTogether/${cluster_name}"
 
-linetextfile /opt/dst/mods/dedicated_server_mods_setup.lua "ServerModCollectionSetup(\"${server_mod_collection}\")"
+linetextfile ${home}/.klei/DoNotStarveTogether/${cluster_name}/dedicated_server_mods_setup.lua "ServerModCollectionSetup(\"${server_mod_collection}\")"
