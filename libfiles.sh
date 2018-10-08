@@ -115,10 +115,12 @@ function textfile {
 	return 1
 }
 
-function install_script {
+
+function install_file {
 	local input_file="$1"
 	local dest="$2"
 	local user=$3
+	
 	if [ -z ${user} ]; then
 		user=auto
 	fi
@@ -162,6 +164,11 @@ function install_script {
 			fi
 		fi
 	fi
+}
+
+function set_executable {
+	local input_file="$1"
+	
 	if [[ ! -x "$dest" ]]; then
 		if [ -w "$dest" ]; then
 			logexec chmod +x "$dest"
@@ -173,6 +180,14 @@ function install_script {
 		errcho "Cannot set executable permission to $dest"
 		return 1
 	fi
+}
+
+function install_script {
+	local input_file="$1"
+	local dest="$2"
+	local user=$3
+	install_file $input_file $dest $user
+	set_executable $dest
 }
 
 function chmod_file {
