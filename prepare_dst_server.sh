@@ -127,7 +127,7 @@ install_file files/dst_worldgenoverride2.lua ${home}/.klei/DoNotStarveTogether/$
 install_file files/dst_worldgenoverride3.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/worldgenoverride.lua ${USER}
 install_file files/dst_worldgenoverride4.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/worldgenoverride.lua ${USER}
 
-make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/modoverrides.lua
-make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/modoverrides.lua
-make_symlink files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/modoverrides.lua
+make_symlink ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/modoverrides.lua
+make_symlink ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/modoverrides.lua
+make_symlink ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/modoverrides.lua
 
