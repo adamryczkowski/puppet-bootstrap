@@ -102,6 +102,8 @@ fi
 
 home=$(get_home_dir ${USER})
 
+install_apt_packages lib32gcc1 libcurl4-gnutls-dev:i386
+
 install_script files/dont-starve-headless.sh ${home}
 install_script files/update-dont-starve.sh ${home}
 
