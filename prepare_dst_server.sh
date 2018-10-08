@@ -9,14 +9,12 @@ Prepares Don't Starve Together dedicated server.
 
 Usage:
 
-$(basename $0)  --cluster-token <token>
+$(basename $0)  [--cluster-token <token>]
                 [--help] [--debug] [--log <output file>] 
 
 
 where
  --cluster-token <token>      - Cluster token (defaults to 'gpMrs7hckCBAnHn2lAdcgEQFcbTigcxv')
- --spack_mirror               - Location of local spack mirror
- --pre-install                - Name of the spack packages that will be installed in sequence
  --debug                      - Flag that sets debugging mode. 
  --log                        - Path to the log file that will log all meaningful commands
 
@@ -27,10 +25,10 @@ $(basename $0) --debug
 "
 
 
-if [ -z "$1" ]; then
-	echo "$usage" >&2
-	exit 0
-fi
+#if [ -z "$1" ]; then
+#	echo "$usage" >&2
+#	exit 0
+#fi
 
 set -x
 
@@ -56,14 +54,6 @@ case $key in
 	;;
 	--cluster-token)
 	cluster_token="$1"
-	shift
-	;;
-	--spack-mirror)
-	spack_mirror="$1"
-	shift
-	;;
-	--pre-install)
-	pre_install+=("$1")
 	shift
 	;;
 	-*)
