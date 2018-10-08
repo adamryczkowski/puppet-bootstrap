@@ -14,12 +14,13 @@ Prepares Don't Starve Together dedicated server.
 
 Usage:
 
-$(basename $0)  [--cluster-token <token>]
+$(basename $0)  [--cluster-token <token>] [--cluster-name <name>]
                 [--help] [--debug] [--log <output file>] 
 
 
 where
  --cluster-token <token>      - Cluster token (defaults to 'gpMrs7hckCBAnHn2lAdcgEQFcbTigcxv')
+ --cluster-name <name>        - Name of the clustre (defaults to WAM)
  --debug                      - Flag that sets debugging mode. 
  --log                        - Path to the log file that will log all meaningful commands
 
@@ -39,6 +40,7 @@ set -x
 
 user="$USER"
 cluster_token="gpMrs7hckCBAnHn2lAdcgEQFcbTigcxv"
+cluster_name="WAM"
 
 while [[ $# > 0 ]]
 do
@@ -59,6 +61,10 @@ case $key in
 	;;
 	--cluster-token)
 	cluster_token="$1"
+	shift
+	;;
+	--cluster-name)
+	cluster_name="$1"
 	shift
 	;;
 	-*)
@@ -93,4 +99,4 @@ home=$(get_home_dir ${USER})
 install_script files/dont-starve-headless.sh ${home}
 install_script files/update-dont-starve.sh ${home}
 
-
+logmkdir "${home}.klei/DoNotStarveTogether/${cluster_name}"
