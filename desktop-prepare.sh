@@ -523,6 +523,13 @@ function gedit {
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins textsize
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins spell
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins codecomment
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins charmap
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins charmap
+	
+	gsettings_set_value org.gnome.gedit.preferences.editor bracket-matching true
+	gsettings_set_value org.gnome.gedit.preferences.editor highlight-current-line true
+	gsettings_set_value org.gnome.gedit.preferences.editor background-pattern 'grid'
+	gsettings_set_value org.gnome.gedit.preferences.editor display-line-numbers true
 }
 
 oldifs=${IFS}
