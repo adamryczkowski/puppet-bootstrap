@@ -398,6 +398,7 @@ function nemo {
 	gsettings_set_value org.nemo.preferences default-folder-viewer "compact-view"
 	gsettings_set_value org.nemo.preferences show-hidden-files true
 	
+	logmkdir "${home}/.local/bin" ${user}
 	cp_file $(get_cached_file apply_exif_rotation.sh https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/apply_exif_rotation.sh) "${home}/.local/bin" ${user}
 	set_executable "${home}/.local/bin/apply_exif_rotation.sh"
 	cp_file $(get_cached_file fix_jpeg_rotation_dir.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation_dir.nemo_action) "${home}/.local/share/nemo/actions" ${user}
