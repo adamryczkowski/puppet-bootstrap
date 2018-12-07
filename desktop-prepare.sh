@@ -386,7 +386,7 @@ function kodi {
 }
 
 function nemo {
-	add_ppa ppa:webupd8team/nemo3
+	add_ppa webupd8team/nemo3
 	do_update
 	install_apt_package nemo nemo
 
