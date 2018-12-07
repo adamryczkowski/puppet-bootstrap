@@ -36,7 +36,7 @@ Comment=Physically rotate all JPG photos inside %p according to their EXIF tag
 # What to run.  Enclose in < > to run an executable that resides in the actions folder.
 # **** REQUIRED ****
 #Exec=gedit %F
-Exec=<apply_exif_rotation.sh> %F
+Exec=apply_exif_rotation.sh %F
 
 # Icon name to use in the menu - must be a theme icon name
 #Icon-Name=applications-accessories
