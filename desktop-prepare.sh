@@ -397,6 +397,11 @@ function nemo {
 	gsettings_set_value org.nemo.preferences show-open-in-terminal-toolbar true
 	gsettings_set_value org.nemo.preferences default-folder-viewer "compact-view"
 	gsettings_set_value org.nemo.preferences show-hidden-files true
+	
+	cp_file $(get_cached_file apply_exif_rotation.sh https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/apply_exif_rotation.sh) "${home}/.local/share/nemo/actions" ${user}
+	set_executable "${home}/.local/share/nemo/actions/apply_exif_rotation.sh"
+	cp_file $(get_cached_file fix_jpeg_rotation dir.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation dir.nemo_action) "${home}/.local/share/nemo/actions" ${user}
+	cp_file $(get_cached_file fix_jpeg_rotation_files.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation_files.nemo_action) "${home}/.local/share/nemo/actions" ${user}
 }
 
 function mod3 {
