@@ -26,7 +26,7 @@ if [ ! -d "$1" ]; then
 		echo "Non existing $1"
 		exit 1
 	fi
-	install_apt_packages parallel --no-cite exiftran
+	install_apt_packages parallel exiftran
 	parallel --jobs 2 exiftran -a -i -p {} ::: $@
 else
 	cd "$1"
