@@ -111,7 +111,7 @@ else
 	tweaks="tweak_base,${tweaks}"
 fi
 
-home=$(get_home_dir)
+home=$(get_home_dir ${user})
 
 if [ -n "$common_debug" ]; then
 	if [ -z "$log" ]; then
