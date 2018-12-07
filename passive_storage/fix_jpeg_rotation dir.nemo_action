@@ -28,10 +28,10 @@ Active=true
 
 # The name to show in the menu, locale supported with standard desktop spec.
 # **** REQUIRED ****
-Name=Auto rotate selected jpgs
+Name=Auto rotate all JPG in %p
 
 # Tool tip, locale supported (Appears in the status bar)
-Comment=Physically rotate all selected JPG photos according to their EXIF tag
+Comment=Physically rotate all JPG photos inside %p according to their EXIF tag
 
 # What to run.  Enclose in < > to run an executable that resides in the actions folder.
 # **** REQUIRED ****
@@ -39,16 +39,16 @@ Comment=Physically rotate all selected JPG photos according to their EXIF tag
 Exec=apply_exif_rotation.sh %F
 
 # Icon name to use in the menu - must be a theme icon name
-###Icon-Name=applications-accessories
+#Icon-Name=applications-accessories
 
 # Gtk Stock ID to use for the icon.  Note if both Icon-name and Stock-Id are
 # defined, the Stock-Id takes precedence.
-#Stock-Id=applications-accessories
+#Stock-Id=gtk-cdrom
 
 # What type selection: [s]ingle, [m]ultiple, any, notnone, none (background click), or
 # a number representing how many files must be selected to display.
 # ****** REQUIRED *******
-Selection=NotNone
+Selection=s
 
 # What extensions to display on - this is an array, end with a semicolon
 # Single entry options, ending in a semicolon:
@@ -59,7 +59,7 @@ Selection=NotNone
 # Individual specific extensions can be a semicolon-terminated list
 # Extensions are NOT case sensitive.  jpg will match JPG, jPg, jpg, etc..
 # **** EITHER EXTENSIONS OR MIMETYPES IS REQUIRED *****
-Extensions=jpg;jpeg
+Extensions=dir
 
 # What mime-types to display on - this is an array, end with a semicolon
 # **** EITHER EXTENSIONS OR MIMETYPES IS REQUIRED *****
