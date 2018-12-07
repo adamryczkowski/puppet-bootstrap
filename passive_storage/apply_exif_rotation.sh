@@ -1,5 +1,4 @@
 #!/bin/bash
-
 #Rotates all JPGs according to their EXIF tag
 #Checks for and installs if needed the exiftran tool
 
@@ -20,18 +19,19 @@ function install_apt_packages {
 	fi
 	return 0
 }
-
 if [ ! -d "$1" ]; then
 	if [ ! -f "$1" ]; then
 		echo "Non existing $1"
+		sleep 10
 		exit 1
 	fi
 	install_apt_packages parallel exiftran
-	parallel --jobs 2 exiftran -a -i -p {} ::: $@
+	parallel --jobs 2 --no-notice exiftran -a -i -p "{}" ::: "$@"
 else
 	cd "$1"
 	install_apt_packages parallel exiftran
-	find . -name "*[.jpg\|.jpeg\|.JPG\|.JPEG]" -and -not -type d | parallel --no-cite --jobs 2 exiftran -a -i -p {}
+	find . -name "*[.jpg\|.jpeg\|.JPG\|.JPEG]" -and -not -type d | parallel --no-notice --jobs 2 exiftran -a -i -p "{}"
 fi
 
-sleep 1
+echo "Done."
+read -p "Press enter to continue"
