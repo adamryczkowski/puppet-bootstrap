@@ -400,7 +400,7 @@ function nemo {
 	
 	cp_file $(get_cached_file apply_exif_rotation.sh https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/apply_exif_rotation.sh) "${home}/.local/share/nemo/actions" ${user}
 	set_executable "${home}/.local/share/nemo/actions/apply_exif_rotation.sh"
-	cp_file $(get_cached_file fix_jpeg_rotation dir.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation dir.nemo_action) "${home}/.local/share/nemo/actions" ${user}
+	cp_file $(get_cached_file fix_jpeg_rotation_dir.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation dir.nemo_action) "${home}/.local/share/nemo/actions" ${user}
 	cp_file $(get_cached_file fix_jpeg_rotation_files.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation_files.nemo_action) "${home}/.local/share/nemo/actions" ${user}
 }
 

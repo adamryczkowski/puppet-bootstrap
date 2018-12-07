@@ -26,12 +26,12 @@ if [ ! -d "$1" ]; then
 		echo "Non existing $1"
 		exit 1
 	fi
-	install_apt_packages parallel exiftran
+	install_apt_packages parallel --no-cite exiftran
 	parallel --jobs 2 exiftran -a -i -p {} ::: $@
 else
 	cd "$1"
 	install_apt_packages parallel exiftran
-	find . -name "*[.jpg\|.jpeg\|.JPG\|.JPEG]" -and -not -type d | parallel --jobs 2 exiftran -a -i -p {}
+	find . -name "*[.jpg\|.jpeg\|.JPG\|.JPEG]" -and -not -type d | parallel --no-cite --jobs 2 exiftran -a -i -p {}
 fi
 
 sleep 1
