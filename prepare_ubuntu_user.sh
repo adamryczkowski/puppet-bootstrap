@@ -239,6 +239,12 @@ if [ -n "$user" ]; then
 		linetextfile ${sshhome}/.bashrc 'alias ping="prettyping"'
 	fi
 	
+	if [ "${install_autojump}" == "1" ]; then
+		if dpkg -s autojump >/dev/null 2>/dev/null; then
+			linetextfile ${sshhome}/.bashrc 'source /usr/share/autojump/autojump.sh'
+		fi
+	fi
+
 	if [ "${install_liquidprompt}" == "1" ]; then
 		if dpkg -s liquidprompt >/dev/null 2>/dev/null; then
 			if [[ "$user" != "root" ]]; then
@@ -249,13 +255,5 @@ if [ -n "$user" ]; then
 		fi
 	fi
 
-	if [ "${install_autojump}" == "1" ]; then
-		if dpkg -s autojump >/dev/null 2>/dev/null; then
-			linetextfile ${sshhome}/.bashrc 'source /usr/share/autojump/autojump.sh'
-		fi
-	fi
-
 fi
-
-
 
