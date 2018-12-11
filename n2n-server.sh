@@ -48,7 +48,7 @@ where
 
 Example2:
 
-$(basename $0) --port 5000
+./$(basename $0) --password szakal --port 5536 --network-name SiecAdama
 
 "
 server_service_name="supernode"
@@ -130,11 +130,11 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-if [ -n "$network_name" ]; then
+if [ -z "$network_name" ]; then
 	errcho "--network-name is an obligatory parameter"
 	exit 1
 fi
-if [ -n "$password" ]; then
+if [ -z "$password" ]; then
 	errcho "--pasword is an obligatory parameter"
 	exit 1
 fi
