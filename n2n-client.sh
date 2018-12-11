@@ -116,6 +116,10 @@ case $key in
 	password="$1"
 	shift
 	;;
+	--help)
+	echo "$usage"
+	exit 0
+	;;
 	--ip)
 	our_ip="$1"
 	shift
