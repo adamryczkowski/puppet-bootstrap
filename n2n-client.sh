@@ -177,10 +177,7 @@ fi
 if edit_bash_augeas /etc/default/${service_name} N2N_KEY ${password}; then
 	restart=1
 fi
-if edit_bash_augeas /etc/default/${service_name} N2N_SUPERNODE ${supernode_ip}; then
-	restart=1
-fi
-if edit_bash_augeas /etc/default/${service_name} N2N_SUPERNODE_PORT ${supernode_port}; then
+if edit_bash_augeas /etc/default/${service_name} N2N_SUPERNODE ${supernode_ip}:${supernode_port}; then
 	restart=1
 fi
 if [ "$our_ip" == "dhcp" ]; then
