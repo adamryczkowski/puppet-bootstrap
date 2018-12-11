@@ -12,11 +12,13 @@ The script can be run either as a root or normal user
 
 Usage:
 
-$(basename $0) <user-name> [--help] [--install-dir <install dir>] [--debug] [--log log]
+$(basename $0) --user <username> [--help] [--install-dir <install dir>] [--debug] [--log log]
 
 where
 
  --install-dir <install dir> - Place to install the repository
+ --user <username>           - Username to install update to its ~/tmp/update-all. Defaults to the
+                               current user.
  --debug                     - Flag that sets debugging mode. 
  --log                       - Path to the log file that will log all meaningful commands
 
@@ -35,14 +37,9 @@ mypath=${0%/*}
 mypath=`dir_resolve $mypath`
 cd $mypath
 
-if [ "${USER}" == "root" ]; then
-	install_dir="/usr/local/lib"
-else
-	install_dir="$(get_home_dir)/tmp"
-fi
-
 debug=0
 wormhole=0
+user=${USER}
 
 while [[ $# > 0 ]]
 do
@@ -65,6 +62,10 @@ case $key in
 	install_dir=$1
 	shift
 	;;
+	--user)
+	user=$1
+	shift
+	;;
     -*)
     echo "Error: Unknown option: $1" >&2
     echo "$usage" >&2
@@ -72,6 +73,12 @@ case $key in
 esac
 done
 
+
+if [ "${user}" == "root" ]; then
+	install_dir="/usr/local/lib"
+else
+	install_dir="$(get_home_dir ${user})/tmp"
+fi
 
 
 if [ -n "$debug" ]; then
@@ -83,7 +90,7 @@ fi
 logmkdir "${install_dir}" adam
 
 if [ ! -w ${install_dir} ] ; then 
-	errcho "${install_dir} is not writable for ${USER}"
+	errcho "${install_dir} is not writable for ${user}"
 	exit 1
 fi
 
