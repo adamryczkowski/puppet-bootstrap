@@ -334,7 +334,9 @@ function dir_resolve
 source libs.sh
 
 mypath=${0%/*}
-mypath=`dir_resolve $mypath`
-cd $mypath
+mypath=$(dir_resolve $mypath)
+if [ -n "${mypath}" ]; then
+	cd $mypath
+fi
 
 

@@ -1,7 +1,9 @@
 #!/bin/bash
+
+## dependency: n2n-client.sh
+
 cd `dirname $0`
 . ./common.sh
-
 
 usage="
 Prepares peer-to-peer vpn 'n2n' server or node on
