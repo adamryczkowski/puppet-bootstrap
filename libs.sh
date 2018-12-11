@@ -114,7 +114,9 @@ function custom_systemd_service {
 
 
 function get_home_dir {
-	local USER=$1
+	if [ -n "$1" ]; then
+		local USER=$1
+	fi
 	echo $( getent passwd "$USER" | cut -d: -f6 )
 }
 
