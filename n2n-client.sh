@@ -20,28 +20,31 @@ $(basename $0) <supernode ip:port> [--network_name <network_name>] [--ifname <if
 
 where
 
- <ip address[:port]>      - IP address and port to the supernode.  
-                            E.g. 139.162.181.142:5000. Port must be the same as the supernode. 
- --network-name           - Name of the n2n community. All edges within the same community 
-                            appear on the same LAN (layer 2 network segment). 
-                            Community name is 16 bytes in length. 
-                            Defaults to 'My_n2n_network'
- --ifname                 - Name of the virtual network device. Defaults to 'edge0'.
- --mac                    - Sets the MAC address of the node. 
-                            Without this, edge command will randomly generate a MAC address. 
-                            In fact, hardcoding a static MAC address for a VPN interface is 
-                            highly recommended. Otherwise, in case you restart edge 
-                            daemon on a node, ARP cache of other peers will be polluted 
-                            due to a newly generated MAC addess, and they will not send 
-                            traffic to the node until the polluted ARP entry is evicted. 
-                            Default 'auto', which will randomize MAC address.
- --name                   - Name of the service, needed if you intent to install more than one.
-                            Defaults to n2n.
- --password               - Password needed to join the network.  
- --ip                     - IP address in the private network of the node, or 'dhcp'. 
-                            Default to 'dhcp'
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+ <ip address[:port]>        - IP address and port to the supernode.  
+                              E.g. 139.162.181.142:5000. Port must be the same as the supernode. 
+ --network-name             - Name of the n2n community. All edges within the same community 
+                              appear on the same LAN (layer 2 network segment). 
+                              Community name is 16 bytes in length. 
+                              Defaults to 'My_n2n_network'
+ --ifname                   - Name of the virtual network device. Defaults to 'edge0'.
+ --mac                      - Sets the MAC address of the node. 
+                              Without this, edge command will randomly generate a MAC address. 
+                              In fact, hardcoding a static MAC address for a VPN interface is 
+                              highly recommended. Otherwise, in case you restart edge 
+                              daemon on a node, ARP cache of other peers will be polluted 
+                              due to a newly generated MAC addess, and they will not send 
+                              traffic to the node until the polluted ARP entry is evicted. 
+                              Default 'auto', which will randomize MAC address.
+ --name                     - Name of the service, needed if you intent to install more than one.
+                              Defaults to n2n.
+ --supernode-service <name> - Name of the supernode service. Required, if the supernode for this
+                              VPN runs on the same host. It will make sure, that the client starts
+                              after the supernode boots.
+ --password                 - Password needed to join the network.  
+ --ip                       - IP address in the private network of the node, or 'dhcp'. 
+                              Default to 'dhcp'
+ --debug                    - Flag that sets debugging mode. 
+ --log                      - Path to the log file that will log all meaningful commands
 
 
 Example2:
@@ -51,6 +54,7 @@ $(basename $0)  172.104.148.166:5535 --password 'szakal'
 "
 
 server_address=$1
+supernode_service=""
 shift
 
 if [ -z "$server_address" ]; then
@@ -73,7 +77,7 @@ if [ -z "${port}" ]; then
 fi
 supernode_port=${port}
 
-service_name="n2n"
+service_name="edge"
 network_name="My_n2n_network"
 ifname="edge0"
 our_ip="dhcp"
@@ -104,6 +108,10 @@ case $key in
 	ifname="$1"
 	errcho "Option --ifname is not supported now, because the init scripts that come with Ubuntu don't."
 	exit 1
+	shift
+	;;
+	--supernode-service)
+	supernode_service="$1"
 	shift
 	;;
 	--mac)
@@ -147,59 +155,58 @@ if [ -z "$password" ]; then
 	exit 1
 fi
 
-if [ -z "${our_ip}" ]; then
-	errcho "You must provide a static IP with the '--ip <ip>' argument."
+ubuntu_ver=$(get_ubuntu_version)
+pattern='([[:digit:]]{2})([[:digit:]]{2})'
+if [[ "${ubuntu_ver}" =~ $pattern ]]; then
+	file_link="http://apt-stable.ntop.org/${BASH_REMATCH[1]}.${BASH_REMATCH[2]}/all/apt-ntop-stable.deb"
+	file_name="n2n-$(get_ubuntu_codename)-repo.deb"
+else
+	errcho "Something wrong with get_ubuntu_version"
 	exit 1
 fi
+
+install_apt_package_file "${file_name}" apt-ntop-stable "${file_link}" && flag_need_apt_update=1 do_update
 
 install_apt_package n2n
-if ! [ -f files/n2n ]; then
-	errcho "Cannot find n2n file to replace"
-	exit 1
-fi
-if ! cmp /etc/init.d/${service_name} files/n2n; then
-	if [ "${service_name}" != "n2n" ]; then
-		logexec sudo sed -e "s/NAME=n2n/NAME=${service_name}/g" files/n2n > /etc/init.d/${service_name}
-		logexec sudo cp /etc/default/n2n /etc/default/${service_name}
-	else
-		logexec sudo cp files/n2n /etc/init.d/${service_name}
-	fi
-	logexec sudo chown root:root /etc/init.d/${service_name}
-	logexec sudo chmod 755 /etc/init.d/${service_name}
-fi
-#if apply_patch /etc/init.d/n2n files/n2n.patch; then
-#	restart=1
-#fi
 
-if edit_bash_augeas /etc/default/${service_name} N2N_COMMUNITY ${network_name}; then
-	restart=1
-fi 
-if edit_bash_augeas /etc/default/${service_name} N2N_KEY ${password}; then
-	restart=1
-fi
-if edit_bash_augeas /etc/default/${service_name} N2N_SUPERNODE ${supernode_ip}:${supernode_port}; then
-	restart=1
-fi
-if [ "$our_ip" == "dhcp" ]; then
-	if edit_bash_augeas /etc/default/${service_name} N2N_IP dhcp:0.0.0.0; then
-		restart=1
-	fi
-	if edit_bash_augeas /etc/default/${service_name} N2N_DHCP "yes"; then
-		restart=1
-	fi
+config="--tun-device=${ifname}
+--community=${network_name}
+-k=${password}
+-m=${mac}
+--supernode-list=${supernode_ip}:${supernode_port}
+"
+
+if [ "${our_ip}" == "dhcp" ]; then
+	config="${config}-r
+-a dhcp:0.0.0.0"
 else
-	if edit_bash_augeas /etc/default/${service_name} N2N_IP ${our_ip}; then
-		restart=1
-	fi
+	config="${config}-a=${our_ip}"
 fi
-if edit_bash_augeas /etc/default/${service_name} N2N_EDGE_CONFIG_DONE yes; then
-	restart=1
+
+if [ "$service_name" != "edge" ]; then
+	systemd_file="[Unit]
+Description=n2n edge process
+After=network.target syslog.target
+Wants=
+
+[Service]
+Type=simple
+ExecStartPre=
+ExecStart=/usr/sbin/edge /etc/n2n/${service_name}.conf -f
+Restart=on-abnormal
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+Alias=
+"
+	textfile /etc/systemd/system/${service_name}.service "${systemd_file}" root
+	textfile /etc/n2n/${service_name}.conf "${config}" root
+else
+	textfile /etc/n2n/edge.conf "${config}" root
 fi
-if edit_bash_augeas /etc/default/${service_name} N2N_MAC ${mac}; then
-	restart=1
-fi 
 
 if [ "$restart" == "1" ]; then
 	logexec sudo systemctl daemon-reload
-	logexec sudo service ${service_name} restart
+	logexec sudo service ${service_name}.service restart
 fi

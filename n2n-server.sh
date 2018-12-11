@@ -20,6 +20,26 @@ where
  --no-dhcp                - Flag. If given, no DHCP server will be installed on the network. 
  --dhcp-range             - Range of the addresses to use in the network. 
                             Defaults to 'auto', which will randomly take 10.x.x.0/24 IP domain.
+ --network-name           - Name of the n2n community. All edges within the same community 
+                            appear on the same LAN (layer 2 network segment). 
+                            Community name is 16 bytes in length. 
+                            Defaults to 'My_n2n_network'
+ --ifname                 - Name of the virtual network device. Defaults to 'edge0'.
+ --mac                    - Sets the MAC address of the node. 
+                            Without this, edge command will randomly generate a MAC address. 
+                            In fact, hardcoding a static MAC address for a VPN interface is 
+                            highly recommended. Otherwise, in case you restart edge 
+                            daemon on a node, ARP cache of other peers will be polluted 
+                            due to a newly generated MAC addess, and they will not send 
+                            traffic to the node until the polluted ARP entry is evicted. 
+                            Default 'auto', which will randomize MAC address.
+ --client-service-name    - Name of the client service, needed if you intent to install more than one.
+                            Defaults to edge.
+ --server-service-name    - Name of the server service, needed if you intent to install more than one.
+                            Defaults to supernode.
+ --password               - Password needed to join the network.  
+ --ip                     - IP address in the private network of the node. Defaults to 
+                            the first address in the dhcp range.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
  <options to n2n_client>  - You must provide password. Server address will be put automatically. 
@@ -31,7 +51,8 @@ Example2:
 $(basename $0) --port 5000
 
 "
-
+server_service_name="supernode"
+our_ip="dhcp"
 port=5535
 while [[ $# > 0 ]]
 do
@@ -47,11 +68,39 @@ case $key in
 	shift
 	;;
 	--help)
-	    echo "$usage"
-	    exit 0
+	echo "$usage"
+	exit 0
 	;;
 	--port)
 	port="$1"
+	shift
+	;;
+	--network-name)
+	network_name="$1"
+	shift
+	;;
+	--client-service-name)
+	client_service_name="$1"
+	shift
+	;;
+	--server-service-name)
+	server_service_name="$1"
+	shift
+	;;
+	--ifname)
+	ifname="$1"
+	shift
+	;;
+	--mac)
+	mac="$1"
+	shift
+	;;
+	--password)
+	password="$1"
+	shift
+	;;
+	--ip)
+	our_ip="$1"
 	shift
 	;;
 	--no-dhcp)
@@ -79,6 +128,27 @@ if [ -n "$debug" ]; then
 	else
 		opts="$opts --log $log"
 	fi
+fi
+
+if [ -n "$network_name" ]; then
+	errcho "--network-name is an obligatory parameter"
+	exit 1
+fi
+if [ -n "$password" ]; then
+	errcho "--pasword is an obligatory parameter"
+	exit 1
+fi
+
+set client_opts=
+
+if [ -n "$client_service_name" ]; then
+	client_opts="${client_opts} --name ${client_service_name}"
+fi
+if [ -n "$ifname" ]; then
+	client_opts="${client_opts} --ifname ${ifname}"
+fi
+if [ -n "$mac" ]; then
+	client_opts="${client_opts} --mac ${mac}"
 fi
 
 if [ -z "$no_dhcp" ]; then
@@ -109,10 +179,13 @@ if [ -z "$no_dhcp" ]; then
 			exit 1
 		fi
 	fi
-#	if ! ./n2n-client.sh localhost:$port --ip $server_ip  "$@" $opts; then
-#		errcho "Problems when installing n2n client. Exiting"
-#		exit 1
-#	fi
+	if [ -z "${ip}" ]; then
+		ip=${server_ip}
+	fi
+	if ! ./n2n-client.sh localhost:$port --ip ${ip} --network-name ${network_name} --supernode-service ${server_service_name} --password ${pasword} ${client_opts} ${opts}; then
+		errcho "Problems when installing n2n client. Exiting"
+		exit 1
+	fi
 	
 	if install_apt_package isc-dhcp-server; then
 		restart_dhcp=1
@@ -129,12 +202,6 @@ if [ -z "$no_dhcp" ]; then
 	fi
 	
 	if [ "$restart_dhcp" == "1" ]; then
-		logexec sudo service isc-dhcp-server restart
+		logexec sudo service isc-dhcp-server restart #Make sure the dhcp starts AFTER supernode and its client
 	fi
-	
 fi
-
-install_apt_package n2n
-
-simple_systemd_service n2n_supernode  "N2N Supernode service" supernode -l ${port}
-

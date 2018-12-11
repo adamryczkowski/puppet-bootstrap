@@ -44,7 +44,7 @@ function simple_systemd_service {
 	local name=$1
 	local description="$2"
 	local program=$3
-	shift;shift;shift
+	shift;shift;shift;shift
 	local args="$@"
 	local is_active
 	
@@ -74,6 +74,7 @@ Description=$description
 
 [Service]
 ExecStart="$program" $args
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
