@@ -90,10 +90,6 @@ case $key in
 	log=$1
 	shift
 	;;
-	--help)
-        echo "$usage"
-        exit 0
-	;;
 	--network-name)
 	network_name="$1"
 	shift
