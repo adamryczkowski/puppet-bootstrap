@@ -183,7 +183,8 @@ if [ -z "$no_dhcp" ]; then
 		ip=${server_ip}
 	fi
 	
-	if ! ./n2n-client.sh localhost:$port --ip ${ip} --network-name ${network_name} --supernode-service ${server_service_name} --password ${password} ${client_opts} ${opts}; then
+	bash -x ./n2n-client.sh localhost:$port --ip ${ip} --network-name ${network_name} --supernode-service ${server_service_name} --password ${password} ${client_opts} ${opts}
+	if [ "$?" ] ; then
 		errcho "Problems when installing n2n client. Exiting"
 		exit 1
 	fi
