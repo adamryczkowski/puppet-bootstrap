@@ -122,7 +122,7 @@ case $key in
 	lxcuser="$1"
 	shift
 	;;
-	-forward-port)
+	--forward-port)
 	forward_ports+=("$1")
 	shift
 	;;
@@ -561,7 +561,7 @@ if [ "${update_all}" == "1" ]; then
 			opts="$opts --log $log"
 		fi
 	fi
-	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- 
+	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- --puppet-bootstrap
 fi
 
 if [ -n "${guestfolder}" ]; then

@@ -19,6 +19,7 @@ where
  --install-dir <install dir> - Place to install the repository
  --user <username>           - Username to install update to its ~/tmp/update-all. Defaults to the
                                current user.
+ --puppet-bootstrap          - Clone also puppet-bootstrap
  --debug                     - Flag that sets debugging mode. 
  --log                       - Path to the log file that will log all meaningful commands
 
@@ -37,6 +38,7 @@ mypath=${0%/*}
 mypath=`dir_resolve $mypath`
 cd $mypath
 
+puppet_bootstrap=0
 debug=0
 wormhole=0
 user=${USER}
@@ -51,8 +53,11 @@ case $key in
 	debug=1
 	;;
 	--help)
-        echo "$usage"
-        exit 0
+	echo "$usage"
+	exit 0
+	;;
+	--puppet-bootstrap)
+	puppet_bootstrap=1
 	;;
 	--log)
 	log=$1
@@ -103,5 +108,16 @@ else
 	logexec pushd "${install_dir}"
 	git clone --depth 1 https://github.com/adamryczkowski/update-all
 fi
+
+if [ "${puppet_bootstrap}" == "1" ]; then
+	if [ -d "${install_dir}/puppet-bootstrap" ]; then
+		logexec pushd "${install_dir}/puppet-bootstrap"
+		logexec git pull
+	else
+		logexec pushd "${install_dir}"
+		git clone --depth 1 https://github.com/adamryczkowski/puppet-bootstrap
+	fi
+fi
+
 logexec popd
 
