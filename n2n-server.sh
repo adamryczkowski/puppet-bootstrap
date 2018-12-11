@@ -109,10 +109,10 @@ if [ -z "$no_dhcp" ]; then
 			exit 1
 		fi
 	fi
-	if ! ./n2n-client.sh localhost:$port --ip $server_ip  "$@" $opts; then
-		errcho "Problems when installing n2n client. Exiting"
-		exit 1
-	fi
+#	if ! ./n2n-client.sh localhost:$port --ip $server_ip  "$@" $opts; then
+#		errcho "Problems when installing n2n client. Exiting"
+#		exit 1
+#	fi
 	
 	if install_apt_package isc-dhcp-server; then
 		restart_dhcp=1
