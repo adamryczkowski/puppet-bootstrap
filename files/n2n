@@ -80,7 +80,7 @@ do_start()
 		-u $(id -u nobody) -g $(id -g nobody) $DAEMON_ARGS \
 		|| return 2
 	if [ "$N2N_DHCP" = "yes" ]; then
-		dhclient edge0
+		dhclient -1 edge0
 	fi
 
 }

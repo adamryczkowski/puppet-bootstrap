@@ -35,6 +35,8 @@ where
                             due to a newly generated MAC addess, and they will not send 
                             traffic to the node until the polluted ARP entry is evicted. 
                             Default 'auto', which will randomize MAC address.
+ --name                   - Name of the service, needed if you intent to install more than one.
+                            Defaults to n2n.
  --password               - Password needed to join the network.  
  --ip                     - IP address in the private network of the node, or 'dhcp'. 
                             Default to 'dhcp'
@@ -69,6 +71,7 @@ if [ -z "${port}" ]; then
 fi
 supernode_port=${port}
 
+service_name="n2n"
 network_name="My_n2n_network"
 ifname="edge0"
 our_ip="dhcp"
@@ -93,6 +96,10 @@ case $key in
 	;;
 	--network-name)
 	network_name="$1"
+	shift
+	;;
+	--name)
+	service_name="$1"
 	shift
 	;;
 	--ifname)
@@ -148,47 +155,52 @@ if ! [ -f files/n2n ]; then
 	errcho "Cannot find n2n file to replace"
 	exit 1
 fi
-if ! cmp /etc/init.d/n2n files/n2n; then
-	logexec sudo cp files/n2n /etc/init.d/n2n
-	logexec sudo chown root:root /etc/init.d/n2n
-	logexec sudo chmod 755 /etc/init.d/n2n
+if ! cmp /etc/init.d/${service_name} files/n2n; then
+	if [ "${service_name}" != "n2n" ]; then
+		logexec sudo sed -e "s/NAME=n2n/NAME=${service_name}/g" files/n2n > /etc/init.d/${service_name}
+		logexec sudo cp /etc/default/n2n /etc/default/${service_name}
+	else
+		logexec sudo cp files/n2n /etc/init.d/${service_name}
+	fi
+	logexec sudo chown root:root /etc/init.d/${service_name}
+	logexec sudo chmod 755 /etc/init.d/${service_name}
 fi
 #if apply_patch /etc/init.d/n2n files/n2n.patch; then
 #	restart=1
 #fi
 
-if edit_bash_augeas /etc/default/n2n N2N_COMMUNITY ${network_name}; then
+if edit_bash_augeas /etc/default/${service_name} N2N_COMMUNITY ${network_name}; then
 	restart=1
 fi 
-if edit_bash_augeas /etc/default/n2n N2N_KEY ${password}; then
+if edit_bash_augeas /etc/default/${service_name} N2N_KEY ${password}; then
 	restart=1
 fi
-if edit_bash_augeas /etc/default/n2n N2N_SUPERNODE ${supernode_ip}; then
+if edit_bash_augeas /etc/default/${service_name} N2N_SUPERNODE ${supernode_ip}; then
 	restart=1
 fi
-if edit_bash_augeas /etc/default/n2n N2N_SUPERNODE_PORT ${supernode_port}; then
+if edit_bash_augeas /etc/default/${service_name} N2N_SUPERNODE_PORT ${supernode_port}; then
 	restart=1
 fi
 if [ "$our_ip" == "dhcp" ]; then
-	if edit_bash_augeas /etc/default/n2n N2N_IP dhcp:0.0.0.0; then
+	if edit_bash_augeas /etc/default/${service_name} N2N_IP dhcp:0.0.0.0; then
 		restart=1
 	fi
-	if edit_bash_augeas /etc/default/n2n N2N_DHCP "yes"; then
+	if edit_bash_augeas /etc/default/${service_name} N2N_DHCP "yes"; then
 		restart=1
 	fi
 else
-	if edit_bash_augeas /etc/default/n2n N2N_IP ${our_ip}; then
+	if edit_bash_augeas /etc/default/${service_name} N2N_IP ${our_ip}; then
 		restart=1
 	fi
 fi
-if edit_bash_augeas /etc/default/n2n N2N_EDGE_CONFIG_DONE yes; then
+if edit_bash_augeas /etc/default/${service_name} N2N_EDGE_CONFIG_DONE yes; then
 	restart=1
 fi
-if edit_bash_augeas /etc/default/n2n N2N_MAC ${mac}; then
+if edit_bash_augeas /etc/default/${service_name} N2N_MAC ${mac}; then
 	restart=1
 fi 
 
 if [ "$restart" == "1" ]; then
 	logexec sudo systemctl daemon-reload
-	logexec sudo service n2n restart
+	logexec sudo service ${service_name} restart
 fi
