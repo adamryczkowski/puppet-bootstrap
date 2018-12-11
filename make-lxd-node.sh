@@ -25,6 +25,7 @@ $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <
 						[--map-host-user <username>]
 						[--authorized-key <public key>]
 						[--update-all 0|1]
+						[--forward-port tcp|udp:<ip_address>:<host_port>;<lxc_port>]
 						[--map-host-folder <host-path> <remote-path>]
 						[--help] [--debug] [--log <output file>]
 
@@ -53,6 +54,9 @@ where
  --map-host-folder <host-path> <remote-path>
                           - After container's creation, map a single host folder into the guest file
                             system. 
+ --forward-port           - Name of the port to forward in format like tcp:0.0.0.0:8080;80. 
+                            It will create a listening socket on host accepting connections from all
+                            computers on port 8080, and forwarding it to the lxc container port 80.
  --storage                - Name of the storage to use for this container. Defaults to 'default'
  --repo-path              - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
  --update-all             - If set, it will install the update-all script as well (defaults to yes)
@@ -95,6 +99,7 @@ sshuser=`whoami`
 lxcuser=`whoami`
 update_all=1
 use_repo=""
+declare -a forward_ports
 authorized_keys=()
 
 while [[ $# > 0 ]]
@@ -115,6 +120,10 @@ case $key in
 	;;
 	-u|--username)
 	lxcuser="$1"
+	shift
+	;;
+	-forward-port)
+	forward_ports+=("$1")
 	shift
 	;;
 	--storage)
@@ -331,7 +340,17 @@ if [ -n "${internalif}" ]; then
 	fi
 fi
 
-
+if [ -n "${forward_ports}" ]; then
+	pattern='((tcp)|(udp)):([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+):([[:digit:]]+);([[:digit:]]+)'
+	for forward_port in ${forward_ports[*]}; do
+		if [[ "$forward_port" =~ $pattern ]]; then
+			host_address="${BASH_REMATCH[1]}:${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
+			lxc_address="${BASH_REMATCH[1]}:localhost:${BASH_REMATCH[6]}"
+			logexec lxc config device add ${name} forward${BASH_REMATCH[1]}${BASH_REMATCH[5]} proxy listen=${host_address} connect=${lxc_address}
+		fi
+	done
+	
+fi
 
 
 #Ustawiamy wpis w hosts
