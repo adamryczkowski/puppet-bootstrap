@@ -61,12 +61,14 @@ fi
 parse_URI ${server_address}
 if [ -z "${ip}" ]; then
 	echo "Cannot find address of the server in ${server_address}"
+	echo $usage"
 	exit 1
 fi
 supernode_ip=${ip}
 
 if [ -z "${port}" ]; then
 	echo "Cannot find UDP port of the server in ${server_address}"
+	echo $usage"
 	exit 1
 fi
 supernode_port=${port}
