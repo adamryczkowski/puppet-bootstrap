@@ -212,3 +212,4 @@ if [ "$restart" == "1" ]; then
 	logexec sudo systemctl daemon-reload
 	logexec sudo service ${service_name}.service restart
 fi
+exit 0
