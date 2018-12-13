@@ -275,7 +275,7 @@ function get_cached_file {
 			return 1
 		fi
 		if [ ! -w "${repo_path}" ]; then
-			if ! chmod +w "${repo_path}"; then
+			if ! sudo chmod +w "${repo_path}"; then
 				echo "Cannot write to the repo ${repo_path}" >/dev/stderr
 				exit 1
 			fi
