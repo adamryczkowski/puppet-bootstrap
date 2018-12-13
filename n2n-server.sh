@@ -188,7 +188,9 @@ if [ -z "$no_dhcp" ]; then
 		errcho "Problems when installing n2n client. Exiting"
 		exit 1
 	fi
-	
+	config="--local-port ${port}"
+	textfile /etc/n2n/${server_service_name}.conf "${config}" root
+
 	if install_apt_package isc-dhcp-server; then
 		restart_dhcp=1
 	fi 
