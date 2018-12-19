@@ -1,4 +1,8 @@
 #!/bin/bash
+
+## dependency: execute-script-remotely.sh
+## dependency: prepare_ubuntu.sh
+
 cd `dirname $0`
 . ./common.sh
 
@@ -32,6 +36,7 @@ where
  --wormhole               - Install magic-wormhole on the remote host 
  -p|--apt-proxy           - Address of the existing apt-cacher together with the port, e.g. 
                             192.168.1.1:3142
+ --cli-improved           - Install all default command line tools.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
 
@@ -61,6 +66,7 @@ shift
 private_key_path=''
 user=`whoami`
 sshuser='root'
+install_cli_improved=0
 
 
 while [[ $# > 0 ]]
@@ -77,8 +83,8 @@ case $key in
 	shift
 	;;
 	--help)
-        echo "$usage"
-        exit 0
+	echo "$usage"
+	exit 0
 	;;
 	-u|--username)
 	user="$1"
@@ -94,6 +100,9 @@ case $key in
 	--external-key)
 	external_key="$1"
 	shift
+	;;
+	--cli-improved)
+	install_cli_improved=1
 	;;
 	--apt-proxy)
 	aptproxy="$1"
@@ -163,6 +172,10 @@ fi
 
 if [ -n "$flag_wormhole" ]; then
 	external_opts2="$external_opts2 --wormhole"
+fi
+
+if [ "${install_cli_improved}" == "1" ]; then
+	external_opts2="$external_opts2 --cli-improved"
 fi
 
 ./execute-script-remotely.sh prepare_ubuntu.sh ${external_opts} --ssh-address $ssh_address -- ${user} ${external_opts2} 

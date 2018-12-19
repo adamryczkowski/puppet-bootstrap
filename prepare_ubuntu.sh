@@ -28,7 +28,7 @@ where
  --repo-path              - Path to the common repository
  --user <username>        - Additional user to install the tricks to. Can be specified
                             multiple times, each time adding another user.
- --cli_improved           - Install all the following recommended command line tools:
+ --cli-improved           - Install all the following recommended command line tools:
  --bat                    - cat replacement (bat)
  --ping                   - prettyping (ping),
  --fzf                    - fzf (for bash ctr+r)
@@ -134,7 +134,7 @@ case $key in
 	--need-apt-update)
 	flag_need_apt_update=1
 	;;
-	--cli_improved)
+	--cli-improved)
 	install_bat=1
 	user_opts="${user_opts} --bat"
 	install_ping=1
