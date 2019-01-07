@@ -182,7 +182,7 @@ function office2007 {
 	echo "#TODO"
 #	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/Release.key)
 #	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual winehq 'deb https://dl.winehq.org/wine-builds/ubuntu/ xenial main' https://dl.winehq.org/wine-builds/Release.key WineHQ_Release.key
+	add_apt_source_manual winehq 'deb https://dl.winehq.org/wine-builds/ubuntu/ xenial main' https://dl.winehq.org/wine-builds/winehq.key WineHQ_Release.key
 	
 #	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
 #	logexec sudo apt-key add "${release_key}"
