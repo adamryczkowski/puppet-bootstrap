@@ -421,15 +421,27 @@ function mod3 {
      // Fake keys for virtual<->real modifiers mapping:"
 	echo "$patch">/tmp/symbols_pc.patch
 	apply_patch /usr/share/X11/xkb/symbols/pc 2019c40a10ccb69d6b1d95c5762f8c3a09fce64b 63867d13946f00aa9017937ef0b4d3aad25caa52 /tmp/symbols_pc.patch
-	gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-down "['<Shift><Mod3>Down']"
-	gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-left "['<Shift><Mod3>Left']"
-	gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-up "['<Shift><Mod3>Up']"
-	gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-right "['<Shift><Mod3>Right']"
+	if [ $(get_distribution) == "LinuxMint" ]; then
+		gsettings_set_value org.cinnamon.desktop.wm.keybindings move-to-workspace-down "['<Shift><Mod3>Down']"
+		gsettings_set_value org.cinnamon.desktop.wm.keybindings move-to-workspace-left "['<Shift><Mod3>Left']"
+		gsettings_set_value org.cinnamon.desktop.wm.keybindings move-to-workspace-up "['<Shift><Mod3>Up']"
+		gsettings_set_value org.cinnamon.desktop.wm.keybindings move-to-workspace-right "['<Shift><Mod3>Right']"
 
-	gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-down "['<Mod3>Down']"
-	gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Mod3>Left']"
-	gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-up "['<Mod3>Up']"
-	gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Mod3>Right']"
+		gsettings_set_value org.cinnamon.desktop.wm.keybindings switch-to-workspace-down "['<Mod3>Down']"
+		gsettings_set_value org.cinnamon.desktop.wm.keybindings switch-to-workspace-left "['<Mod3>Left']"
+		gsettings_set_value org.cinnamon.desktop.wm.keybindings switch-to-workspace-up "['<Mod3>Up']"
+		gsettings_set_value org.cinnamon.desktop.wm.keybindings switch-to-workspace-right "['<Mod3>Right']"
+	elif [ $(get_distribution) == "Ubuntu" ]; then
+		gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-down "['<Shift><Mod3>Down']"
+		gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-left "['<Shift><Mod3>Left']"
+		gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-up "['<Shift><Mod3>Up']"
+		gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-right "['<Shift><Mod3>Right']"
+
+		gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-down "['<Mod3>Down']"
+		gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-left "['<Mod3>Left']"
+		gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-up "['<Mod3>Up']"
+		gsettings_set_value org.gnome.desktop.wm.keybindings switch-to-workspace-right "['<Mod3>Right']"
+	fi
 }
 
 function zulip {

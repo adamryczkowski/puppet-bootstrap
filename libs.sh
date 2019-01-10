@@ -39,6 +39,16 @@ function get_ubuntu_codename {
 	return 1
 }
 
+function get_distribution {
+	local tmp=$(lsb_release --id 2>/dev/null)
+	local pattern='^Distributor ID:\s*([^ ]+)$'
+	if [[ "$tmp" =~ $pattern ]]; then
+		echo ${BASH_REMATCH[1]}
+		return 0
+	fi
+	return 1
+}
+
 
 function simple_systemd_service {
 	local name=$1
