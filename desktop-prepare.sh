@@ -444,6 +444,12 @@ function mod3 {
 	fi
 }
 
+function firefox {
+#TODO
+#1. Automatic addon installation: https://askubuntu.com/a/712714
+#2. https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile for managing user profile
+}
+
 function zulip {
 	logexec sudo apt-key adv --keyserver pool.sks-keyservers.net --recv 69AD12704E71A4803DCA3A682424BE5AE9BD10D9
 	textfile /etc/apt/sources.list.d/zulip.list "deb https://dl.bintray.com/zulip/debian/ stable main"

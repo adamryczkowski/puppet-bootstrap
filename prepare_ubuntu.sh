@@ -45,6 +45,7 @@ where
  --git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
  --liquidprompt           - liquidprompt
  --byobu                  - byobu
+ --hexyl                  - hexyl (a hex editor)
  --autojump               - autojump (cd replacement)
 
 Example:
@@ -87,6 +88,7 @@ install_mc=0
 install_git_extra=0
 install_liquidprompt=0
 install_byobu=0
+install_hexyl=0
 install_autojump=0
 
 user_opts=""
@@ -156,6 +158,7 @@ case $key in
 	install_liquidprompt=1
 	user_opts="${user_opts} --liquidprompt"
 	install_byobu=1
+	install_hexyl=1
 	install_autojump=1
 	user_opts="${user_opts} --autojump"
 	;;
@@ -213,6 +216,9 @@ case $key in
 	;;
 	--byobu)
 	install_byobu=1
+	;;
+	--hexyl)
+	install_hexyl=1
 	;;
 	--autojump)
 	install_autojump=1
@@ -346,6 +352,10 @@ fi
 
 if [ "${install_byobu}" == "1" ]; then
 	install_apt_package byobu
+fi
+
+if [ "${install_hexyl}" == "1" ]; then
+	install_apt_package_file fd-musl_7.1.0_amd64.debhexyl_0.3.1_amd64.deb hexyl https://github.com/sharkdp/hexyl/releases/download/v0.3.1/hexyl_0.3.1_amd64.deb
 fi
 
 if [ "${install_autojump}" == "1" ]; then
