@@ -56,7 +56,7 @@ mypath=`dir_resolve $mypath`
 cd $mypath
 
 repo_path=/media/adam-minipc/other/debs
-release=xenial
+release=$(get_ubuntu_codename)
 user=$USER
 common_debug=0
 
@@ -138,7 +138,6 @@ function desktop {
 	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
 	gsettings_set_value com.canonical.Unity integrated-menus true
 	
-	release=$(get_ubuntu_codename)
 	if [ "$release" == "bionic" ]; then
 		install_apt_package gnome-tweak-tool
 		ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
@@ -182,11 +181,11 @@ function office2007 {
 	echo "#TODO"
 #	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/Release.key)
 #	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual winehq 'deb https://dl.winehq.org/wine-builds/ubuntu/ xenial main' https://dl.winehq.org/wine-builds/winehq.key WineHQ_Release.key
+	add_apt_source_manual winehq 'deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main' https://dl.winehq.org/wine-builds/winehq.key
 	
 #	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
 #	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual playonlinux 'deb http://deb.playonlinux.com/ xenial main' http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
+	add_apt_source_manual playonlinux 'deb http://deb.playonlinux.com/ ${release} main' http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
 	
 	do_update
 	install_apt_packages winehq-devel playonlinux
@@ -312,7 +311,7 @@ function cli {
 	logmkdir ${home}/tmp
 	get_git_repo https://github.com/adamryczkowski/update-all ${home}/tmp
 	#youtube-dl
-}
+}21
 
 function rdesktop {
 	reposerver="$(dirname ${repo_path})/r-mirror"
@@ -324,7 +323,7 @@ function virtualbox {
 	logexec sudo apt-key add "${release_key}"
 	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
 	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual winehq 'deb https://download.virtualbox.org/virtualbox/debian xenial contrib' 
+	add_apt_source_manual virtualbox 'deb https://download.virtualbox.org/virtualbox/debian ${release} contrib' 
 	add_ppa thebernmeister/ppa
 	install_apt_packages virtualbox-5.2 indicator-virtual-box
 	
