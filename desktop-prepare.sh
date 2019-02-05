@@ -181,11 +181,11 @@ function office2007 {
 	echo "#TODO"
 #	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/Release.key)
 #	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual winehq 'deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main' https://dl.winehq.org/wine-builds/winehq.key
+	add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key
 	
 #	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
 #	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual playonlinux 'deb http://deb.playonlinux.com/ ${release} main' http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
+	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
 	
 	do_update
 	install_apt_packages winehq-devel playonlinux
@@ -323,7 +323,7 @@ function virtualbox {
 	logexec sudo apt-key add "${release_key}"
 	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
 	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual virtualbox 'deb https://download.virtualbox.org/virtualbox/debian ${release} contrib' 
+	add_apt_source_manual virtualbox "deb https://download.virtualbox.org/virtualbox/debian ${release} contrib"
 	add_ppa thebernmeister/ppa
 	install_apt_packages virtualbox-5.2 indicator-virtual-box
 	
