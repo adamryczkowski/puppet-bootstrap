@@ -311,7 +311,7 @@ function cli {
 	logmkdir ${home}/tmp
 	get_git_repo https://github.com/adamryczkowski/update-all ${home}/tmp
 	#youtube-dl
-}21
+}
 
 function rdesktop {
 	reposerver="$(dirname ${repo_path})/r-mirror"
