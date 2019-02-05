@@ -447,6 +447,7 @@ function firefox {
 #TODO
 #1. Automatic addon installation: https://askubuntu.com/a/712714
 #2. https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile for managing user profile
+	echo "Not supported (yet)"
 }
 
 function zulip {
