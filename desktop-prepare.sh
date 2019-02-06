@@ -291,7 +291,7 @@ function cuda {
 }
 
 function bumblebee {
-	return 1 #not ready
+#	return 1 #not ready
 	add_ppa graphics-drivers/ppa
 	add_ppa bumblebee/testing
 	
