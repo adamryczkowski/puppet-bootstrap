@@ -146,6 +146,8 @@ function desktop {
 		gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
 		gsettings_set_value org.gnome.mutter dynamic-workspaces false
 		gsettings_set_value org.gnome.shell.extensions.dash-to-dock dock-fixed false
+		
+		add_ppa unity7maintainers/unity7-desktop
 	fi
 	gsettings_set_value org.gnome.desktop.wm.preferences num-workspaces 9
 	install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
@@ -279,14 +281,19 @@ function nvidia {
 	fi
 }
 
+function cuda {
+	install_apt_package_file "cuda-repo-ubuntu1604_9.1.85-1_amd64.deb" "cuda-repo-ubuntu1604" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
+	if [ "$?" == "0" ]; then
+		logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(get_ubuntu_version)/x86_64/7fa2af80.pub
+	fi
+	install_apt_package cuda
+	
+}
+
 function bumblebee {
 	return 1 #not ready
 	add_ppa graphics-drivers/ppa
 	add_ppa bumblebee/testing
-	install_apt_package_file "cuda-repo-ubuntu1604_9.1.85-1_amd64.deb" "cuda-repo-ubuntu1604" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
-	if [ "$?" == "0" ]; then
-		logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
-	fi
 	
 	do_update
 	
@@ -299,6 +306,7 @@ function bumblebee {
 		errcho "Unexpected error"
 		exit 1
 	fi
+	install_apt_packages bumblebee bumblebee-nvidia tlp powertop
 	#TODO: https://gist.github.com/whizzzkid/37c0d365f1c7aa555885d102ec61c048
 }
 
