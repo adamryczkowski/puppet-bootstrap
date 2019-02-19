@@ -1,0 +1,109 @@
+#!/bin/bash
+
+function regex1 { gawk 'match($0,/'$1'/, ary) {print ary['${2:-'1'}']}'; }
+
+function get_home_dir {
+	if [ -n "$1" ]; then
+		local USER=$1
+	fi
+	echo $( getent passwd "$USER" | cut -d: -f6 )
+}
+
+function install_apt_packages {
+	local ans=0
+	local to_install=""
+	local packages="$@"
+	for package in ${packages[@]}; do
+		if ! dpkg -s "$package">/dev/null  2> /dev/null; then
+			to_install="${to_install} ${package}"
+		fi
+	done
+	if [[ "${to_install}" != "" ]]; then
+		sudo apt-get --yes --force-yes -q  install $to_install
+		return 0
+	fi
+	return 1
+}
+
+paths_to_try=$(mount | regex1 '\son\s(.*)\stype\sbtrfs\s\(.*\)')
+
+declare -a paths
+declare -a devices
+declare -a items
+
+
+mount | while read line ; do
+	path=$(echo "$line" | regex1 '\son\s(.*)\stype\sbtrfs\s\(.*\)')
+	if [ -f "${path}/.backup_disk" ]; then
+		device=$(echo "$line" | regex1 '(.*)\son\s.*\stype\sbtrfs\s\(.*\)')
+		paths+=("${path}")
+		devices+=("${device}")
+		items+=("${path}" "${device}")
+	fi 
+done
+
+paths_count=${#paths[@]}
+
+if (( paths_count > 1 )); then
+	items+=("" "None of the above")
+	path=$(zenity --list --title="Choose backup disk" --column="Disk" --column "Device" echo ${items[*]} )
+	if [[ "${path}" == "" ]]; then
+		exit 0;
+	fi
+elif (( paths_count == 0 )); then
+	zenity --warning --text "No disk with backups found!"
+	exit 1
+fi
+
+home=$(get_home_dir)
+
+export UNISON=${home}/.unison
+
+mkdir -p ${home}/.unison
+
+source ~/.config/user-dirs.dirs
+
+
+export UNISON=$(readlink -f "${XDG_DOCUMENTS_DIR}/../Unison")
+
+install_apt_packages unison unison-gtk
+
+if unison-gtk -version >/dev/null 2>/dev/null; then
+	unis="unison-gtk"
+else
+	unis="unison"
+fi
+
+if [ "$1" == "nogtk" ]; then
+	unis="unison"
+	shift
+fi
+
+
+unison unison $@
+case $? in
+    0)
+    	echo "successful sync."
+        ;; 
+    1)
+    	echo "all file transfers were successful; some files were skipped."
+        ;; 
+    2)
+    	echo "non-fatal failures during file transfer."
+        ;;
+    3)
+    	echo "fatal error occurred; execution was interrupted."
+        ;; 
+    *)
+    	echo "unknown exit code."
+        ;;  
+esac
+
+
+$unis docs $@
+$unis sett $@
+
+sudo ${path}/SnapBtr.py --path ${path}/historia --target-freespace 100G --keep-backups 20 --verbose --snap ${path}/dokumenty
+
+#unison "$HOSTNAME-niezbednik" $@
+
