@@ -287,9 +287,12 @@ function laptop {
 
 function nvidia {
 	add_ppa graphics-drivers/ppa
-	install_apt_package_file "cuda-repo-ubuntu1604_9.1.85-1_amd64.deb" "cuda-repo-ubuntu1604" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
+	
+	release=$(get_ubuntu_version)
+	
+	install_apt_package_file "cuda-repo-ubuntu${release}_9.1.85-1_amd64.deb" "cuda-repo-ubuntu${release}" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu${release}/x86_64/cuda-repo-ubuntu${release}_9.1.85-1_amd64.deb
 	if [ "$?" == "0" ]; then
-		logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+		logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu${release}/x86_64/7fa2af80.pub
 	fi
 	
 	do_update
@@ -306,7 +309,7 @@ function nvidia {
 }
 
 function cuda {
-	install_apt_package_file "cuda-repo-ubuntu1604_9.1.85-1_amd64.deb" "cuda-repo-ubuntu1604" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
+	install_apt_package_file "cuda-repo-ubuntu${release}_9.1.85-1_amd64.deb" "cuda-repo-ubuntu${release}" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu${release}/x86_64/cuda-repo-ubuntu${release}_9.1.85-1_amd64.deb
 	if [ "$?" == "0" ]; then
 		logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(get_ubuntu_version)/x86_64/7fa2af80.pub
 	fi
@@ -500,7 +503,7 @@ function owncloud {
 		release_key=$(get_cached_file owncloud_1604_Release.key https://download.owncloud.org/download/repositories/production/Ubuntu_16.04/Release.key)
 		logexec sudo apt-key add "${release_key}"
 		contents='deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_16.04/ /'
-		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_16.04/Release.key ownCloud_16.04_Release.key
+#		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_16.04/Release.key ownCloud_16.04_Release.key
 	elif [[ "$ver" == "1804" ]]; then
 		release_key=$(get_cached_file owncloud_1804_Release.key https://download.owncloud.org/download/repositories/production/Ubuntu_18.04/Release.key)
 		logexec sudo apt-key add "${release_key}"
