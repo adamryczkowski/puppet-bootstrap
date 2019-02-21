@@ -1,0 +1,7 @@
+path = Unison
+ignore = Regex Unison/[a-zA-Z0-9_-]*/[a-z0-9]{8}$
+ignore = Regex Unison/[a-z0-9]{8}$
+ignore = Regex Unison/[a-z0-9]{34}$
+ignore = Regex unison\.log
+ignore = Path roots
+ignore = Name unison.log
