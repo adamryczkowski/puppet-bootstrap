@@ -114,6 +114,7 @@ if [ -z $local_doc_root ]; then
 fi
 
 # 1. Install unison & unison-gtk
+homedir=$(get_home_dir $user)
 
 install_apt_packages unison unison-gtk
 
