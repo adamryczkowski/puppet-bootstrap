@@ -204,8 +204,8 @@ function blender {
 function office2007 {
 	
 	echo "#TODO"
-#	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/Release.key)
-#	logexec sudo apt-key add "${release_key}"
+	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/winehq.key)
+	logexec sudo apt-key add "${release_key}"
    release=$(get_ubuntu_codename)
 	add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key
 	
@@ -417,7 +417,7 @@ function kodi {
 }
 
 function nemo {
-	add_ppa webupd8team/nemo3
+#	add_ppa webupd8team/nemo3
 	do_update
 	install_apt_package nemo nemo
 
@@ -497,9 +497,14 @@ function zulip {
 function owncloud {
 	ver=$(get_ubuntu_version)
 	if [[ "$ver" == "1604" ]]; then
+		release_key=$(get_cached_file owncloud_1604_Release.key https://download.owncloud.org/download/repositories/production/Ubuntu_16.04/Release.key)
+		logexec sudo apt-key add "${release_key}"
 		contents='deb http://download.opensuse.org/repositories/isv:/ownCloud:/desktop/Ubuntu_16.04/ /'
 		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.opensuse.org/repositories/isv:ownCloud:desktop/Ubuntu_16.04/Release.key ownCloud_16.04_Release.key
 	elif [[ "$ver" == "1804" ]]; then
+		release_key=$(get_cached_file owncloud_1804_Release.key https://download.owncloud.org/download/repositories/production/Ubuntu_18.04/Release.key)
+		logexec sudo apt-key add "${release_key}"
+		
 		contents='deb http://download.owncloud.org/download/repositories/10.0/Ubuntu_18.04/ /'
 		add_apt_source_manual isv:ownCloud:desktop "$contents" https://download.owncloud.org/download/repositories/10.0/Ubuntu_16.04/Release.key ownCloud_18.04_Release.key
 	else
