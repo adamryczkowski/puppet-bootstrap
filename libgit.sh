@@ -1,5 +1,28 @@
 #!/bin/bash
 
+function get_latest_github_release_name { #source: https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
+	curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+		grep '"tag_name":' |                                            # Get tag line
+		sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+}
+
+#Gets the file from latest release of github, or specific release
+# example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
+function get_latest_github_release {
+	local github_name="$1"
+	local remote_filename="$2"
+	remote_filename=$(basename -- "$remote_filename") #We need only file name, no folders
+	local release="$3"
+	if [ -z "$release" ]; then
+		release=$(get_latest_github_release_name $github_name)
+	fi
+	local extension="${remote_filename##*.}"
+	local noextension="${remote_filename%.*}"
+	
+	file=$(get_cached_file "${noextension}-${release}.${extension}" "https://github.com/${github_name}/releases/download/${release}/${remote_filename}")
+	echo "$file"	
+}
+
 function make_sure_git_exists {
 	local repo_path="$1"
 	local user="$2"

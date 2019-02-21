@@ -115,7 +115,6 @@ function set_gsettings_array {
 	if [ "$old_value_str" == "$value_arr_str" ]; then
 		return 0 #nothing to do
 	fi
-	eval "local -a value_array=$3"
 	(>&2 echo "Number of elements of value_array: ${#value_array[@]}")
 	local ans="['"
 	for value in "${value_array[@]}"; do
@@ -128,6 +127,33 @@ function set_gsettings_array {
 	done
 	ans="${ans}']"
 	gsettings set ${schema} ${name} "${ans}"
+}
+
+function set_gsettings_array2 {
+	get_ui_context
+	local schema=$1
+	local name=$2
+	local value_arr_str="$3"
+	local i=1
+	local old_value_str="$(load_gsettings_array ${schema} ${name})"
+	if [ "$old_value_str" == "$value_arr_str" ]; then
+		return 0 #nothing to do
+	fi
+	eval "local -a value_array=\"$3\""
+	(>&2 echo "Number of elements of value_array: ${#value_array[@]}")
+	echo "value_array: ${value_array[@]}"
+	local ans="["
+	for value in "${value_array[@]}"; do
+		if [ "$i" == "1" ]; then
+			ans="${ans}${value}"
+		else
+			ans="${ans}', '${value}"
+		fi 
+		((i++))
+	done
+	ans="${ans}]"
+	echo "gsettings set ${schema} ${name} ${ans[*]}"
+	gsettings set ${schema} ${name} "${ans[*]}"
 }
 
 function gsettings_add_to_array {

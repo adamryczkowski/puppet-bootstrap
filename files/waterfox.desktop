@@ -1,0 +1,25 @@
+[Desktop Entry]
+Version=1.0
+Name=Waterfox Web Browser
+Comment=Browse the World Wide Web
+GenericName=Web Browser
+Keywords=Internet;WWW;Browser;Web;Explorer
+Exec=/opt/waterfox/waterfox %u
+Terminal=false
+X-MultipleArgs=false
+Type=Application
+Icon=/opt/waterfox/browser/icons/mozicon128.png
+Categories=GNOME;GTK;Network;WebBrowser;
+MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
+StartupNotify=true
+Actions=new-window;new-private-window;
+
+Name[en_US]=Waterfox
+
+[Desktop Action new-window]
+Name=Open a New Window
+Exec=/opt/waterfox/waterfox -new-window
+
+[Desktop Action new-private-window]
+Name=Open a New Private Window
+Exec=/opt/waterfox/waterfox -private-window

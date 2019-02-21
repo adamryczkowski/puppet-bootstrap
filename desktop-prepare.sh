@@ -43,7 +43,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass
 "
 
 dir_resolve()
@@ -137,6 +137,9 @@ function desktop {
 	gsettings_set_value org.gnome.desktop.screensaver lock-enabled false
 	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
 	gsettings_set_value com.canonical.Unity integrated-menus true
+	gsettings_set_value org.gnome.desktop.input-sources show-all-sources true
+#	set_gsettings_array org.gnome.desktop.input-sources sources "[('xkb', 'pl+intl')]"
+	gsettings set org.gnome.desktop.input-sources sources "[('xkb,', 'pl+intl')]"
 	
 	if [ "$release" == "bionic" ]; then
 		install_apt_package gnome-tweak-tool
@@ -149,10 +152,15 @@ function desktop {
 		
 		add_ppa unity7maintainers/unity7-desktop
 	fi
+	
+	if dpkg -s ubuntu-unity-desktop >/dev/null 2>/dev/null; then
+		install_apt_packages unity tweak
+	fi
+	
 	gsettings_set_value org.gnome.desktop.wm.preferences num-workspaces 9
 	install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
 	
-	install_apt_packages redshift-gtk
+	install_apt_packages redshift-gtk dconf-editor ibus-table-translit
 	redshift-gtk &
 }
 
@@ -194,9 +202,9 @@ function office2007 {
 	
 	add_group wine_office
 	add_usergroup "$user" wine_office
-	uncompress_cached_file office2007_pl.tar.xz "/opt/" "${user}:wine_office"
+	uncompress_cached_file office2007_pl.tar.xz "/opt/" 
 	local office_install="/opt/Office2007"
-	chown_dir ${office_install} "$user" wine_office
+	chown_dir ${office_install} "${user}:wine_office" wine_office
 	#Make sure all office is writable by anyone with execute permission preserverd
 	chmod_dir ${office_install} 777 666 777
 	
@@ -452,10 +460,14 @@ function mod3 {
 }
 
 function firefox {
-#TODO
-#1. Automatic addon installation: https://askubuntu.com/a/712714
-#2. https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options#User_Profile for managing user profile
-	echo "Not supported (yet)"
+	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
+	file=$(get_cached_file "waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2" "https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2")
+	
+	uncompress_cached_file waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2 "/opt/"
+	
+	chown_dir "/opt/waterfix" root root
+
+	install_script waterfox.desktop /usr/share/applications/waterfox.desktop
 }
 
 function zulip {
@@ -562,7 +574,18 @@ function gedit {
 	gsettings_set_value org.gnome.gedit.preferences.editor highlight-current-line true
 	gsettings_set_value org.gnome.gedit.preferences.editor background-pattern 'grid'
 	gsettings_set_value org.gnome.gedit.preferences.editor display-line-numbers true
+	gsettings_set_value org.gnome.gedit.preferences.editor tabs-size 3
+	gsettings_set_value org.gnome.gedit.preferences.editor auto-indent true
 }
+
+function keepass {
+	add_ppa jtaylor/keepass
+	install_apt_package keepass2 keepass2
+	file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
+	cp_file "$file" /usr/lib/keepass2/Plugins/KeePassRPC.plgx root
+}
+
+
 
 oldifs=${IFS}
 export IFS=","

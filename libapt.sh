@@ -102,6 +102,7 @@ function do_upgrade {
 	return 0
 }
 
+# example: add_ppa jtaylor/keepass
 function add_ppa {
 	local the_ppa=$1
 	
