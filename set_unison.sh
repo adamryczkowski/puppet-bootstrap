@@ -121,15 +121,18 @@ install_apt_packages unison unison-gtk
 
 # 2. Make sure local docs exist
 logmkdir "${local_doc_root}/${unison_settings_relpath}/do" $user
+logmkdir "${local_doc_root}/${unison_settings_relpath}/roots" $user
 
 # 3. Make sure Unison roots contain minimum files
 textfile ${homedir}/.unison/roots.prf "root = ${local_doc_root}
 root = ssh://${server}/${server_doc_root}" $user
+make_symlink ${homedir}/.unison/roots.prf ${local_doc_root}/${unison_settings_relpath}/roots/roots.prf
+
 	
 # 4. Upload standard unison bootstrap files
 install_file ${DIR}/files/unison/unison.prf "${local_doc_root}/${unison_settings_relpath}" $user
 install_file ${DIR}/files/unison/do/do-unison.prf "${local_doc_root}/${unison_settings_relpath}/do" $user
-	
+
 # 5. Upload synchronization script
 install_script files/sync-local "/usr/local/bin" root
 #TODO: dokończ skrypt sync-local. 
