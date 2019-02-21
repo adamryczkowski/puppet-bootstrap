@@ -1,7 +1,8 @@
 #!/bin/bash
 #  ## dependency: prepare_ubuntu_user.sh
 
-cd `dirname $0`
+local_dir=$(dirname $0)
+cd $local_dir
 . ./common.sh
 
 usage="
@@ -126,8 +127,8 @@ textfile ${homedir}/.unison/roots.prf "root = ${local_doc_root}
 root = ssh://${server}/${server_doc_root}" $user
 	
 # 4. Upload standard unison bootstrap files
-install_file files/unison/unison.prf "${local_doc_root}/${unison_settings_relpath}" $user
-install_file files/unison/do/do-unison.prf "${local_doc_root}/${unison_settings_relpath}/do" $user
+install_file ${DIR}/files/unison/unison.prf "${local_doc_root}/${unison_settings_relpath}" $user
+install_file ${DIR}/files/unison/do/do-unison.prf "${local_doc_root}/${unison_settings_relpath}/do" $user
 	
 # 5. Upload synchronization script
 install_script files/sync-local "/usr/local/bin" root
