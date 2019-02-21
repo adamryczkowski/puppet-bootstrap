@@ -43,7 +43,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox
 "
 
 dir_resolve()
@@ -124,6 +124,21 @@ function tweak_base  {
 	install_script files/discover_session_bus_address.sh
 	install_apt_packages git gdebi-core
 	mount_smb_share "$repo_path"
+}
+
+function unity {
+	if [ "$release" == "bionic" ]; then
+		ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
+		install_gnome_extension ${ext_path}
+		
+		gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
+		gsettings_set_value org.gnome.mutter dynamic-workspaces false
+		gsettings_set_value org.gnome.shell.extensions.dash-to-dock dock-fixed false
+		
+		add_ppa unity7maintainers/unity7-desktop
+		install_apt_package gnome-tweak-tool
+	fi
+	install_apt_package ubuntu-unity-desktop
 }
 
 function desktop {
