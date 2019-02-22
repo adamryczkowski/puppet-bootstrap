@@ -486,7 +486,7 @@ function firefox {
 	
 	chown_dir "/opt/waterfix" root root
 
-	install_script waterfox.desktop /usr/share/applications/waterfox.desktop
+	install_script ${DIR}/files/waterfox.desktop /usr/share/applications/waterfox.desktop
 }
 
 function zulip {

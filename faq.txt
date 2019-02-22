@@ -1,0 +1,8 @@
+Q: ERROR: ld.so: object 'libgtk3-nocsd.so.0' from LD_PRELOAD cannot be preloaded (cannot open shared object file): ignored.
+A: https://github.com/lutris/lutris/issues/905
+
+Q: Bridge in netplan (default on Ubuntu 18.04)
+A: https://netplan.io/examples
+
+Q: DNS not working in 18.04
+A: sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
