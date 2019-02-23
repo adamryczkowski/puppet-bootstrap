@@ -539,7 +539,7 @@ else
 fi
 
 if [ ! -f "$private_key_path" ]; then
-	if ! lxc exec ${name} ls ~/.ssh/id_ed25519; then
+	if ! lxc exec ${name} -- ls ~/.ssh/id_ed25519; then
 		logexec lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
 	fi
 else
@@ -575,7 +575,7 @@ fi
 if [ -n "${guestfolder}" ]; then
 	sharename=$(basename ${hostfolder})
 	if [ ! $(lxc config device list ${name} | grep -q ${sharename}) ]; then
-		if ! lxc exec ${name} ls ${guestfolder} >/dev/null; then
+		if ! lxc exec ${name} -- ls ${guestfolder} >/dev/null; then
 			logexec lxc exec ${name} -- mkdir -p ${guestfolder}
 		fi
 		logexec lxc config device add ${name} ${sharename} disk source=${hostfolder} path=${guestfolder}

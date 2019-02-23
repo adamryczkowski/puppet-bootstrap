@@ -308,7 +308,7 @@ case $exec_mode in
 	remote_dir=$(lxc exec ${exec_lxcname} -- mktemp -d)
 	exec_prefix="lxc exec ${exec_lxcname} -- "
 	for plik in ${dependencies[@]}; do
-		lxc exec ${exec_lxcname} mkdir -p "$(dirname ${exec_lxcname}/${plik})"
+		lxc exec ${exec_lxcname} -- mkdir -p "$(dirname ${exec_lxcname}/${plik})"
 		lxc file push ${plik} ${exec_lxcname}/${remote_dir}/${plik}
 	done
 	if [ "root" != "${exec_user}" ]; then
@@ -345,7 +345,7 @@ function appendlog ()
 			;;
 			3)
 			#lxc
-			lxc exec ${exec_lxcname} cat $remote_dir/log.log >>$log
+			lxc exec ${exec_lxcname} -- cat $remote_dir/log.log >>$log
 			if [ ! "$repo_path" == "" ]; then
 				lxc config device remove ${exec_lxcname} tmprepo disk
 			fi
