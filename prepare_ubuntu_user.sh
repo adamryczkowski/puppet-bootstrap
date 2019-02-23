@@ -137,42 +137,42 @@ if [ -n "$debug" ]; then
 fi
 
 if [ -n "$user" ]; then
-        if ! grep -q "${user}:" /etc/passwd; then
-                logexec sudo adduser --quiet $user --disabled-password --add_extra_groups --gecos ''
-        fi
+	if ! grep -q "${user}:" /etc/passwd; then
+		logexec sudo adduser --quiet $user --disabled-password --add_extra_groups --gecos ''
+	fi
 	sshhome=$(getent passwd $user | awk -F: '{ print $6 }')
         
-        if ! groups $user | grep -q "sudo" ; then      
-                logexec sudo usermod -a -G sudo $user
-        fi
-        if [ ! -d ${sshhome}/.ssh ]; then
-                logexec sudo mkdir ${sshhome}/.ssh
-                if [[ "$user" != "root" ]]; then
-        		logexec sudo chown ${user}:${user} "$sshhome/.ssh"
+	if ! groups $user | grep -q "sudo" ; then      
+		logexec sudo usermod -a -G sudo $user
+	fi
+	if [ ! -d ${sshhome}/.ssh ]; then
+		logexec sudo mkdir ${sshhome}/.ssh
+		if [[ "$user" != "root" ]]; then
+			logexec sudo chown ${user}:${user} "$sshhome/.ssh"
 		fi
-        fi
-        if [ -n "$external_key" ]; then
-                if ! sudo [ -f ${sshhome}/.ssh/authorized_keys ]; then
-                        loglog
-                        echo "${external_key}" | sudo tee ${sshhome}/.ssh/authorized_keys
-                        logexec sudo chmod 0600 ${sshhome}/.ssh/authorized_keys
-                        logexec sudo chmod 0700 ${sshhome}/.ssh
-                        if [[ "$user" != "root" ]]; then
-                                logexec sudo chown ${user}:${user} -R ${sshhome}/.ssh 
-		        fi
-                else
-                        if ! sudo grep -q "${external_key}" ${sshhome}/.ssh/authorized_keys; then
-                                loglog
-                                echo "${external_key}" >>${sshhome}/.ssh/authorized_keys
-                        fi
-                fi
-        fi
+	fi
+	if [ -n "$external_key" ]; then
+		if ! sudo [ -f ${sshhome}/.ssh/authorized_keys ]; then
+			loglog
+			echo "${external_key}" | sudo tee ${sshhome}/.ssh/authorized_keys
+			logexec sudo chmod 0600 ${sshhome}/.ssh/authorized_keys
+			logexec sudo chmod 0700 ${sshhome}/.ssh
+			if [[ "$user" != "root" ]]; then
+				logexec sudo chown ${user}:${user} -R ${sshhome}/.ssh 
+			fi
+		else
+			if ! sudo grep -q "${external_key}" ${sshhome}/.ssh/authorized_keys; then
+				loglog
+				echo "${external_key}" >>${sshhome}/.ssh/authorized_keys
+			fi
+		fi
+	fi
 
         
-        if ! sudo [ -f /etc/sudoers.d/${user}_nopasswd ]; then
-                loglog
-                echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/${user}_nopasswd
-        fi
+	if ! sudo [ -f /etc/sudoers.d/${user}_nopasswd ]; then
+		loglog
+		echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/${user}_nopasswd
+	fi
         
 	if sudo [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
 		if [ -f "$sshhome/.ssh/id_ed25519" ]; then
@@ -183,9 +183,9 @@ if [ -n "$user" ]; then
 		if [ $? -ne 0 ]; then
 			exit 1
 		fi
-				if [[ "$user" != "root" ]]; then
-				logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519"
-				logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519.pub"
+		if [[ "$user" != "root" ]]; then
+			logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519"
+			logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519.pub"
 		fi
 	fi
 	
