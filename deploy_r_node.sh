@@ -122,7 +122,7 @@ if [ -z "$ip" ]; then
 fi
 
 if [ "${user}" == "auto" ]; then
-	user=$(lxc exec ls -1 /home | head -n 1)
+	user=$(lxc exec --mode=non-interactive -- ls -1 /home | head -n 1)
 fi
 
 if [ -n "${repo_server}" ]; then

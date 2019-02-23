@@ -205,7 +205,7 @@ fi
 ./make-lxd-node.sh ${container_name} ${opts} ${repo_path_opts} ${makelxd_opts} ${release_opts}
 
 #get the IP of the running container
-container_ip=$(lxc exec $container_name -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+container_ip=$(lxc exec $container_name --mode=non-interactive -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 
 # Then we install the VPN network (optionally)
 
@@ -224,7 +224,7 @@ opts=""
 #	opts="${opts}--compile-using ${compile_using}"
 #fi
 #if [ "$compile_using" == "cuda-9" ]; then
-#	lxc exec ${container_name} /bin/mkdir -p /opt/sources
+#	lxc exec ${container_name} --mode=non-interactive -- /bin/mkdir -p /opt/sources
 #	lxc file push ~/tmp/debs/cmake-3.9* ${container_name}/opt/sources/cmake.tar.gz
 #	if [ "$release" == "xenial" ]; then
 #		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1604*" ]; then
@@ -249,9 +249,9 @@ opts=""
 
 if [ -n "$host_path" ]; then
 	if ! lxc config device show ${container_name} | grep -q repo_${container_name}; then
-		if ! lxc exec ${container_name} -- ls ${guest_path}; then
-			logexec lxc exec ${container_name} -- mkdir -p ${guest_path}
-			logexec lxc exec ${container_name} -- chown ${USER} ${guest_path}
+		if ! lxc exec ${container_name} --mode=non-interactive -- ls ${guest_path}; then
+			logexec lxc exec ${container_name} --mode=non-interactive -- mkdir -p ${guest_path}
+			logexec lxc exec ${container_name} --mode=non-interactive -- chown ${USER} ${guest_path}
 		fi
 		logexec lxc config device add ${container_name} repo_${container_name} disk source="${host_path}" path=${guest_path}
 	fi
