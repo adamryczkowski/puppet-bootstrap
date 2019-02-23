@@ -513,7 +513,7 @@ function owncloud {
 	else
 		errcho "Unsupported UBUNTU!!"
 	fi
-	install_apt_package owncloud-client
+	install_apt_package owncloud-client libgnome-keyring0
 }
 
 function smb {

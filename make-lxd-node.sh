@@ -25,6 +25,7 @@ $(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <
 						[--map-host-user <username>]
 						[--authorized-key <public key>]
 						[--update-all 0|1]
+						[--bare]
 						[--forward-port tcp|udp:<ip_address>:<host_port>;<lxc_port>]
 						[--map-host-folder <host-path> <remote-path>]
 						[--help] [--debug] [--log <output file>]
@@ -60,6 +61,7 @@ where
  --storage                - Name of the storage to use for this container. Defaults to 'default'
  --repo-path              - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
  --update-all             - If set, it will install the update-all script as well (defaults to yes)
+ --bare                   - If set, it will skip installing anything except of ssh keys and locale
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
 
@@ -98,6 +100,7 @@ common_debug=0
 sshuser=`whoami`
 lxcuser=`whoami`
 update_all=1
+bare=0
 use_repo=""
 declare -a forward_ports
 authorized_keys=()
@@ -121,6 +124,9 @@ case $key in
 	-u|--username)
 	lxcuser="$1"
 	shift
+	;;
+	--bare)
+	bare=1
 	;;
 	--forward-port)
 	forward_ports+=("$1")
@@ -526,9 +532,11 @@ if [ -n "$actual_ip" ]; then
 	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
 fi
 
-
-
-./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --bat --ping --fzf --htop --find --ag --mc --liquidprompt --byobu --autojump --wormhole $aptproxy --need-apt-update
+if [[ $bare == 0 ]]; then
+	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --bat --ping --fzf --htop --find --ag --mc --liquidprompt --byobu --autojump --wormhole $aptproxy --need-apt-update
+else
+	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --need-apt-update
+fi
 
 if [ ! -f "$private_key_path" ]; then
 	if ! lxc exec ${name} ls ~/.ssh/id_ed25519; then
