@@ -553,7 +553,9 @@ password=Zero tolerancji"
 }
 
 function gedit {
-	if [ ! -f "~/.local/share/gedit/plugins/pair_char_completion.py" ]; then
+	localhome=$(get_home_dir $user)
+	
+	if [ ! -f "${localhome}/.local/share/gedit/plugins/pair_char_completion.py" ]; then
 		plik=$(get_cached_file gedit-pair-char-completion-1.0.6-gnome3.tar.gz https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/gedit-pair-char-autocomplete/gedit-pair-char-completion-1.0.6-gnome3.tar.gz)
 		tmpdir=$(mktemp -d)
 		uncompress_cached_file $plik $tmpdir
@@ -563,7 +565,7 @@ function gedit {
 		gsettings_add_to_array org.gnome.gedit.plugins active-plugins pair_char_completion
 	fi
 	
-	if [ ! -f "~/.local/share/gedit/plugins/ex-mortis.plugin" ]; then
+	if [ ! -f "${localhome}/.local/share/gedit/plugins/ex-mortis.plugin" ]; then
 		plik=$(get_cached_file gedit-ex-mortis.tar.gz https://github.com/jefferyto/gedit-ex-mortis/archive/master.tar.gz)
 		tmpdir=$(mktemp -d)
 		uncompress_cached_file $plik $tmpdir
@@ -578,7 +580,7 @@ function gedit {
 		gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
 	fi
 	
-	if [ ! -f "~/.local/share/gedit/plugins/controlyourtabs.plugin" ]; then
+	if [ ! -f "${localhome}/.local/share/gedit/plugins/controlyourtabs.plugin" ]; then
 		plik=$(get_cached_file gedit-control-your-tabs.tar.gz https://github.com/jefferyto/gedit-control-your-tabs/archive/master.tar.gz)
 		tmpdir=$(mktemp -d)
 		uncompress_cached_file $plik $tmpdir
@@ -600,6 +602,10 @@ function gedit {
 	gsettings_set_value org.gnome.gedit.preferences.editor display-line-numbers true
 	gsettings_set_value org.gnome.gedit.preferences.editor tabs-size 3
 	gsettings_set_value org.gnome.gedit.preferences.editor auto-indent true
+	
+	logmkdir "${localhome}/.local/share/gedit/styles"
+	dracula=$(get_cached_file dracula.xml https://raw.githubusercontent.com/dracula/gedit/master/dracula.xml)
+	install_file "$dracula" "${localhome}/.local/share/gedit/styles/dracula.xml" $user
 }
 
 function keepass {
