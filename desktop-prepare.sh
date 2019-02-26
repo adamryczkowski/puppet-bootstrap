@@ -164,6 +164,8 @@ function desktop {
 		gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
 		gsettings_set_value org.gnome.mutter dynamic-workspaces false
 		gsettings_set_value org.gnome.shell.extensions.dash-to-dock dock-fixed false
+		gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/core/ hsize 3
+		gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/core/ vsize 3
 		
 		add_ppa unity7maintainers/unity7-desktop
 	fi
