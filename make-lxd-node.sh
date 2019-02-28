@@ -421,24 +421,24 @@ echo "Waiting for the container to obtain ip address..."
 
 while [ -z "${actual_ip}" ]
 do
-actual_ip=$(lxc exec $name --mode=non-interactive -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+actual_ip=$(lxc exec $name -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 sleep 1
 done
 echo "Got IP address ${actual_ip}"
 
 
 #Upewniamy się, że kontener ma prawidłwy hostname...
-if ! lxc exec ${name} --mode=non-interactive -- grep -q ${lxcname} /etc/hostname ; then
+if ! lxc exec ${name} -- grep -q ${lxcname} /etc/hostname ; then
 	$loglog 
-	echo ${lxcname} | lxc exec $name --mode=non-interactive -- tee /etc/hostname >/dev/null
+	echo ${lxcname} | lxc exec $name -- tee /etc/hostname >/dev/null
 fi
 
 #...i prawidłowy wpis w /etc/hosts...
-if lxc exec $name --mode=non-interactive -- grep -q "^127\.0\.1\.1" /etc/hosts; then
-	logexec lxc exec $name --mode=non-interactive -- sed -i "s/^\(127\.0\.1\.1\s*\).*/\1$hostsline/" /etc/hosts
+if lxc exec $name -- grep -q "^127\.0\.1\.1" /etc/hosts; then
+	logexec lxc exec $name -- sed -i "s/^\(127\.0\.1\.1\s*\).*/\1$hostsline/" /etc/hosts
 else
 	$loglog 
-	echo "127.0.1.1	$hostsline" | lxc exec $name --mode=non-interactive -- tee -a /etc/hosts >/dev/null
+	echo "127.0.1.1	$hostsline" | lxc exec $name -- tee -a /etc/hosts >/dev/null
 fi
 
 
@@ -487,26 +487,26 @@ fi
 
 # Creating user $lxcuser in the container
 if [ "$lxcuser" != "ubuntu" ]; then
-	logexec lxc exec $name --mode=non-interactive -- adduser --quiet $lxcuser --disabled-password --gecos ""
-	logexec lxc exec $name --mode=non-interactive-- su -l $lxcuser -c "mkdir ~/.ssh"
-	logexec lxc exec $name --mode=non-interactive -- chmod 700 /home/$lxcuser/.ssh
+	logexec lxc exec $name -- adduser --quiet $lxcuser --disabled-password --gecos ""
+	logexec lxc exec $name -- su -l $lxcuser -c "mkdir ~/.ssh"
+	logexec lxc exec $name -- chmod 700 /home/$lxcuser/.ssh
 fi
 
-logexec lxc exec ${name} --mode=non-interactive -- usermod -aG sudo  $lxcuser
+logexec lxc exec ${name} -- usermod -aG sudo  $lxcuser
 
 if [ -f "$sshkey" ]; then
 	mypubkey=$(cat $sshhome/.ssh/id_ed25519.pub)
 	authorized_keys+=("$mypubkey")
-	if ! lxc exec $name --mode=non-interactive -- grep -q -F "$mypubkey" $sshhome/.ssh/authorized_keys 2>/dev/null; then
+	if ! lxc exec $name -- grep -q -F "$mypubkey" $sshhome/.ssh/authorized_keys 2>/dev/null; then
 		$loglog
-		cat $sshhome/.ssh/id_ed25519.pub | lxc exec $name --mode=non-interactive -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
+		cat $sshhome/.ssh/id_ed25519.pub | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
 	fi
 fi
 
 for key in "${authorized_keys[@]}"; do
-	if ! lxc exec $name --mode=non-interactive -- grep -q -F "$key" $sshhome/.ssh/authorized_keys 2>/dev/null; then
+	if ! lxc exec $name -- grep -q -F "$key" $sshhome/.ssh/authorized_keys 2>/dev/null; then
 		$loglog
-		echo "$key" | lxc exec $name --mode=non-interactive -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
+		echo "$key" | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
 	fi
 done
 
@@ -539,20 +539,20 @@ else
 fi
 
 if [ ! -f "$private_key_path" ]; then
-	if ! lxc exec ${name} --mode=non-interactive -- ls ~/.ssh/id_ed25519; then
-		logexec lxc exec $name --mode=non-interactive -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
+	if ! lxc exec ${name} -- ls ~/.ssh/id_ed25519; then
+		logexec lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
 	fi
 else
 	logexec lxc file push ${private_key_path} ${name}${sshhome}/.ssh/ >/dev/null
-	logexec lxc exec ${name} --mode=non-interactive -- chown ${lxcuser}:${lxcuser} ${sshhome}/.ssh/$(basename $private_key_path)
-	logexec lxc exec ${name} --mode=non-interactive -- chmod 0600 ${sshhome}/.ssh/$(basename $private_key_path)
+	logexec lxc exec ${name} -- chown ${lxcuser}:${lxcuser} ${sshhome}/.ssh/$(basename $private_key_path)
+	logexec lxc exec ${name} -- chmod 0600 ${sshhome}/.ssh/$(basename $private_key_path)
 	if [ -f "$public_key_path" ]; then
 		logexec lxc file push ${public_key_path} ${name}${sshhome}/.ssh/ >/dev/null
-		logexec lxc exec ${name} --mode=non-interactive -- chown ${lxcuser}:${lxcuser} ${sshhome}/.ssh/$(basename $public_key_path)
-		logexec lxc exec ${name} --mode=non-interactive -- chmod 0644 ${sshhome}/.ssh/$(basename $public_key_path)
+		logexec lxc exec ${name} -- chown ${lxcuser}:${lxcuser} ${sshhome}/.ssh/$(basename $public_key_path)
+		logexec lxc exec ${name} -- chmod 0644 ${sshhome}/.ssh/$(basename $public_key_path)
 	fi
 	logexec echo "Installed the following ssh key:"
-	logexec lxc exec ${name} --mode=non-interactive -- ssh-keygen -lvf ${sshhome}/.ssh/$(basename $private_key_path)
+	logexec lxc exec ${name} -- ssh-keygen -lvf ${sshhome}/.ssh/$(basename $private_key_path)
 fi
 
 if [ "${hostuser}" != "" ]; then
@@ -575,8 +575,8 @@ fi
 if [ -n "${guestfolder}" ]; then
 	sharename=$(basename ${hostfolder})
 	if [ ! $(lxc config device list ${name} | grep -q ${sharename}) ]; then
-		if ! lxc exec ${name} --mode=non-interactive -- ls ${guestfolder} >/dev/null; then
-			logexec lxc exec ${name} --mode=non-interactive -- mkdir -p ${guestfolder}
+		if ! lxc exec ${name} -- ls ${guestfolder} >/dev/null; then
+			logexec lxc exec ${name} -- mkdir -p ${guestfolder}
 		fi
 		logexec lxc config device add ${name} ${sharename} disk source=${hostfolder} path=${guestfolder}
 	fi
