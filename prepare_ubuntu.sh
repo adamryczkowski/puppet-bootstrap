@@ -372,7 +372,7 @@ if [ "${wormhole}" == "1" ]; then
 	fi
 fi
 
-if [ -n "$user_opts" ] && [ -n "$users" ] ; then
+if [ -n "$users" ] ; then
 	if [ -n "$debug" ]; then
 		user_opts="--debug ${user_opts}"
 	fi
