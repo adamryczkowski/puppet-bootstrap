@@ -179,6 +179,7 @@ if [ -z "$no_dhcp" ]; then
 			exit 1
 		fi
 	fi
+	client_opts="${client_opts} --ip ${server_ip}"
 	if [ -z "${ip}" ]; then
 		ip=${server_ip}
 	fi
@@ -193,6 +194,8 @@ if [ -z "$no_dhcp" ]; then
 
 	if install_apt_package isc-dhcp-server; then
 		restart_dhcp=1
+		logexec ln -s /etc/apparmor.d/usr.sbin.dhcpd /etc/apparmor.d/disable
+		logexec apparmor parser -R /etc/apparmor.d/usr.sbin.dhcpd
 	fi 
 	
 	if add_dhcpd_entry "${ip_prefix}.0" 255.255.255.0 $dhcp_range; then

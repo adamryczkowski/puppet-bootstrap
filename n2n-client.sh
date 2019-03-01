@@ -80,7 +80,7 @@ fi
 supernode_port=${port}
 
 service_name="edge"
-network_name="My_n2n_network"
+network_name="SiecAdama"
 ifname="edge0"
 our_ip="dhcp"
 mac="auto"
