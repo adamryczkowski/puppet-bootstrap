@@ -208,8 +208,6 @@ else
 	textfile /etc/n2n/edge.conf "${config}" root
 fi
 
-if [ "$restart" == "1" ]; then
-	logexec sudo systemctl daemon-reload
-	logexec sudo service ${service_name}.service restart
-fi
+logexec sudo systemctl daemon-reload
+logexec sudo service ${service_name}.service restart
 exit 0
