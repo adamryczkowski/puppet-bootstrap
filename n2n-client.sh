@@ -204,6 +204,23 @@ Alias=
 "
 	textfile /etc/systemd/system/${service_name}.service "${systemd_file}" root
 	textfile /etc/n2n/${service_name}.conf "${config}" root
+	
+	systemd_file="[Unit]
+Description=DHCP Client for ${ifname}
+Documentation=man:dhclient(8)
+Wants=network.target
+Requires=${service_name}.service
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/dhclient-${ifname}.pid
+ExecStart=/usr/sbin/dhclient -d ${ifname} -pf /var/run/dhclient-${ifname}.pid
+
+[Install]
+WantedBy=multi-user.target
+"
+	textfile /etc/systemd/system/${service_name}_dhcpd.service "${systemd_file}" root
 else
 	textfile /etc/n2n/edge.conf "${config}" root
 fi
