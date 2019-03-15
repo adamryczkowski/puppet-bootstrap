@@ -50,7 +50,7 @@ where
 Example2:
 
 Will use existing DHCP server on the n2n network
-$(basename $0)  172.104.148.166:5535 --password 'szakal'
+$(basename $0)  172.104.148.166:5535 --password 'szakal' --network-name SiecAdama
 "
 
 server_address=$1
@@ -171,21 +171,23 @@ install_apt_package_file "${file_name}" apt-ntop-stable "${file_link}" && flag_n
 
 install_apt_package n2n
 
-config="--tun-device=${ifname}
---community=${network_name}
--k=${password}
--m=${mac}
---supernode-list=${supernode_ip}:${supernode_port}
+config="--tun-device ${ifname}
+--community ${network_name}
+-k ${password}
+-m ${mac}
+--supernode-list ${supernode_ip}:${supernode_port}
 "
 
 if [ "${our_ip}" == "dhcp" ]; then
-	config="${config}-r
+	config="${config} -r
 -a dhcp:0.0.0.0"
 else
-	config="${config}-a=${our_ip}"
+	config="${config} -a ${our_ip}"
 fi
 
+textfile /etc/n2n/${service_name}.conf "${config}" root
 if [ "$service_name" != "edge" ]; then
+	set -x
 	systemd_file="[Unit]
 Description=n2n edge process
 After=network.target syslog.target
@@ -203,28 +205,28 @@ WantedBy=multi-user.target
 Alias=
 "
 	textfile /etc/systemd/system/${service_name}.service "${systemd_file}" root
-	textfile /etc/n2n/${service_name}.conf "${config}" root
-	
+fi
+if [ "${our_ip}" == "dhcp" ]; then
 	systemd_file="[Unit]
 Description=DHCP Client for ${ifname}
 Documentation=man:dhclient(8)
 Wants=network.target
 Requires=${service_name}.service
-After=network.target
+After=${service_name}.target
 
 [Service]
 Type=forking
 PIDFile=/var/run/dhclient-${ifname}.pid
-ExecStart=/usr/sbin/dhclient -d ${ifname} -pf /var/run/dhclient-${ifname}.pid
+ExecStart=/sbin/dhclient -d ${ifname} -pf /var/run/dhclient-${ifname}.pid
 
 [Install]
 WantedBy=multi-user.target
 "
 	textfile /etc/systemd/system/${service_name}_dhcpd.service "${systemd_file}" root
-else
-	textfile /etc/n2n/edge.conf "${config}" root
-fi
 
-logexec sudo systemctl daemon-reload
-logexec sudo service ${service_name}.service restart
+	logexec sudo systemctl daemon-reload
+	logexec sudo service ${service_name}_dhcpd restart
+else
+	logexec sudo service ${service_name} restart
+fi
 exit 0

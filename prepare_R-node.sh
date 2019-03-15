@@ -127,7 +127,7 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	flag_need_apt_update=1
 fi
 
-install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-8-jdk pkg-config libnlopt-dev gdebi-core
+install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-11-jdk pkg-config libnlopt-dev gdebi-core
 
 logexec sudo R CMD javareconf
 

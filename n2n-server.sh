@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ## dependency: n2n-client.sh
+## dependency: files/dhcpd_lease_to_slack.sh
 
 cd `dirname $0`
 . ./common.sh
@@ -151,6 +152,20 @@ if [ -n "$mac" ]; then
 	client_opts="${client_opts} --mac ${mac}"
 fi
 
+ubuntu_ver=$(get_ubuntu_version)
+pattern='([[:digit:]]{2})([[:digit:]]{2})'
+if [[ "${ubuntu_ver}" =~ $pattern ]]; then
+	file_link="http://apt-stable.ntop.org/${BASH_REMATCH[1]}.${BASH_REMATCH[2]}/all/apt-ntop-stable.deb"
+	file_name="n2n-$(get_ubuntu_codename)-repo.deb"
+else
+	errcho "Something wrong with get_ubuntu_version"
+	exit 1
+fi
+
+install_apt_package_file "${file_name}" apt-ntop-stable "${file_link}" && flag_need_apt_update=1 do_update
+
+install_apt_package n2n
+
 if [ -z "$no_dhcp" ]; then
 	#We need to create DHCP server. For that:
 	#1. We need to generate dhcp range or get the existing one
@@ -179,25 +194,40 @@ if [ -z "$no_dhcp" ]; then
 			exit 1
 		fi
 	fi
+
 	client_opts="${client_opts} --ip ${server_ip}"
 	if [ -z "${ip}" ]; then
 		ip=${server_ip}
 	fi
 	
-	bash -x ./n2n-client.sh localhost:$port --ip ${ip} --network-name ${network_name} --supernode-service ${server_service_name} --password ${password} ${client_opts} ${opts}
 	if [ "$?" != "0" ] ; then
 		errcho "Problems when installing n2n client. Exiting"
 		exit 1
 	fi
 	config="--local-port ${port}"
 	textfile /etc/n2n/${server_service_name}.conf "${config}" root
+	
+	logexec sudo service supernode start
+
+	bash -x ./n2n-client.sh localhost:$port --ip ${ip} --network-name ${network_name} --supernode-service ${server_service_name} --password ${password} ${client_opts} ${opts}
 
 	if install_apt_package isc-dhcp-server; then
 		restart_dhcp=1
-		logexec ln -s /etc/apparmor.d/usr.sbin.dhcpd /etc/apparmor.d/disable
-		logexec apparmor parser -R /etc/apparmor.d/usr.sbin.dhcpd
+		logexec sudo ln -s /etc/apparmor.d/usr.sbin.dhcpd /etc/apparmor.d/disable
+		logexec sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.dhcpd
 	fi 
-	
+	set -x
+	linetextfile /etc/dhcp/dhcpd.conf "include \"/etc/dhcp/dhcpd_lease_to_slack.conf\";"
+contents="on commit {
+	set ClientIP = binary-to-ascii(10, 8, \".\", leased-address);
+	set ClientMac = binary-to-ascii(16, 8, \":\", substring(hardware, 1, 6));
+	set ClientName = pick-first-value ( option fqdn.hostname, option host-name );
+	log(concat(\"Commit: IP: \", ClientIP, \" Mac: \", ClientMac));
+	execute(\"/etc/dhcp/dhcpd_lease_to_slack.sh\", \"commit\", ClientIP, ClientMac, ClientName);
+}"
+	textfile /etc/dhcp/dhcpd_lease_to_slack.conf "$contents" root
+	install_script ${DIR}/files/dhcpd_lease_to_slack.sh /etc/dhcp/dhcpd_lease_to_slack.sh root
+
 	if add_dhcpd_entry "${ip_prefix}.0" 255.255.255.0 $dhcp_range; then
 		restart_dhcp=1
 	fi
