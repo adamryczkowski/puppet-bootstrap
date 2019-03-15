@@ -186,12 +186,11 @@ else
 fi
 
 textfile /etc/n2n/${service_name}.conf "${config}" root
-if [ "$service_name" != "edge" ]; then
-	set -x
-	systemd_file="[Unit]
+set -x
+systemd_file="[Unit]
 Description=n2n edge process
-After=network.target syslog.target
-Wants=
+After=network.target syslog.target ${supernode_service}
+Requires=${supernode_service}
 
 [Service]
 Type=simple
@@ -204,20 +203,18 @@ RestartSec=5
 WantedBy=multi-user.target
 Alias=
 "
-	textfile /etc/systemd/system/${service_name}.service "${systemd_file}" root
-fi
+textfile /etc/systemd/system/${service_name}.service "${systemd_file}" root
 if [ "${our_ip}" == "dhcp" ]; then
 	systemd_file="[Unit]
 Description=DHCP Client for ${ifname}
 Documentation=man:dhclient(8)
-Wants=network.target
-Requires=${service_name}.service
-After=${service_name}.target
+BindsTo=${service_name}.service
+After=${service_name}.target network.online.target network.target
 
 [Service]
 Type=forking
 PIDFile=/var/run/dhclient-${ifname}.pid
-ExecStart=/sbin/dhclient -d ${ifname} -pf /var/run/dhclient-${ifname}.pid
+ExecStart=/sbin/dhclient ${ifname} -pf /var/run/dhclient-${ifname}.pid
 
 [Install]
 WantedBy=multi-user.target
@@ -226,7 +223,9 @@ WantedBy=multi-user.target
 
 	logexec sudo systemctl daemon-reload
 	logexec sudo service ${service_name}_dhcpd restart
+	logexec sudo systemctl enable ${service_name}_dhcpd.service
 else
 	logexec sudo service ${service_name} restart
 fi
+logexec sudo systemctl enable ${service_name}.service
 exit 0

@@ -37,7 +37,7 @@ where
  --client-service-name    - Name of the client service, needed if you intent to install more than one.
                             Defaults to edge.
  --server-service-name    - Name of the server service, needed if you intent to install more than one.
-                            Defaults to supernode.
+                            Defaults to supernode. THIS OPTION IS DISABLED. SERVICE IS ALWAYS \"supernode\".
  --password               - Password needed to join the network.  
  --ip                     - IP address in the private network of the node. Defaults to 
                             the first address in the dhcp range.
@@ -84,10 +84,10 @@ case $key in
 	client_service_name="$1"
 	shift
 	;;
-	--server-service-name)
-	server_service_name="$1"
-	shift
-	;;
+#	--server-service-name)
+#	server_service_name="$1"
+#	shift
+#	;;
 	--ifname)
 	ifname="$1"
 	shift
@@ -206,7 +206,7 @@ if [ -z "$no_dhcp" ]; then
 	fi
 	config="--local-port ${port}"
 	textfile /etc/n2n/${server_service_name}.conf "${config}" root
-	
+	logexec sudo systemctl enable supernode.service
 	logexec sudo service supernode start
 
 	bash -x ./n2n-client.sh localhost:$port --ip ${ip} --network-name ${network_name} --supernode-service ${server_service_name} --password ${password} ${client_opts} ${opts}
