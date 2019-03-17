@@ -1,0 +1,357 @@
+failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:13:01--  (try:14)  http://deploy_n2n_client.sh/
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:17:31--  (try:15)  http://deploy_n2n_client.sh/
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:22:01--  (try:16)  http://deploy_n2n_client.sh/
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:26:32--  (try:17)  http://deploy_n2n_client.sh/
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:31:02--  (try:18)  http://deploy_n2n_client.sh/
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:35:32--  (try:19)  http://deploy_n2n_client.sh/
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:40:03--  (try:20)  http://deploy_n2n_client.sh/
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to deploy_n2n_client.sh (deploy_n2n_client.sh)|10.0.0.1|:80... failed: Connection timed out.
+Giving up.
+
+--2019-02-26 13:44:23--  http://deploy_n2n_server.sh/
+Resolving deploy_n2n_server.sh (deploy_n2n_server.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘deploy_n2n_server.sh’
+--2019-02-26 13:44:23--  http://deploy_prosody.sh/
+Resolving deploy_prosody.sh (deploy_prosody.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘deploy_prosody.sh’
+--2019-02-26 13:44:24--  http://deploy_radicale.sh/
+Resolving deploy_radicale.sh (deploy_radicale.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘deploy_radicale.sh’
+--2019-02-26 13:44:24--  http://deploy_r_node.sh/
+Resolving deploy_r_node.sh (deploy_r_node.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘deploy_r_node.sh’
+--2019-02-26 13:44:25--  http://desktop-prepare.sh/
+Resolving desktop-prepare.sh (desktop-prepare.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘desktop-prepare.sh’
+--2019-02-26 13:44:25--  http://execute-script-remotely.sh/
+Resolving execute-script-remotely.sh (execute-script-remotely.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘execute-script-remotely.sh’
+--2019-02-26 13:44:25--  http://faq.txt/
+Resolving faq.txt (faq.txt)... failed: Name or service not known.
+wget: unable to resolve host address ‘faq.txt’
+--2019-02-26 13:44:25--  http://files/
+Resolving files (files)... failed: Name or service not known.
+wget: unable to resolve host address ‘files’
+--2019-02-26 13:44:25--  http://imgw-ci-runner.sh/
+Resolving imgw-ci-runner.sh (imgw-ci-runner.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘imgw-ci-runner.sh’
+--2019-02-26 13:44:26--  http://imgw_slack_post.sh/
+Resolving imgw_slack_post.sh (imgw_slack_post.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘imgw_slack_post.sh’
+--2019-02-26 13:44:27--  http://imgw-vpn.sh/
+Resolving imgw-vpn.sh (imgw-vpn.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘imgw-vpn.sh’
+--2019-02-26 13:44:27--  http://insert_elements_to_dconf.py/
+Resolving insert_elements_to_dconf.py (insert_elements_to_dconf.py)... failed: Name or service not known.
+wget: unable to resolve host address ‘insert_elements_to_dconf.py’
+--2019-02-26 13:44:28--  http://install_apt_packages.sh/
+Resolving install_apt_packages.sh (install_apt_packages.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘install_apt_packages.sh’
+--2019-02-26 13:44:29--  http://libapt.sh/
+Resolving libapt.sh (libapt.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘libapt.sh’
+--2019-02-26 13:44:30--  http://libexec.sh/
+Resolving libexec.sh (libexec.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘libexec.sh’
+--2019-02-26 13:44:31--  http://libfiles.sh/
+Resolving libfiles.sh (libfiles.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘libfiles.sh’
+--2019-02-26 13:44:32--  http://libgit.sh/
+Resolving libgit.sh (libgit.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘libgit.sh’
+--2019-02-26 13:44:34--  http://libgsettings.sh/
+Resolving libgsettings.sh (libgsettings.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘libgsettings.sh’
+--2019-02-26 13:44:35--  http://libmount.sh/
+Resolving libmount.sh (libmount.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘libmount.sh’
+--2019-02-26 13:44:37--  http://libnet.sh/
+Resolving libnet.sh (libnet.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘libnet.sh’
+--2019-02-26 13:44:38--  http://libs.sh/
+Resolving libs.sh (libs.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘libs.sh’
+--2019-02-26 13:44:40--  http://license/
+Resolving license (license)... failed: Name or service not known.
+wget: unable to resolve host address ‘license’
+--2019-02-26 13:44:40--  http://make-lxd-node.sh/
+Resolving make-lxd-node.sh (make-lxd-node.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘make-lxd-node.sh’
+--2019-02-26 13:44:42--  http://n2n-client.sh/
+Resolving n2n-client.sh (n2n-client.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘n2n-client.sh’
+--2019-02-26 13:44:43--  http://n2n-server.sh/
+Resolving n2n-server.sh (n2n-server.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘n2n-server.sh’
+--2019-02-26 13:44:45--  http://passive_storage/
+Resolving passive_storage (passive_storage)... failed: Name or service not known.
+wget: unable to resolve host address ‘passive_storage’
+--2019-02-26 13:44:45--  http://prepare_dst_server.sh/
+Resolving prepare_dst_server.sh (prepare_dst_server.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_dst_server.sh’
+--2019-02-26 13:44:46--  http://prepare_for_imgw.sh/
+Resolving prepare_for_imgw.sh (prepare_for_imgw.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_for_imgw.sh’
+--2019-02-26 13:44:47--  http://prepare_gitlab_ci_runner.sh/
+Resolving prepare_gitlab_ci_runner.sh (prepare_gitlab_ci_runner.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_gitlab_ci_runner.sh’
+--2019-02-26 13:44:49--  http://prepare_prosody.sh/
+Resolving prepare_prosody.sh (prepare_prosody.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_prosody.sh’
+--2019-02-26 13:44:51--  http://prepare_qbittorrent-cli.sh/
+Resolving prepare_qbittorrent-cli.sh (prepare_qbittorrent-cli.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_qbittorrent-cli.sh’
+--2019-02-26 13:44:52--  http://prepare_radicale.sh/
+Resolving prepare_radicale.sh (prepare_radicale.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_radicale.sh’
+--2019-02-26 13:44:53--  http://prepare_remote_ubuntu.sh/
+Resolving prepare_remote_ubuntu.sh (prepare_remote_ubuntu.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_remote_ubuntu.sh’
+--2019-02-26 13:44:55--  http://prepare_r-node.sh/
+Resolving prepare_r-node.sh (prepare_r-node.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_r-node.sh’
+--2019-02-26 13:44:56--  http://prepare_samba_client.sh/
+Resolving prepare_samba_client.sh (prepare_samba_client.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_samba_client.sh’
+--2019-02-26 13:45:00--  http://prepare_spack.sh/
+Resolving prepare_spack.sh (prepare_spack.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_spack.sh’
+--2019-02-26 13:45:04--  http://prepare_ubuntu.sh/
+Resolving prepare_ubuntu.sh (prepare_ubuntu.sh)... 10.0.0.1, 10.0.0.1
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:49:31--  (try: 2)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:53:54--  (try: 3)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 13:58:19--  (try: 4)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:02:45--  (try: 5)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:07:12--  (try: 6)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:11:39--  (try: 7)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:16:06--  (try: 8)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:20:36--  (try: 9)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:25:05--  (try:10)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:29:36--  (try:11)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:34:07--  (try:12)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:38:37--  (try:13)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:43:07--  (try:14)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:47:38--  (try:15)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:52:08--  (try:16)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 14:56:38--  (try:17)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 15:01:09--  (try:18)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 15:05:39--  (try:19)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Retrying.
+
+--2019-02-26 15:10:09--  (try:20)  http://prepare_ubuntu.sh/
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Connecting to prepare_ubuntu.sh (prepare_ubuntu.sh)|10.0.0.1|:80... failed: Connection timed out.
+Giving up.
+
+--2019-02-26 15:14:30--  http://prepare_ubuntu_user.sh/
+Resolving prepare_ubuntu_user.sh (prepare_ubuntu_user.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_ubuntu_user.sh’
+--2019-02-26 15:14:30--  http://prepare_update-all.sh/
+Resolving prepare_update-all.sh (prepare_update-all.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘prepare_update-all.sh’
+--2019-02-26 15:14:30--  http://proba.sh/
+Resolving proba.sh (proba.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘proba.sh’
+--2019-02-26 15:14:30--  http://rdep/
+Resolving rdep (rdep)... failed: Name or service not known.
+wget: unable to resolve host address ‘rdep’
+--2019-02-26 15:14:30--  http://readme.md/
+Resolving readme.md (readme.md)... 162.255.119.253
+Connecting to readme.md (readme.md)|162.255.119.253|:80... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://core2.me/?ref=readme [following]
+--2019-02-26 15:14:31--  https://core2.me/?ref=readme
+Resolving core2.me (core2.me)... 151.101.65.195, 151.101.1.195
+Connecting to core2.me (core2.me)|151.101.65.195|:443... connected.
+HTTP request sent, awaiting response... 416 Range Not Satisfiable
+
+    The file is already fully retrieved; nothing to do.
+
+--2019-02-26 15:14:31--  http://remote/
+Resolving remote (remote)... failed: Name or service not known.
+wget: unable to resolve host address ‘remote’
+--2019-02-26 15:14:31--  http://r.sh/
+Resolving r.sh (r.sh)... 193.223.78.230
+Connecting to r.sh (r.sh)|193.223.78.230|:80... connected.
+HTTP request sent, awaiting response... 416 Requested Range Not Satisfiable
+
+    The file is already fully retrieved; nothing to do.
+
+--2019-02-26 15:14:32--  http://rstudio.sh/
+Resolving rstudio.sh (rstudio.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘rstudio.sh’
+--2019-02-26 15:14:32--  http://set_unison.sh/
+Resolving set_unison.sh (set_unison.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘set_unison.sh’
+--2019-02-26 15:14:32--  http://studia/
+Resolving studia (studia)... failed: Name or service not known.
+wget: unable to resolve host address ‘studia’
+--2019-02-26 15:14:32--  http://studium-flamenco.sh/
+Resolving studium-flamenco.sh (studium-flamenco.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘studium-flamenco.sh’
+--2019-02-26 15:14:37--  http://testd.sh/
+Resolving testd.sh (testd.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘testd.sh’
+--2019-02-26 15:14:37--  http://test_log.sh/
+Resolving test_log.sh (test_log.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘test_log.sh’
+--2019-02-26 15:14:42--  http://test_n2n.sh/
+Resolving test_n2n.sh (test_n2n.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘test_n2n.sh’
+--2019-02-26 15:14:43--  http://test.sh/
+Resolving test.sh (test.sh)... 113.29.216.100
+Connecting to test.sh (test.sh)|113.29.216.100|:80... connected.
+HTTP request sent, awaiting response... 416 Requested Range Not Satisfiable
+
+    The file is already fully retrieved; nothing to do.
+
+--2019-02-26 15:14:44--  http://tmp_imgw.sh/
+Resolving tmp_imgw.sh (tmp_imgw.sh)... failed: Name or service not known.
+wget: unable to resolve host address ‘tmp_imgw.sh’
+--2019-02-26 15:14:45--  http://todo/
+Resolving todo (todo)... failed: Name or service not known.
+wget: unable to resolve host address ‘todo’
+--2019-02-26 15:14:45--  http://todo.txt/
+Resolving todo.txt (todo.txt)... failed: Name or service not known.
+wget: unable to resolve host address ‘todo.txt’
+--2019-02-26 15:14:45--  http://upstart-scripts/
+Resolving upstart-scripts (upstart-scripts)... failed: Name or service not known.
+wget: unable to resolve host address ‘upstart-scripts’
+--2019-02-26 15:14:45--  http://removing/
+Resolving removing (removing)... failed: Name or service not known.
+wget: unable to resolve host address ‘removing’
+--2019-02-26 15:14:45--  http://xn--dvg/home/adam/R/x86_64-pc-linux-gnu-library/3.4/selectr%E2%80%99
+Resolving xn--dvg (xn--dvg)... failed: Name or service not known.
+wget: unable to resolve host address ‘xn--dvg’
+ftp://[12/14:51: Unterminated IPv6 numeric address.
+--2019-02-26 15:14:45--  ftp://adam@potworek//home/adam/tmp/puppet-bootstrap/prepare_R-node.sh:207]
+           => ‘.listing’
+Resolving potworek (potworek)... 127.0.1.1
+Connecting to potworek (potworek)|127.0.1.1|:21... failed: Connection refused.
+--2019-02-26 15:14:45--  http://$/
+Resolving $ ($)... failed: Name or service not known.
+wget: unable to resolve host address ‘$’
+--2019-02-26 15:14:45--  http://rstudio_uri=$(rscript/
+Resolving rstudio_uri=$(rscript (rstudio_uri=$(rscript)... failed: Name or service not known.
+wget: unable to resolve host address ‘rstudio_uri=$(rscript’
+/tmp/get_rstudio_server_uri.R): Scheme missing.
+--2019-02-26 15:14:45--  http://trapped/
+Resolving trapped (trapped)... failed: Name or service not known.
+wget: unable to resolve host address ‘trapped’
+--2019-02-26 15:14:45--  http://error/
+Resolving error (error)... failed: Name or service not known.
+wget: unable to resolve host address ‘error’
+--2019-02-26 15:14:45--  http://in/
+Resolving in (in)... failed: Name or service not known.
+wget: unable to resolve host address ‘in’
+--2019-02-26 15:14:45--  http://the/
+Resolving the (the)... failed: Name or service not known.
+wget: unable to resolve host address ‘the’
+--2019-02-26 15:14:45--  http://line/
+Resolving line (line)... failed: Name or service not known.
+wget: unable to resolve host address ‘line’
+--2019-02-26 15:14:45--  http://above!!/
+Resolving above!! (above!!)... failed: Name or service not known.
+wget: unable to resolve host address ‘above!!’

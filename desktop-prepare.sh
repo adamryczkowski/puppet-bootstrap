@@ -519,7 +519,7 @@ function owncloud {
 	else
 		errcho "Unsupported UBUNTU!!"
 	fi
-	install_apt_package owncloud-client libgnome-keyring0 python-keyring gnome-keyring
+	install_apt_packages owncloud-client libgnome-keyring0 python-keyring gnome-keyring
 }
 
 function smb {
