@@ -5,8 +5,9 @@ reset; bash -x ./make-lxd-node.sh customer
 
 
 lxc list
-ip_client=10.51.192.224
-ip_server=10.51.192.222
+ip_client=10.51.192.156
+ip_client=10.51.192.150
+ip_server=10.51.192.210
 
 reset;./execute-script-remotely.sh n2n-server.sh --ssh-address adam@${ip_server} --extra-executable files/n2n -- --password 'szakal' --port 5536 --network-name SiecAdama
 

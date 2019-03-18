@@ -189,7 +189,7 @@ textfile /etc/n2n/${service_name}.conf "${config}" root
 set -x
 systemd_file="[Unit]
 Description=n2n edge process
-After=network.target syslog.target ${supernode_service}
+After=network-online.target syslog.target ${supernode_service}
 Requires=${supernode_service}
 
 [Service]
