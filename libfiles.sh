@@ -218,11 +218,11 @@ function chmod_dir {
 	local actual_mode
 	if [[ ! "${desired_mode_file}" =~ $pattern ]]; then
 		errcho "Wrong file permissions. Needs octal format."
-		exit 1
+		return 1
 	fi
 	if [[ ! "${desired_mode_dir}" =~ $pattern ]]; then
 		errcho "Wrong dir permissions. Needs octal format."
-		exit 1
+		return 1
 	fi
 	if [ ! -d "${file}" ]; then
 		errcho "File ${file} doesn't exist"
@@ -248,11 +248,11 @@ function chown_dir {
 	
 	if [ -z "$user" ]; then
 		errcho "No user name exitting"
-		exit 1
+		return 1
 	fi
 	if [ -z "$file" ]; then
 		errcho "No path. Exiting"
-		exit 1
+		return 1
 	fi
 	if [ ! -d "${file}" ]; then
 		errcho "File ${file} doesn't exist"
@@ -277,7 +277,7 @@ function get_cached_file {
 		if [ ! -w "${repo_path}" ]; then
 			if ! sudo chown ${USER} "${repo_path}"; then
 				echo "Cannot write to the repo ${repo_path}" >/dev/stderr
-				exit 1
+				return 1
 			fi
 			local repo_path="/tmp/repo_path"
 			mkdir -p /tmp/repo_path
@@ -296,19 +296,19 @@ function uncompress_cached_file {
 	local destination="$2"
 	local usergr="$3"
 	local user
-	local timestamp_path="${destination}/$(basename ${filename}).timestamp"
+	local timestamp_path="$(dirname ${destination})/$(basename ${filename}).timestamp"
 	if [ -z "$usergr" ]; then
 		user=$USER
 		usergr=$user
 		group=""
 	else
 		local pattern='^([^:]+):([^:]+)$'
-		if [[ "$usergr" != $pattern ]]; then
+		if [[ "$usergr" =~ $pattern ]]; then
 			group=${BASH_REMATCH[2]}
 			user=${BASH_REMATCH[1]}
 		else
 			group=""
-			user=$user
+			user=$usergr
 		fi
 	fi
 	
@@ -318,31 +318,47 @@ function uncompress_cached_file {
 		path_filename="$filename"
 	fi
 	if [ -z "$path_filename" ]; then
+		echo "no input file $path_filename"
 		return 1
 	fi
 	if [ -z "$destination" ]; then
+		echo "no destination $destination"
 		return 2
 	fi
-	moddate_remote=$(stat -c %y "$path_filename")
-	if [ -f "$timestamp_path" ]; then
-		moddate_hdd=$(cat "$timestamp_path")
-		if [ "$moddate_hdd" == "$moddate_remote" ]; then
-			return 0
+	if [ -d "$destination" ]; then
+		moddate_remote=$(stat -c %y "$destination")
+		if [ -f "$timestamp_path" ]; then
+			moddate_hdd=$(cat "$timestamp_path")
+			if [ "$moddate_hdd" == "$moddate_remote" ]; then
+				return 0
+			fi
 		fi
 	fi
-	if is_folder_writable "$destination" "$user"; then
+	pushd $(dirname $destination)
+	if is_folder_writable $(dirname "$destination") "$user"; then
 		if [ "$user" == "$USER" ]; then
-			logexec tar -xvf "$path_filename" -C "$destination"
-			echo "$moddate_remote" | tee "$timestamp_path"
+#			logexec tar -xvf "$path_filename" -C "$destination"
+			logexec dtrx --one rename "$path_filename"
+			extension="${path_filename##*.}"
+			filename_no_ext="${path_filename%.*}"
+			logexec mv $(basename $filename_no_ext) $(basename $destination) 
+			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
 		else
-			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
-			echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path"
+#			echo sudo -u "$user" dtrx --one rename "$path_filename"
+			logexec sudo -u "$user" dtrx --one rename "$path_filename"
+			logexec sudo mv $(basename $filename_no_ext) $(basename $destination) 
+#			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
+			echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 		fi
 	else
-		logexec sudo tar -xvf "$path_filename" -C "$destination"
+#		echo sudo dtrx --one rename "$path_filename"
+		logexec sudo dtrx --one rename "$path_filename"
+		logexec sudo mv $(basename $filename_no_ext) $(basename $destination) 
+#		logexec sudo tar -xvf "$path_filename" -C "$destination"
 		logexec sudo chown -R "$usergr" "$destination"
-		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path"
+		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 	fi
+	popd
 }
 
 function cp_file {
@@ -446,20 +462,29 @@ function make_symlink {
 	local dest="$2"
 	if [ ! -f "$source" ] && [ ! -d "$source" ]; then
 		errcho "$source does not exist"
-		exit 1
+		return 1
 	fi
 	if [ -L "$dest" ]; then
 		if [ "$(readlink -f $dest)"!="$(readlink -f $source)" ]; then
-			logexec rm $dest
-			logexec ln -s $source $dest
+			if is_folder_writable $(dirname "$dest") "$user"; then
+				logexec rm $dest
+				logexec ln -s $source $dest
+			else
+				logexec sudo rm $dest
+				logexec sudo ln -s $source $dest
+			fi
 		fi
 		return 0
 	else
 		if [ -f "$dest" ] || [ -d "$dest" ]; then
 			errcho "$dest already exists"
-			exit 1
+			return 1
 		fi
-		logexec ln -s $source $dest
+		if is_folder_writable $(dirname "$dest") "$user"; then
+			logexec ln -s $source $dest
+		else
+			logexec sudo ln -s $source $dest
+		fi
 		return 0
 	fi
 }

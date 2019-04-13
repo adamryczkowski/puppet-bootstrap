@@ -43,7 +43,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox,i3wm
 "
 
 dir_resolve()
@@ -284,7 +284,8 @@ function laptop {
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method 'edge-scrolling'
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad tap-to-click true
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad natural-scroll false
-
+#TODO: install bright script + pam.d permissions
+	install_apt_package_file xserver-xorg-input-synaptics
 }
 
 function nvidia {
@@ -341,7 +342,7 @@ function bumblebee {
 
 function cli {
 	tweak_base
-	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu openssh-server silversearcher-ag software-properties-common
+	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu openssh-server silversearcher-ag software-properties-common curl dtrx
 	logexec liquidprompt_activate
 	logexec sudo liquidprompt_activate
 	home=$(get_home_dir)
@@ -386,7 +387,7 @@ function virtualbox {
 }
 
 function kodi {
-	add_ppa ppa:team-xbmc/ppa
+	add_ppa team-xbmc/ppa
 	install_apt_package kodi
 	home="$(get_home_dir)"
 	logmkdir "${home}/.kodi" ${USER}
@@ -493,6 +494,9 @@ function firefox {
 	chown_dir "/opt/waterfix" root root
 
 	install_script ${DIR}/files/waterfox.desktop /usr/share/applications/waterfox.desktop
+	
+	make_symlink /opt/waterfox/waterfox /usr/local/bin/waterfox
+
 }
 
 function zulip {
@@ -568,8 +572,8 @@ function gedit {
 		pushd $tmpdir/gedit-pair-char-completion-1.0.6-gnome3
 		logexec ${tmpdir}/gedit-pair-char-completion-1.0.6-gnome3/install.sh
 		popd
-		gsettings_add_to_array org.gnome.gedit.plugins active-plugins pair_char_completion
 	fi
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins pair_char_completion
 	
 	if [ ! -f "${localhome}/.local/share/gedit/plugins/ex-mortis.plugin" ]; then
 		plik=$(get_cached_file gedit-ex-mortis.tar.gz https://github.com/jefferyto/gedit-ex-mortis/archive/master.tar.gz)
@@ -577,14 +581,15 @@ function gedit {
 		uncompress_cached_file $plik $tmpdir
 		logexec cp -R ${tmpdir}/gedit-ex-mortis-master/ex-mortis ~/.local/share/gedit/plugins
 		logexec cp ${tmpdir}/gedit-ex-mortis-master/ex-mortis.plugin ~/.local/share/gedit/plugins
-		gsettings_add_to_array org.gnome.gedit.plugins active-plugins ex-mortis
 	fi
-	
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins ex-mortis
+
 	if [ ! -d "/usr/share/gedit/plugins/crypto" ]; then
 		plik=$(get_cached_file gedit-crypto.deb http://pietrobattiston.it/_media/gedit-crypto:gedit-crypto-plugin_0.5-1_all.deb)
 		install_apt_package_file $plik gedit-crypto-plugin
 		gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
 	fi
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
 	
 	if [ ! -f "${localhome}/.local/share/gedit/plugins/controlyourtabs.plugin" ]; then
 		plik=$(get_cached_file gedit-control-your-tabs.tar.gz https://github.com/jefferyto/gedit-control-your-tabs/archive/master.tar.gz)
@@ -592,14 +597,13 @@ function gedit {
 		uncompress_cached_file $plik $tmpdir
 		logexec cp -R ${tmpdir}/gedit-control-your-tabs-master/controlyourtabs ~/.local/share/gedit/plugins
 		logexec cp ${tmpdir}/gedit-control-your-tabs-master/controlyourtabs.plugin ~/.local/share/gedit/plugins
-		gsettings_add_to_array org.gnome.gedit.plugins active-plugins controlyourtabs
 	fi
+	gsettings_add_to_array org.gnome.gedit.plugins active-plugins controlyourtabs
 	install_apt_package gedit-plugins
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins git
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins textsize
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins spell
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins codecomment
-	gsettings_add_to_array org.gnome.gedit.plugins active-plugins charmap
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins charmap
 	
 	gsettings_set_value org.gnome.gedit.preferences.editor bracket-matching true
@@ -612,15 +616,87 @@ function gedit {
 	logmkdir "${localhome}/.local/share/gedit/styles"
 	dracula=$(get_cached_file dracula.xml https://raw.githubusercontent.com/dracula/gedit/master/dracula.xml)
 	install_file "$dracula" "${localhome}/.local/share/gedit/styles/dracula.xml" $user
+	gsettings_set_value org.gnome.gedit.preferences.editor scheme 'oblivion'
+
 }
 
 function keepass {
 	add_ppa jtaylor/keepass
-	install_apt_package keepass2 keepass2
+	install_apt_package keepass2 libmono-system-configuration-install4.0-cil libmono-system-management4.0-cil libmono-csharp4.0c-cil libmono-microsoft-csharp4.0-cil mono-dmcs mono-mcs
 	file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
-	cp_file "$file" /usr/lib/keepass2/Plugins/KeePassRPC.plgx root
+	echo "file=$file"
+	cp_file "$file" /usr/lib/keepass2/plugins/KeePassRPC.plgx root
 }
 
+function i3wm {
+	install_apt_package_file sur5r-keyring_2019.02.01_all.deb  debian.sur5r.net http://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2019.02.01_all.deb
+	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(grep '^DISTRIB_CODENAME=' /etc/lsb-release | cut -f2 -d=) universe"
+
+	/etc/apt/sources.list.d/sur5r-i3.list
+	install_apt_packages i3 alsa-utils i3blocks pasystray apparmor-notify
+	
+	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp/i3blocks
+	if ! which i3blocks >/dev/null; then
+		install_apt_packages autoconf
+		pushd ${home}/tmp/i3blocks
+		logexec ./autogen.sh
+		logexec ./configure
+		logexec make
+		logexec make install
+	fi
+
+	
+	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
+	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb 
+	
+	get_git_repo https://gitlab.com/adamwam/i3blocks-config.git ${home}/.config/i3blocks
+	
+	install_file files/i3-config ${home}/.config/i3/config
+	
+	
+	
+	#https://github.com/unix121/i3wm-themer
+	
+#	if ! which polybar >/dev/null; then
+#		install_apt_packages cmake cmake-data libcairo2-dev libxcb1-dev libxcb-ewmh-dev libxcb-icccm4-dev libxcb-image0-dev libxcb-randr0-dev libxcb-util0-dev libxcb-xkb-dev pkg-config python-xcbgen xcb-proto libxcb-xrm-dev i3-wm libasound2-dev libmpdclient-dev libiw-dev libcurl4-openssl-dev libpulse-dev libxcb-composite0-dev xcb libxcb-ewmh2 rofi
+#		get_git_repo https://github.com/jaagr/polybar.git /tmp/polybar polybar
+#		pushd /tmp/polybar
+#		./build.sh --all-features --auto
+#	fi
+	
+	install_apt_packages fonts-noto fonts-hack fonts-font-awesome fonts-powerline
+	
+#	get_git_repo https://github.com/flumm/Themes.git ${home}/tmp/i3themes i3themes
+	
+	
+}
+
+
+function kitty {
+	local version=$(get_latest_github_release_name kovidgoyal/kitty)
+	pattern='v(.*)$'
+	if [[ ! "$version" =~ $pattern ]]; then
+		echo "Something wrong with the kitty release naming convention, $version"
+		return -1 
+	else
+		version=${BASH_REMATCH[1]}
+	fi
+	local file="kitty-${version}-x86_64.txz"
+	local kitty_source=$(get_latest_github_release kovidgoyal/kitty "${file}" "${file}")
+	uncompress_cached_file "$file" /opt/kitty $user
+
+	make_symlink /opt/kitty/bin/kitty /usr/local/bin/kitty
+	if which nemo >/dev/null; then
+		gsettings set_value org.cinnamon.desktop.default-applications.terminal exec "kitty"
+	fi
+	
+	logexec sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /opt/kitty/bin/kitty 100
+	linetextfile ${home}/.bashrc 'alias ssh="kitty +kitten ssh"'
+		
+# libcairo-script-interpreter2 libfontconfig1-dev libfreetype6-dev libiw30 libmpdclient2 libpixman-1-dev
+ # libxcb-composite0 libxcb-render0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-util-dev
+  #libxcb-xfixes0-dev libxext-dev libxrender-dev x11proto-xext-dev
+}
 
 
 oldifs=${IFS}

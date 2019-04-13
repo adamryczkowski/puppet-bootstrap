@@ -9,17 +9,25 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 #Gets the file from latest release of github, or specific release
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 function get_latest_github_release {
+#set -x
 	local github_name="$1"
 	local remote_filename="$2"
+	local local_filename="$3"
+	if [ -z "$remote_filename" ]; then
+		return -1
+	fi
 	remote_filename=$(basename -- "$remote_filename") #We need only file name, no folders
-	local release="$3"
+	local release="$4"
 	if [ -z "$release" ]; then
-		release=$(get_latest_github_release_name $github_name)
+		local release=$(get_latest_github_release_name $github_name)
 	fi
 	local extension="${remote_filename##*.}"
 	local noextension="${remote_filename%.*}"
-	
-	file=$(get_cached_file "${noextension}-${release}.${extension}" "https://github.com/${github_name}/releases/download/${release}/${remote_filename}")
+	if [ -z "$local_filename" ]; then
+		local_filename="${noextension}-${release}.${extension}"
+	fi
+	local file=$(get_cached_file "${local_filename}" "https://github.com/${github_name}/releases/download/${release}/${remote_filename}")
+set +x
 	echo "$file"	
 }
 

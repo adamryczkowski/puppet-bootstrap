@@ -157,16 +157,30 @@ function set_gsettings_array2 {
 }
 
 function gsettings_add_to_array {
-	local schema=$1
-	local name=$2
+	echo "KUKU!"
+	local key=$2
 	local value=$3
-	local position=$4
+#	local position=$4
+	local status=$(gsettings get ${schema} ${key})
 	
-	local existing_values_str=$(load_gsettings_array ${schema} ${name})
-	
-	local ans_str=$(add_item_to_array "${existing_values_str}" ${value} ${position})
-	set_gsettings_array ${schema} ${name} "${ans_str}"
+	# Optional proof, whether value to add already exsists
+	if [[ ! $status == *"'to.add.value'"* ]]; then
+		 gsettings set ${schema} ${key} "${status%]*}, '${value}']"
+#		 echo "Added to.add.value to the list."
+	fi
 }
+
+#function gsettings_add_to_array {
+#	local schema=$1
+#	local name=$2
+#	local value=$3
+#	local position=$4
+#	
+#	local existing_values_str=$(load_gsettings_array ${schema} ${name})
+#	
+#	local ans_str=$(add_item_to_array "${existing_values_str}" ${value} ${position})
+#	set_gsettings_array ${schema} ${name} "${ans_str}"
+#}
 
 function gsettings_remove_from_array {
 	local schema=$1
