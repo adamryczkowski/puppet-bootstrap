@@ -268,7 +268,10 @@ install_apt_packages bash-completion
 #	install_byobu=1
 
 if [ "${install_bat}" == "1" ]; then
-	install_apt_package_file bat_0.6.1_amd64.deb bat https://github.com/sharkdp/bat/releases/download/v0.6.1/bat_0.6.1_amd64.deb
+	version=$(get_latest_github_release_name sharkdp/bat skip_v)
+	
+	link=$(get_latest_github_release_link sharkdb/bat bat_${version}_amd64.deb bat_${version}_amd64.deb )
+	install_apt_package_file bat_${version}_amd64.deb bat $link
 fi
 
 if [ "${install_ping}" == "1" ]; then
@@ -292,15 +295,17 @@ if [ "${install_diff}" == "1" ]; then
 fi
 
 if [ "${install_find}" == "1" ]; then
-	install_apt_package_file fd-musl_7.1.0_amd64.deb fd https://github.com/sharkdp/fd/releases/download/v7.1.0/fd-musl_7.1.0_amd64.deb
+	file="fd_$(get_latest_github_release_name sharkdp/fd skip_v)_amd64.deb"
+	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
+	install_apt_package_file ${file} fd $link
 fi
 
 if [ "${install_du}" == "1" ]; then
-	get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.13.tar.gz
+	get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz
 	tmp=$(mktemp -d)
 	uncompress_cached_file ncdu.tar.gz $tmp
 	install_apt_packages build-essential libncurses5-dev
-	logexec pushd ${tmp}/ncdu-1.13
+	logexec pushd ${tmp}/ncdu-1.14
 	logexec ./configure
 	logexec make
 	logexec sudo make install
@@ -317,10 +322,11 @@ if [ "${install_ag}" == "1" ]; then
 fi
 
 if [ "${install_entr}" == "1" ]; then
-	get_cached_file entr-4.1.tar.gz http://entrproject.org/code/entr-4.1.tar.gz
+	get_cached_file entr-4.1.tar.gz http://entrproject.org/code/entr-4.2.tar.gz
 	tmp=$(mktemp -d)
-	uncompress_cached_file entr-4.1.tar.gz $tmp
-	logexec pushd ${tmp}/eradman-entr-f4e2cbe57708
+	pushd $tmp
+	uncompress_cached_file entr-4.2.tar.gz eradman
+	logexec cd eradman
 	install_apt_packages build-essential
 	logexec ./configure
 	logexec make
@@ -355,7 +361,12 @@ if [ "${install_byobu}" == "1" ]; then
 fi
 
 if [ "${install_hexyl}" == "1" ]; then
-	install_apt_package_file fd-musl_7.1.0_amd64.debhexyl_0.3.1_amd64.deb hexyl https://github.com/sharkdp/hexyl/releases/download/v0.3.1/hexyl_0.3.1_amd64.deb
+	file="hexyl_$(get_latest_github_release_name sharkdp/hexyl skip_v)_amd64.deb"
+	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
+	install_apt_package_file ${file} hexyl $link
+
+
+#	install_apt_package_file fd-musl_7.1.0_amd64.debhexyl_0.3.1_amd64.deb hexyl https://github.com/sharkdp/hexyl/releases/download/v0.3.1/hexyl_0.3.1_amd64.deb
 fi
 
 if [ "${install_autojump}" == "1" ]; then

@@ -32,6 +32,10 @@ where
                                - office2007
                                - docs
                                - gedit (gedit plugins)
+                               - i3wm
+                               - kitty
+                               - waterfox (=firefox)
+                               
  --user <user name>       - Name of user. If specified, some extra user-specific tasks
                             will be performed for most of the tricks.
  --repo-path              - Path to the repository. Some tweaks require it.
@@ -43,7 +47,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox,i3wm
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox,i3wm,virtualbox,kitty
 "
 
 dir_resolve()
@@ -384,12 +388,14 @@ function virtualbox {
 	if [ ! -f "${homedir}/.config/autostart/indicator-virtual-box.py.desktop" ]; then
 		logexec cp /usr/share/applications/indicator-virtual-box.py.desktop "${homedir}/.config/autostart/indicator-virtual-box.py.desktop"
 	fi
+	logexec sudo update-secureboot-policy --new-key
+	
 }
 
 function kodi {
-	add_ppa team-xbmc/ppa
-	install_apt_package kodi
-	home="$(get_home_dir)"
+	if add_ppa team-xbmc/ppa; then
+		install_apt_package kodi
+	fi
 	logmkdir "${home}/.kodi" ${USER}
 	logmkdir "${home}/.kodi/userdata" ${USER}
 	textfile "${home}/.kodi/userdata/advancedsettings.xml" "\
@@ -416,8 +422,8 @@ function kodi {
 	textfile "${home}/.kodi/userdata/passwords.xml" "\
 <passwords>
     <path>
-        <from pathversion="1">smb://ADAM-990FX/rozne</from>
-        <to pathversion="1">smb://adam:Zero%20tolerancji@ADAM-990FX/rozne/</to>
+        <from pathversion="1">smb://szesciodysk/filmy</from>
+        <to pathversion="1">smb://adam:Zero%20tolerancji@szesciodysk/filmy/</to>
     </path>
 </passwords>"
 }
@@ -496,7 +502,7 @@ function firefox {
 	install_script ${DIR}/files/waterfox.desktop /usr/share/applications/waterfox.desktop
 	
 	make_symlink /opt/waterfox/waterfox /usr/local/bin/waterfox
-
+	#TODO: Install addon: https://github.com/iamadamdev/bypass-paywalls-firefox
 }
 
 function zulip {
@@ -633,7 +639,7 @@ function i3wm {
 	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(grep '^DISTRIB_CODENAME=' /etc/lsb-release | cut -f2 -d=) universe"
 
 	/etc/apt/sources.list.d/sur5r-i3.list
-	install_apt_packages i3 alsa-utils i3blocks pasystray apparmor-notify
+	install_apt_packages i3 alsa-utils i3blocks pasystray apparmor-notify lxappearance compton
 	
 	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp/i3blocks
 	if ! which i3blocks >/dev/null; then
@@ -673,14 +679,7 @@ function i3wm {
 
 
 function kitty {
-	local version=$(get_latest_github_release_name kovidgoyal/kitty)
-	pattern='v(.*)$'
-	if [[ ! "$version" =~ $pattern ]]; then
-		echo "Something wrong with the kitty release naming convention, $version"
-		return -1 
-	else
-		version=${BASH_REMATCH[1]}
-	fi
+	local version=$(get_latest_github_release_name kovidgoyal/kitty skip_v)
 	local file="kitty-${version}-x86_64.txz"
 	local kitty_source=$(get_latest_github_release kovidgoyal/kitty "${file}" "${file}")
 	uncompress_cached_file "$file" /opt/kitty $user
@@ -697,7 +696,6 @@ function kitty {
  # libxcb-composite0 libxcb-render0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-util-dev
   #libxcb-xfixes0-dev libxext-dev libxrender-dev x11proto-xext-dev
 }
-
 
 oldifs=${IFS}
 export IFS=","

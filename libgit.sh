@@ -1,14 +1,32 @@
 #!/bin/bash
 
 function get_latest_github_release_name { #source: https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
-	curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+	local skip_v=$2
+	ans=$(curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
 		grep '"tag_name":' |                                            # Get tag line
-		sed -E 's/.*"([^"]+)".*/\1/'                                    # Pluck JSON value
+		sed -E 's/.*"([^"]+)".*/\1/') # Pluck JSON value
+	                                    
+	if [ -n "$skip_v" ]; then
+		pattern='v(.*)$'
+		if [[ ! "$ans" =~ $pattern ]]; then
+			echo "Cannot strip \"v\" prefix from  $version"
+			return -1 
+		else
+			ans=${BASH_REMATCH[1]}
+		fi
+	fi
+	echo "$ans"
 }
 
 #Gets the file from latest release of github, or specific release
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 function get_latest_github_release {
+	link=$(get_latest_github_release_link "$@")
+	local file=$(get_cached_file "${local_filename}" "https://github.com/${github_name}/releases/download/${release}/${remote_filename}")
+	echo "$file"	
+}
+
+function get_latest_github_release_link {
 #set -x
 	local github_name="$1"
 	local remote_filename="$2"
@@ -26,9 +44,7 @@ function get_latest_github_release {
 	if [ -z "$local_filename" ]; then
 		local_filename="${noextension}-${release}.${extension}"
 	fi
-	local file=$(get_cached_file "${local_filename}" "https://github.com/${github_name}/releases/download/${release}/${remote_filename}")
-set +x
-	echo "$file"	
+	echo "https://github.com/${github_name}/releases/download/${release}/${remote_filename}"
 }
 
 function make_sure_git_exists {
