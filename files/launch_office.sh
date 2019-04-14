@@ -40,6 +40,36 @@ case $1 in
 esac
 shift
 
+function get_home_dir {
+	if [ -n "$1" ]; then
+		local USER=$1
+	fi
+	echo $( getent passwd "$USER" | cut -d: -f6 )
+}
+
+function get_special_dir {
+	local dirtype=$1
+	local user=$2
+	local ans=""
+	local HOME
+	local pattern
+	local folder
+	HOME=$(get_home_dir $user)
+	if [ -f "${HOME}/.config/user-dirs.dirs" ]; then
+		line=$(grep "^[^#].*${dirtype}" "${HOME}/.config/user-dirs.dirs")
+		pattern="^.*${dirtype}.*=\"?([^\"]+)\"?$"
+		if [[ "$line" =~ $pattern ]]; then
+			folder=${BASH_REMATCH[1]}
+			ans=$(echo $folder | envsubst )
+			if [ "$ans" == "$HOME" ]; then
+				ans=""
+			fi
+		fi
+	fi
+	echo "$ans"
+}
+
+
 function get_best_wine_path {
 	local docpath="$1"
 	local answer

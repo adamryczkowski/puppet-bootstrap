@@ -169,20 +169,22 @@ EOT
 		if [ "$out" != "0" ]; then
 			logexec sudo apt install -f --yes
 		fi
-		homedir="$(get_home_dir)"
+	fi
+	homedir="$(get_home_dir)"
+	if ! fc-list |grep -q -F "Fira Code"; then
 		dest_dir="${homedir}/.local/share/fonts"
-		if ! fc-list |grep -q FiraCode; then
-			for type in Bold Light Medium Regular Retina; do
-				src_file=$(get_cached_file "FiraCode-${type}.ttf" "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true")
-				cp_file "$src_file" "$dest_dir" "$user"
-				# logexec wget -O ~/.local/share/fonts/FiraCode-${type}.ttf "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true";
-			done
-		fi
+		logmkdir $dest_dir
+		for type in Bold Light Medium Regular Retina; do
+			src_file=$(get_cached_file "FiraCode-${type}.ttf" "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true")
+			cp_file "$src_file" "$dest_dir" "$user"
+			# logexec wget -O ~/.local/share/fonts/FiraCode-${type}.ttf "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true";
+		done
+		fc-cache -f
+	fi
 
-		if fc-list |grep -q FiraCode; then
-			if !grep -q "text-rendering:" /usr/lib/rstudio/www/index.htm; then
-				sudo sed -i '/<head>/a<style>*{text-rendering: optimizeLegibility;}<\/style>' /usr/lib/rstudio/www/index.htm
-			fi
+	if fc-list |grep -q FiraCode; then
+		if !grep -q "text-rendering:" /usr/lib/rstudio/www/index.htm; then
+			sudo sed -i '/<head>/a<style>*{text-rendering: optimizeLegibility;}<\/style>' /usr/lib/rstudio/www/index.htm
 		fi
 	fi
 fi

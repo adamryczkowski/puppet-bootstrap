@@ -220,12 +220,12 @@ function office2007 {
 	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
 	
 	do_update
-	install_apt_packages winehq-devel playonlinux
+	install_apt_packages winehq-staging playonlinux
 	
 	add_group wine_office
 	add_usergroup "$user" wine_office
-	uncompress_cached_file office2007_pl.tar.xz "/opt/" 
 	local office_install="/opt/Office2007"
+	uncompress_cached_file office2007_pl.tar.xz "${office_install}" 
 	chown_dir ${office_install} "${user}:wine_office" wine_office
 	#Make sure all office is writable by anyone with execute permission preserverd
 	chmod_dir ${office_install} 777 666 777
@@ -367,29 +367,23 @@ function virtualbox {
 	logexec sudo apt-key add "${release_key}"
 	add_apt_source_manual virtualbox "deb https://download.virtualbox.org/virtualbox/debian ${release} contrib"
 	add_ppa thebernmeister/ppa
-	install_apt_packages virtualbox-5.2 indicator-virtual-box
+	install_apt_packages virtualbox-6.0 indicator-virtual-box
 	
-	if ! VBoxManage list extpacks | grep "Oracle VM VirtualBox Extension Pack" >/dev/null; then
+	if ! sudo VBoxManage list extpacks | grep -q -F "Oracle VM VirtualBox Extension Pack"; then
 		version=$(VBoxManage -v)
-		echo $version
-		var1=$(echo $version | cut -d 'r' -f 1)
-		echo $var1
-		var2=$(echo $version | cut -d 'r' -f 2)
-		echo $var2
-		virtualbox_extension="Oracle_VM_VirtualBox_Extension_Pack-$var1-$var2.vbox-extpack"
-	
-		virtualbox_extension=$(get_cached_file ${virtualbox_extension} http://download.virtualbox.org/virtualbox/$var1/$virtualbox_extension)
-	
-		#sudo VBoxManage extpack uninstall "Oracle VM VirtualBox Extension Pack"
-		$loglog
-		echo "y" |sudo VBoxManage extpack install ${virtualbox_extension} --replace
+		pattern='^([0-9\.]+)r.*'
+		if [[ $version =~ $pattern ]]; then
+			version=${BASH_REMATCH[1]}
+			vb_ext_filename="Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
+			vb_ext_path=$(get_cached_file ${vb_ext_filename} https://download.virtualbox.org/virtualbox/${version}/${vb_ext_path})
+			logexec sudo VBoxManage extpack install ${vb_ext_path} --replace
+		fi
 	fi
 	homedir=$(get_home_dir)
 	if [ ! -f "${homedir}/.config/autostart/indicator-virtual-box.py.desktop" ]; then
 		logexec cp /usr/share/applications/indicator-virtual-box.py.desktop "${homedir}/.config/autostart/indicator-virtual-box.py.desktop"
 	fi
 	logexec sudo update-secureboot-policy --new-key
-	
 }
 
 function kodi {
