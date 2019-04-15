@@ -342,6 +342,9 @@ set -x
 			logexec dtrx --one rename "$path_filename"
 			extension="${path_filename##*.}"
 			filename_no_ext="${path_filename%.*}"
+			if [ ! -d "$filename_no_ext" ]; then
+				filename_no_ext="${filename_no_ext%.*}"
+			fi
 			logexec mv $(basename $filename_no_ext) $(basename $destination) 
 			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
 		else

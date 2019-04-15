@@ -157,7 +157,7 @@ function set_gsettings_array2 {
 }
 
 function gsettings_add_to_array {
-	echo "KUKU!"
+	local schema=$1
 	local key=$2
 	local value=$3
 #	local position=$4

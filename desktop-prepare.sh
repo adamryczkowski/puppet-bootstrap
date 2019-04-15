@@ -125,9 +125,11 @@ fi
 
 #Makes sure basic scripts are installed
 function tweak_base  {
-	install_script files/discover_session_bus_address.sh
+set -x
+	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scritps
 	install_apt_packages git gdebi-core
 	mount_smb_share "$repo_path"
+set +x
 }
 
 function unity {
@@ -599,7 +601,7 @@ function gedit {
 		logexec cp ${tmpdir}/gedit-control-your-tabs-master/controlyourtabs.plugin ~/.local/share/gedit/plugins
 	fi
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins controlyourtabs
-	install_apt_package gedit-plugins
+	install_apt_package gedit-plugins gedit-plugin-text-size
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins git
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins textsize
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins spell
@@ -626,6 +628,39 @@ function keepass {
 	file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 	echo "file=$file"
 	cp_file "$file" /usr/lib/keepass2/plugins/KeePassRPC.plgx root
+}
+
+function julia {
+	set -x
+	local julia_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
+	local pattern='^([0-9]+\.[0-9])\..*'
+	if [[ $julia_version =~ $pattern ]]; then
+		local short_version=${BASH_REMATCH[1]}
+	else
+		echo "Wrong format of version: ${julia_version}"
+		return 1
+	fi
+	local julia_file="julia-${julia_version}-linux-x86_64.tar.gz"
+	local julia_link="https://julialang-s3.julialang.org/bin/linux/x64/${short_version}/${julia_file}"
+	local julia_path=$(get_cached_file "${julia_file}" "${julia_link}")
+	uncompress_cached_file "${julia_file}" /opt/julia $user
+
+	make_symlink /opt/julia/bin/julia /usr/local/bin/julia
+
+	atom	
+	if which apm >/dev/null; then
+		if ! apm list | grep -q -F "uber-juno"; then
+			logexec apm install uber-juno
+		fi
+	fi
+	set +x
+	
+	julia -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatPlots" , "DataFrames", "JLD", "Flux", "TensorFlow"])'
+}
+
+function atom {
+	add_apt_source_manual atom "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" https://packagecloud.io/AtomEditor/atom/gpgkey atom.key
+	install_apt_packages atom
 }
 
 function i3wm {
