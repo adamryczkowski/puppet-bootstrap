@@ -22,6 +22,14 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 function get_latest_github_release {
 	link=$(get_latest_github_release_link "$@")
+	
+	if [[ $(get_distribution) == "LinuxMint" ]]; then
+		release=bionic
+	else
+	   release=$(get_ubuntu_codename)
+	fi
+
+	
 	local file=$(get_cached_file "${local_filename}" "https://github.com/${github_name}/releases/download/${release}/${remote_filename}")
 	echo "$file"	
 }
