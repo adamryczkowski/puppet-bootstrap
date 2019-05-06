@@ -21,6 +21,7 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 #Gets the file from latest release of github, or specific release
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 function get_latest_github_release {
+	local local_filename="$3"
 	link=$(get_latest_github_release_link "$@")
 	local file=$(get_cached_file "${local_filename}" "$link")
 	echo "$file"	
