@@ -22,6 +22,7 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 function get_latest_github_release {
 	local github_name="$1"
+	local remote_filename="$2"
 	link=$(get_latest_github_release_link "$@")
 	
 	if [[ $(get_distribution) == "LinuxMint" ]]; then
