@@ -214,11 +214,17 @@ function office2007 {
 	echo "#TODO"
 	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/winehq.key)
 	logexec sudo apt-key add "${release_key}"
-   release=$(get_ubuntu_codename)
 	add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key
 	
 #	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
 #	logexec sudo apt-key add "${release_key}"
+
+	if [[ $(get_distribution) == "LinuxMint" ]]; then
+		release=bionic
+	else
+	   release=$(get_ubuntu_codename)
+	fi
+
 	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
 	
 	do_update

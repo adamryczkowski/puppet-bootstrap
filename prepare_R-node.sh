@@ -183,7 +183,7 @@ EOT
 	fi
 
 	if fc-list |grep -q FiraCode; then
-		if !grep -q "text-rendering:" /usr/lib/rstudio/www/index.htm; then
+		if ! grep -q "text-rendering:" /usr/lib/rstudio/www/index.htm; then
 			sudo sed -i '/<head>/a<style>*{text-rendering: optimizeLegibility;}<\/style>' /usr/lib/rstudio/www/index.htm
 		fi
 	fi
