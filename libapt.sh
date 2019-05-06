@@ -113,7 +113,9 @@ function add_ppa {
 		if [ "$release" == "xenial" ]; then
 			logexec sudo add-apt-repository -y ppa:${the_ppa}
 		else
-			logexec sudo add-apt-repository --no-update -y ppa:${the_ppa}
+			if ! logexec sudo add-apt-repository --no-update -y ppa:${the_ppa}
+				logexec sudo add-apt-repository -y ppa:${the_ppa}
+			fi
 		fi
 		refresh_apt_redirections
 		flag_need_apt_update=1
