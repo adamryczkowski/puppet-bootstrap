@@ -21,6 +21,7 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 #Gets the file from latest release of github, or specific release
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 function get_latest_github_release {
+	local github_name="$1"
 	link=$(get_latest_github_release_link "$@")
 	
 	if [[ $(get_distribution) == "LinuxMint" ]]; then
@@ -31,7 +32,7 @@ function get_latest_github_release {
 
 	
 	local file=$(get_cached_file "${local_filename}" "https://github.com/${github_name}/releases/download/${release}/${remote_filename}")
-	echo "$file"	
+		echo "$file"	
 }
 
 function get_latest_github_release_link {

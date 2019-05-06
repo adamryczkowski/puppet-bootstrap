@@ -631,7 +631,7 @@ function gedit {
 
 function keepass {
 	add_ppa jtaylor/keepass
-	install_apt_package keepass2 libmono-system-configuration-install4.0-cil libmono-system-management4.0-cil libmono-csharp4.0c-cil libmono-microsoft-csharp4.0-cil mono-dmcs mono-mcs
+	install_apt_package keepass2 	libmono-system-configuration-install4.0-cil libmono-system-management4.0-cil libmono-csharp4.0c-cil libmono-microsoft-csharp4.0-cil mono-dmcs mono-mcs
 	file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 	echo "file=$file"
 	cp_file "$file" /usr/lib/keepass2/plugins/KeePassRPC.plgx root
