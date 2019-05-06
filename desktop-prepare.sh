@@ -498,7 +498,7 @@ function firefox {
 	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
 	file=$(get_cached_file "waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2" "https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2")
 	
-	uncompress_cached_file waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2 "/opt/"
+	uncompress_cached_file waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2 "/opt/waterfox"
 	
 	chown_dir "/opt/waterfix" root root
 
