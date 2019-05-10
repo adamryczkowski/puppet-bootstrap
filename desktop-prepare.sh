@@ -654,7 +654,6 @@ function julia {
 
 	make_symlink /opt/julia/bin/julia /usr/local/bin/julia
 
-	atom	
 	if which apm >/dev/null; then
 		if ! apm list | grep -q -F "uber-juno"; then
 			logexec apm install uber-juno
@@ -662,7 +661,7 @@ function julia {
 	fi
 	set +x
 	
-	julia -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatPlots" , "DataFrames", "JLD", "Flux", "TensorFlow"])'
+	$(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatPlots" , "DataFrames", "JLD", "Flux", "TensorFlow", "Debugger", "Weave"])'
 }
 
 function atom {
