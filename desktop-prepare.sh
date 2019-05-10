@@ -651,7 +651,7 @@ function julia {
 	local julia_file="julia-${julia_version}-linux-x86_64.tar.gz"
 	local julia_link="https://julialang-s3.julialang.org/bin/linux/x64/${short_version}/${julia_file}"
 	local julia_path=$(get_cached_file "${julia_file}" "${julia_link}")
-	uncompress_cached_file "${julia_file}" /opt/julia $user
+	uncompress_cached_file "${julia_path}" /opt/julia $user
 
 	make_symlink /opt/julia/bin/julia /usr/local/bin/julia
 
