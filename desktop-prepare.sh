@@ -126,6 +126,7 @@ fi
 #Makes sure basic scripts are installed
 function tweak_base  {
 set -x
+	logmkdir /usr/local/lib/adam/scritps root
 	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scritps
 	install_apt_packages git gdebi-core
 	mount_smb_share "$repo_path"
