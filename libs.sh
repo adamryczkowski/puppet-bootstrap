@@ -7,6 +7,7 @@
 ## dependency: libmount.sh
 ## dependency: libnet.sh
 ## dependency: libexec.sh
+## dependency: libatom.sh
 
 
 source libapt.sh
@@ -16,6 +17,7 @@ source libgit.sh
 source libmount.sh
 source libnet.sh
 source libexec.sh
+source libatom.sh
 
 
 #Gets ubuntu version in format e.g. 1804 or 1604

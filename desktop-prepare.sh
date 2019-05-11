@@ -35,6 +35,7 @@ where
                                - i3wm
                                - kitty
                                - waterfox (=firefox)
+                               - julia
                                
  --user <user name>       - Name of user. If specified, some extra user-specific tasks
                             will be performed for most of the tricks.
@@ -47,7 +48,7 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox,i3wm,virtualbox,kitty
+./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox,i3wm,virtualbox,kitty,julia
 "
 
 dir_resolve()
@@ -655,19 +656,10 @@ function julia {
 
 	make_symlink /opt/julia/bin/julia /usr/local/bin/julia
 
-	if which apm >/dev/null; then
-		if ! apm list | grep -q -F "uber-juno"; then
-			logexec apm install uber-juno
-		fi
-	fi
-	set +x
-	
-	$(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatPlots" , "DataFrames", "JLD", "Flux", "TensorFlow", "Debugger", "Weave"])'
-}
+	install_apt_packages hdf5-tools #for HDF5 Julia package
+	install_atom_packages uber-juno
 
-function atom {
-	add_apt_source_manual atom "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" https://packagecloud.io/AtomEditor/atom/gpgkey atom.key
-	install_apt_packages atom
+	$(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatPlots" , "DataFrames", "JLD", "Flux", "TensorFlow", "Debugger", "Weave"]);ENV["PYTHON"]=""; Pkg.build()'
 }
 
 function i3wm {
