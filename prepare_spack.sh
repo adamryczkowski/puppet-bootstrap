@@ -22,7 +22,7 @@ where
 
 Example2:
 
-$(basename $0) --debug
+$(basename $0) --debug --spack-mirror /media/adam-minipc/other/spack-mirror
 
 "
 
