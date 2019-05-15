@@ -610,7 +610,7 @@ function gedit {
 		logexec cp ${tmpdir}/gedit-control-your-tabs-master/controlyourtabs.plugin ~/.local/share/gedit/plugins
 	fi
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins controlyourtabs
-	install_apt_package gedit-plugins gedit-plugin-text-size
+	install_apt_packages gedit-plugins gedit-plugin-text-size
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins git
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins textsize
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins spell
