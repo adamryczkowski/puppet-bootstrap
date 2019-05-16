@@ -231,7 +231,7 @@ function office2007 {
 	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
 	
 	do_update
-	install_apt_packages winehq-staging playonlinux
+	install_apt_packages winehq-staging playonlinux gridsite-clients
 	
 	add_group wine_office
 	add_usergroup "$user" wine_office
