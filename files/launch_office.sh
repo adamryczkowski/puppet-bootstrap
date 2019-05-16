@@ -98,12 +98,13 @@ function get_best_wine_path {
 
 
 doc_dir=$(get_special_dir DOCUMENTS "$USER")
-desktop_dir=$(get_special_dir DOCUMENTS "$USER")
+desktop_dir=$(get_special_dir DESKTOP "$USER")
 
 declare -a args
-
+#file:///home/adam/Documents/plany,%20formalnosci/Adam/praca/szukanie%20pracy/cover.docx
 for var in "$@"
 do
+	var=$(urlencode -d "${var}" | sed "s/^file:\/\///g")
 	arg=$(readlink -f "$var")
 #	openin=`dirname "${arg}"`
 	#echo "arg: ${arg}" >/tmp/kiki
