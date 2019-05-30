@@ -133,4 +133,14 @@ function is_host_up {
 	ping -c 1 -w 1  $1 >/dev/null
 }
 
-
+function get_local_ip {
+	local line=$(ip route get 1)
+	local pattern='^.* src (.*) uid'
+	if [[ $line =~ $pattern ]]; then
+		echo "${BASH_REMATCH[1]}"
+		return
+	else
+		errcho "Cannot get local ip from $line"
+		return -1
+	fi
+}

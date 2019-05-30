@@ -318,7 +318,11 @@ if [ "${install_tldr}" == "1" ]; then
 fi
 
 if [ "${install_ag}" == "1" ]; then
-	install_apt_package silversearcher-ag
+	local rg_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
+	local rg_file="ripgrep_${rg_version}_amd64.deb"
+	local rg_link="https://github.com/BurntSushi/ripgrep/releases/download/${rg_version}/${rg_file}"
+	install_apt_package_file ${rg_file} "ripgrep" "${rg_link}"
+	make_symlink /usr/bin/rg /usr/local/bin/ag
 fi
 
 if [ "${install_entr}" == "1" ]; then
