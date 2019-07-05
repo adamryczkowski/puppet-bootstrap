@@ -47,6 +47,7 @@ where
  --byobu                  - byobu
  --hexyl                  - hexyl (a hex editor)
  --autojump               - autojump (cd replacement)
+ --dtrx                   - Do The Right eXtraction (untar/unzip/unrar/etc. replacement)
 
 Example:
 
@@ -90,6 +91,7 @@ install_liquidprompt=0
 install_byobu=0
 install_hexyl=0
 install_autojump=0
+install_dtrx=0
 
 user_opts=""
 
@@ -154,6 +156,7 @@ case $key in
 	install_entr=1
 	install_noti=1
 	install_mc=1
+	install_dtrx=1
 	install_aptitude=1
 	install_liquidprompt=1
 	user_opts="${user_opts} --liquidprompt"
@@ -224,6 +227,10 @@ case $key in
 	install_autojump=1
 	user_opts="${user_opts} --autojump"
 	;;
+	--dtrx)
+	install_dtrx=1
+	user_opts="${user_opts} --dtrx"
+	;;
     -*)
     echo "Error: Unknown option: $1" >&2
     echo "$usage" >&2
@@ -286,6 +293,10 @@ fi
 
 if [ "${install_htop}" == "1" ]; then
 	install_apt_package htop
+fi
+
+if [ "${install_dtrx}" == "1" ]; then
+	install_apt_package dtrx
 fi
 
 if [ "${install_diff}" == "1" ]; then
