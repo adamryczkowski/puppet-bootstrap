@@ -84,7 +84,7 @@ fi
 
 linetextfile /etc/salt/minion.d/server.conf "master: ${server_address}"
 
-if [[ "${server_key}" != ""]]; then
+if [[ "${server_key}" != "" ]]; then
    linetextfile /etc/salt/minion.d/server.conf "master_finger: '${server_key}'"   
 fi
 
