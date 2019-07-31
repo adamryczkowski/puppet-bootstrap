@@ -316,7 +316,7 @@ if [ "${install_du}" == "1" ]; then
 	tmp=$(mktemp -d)
 	uncompress_cached_file ncdu.tar.gz $tmp
 	install_apt_packages build-essential libncurses5-dev
-	logexec pushd ${tmp}/ncdu-1.14
+	logexec pushd ${tmp}/ncdu
 	logexec ./configure
 	logexec make
 	logexec sudo make install
