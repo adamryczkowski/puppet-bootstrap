@@ -28,19 +28,13 @@ where
 Example2:
 
 Will use existing DHCP server on the n2n network
-$(basename $0)  
+$(basename $0) localhost  
 "
 
 server_key=""
 server_address=$1
 shift
 if [ -z "$server_address" ]; then
-	echo "$usage"
-	exit 1
-fi
-parse_URI ${server_address}
-if [ -z "${ip}" ]; then
-	echo "Cannot find address of the server in ${server_address}"
 	echo "$usage"
 	exit 1
 fi
