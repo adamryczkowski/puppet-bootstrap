@@ -87,6 +87,7 @@ linetextfile /etc/salt/minion.d/server.conf "master: ${server_address}"
 if [ "${server_key}" != "" ]; then
    linetextfile /etc/salt/minion.d/server.conf "master_finger: '${server_key}'"   
 fi
+sudo service salt-minion restart
 
 echo "Now you need to accept the minion in the server by typing down sudo salt-key -A"
 
