@@ -688,7 +688,8 @@ function i3wm {
 	install_file files/i3-config ${home}/.config/i3/config
 	
 	
-	
+	#https://i3wm.org/docs/repositories.html
+	#https://askubuntu.com/questions/1080671/how-can-i-install-playerctl
 	#https://github.com/unix121/i3wm-themer
 	
 #	if ! which polybar >/dev/null; then
