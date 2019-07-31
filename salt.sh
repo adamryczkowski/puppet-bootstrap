@@ -31,7 +31,7 @@ $(basename $0)
 "
 
 
-use_develop=0
+develop=0
 
 
 while [[ $# > 0 ]]
@@ -48,7 +48,7 @@ case $key in
 	shift
 	;;
 	--develop)
-	use_develop=1
+	develop=1
 	;;
 	--help)
 	echo "$usage"
@@ -66,7 +66,7 @@ install_apt_package curl curl
 
 curl -o /tmp/bootstrap-salt.sh -L https://bootstrap.saltstack.com
 
-if [[ "${do_develop}" == "1" ]];  then
+if [[ "${develop}" == "1" ]];  then
    sudo sh /tmp/bootstrap-salt.sh -f  -M -x python3 -git # (-M aby instalować serwer i -N aby NIE instalować miniona -f aby na pewno zrobić shallow clone)
 else
    errcho "We do not support non-development versions atm."
