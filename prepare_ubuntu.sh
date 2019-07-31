@@ -377,7 +377,7 @@ fi
 
 if [ "${install_hexyl}" == "1" ]; then
 	file="hexyl_$(get_latest_github_release_name sharkdp/hexyl skip_v)_amd64.deb"
-	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
+	link=$(get_latest_github_release_link sharkdp/hexyl ${file} ${file})
 	install_apt_package_file ${file} hexyl $link
 
 
