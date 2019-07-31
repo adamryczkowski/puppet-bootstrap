@@ -271,7 +271,7 @@ do_update
 do_upgrade
 
 install_apt_packages bash-completion
-
+set -x
 #	install_byobu=1
 
 if [ "${install_bat}" == "1" ]; then

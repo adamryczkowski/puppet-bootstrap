@@ -8,7 +8,6 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 	ans=$(curl $github_token --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
 		grep '"tag_name":' |                                            # Get tag line
 		sed -E 's/.*"([^"]+)".*/\1/') # Pluck JSON value
-	echo "ans=${ans}"                             
 	if [ -n "$skip_v" ]; then
 		pattern='v(.*)$'
 		if [[ ! "$ans" =~ $pattern ]]; then
