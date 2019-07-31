@@ -39,7 +39,6 @@ if [ -z "$server_address" ]; then
 	exit 1
 fi
 
-server_address=${ip}
 if [ -z "${port}" ]; then
 	echo "Cannot find UDP port of the server in ${server_address}"
 	echo "$usage"
