@@ -13,14 +13,13 @@ Prepares salt server with the clone of my repository
 
 Usage:
 
-$(basename $0) <server_address> [--server-key <server key>]
+$(basename $0) [--develop]
 		[--help] [--debug] [--log <output file>]
 
 
 where
 
- <server_address>           - Where the minion should find the server
- <server key>               - Public key of the server. 
+ --develop                  - Flat that indicates to download a development version from git
  --debug                    - Flag that sets debugging mode. 
  --log                      - Path to the log file that will log all meaningful commands
 
@@ -31,26 +30,9 @@ Will use existing DHCP server on the n2n network
 $(basename $0)  
 "
 
-server_key=""
-server_address=$1
-shift
-if [ -z "$server_address" ]; then
-	echo "$usage"
-	exit 1
-fi
-parse_URI ${server_address}
-if [ -z "${ip}" ]; then
-	echo "Cannot find address of the server in ${server_address}"
-	echo "$usage"
-	exit 1
-fi
 
-server_address=${ip}
-if [ -z "${port}" ]; then
-	echo "Cannot find UDP port of the server in ${server_address}"
-	echo "$usage"
-	exit 1
-fi
+develop=0
+
 
 while [[ $# > 0 ]]
 do
@@ -67,10 +49,6 @@ case $key in
 	;;
 	--develop)
 	develop=1
-	;;
-	--server-key)
-	server_key="$1"
-	shift
 	;;
 	--help)
 	echo "$usage"
@@ -89,19 +67,19 @@ install_apt_package curl curl
 curl -o /tmp/bootstrap-salt.sh -L https://bootstrap.saltstack.com
 
 if [[ "${develop}" == "1" ]];  then
-   sudo sh /tmp/bootstrap-salt.sh -f -x python3 -git # (-M aby instalować serwer i -N aby NIE instalować miniona -f aby na pewno zrobić shallow clone)
+   sudo sh /tmp/bootstrap-salt.sh -f  -M -x python3 -git # (-M aby instalować serwer i -N aby NIE instalować miniona -f aby na pewno zrobić shallow clone)
 else
    errcho "We do not support non-development versions atm."
    exit 1
 fi
 
-linetextfile /etc/salt/minion.d/server.conf "master: ${server_address}"
+logexec sudo chown $USER /srv
 
-if [[ "${server_key}" != ""]]; then
-   linetextfile /etc/salt/minion.d/server.conf "master_finger: '${server_key}'"   
-fi
+get_git_repo https://github.com/adamryczkowski/salt_repo /srv salt
 
-echo "Now you need to accept the minion in the server by typing down sudo salt-key -A"
+server_key=$(sudo salt-key --finger-all | grep master.pub | grep -E '[0-9a-f]{2}(:[0-9a-f]{2})+$' -o)
+
+echo "SERVER KEY: ${server_key}"
 
 exit 0
 
