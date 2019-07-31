@@ -277,7 +277,7 @@ install_apt_packages bash-completion
 if [ "${install_bat}" == "1" ]; then
 	version=$(get_latest_github_release_name sharkdp/bat skip_v)
 	
-	link=$(get_latest_github_release_link sharkdb/bat bat_${version}_amd64.deb bat_${version}_amd64.deb )
+	link=$(get_latest_github_release_link sharkdp/bat bat_${version}_amd64.deb bat_${version}_amd64.deb )
 	install_apt_package_file bat_${version}_amd64.deb bat $link
 fi
 
