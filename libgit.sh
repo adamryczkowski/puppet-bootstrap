@@ -1,11 +1,14 @@
 #!/bin/bash
 
+set github_token=$(openssl enc -d -in binary_blob.bin -pbkdf2 -aes-256-cbc -pass pass:BASH_REMATCH)
+
 function get_latest_github_release_name { #source: https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
+   set -x
 	local skip_v=$2
-	ans=$(curl --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+	ans=$(curl $github_token --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
 		grep '"tag_name":' |                                            # Get tag line
 		sed -E 's/.*"([^"]+)".*/\1/') # Pluck JSON value
-	                                    
+	echo "ans=${ans}"                             
 	if [ -n "$skip_v" ]; then
 		pattern='v(.*)$'
 		if [[ ! "$ans" =~ $pattern ]]; then
@@ -17,6 +20,8 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 	fi
 	echo "$ans"
 }
+
+openssl enc -in foo.bar -aes-256-cbc -K szakal > foo.bar.enc
 
 #Gets the file from latest release of github, or specific release
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
