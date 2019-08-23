@@ -663,30 +663,33 @@ function julia {
 }
 
 function i3wm {
-	install_apt_package_file sur5r-keyring_2019.02.01_all.deb  debian.sur5r.net http://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2019.02.01_all.deb
+	set -x
+	install_apt_package_file sur5r-keyring_2019.02.01_all.deb sur5r-keyring http://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2019.02.01_all.deb
 	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(grep '^DISTRIB_CODENAME=' /etc/lsb-release | cut -f2 -d=) universe"
 
-	/etc/apt/sources.list.d/sur5r-i3.list
-	install_apt_packages i3 alsa-utils i3blocks pasystray apparmor-notify lxappearance scrot gnome-screenshot compton
+#	/etc/apt/sources.list.d/sur5r-i3.list
+	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools 
 	
-	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp/i3blocks
+	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
 	if ! which i3blocks >/dev/null; then
-		install_apt_packages autoconf
+		install_apt_packages autoconf automake
 		pushd ${home}/tmp/i3blocks
 		logexec ./autogen.sh
 		logexec ./configure
 		logexec make
 		logexec make install
 	fi
+	logmkdir ${home}/.config
 
+	get_git_repo https://gitlab.com/adamwam/i3-config.git ${home}/.config
+	get_git_repo https://gitlab.com/adamwam/i3blocks-config.git ${home}/.config
+	make_symlink ${home}/.config/i3-config/i3 ${home}/.config/i3
+	make_symlink ${home}/.config/i3-config/terminator ${home}/.config/terminator
+	
 	
 	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
 	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb 
-	
-	get_git_repo https://gitlab.com/adamwam/i3blocks-config.git ${home}/.config/i3blocks
-	
-	install_file files/i3-config ${home}/.config/i3/config
-	
+		
 	
 	#https://i3wm.org/docs/repositories.html
 	#https://askubuntu.com/questions/1080671/how-can-i-install-playerctl
