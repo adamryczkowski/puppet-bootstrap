@@ -679,9 +679,13 @@ function i3wm {
 		logexec make
 		logexec make install
 	fi
+<<<<<<< Updated upstream
 	logmkdir ${home}/.config
+=======
+	
 	#TODO: install terminator
 	#TODO: install albert
+>>>>>>> Stashed changes
 
 	get_git_repo https://gitlab.com/adamwam/i3-config.git ${home}/.config
 	get_git_repo https://gitlab.com/adamwam/i3blocks-config.git ${home}/.config
