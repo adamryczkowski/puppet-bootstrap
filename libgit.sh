@@ -3,9 +3,9 @@
 github_token=$(openssl enc -d -in binary_blob.bin -pbkdf2 -aes-256-cbc -pass pass:BASH_REMATCH)
 
 function get_latest_github_release_name { #source: https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
-   set -x
+#   set +x
 	local skip_v=$2
-	install_apt_package curl curl
+#	install_apt_package curl curl
 	ans=$(curl $github_token --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
 		grep '"tag_name":' |                                            # Get tag line
 		sed -E 's/.*"([^"]+)".*/\1/') # Pluck JSON value
