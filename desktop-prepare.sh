@@ -668,7 +668,7 @@ function i3wm {
 	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(grep '^DISTRIB_CODENAME=' /etc/lsb-release | cut -f2 -d=) universe"
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
-	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools 
+	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator
 	
 	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
 	if ! which i3blocks >/dev/null; then
@@ -680,6 +680,7 @@ function i3wm {
 		logexec make install
 	fi
 	logmkdir ${home}/.config
+	
 	#TODO: install terminator
 	#TODO: install albert
 
@@ -687,6 +688,7 @@ function i3wm {
 	get_git_repo https://gitlab.com/adamwam/i3blocks-config.git ${home}/.config
 	make_symlink ${home}/.config/i3-config/i3 ${home}/.config/i3
 	make_symlink ${home}/.config/i3-config/terminator ${home}/.config/terminator
+	make_symlink ${home}/.config/i3blocks-config ${home}/.config/i3blocks
 	
 	
 	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
