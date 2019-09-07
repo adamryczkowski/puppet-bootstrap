@@ -561,18 +561,6 @@ if [ "${hostuser}" != "" ]; then
 	echo " lxc config device add ${name} mywork_share disk source=/mnt/ext4/work path=/home/${lxcuser}/work"
 fi
 
-if [ "${update_all}" == "1" ]; then
-	if [ -n "$debug" ]; then
-		opts="$opts --debug"
-		if [ -z "$log" ]; then
-			log=/dev/stdout
-		else
-			opts="$opts --log $log"
-		fi
-	fi
-	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- --puppet-bootstrap
-fi
-
 if [ -n "${guestfolder}" ]; then
 	sharename=$(basename ${hostfolder})
 	if [ ! $(lxc config device list ${name} | grep -q ${sharename}) ]; then
@@ -587,6 +575,18 @@ if [[ $bare == 0 ]]; then
 	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --bat --ping --fzf --htop --find --ag --mc --liquidprompt --byobu --autojump --wormhole $aptproxy --need-apt-update
 else
 	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --need-apt-update
+fi
+
+if [ "${update_all}" == "1" ]; then
+	if [ -n "$debug" ]; then
+		opts="$opts --debug"
+		if [ -z "$log" ]; then
+			log=/dev/stdout
+		else
+			opts="$opts --log $log"
+		fi
+	fi
+	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- --puppet-bootstrap
 fi
 
 

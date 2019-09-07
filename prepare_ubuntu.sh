@@ -270,7 +270,7 @@ fi
 do_update
 do_upgrade
 
-install_apt_packages bash-completion
+install_apt_packages bash-completion curl
 set -x
 #	install_byobu=1
 
