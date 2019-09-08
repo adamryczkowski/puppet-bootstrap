@@ -127,8 +127,8 @@ fi
 install_apt_package curl
 last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
 link="https://github.com/SoftEtherVPN/SoftEtherVPN/archive/${last_version}.tar.gz"
-
-uncompress_cached_file 5.01.9670.tar.gz /opt/softether
+filepath=$(get_cached_file "${last_version}.tar.gz" "${link}")
+uncompress_cached_file "${filepath}" /opt/softether
 
 exit 1
 
