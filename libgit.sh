@@ -108,7 +108,7 @@ function get_git_repo {
 		logexec $prefix git pull
 	else
 		# clone repo
-		logexec $prefix git clone --depth 1 ${repo} ${dest}
+		logexec $prefix git clone --depth 1 --recursive ${repo} ${dest}
 	fi
 }
 

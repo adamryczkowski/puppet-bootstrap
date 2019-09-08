@@ -130,5 +130,8 @@ link="https://github.com/SoftEtherVPN/SoftEtherVPN/archive/${last_version}.tar.g
 filepath=$(get_cached_file "${last_version}.tar.gz" "${link}")
 uncompress_cached_file "${filepath}" /opt/softether
 
+install_apt_package curl cmake build-essential libssl-dev zlib1g-dev libreadline-dev
+
+
 exit 1
 
