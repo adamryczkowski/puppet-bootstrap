@@ -125,8 +125,9 @@ if [ -z "$password" ]; then
 fi
 
 add_ppa paskal-07/softethervpn
-install_apt_package softether-vpn
+install_apt_package softether-vpnserver
 
+vpncmd /SERVER localhost /CMD ServerPasswordSet "${password}"
 
 #install_apt_package curl
 #last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)

@@ -685,7 +685,7 @@ function i3wm {
 		logexec ./autogen.sh
 		logexec ./configure
 		logexec make
-		logexec make install
+		logexec sudo make install
 	fi
 	logmkdir ${home}/.config
 	
