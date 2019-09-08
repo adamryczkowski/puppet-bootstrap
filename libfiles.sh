@@ -69,7 +69,7 @@ function logmkdir {
 		logexec sudo mkdir -p "$dir"
 	fi
 	if [ -n "$user" ]; then
-		logexec sudo chown ${user}:${user} "$dir"
+		logexec sudo chown -R ${user}:${user} "$dir"
 	fi
 }
 
