@@ -124,23 +124,25 @@ if [ -z "$password" ]; then
 	exit 1
 fi
 
-install_apt_package curl
-last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
-link="https://github.com/SoftEtherVPN/SoftEtherVPN/archive/${last_version}.tar.gz"
-get_git_repo https://github.com/SoftEtherVPN/SoftEtherVPN.git /opt SoftEther
-#filepath=$(get_cached_file "${last_version}.tar.gz" "${link}")
-#uncompress_cached_file "${filepath}" /opt/softether
+add_ppa paskal-07/softethervpn
+install_apt_package softether-vpn
 
-install_apt_packages curl cmake build-essential libssl-dev zlib1g-dev libreadline-dev
 
-if ! which vpncmd>/dev/null; then
-   logmkdir "/opt/SoftEther" adam
-   logmkdir "/opt/SoftEther/build" adam
-   pushd "/opt/SoftEther/build"
-   logexec cmake ..
-   logexec make -j
-   logexec sudo make install
-fi
+#install_apt_package curl
+#last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
+#link="https://github.com/SoftEtherVPN/SoftEtherVPN/archive/${last_version}.tar.gz"
+#get_git_repo https://github.com/SoftEtherVPN/SoftEtherVPN.git /opt SoftEther
+
+#install_apt_packages curl cmake build-essential libssl-dev zlib1g-dev libreadline-dev
+
+#if ! which vpncmd>/dev/null; then
+#   logmkdir "/opt/SoftEther" adam
+#   logmkdir "/opt/SoftEther/build" adam
+#   pushd "/opt/SoftEther/build"
+#   logexec cmake ..
+#   logexec make -j
+#   logexec sudo make install
+#fi
 
 exit 1
 
