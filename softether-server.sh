@@ -127,8 +127,9 @@ fi
 install_apt_package curl
 last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
 link="https://github.com/SoftEtherVPN/SoftEtherVPN/archive/${last_version}.tar.gz"
-filepath=$(get_cached_file "${last_version}.tar.gz" "${link}")
-uncompress_cached_file "${filepath}" /opt/softether
+get_git_repo https://github.com/SoftEtherVPN/SoftEtherVPN.git /opt SoftEther
+#filepath=$(get_cached_file "${last_version}.tar.gz" "${link}")
+#uncompress_cached_file "${filepath}" /opt/softether
 
 install_apt_package curl cmake build-essential libssl-dev zlib1g-dev libreadline-dev
 
