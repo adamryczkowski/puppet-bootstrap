@@ -124,20 +124,6 @@ if [ -z "$password" ]; then
 	exit 1
 fi
 
-ubuntu_ver=$(get_ubuntu_version)
-pattern='([[:digit:]]{2})([[:digit:]]{2})'
-if [[ "${ubuntu_ver}" =~ $pattern ]]; then
-	file_link="http://apt-stable.ntop.org/${BASH_REMATCH[1]}.${BASH_REMATCH[2]}/all/apt-ntop-stable.deb"
-	file_name="n2n-$(get_ubuntu_codename)-repo.deb"
-else
-	errcho "Something wrong with get_ubuntu_version"
-	exit 1
-fi
-
-#Building
-
-install_apt_packages git make gcc build-essential libreadline-dev libssl-dev libncurses-dev zlib1g-dev cmake
-
 last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
 link="https://github.com/SoftEtherVPN/SoftEtherVPN/releases/download/${last_version}/${last_version}.tar.gz"
 
