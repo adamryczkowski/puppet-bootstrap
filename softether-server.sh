@@ -124,8 +124,9 @@ if [ -z "$password" ]; then
 	exit 1
 fi
 
+install_apt_package curl
 last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
-link="https://github.com/SoftEtherVPN/SoftEtherVPN/releases/download/${last_version}/${last_version}.tar.gz"
+link="https://github.com/SoftEtherVPN/SoftEtherVPN/archuve/${last_version}.tar.gz"
 
 uncompress_cached_file 5.01.9670.tar.gz /opt/softether
 
