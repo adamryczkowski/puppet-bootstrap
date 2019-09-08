@@ -134,6 +134,7 @@ get_git_repo https://github.com/SoftEtherVPN/SoftEtherVPN.git /opt SoftEther
 install_apt_packages curl cmake build-essential libssl-dev zlib1g-dev libreadline-dev
 
 if ! which vpncmd>/dev/null; then
+   logmkdir "/opt/SoftEther" adam
    logmkdir "/opt/SoftEther/build" adam
    pushd "/opt/SoftEther/build"
    logexec cmake ..
