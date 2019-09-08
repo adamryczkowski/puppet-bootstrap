@@ -701,7 +701,9 @@ function i3wm {
 	
 	add_apt_source_manual manuelschneid3r 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_18.04/ /' https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
 	
-	install_apt_package albert pcmanfm
+	install_script files/i3exit '/usr/local/bin' root
+	
+	install_apt_packages albert pcmanfm units
 	
 	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
 	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb 

@@ -127,7 +127,8 @@ fi
 add_ppa paskal-07/softethervpn
 install_apt_package softether-vpnserver
 
-vpncmd /SERVER localhost /CMD ServerPasswordSet "${password}"
+vpncmd /SERVER localhost /CMD ServerPasswordSet "${password}" /CMD Hub VPN /CMD SecureNATEnable
+
 
 #install_apt_package curl
 #last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)

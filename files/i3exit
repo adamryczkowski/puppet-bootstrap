@@ -1,0 +1,45 @@
+#!/bin/sh
+lock() {
+    i3lock
+}
+
+case "$1" in
+    lock)
+        lock
+        ;;
+    logout)
+        i3-msg exit
+        ;;
+    suspend)
+        lock && systemctl suspend
+        ;;
+    hibernate)
+        lock && systemctl hibernate
+        ;;
+    reboot)
+    	  sudo umount -t cifs -alf
+        systemctl reboot
+        ;;
+    shutdown)
+        sudo umount -t cifs -alf
+        systemctl poweroff
+        ;;
+    switch)
+        if grep -q lightdm /etc/X11/default-display-manager; then
+            dm-tool switch-to-greeter
+        elif grep -q mdm /etc/X11/default-display-manager; then
+            mdmflexiserver
+        elif grep -q lxdm /etc/X11/default-display-manager; then
+            lxdm -c USER_SWITCH
+        elif grep -q gdm /etc/X11/default-display-manager; then
+            gdmflexiserver
+        elif grep -q kdm /etc/X11/default-display-manager; then
+            kdmctl reserve
+        fi
+        ;;
+    *)
+        echo "Usage: $0 {lock|logout|suspend|hibernate|reboot|shutdown}"
+        exit 2
+esac
+
+exit 0
