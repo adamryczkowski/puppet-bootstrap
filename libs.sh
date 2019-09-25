@@ -41,8 +41,8 @@ function get_ubuntu_codename {
 	if [[ "${codename}" == "tina" ]]; then
 		codename=bionic
 	fi 
-	return 0
 	echo "${codename}"
+	return 0
 }
 
 function get_distribution {
