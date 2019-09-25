@@ -34,11 +34,14 @@ function get_ubuntu_version {
 function get_ubuntu_codename {
 	local tmp=$(lsb_release --codename 2>/dev/null | grep Codename)
 	local pattern='^Codename:\s*([^ ]+)$'
-	if [[ "$tmp" =~ $pattern ]]; then
-		echo ${BASH_REMATCH[1]}
-		return 0
+	if [[ ! "$tmp" =~ $pattern ]]; then
+		return 1
 	fi
-	return 1
+	local codename=${BASH_REMATCH[1]}
+	if [[ "${codename}" == "tina" ]]; then
+		codename=bionic
+	fi 
+	return 0
 }
 
 function get_distribution {
