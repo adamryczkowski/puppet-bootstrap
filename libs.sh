@@ -42,7 +42,7 @@ function get_ubuntu_codename {
 		codename=bionic
 	fi 
 	return 0
-	echo "${codename"}
+	echo "${codename}"
 }
 
 function get_distribution {
