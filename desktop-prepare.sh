@@ -673,7 +673,7 @@ function julia {
 function i3wm {
 	set -x
 	install_apt_package_file sur5r-keyring_2019.02.01_all.deb sur5r-keyring http://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2019.02.01_all.deb
-	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(grep '^DISTRIB_CODENAME=' /etc/lsb-release | cut -f2 -d=) universe"
+	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe"
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
 	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat
@@ -689,9 +689,6 @@ function i3wm {
 	fi
 	logmkdir ${home}/.config
 	
-	#TODO: install terminator
-	#TODO: install albert
-
 	get_git_repo https://gitlab.com/adamwam/i3-config.git ${home}/.config
 	get_git_repo https://gitlab.com/adamwam/i3blocks-config.git ${home}/.config
 	make_symlink ${home}/.config/i3-config/i3 ${home}/.config/i3
