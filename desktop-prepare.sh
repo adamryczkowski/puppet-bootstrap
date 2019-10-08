@@ -677,7 +677,7 @@ function i3wm {
 	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe"
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
-	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme qt4-qtconfig
+	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme qt4-qtconfig acpi
 
 	
 	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
