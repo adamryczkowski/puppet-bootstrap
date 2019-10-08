@@ -92,7 +92,7 @@ fi
 shift
 autostart=NO
 ssh=YES
-release=`lsb_release -c | perl -pe 's/^Codename:\s*(.*)$/$1/'`
+release=$(get_ubuntu_codename)
 lxcip=auto
 lxcfqdn=$name
 private_key_path=''

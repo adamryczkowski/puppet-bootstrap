@@ -309,6 +309,7 @@ function laptop {
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad natural-scroll false
 #TODO: install bright script + pam.d permissions
 	install_apt_package_file xserver-xorg-input-synaptics
+	install_file files/30-touchpad.conf /etc/X11/xorg.conf.d root
 }
 
 function nvidia {
