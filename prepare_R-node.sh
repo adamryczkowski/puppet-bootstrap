@@ -127,7 +127,8 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	flag_need_apt_update=1
 fi
 
-install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-11-jdk pkg-config libnlopt-dev gdebi-core
+install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-11-jdk pkg-config libnlopt-dev gdebi-core gfortran liblapack-dev
+
 
 logexec sudo R CMD javareconf
 
@@ -201,7 +202,7 @@ if [ "$rstudio_server" == "1" ]; then
 			netversion=${BASH_REMATCH[1]}
 		fi
 		logheredoc EOT
-		RSTUDIO_URI="https://download2.rstudio.org/server/$(ubuntu-codename)/amd64/rstudio-server-${netversion}-amd64.deb"
+		RSTUDIO_URI="https://download2.rstudio.org/server/$(get_ubuntu_codename)/amd64/rstudio-server-${netversion}-amd64.deb"
 		logexec wget -c $RSTUDIO_URI --output-document ${deb_folder}/rstudio-server_${netversion}_amd64.deb
 		logexec sudo gdebi --n ${deb_folder}/rstudio-server_${netversion}_amd64.deb
 		out=$?
