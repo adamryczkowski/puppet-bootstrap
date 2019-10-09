@@ -119,8 +119,8 @@ fi
 if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
 	release=$(get_ubuntu_codename)
 	$loglog
-	echo "deb https://cran.rstudio.com/bin/linux/ubuntu ${release}-cran35/" | sudo tee /etc/apt/sources.list.d/r.list
-	logexec gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E084DAB9
+	echo "deb https://cloud.r-project.org/bin/linux/ubuntu ${release}-cran35/" | sudo tee /etc/apt/sources.list.d/r.list
+	logexec gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 	$loglog
 	sudo gpg -a --export E084DAB9 | sudo apt-key add -
 	#logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
@@ -148,20 +148,23 @@ logexec Rscript /tmp/prepare_R.R
 
 if [ "$rstudio" == "1" ]; then
 	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
+	#/html/body/div[3]/div[4]/div/div[3]/div/div/table/tbody[1]/tr/td[1]/a
 		netversion=$(Rscript -e 'cat(stringr::str_match(scan("https://www.rstudio.org/links/check_for_update?version=1.0.0", what = character(0), quiet=TRUE), "^[^=]+=([^\\&]+)\\&.*")[[2]])')
 
+		install_apt_packages python3 python3-lxml
+
 		logheredoc EOT
-		tee /tmp/get_rstudio_uri.R <<EOT
-repos=setNames('${repo_server}', 'CRAN')
-options(repos=repos);
-if(!require('rvest')) install.packages('rvest', Ncpus=8, lib = Sys.getenv("R_LIBS_USER"))
-xpath='.downloads:nth-child(2) tr:nth-child(5) a'
-url = "https://www.rstudio.com/products/rstudio/download/"
-thepage<-xml2::read_html(url)
-cat(html_node(thepage, xpath) %>% html_attr("href"))
+		tee /tmp/get_rstudio_uri.py <<EOT
+import requests
+from lxml import html
+page=requests.get('https://rstudio.com/products/rstudio/download/#download')
+root = html.fromstring(page.text)
+result = root.xpath('//*[text()[contains(.,"Ubuntu 18")] and contains(@href,".deb")]')
+hits = [a.attrib['href'] for a in result]
+print(hits[0])
 EOT
-		Rscript /tmp/get_rstudio_uri.R
-		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_uri.R)
+		python3 /tmp/get_rstudio_uri.py
+		RSTUDIO_URI=$(python3 /tmp/get_rstudio_uri.py)
 		
 		wget -c $RSTUDIO_URI -O ${deb_folder}/rstudio_${netversion}_amd64.deb
 		logexec sudo gdebi --n ${deb_folder}/rstudio_${netversion}_amd64.deb
@@ -193,20 +196,12 @@ fi
 if [ "$rstudio_server" == "1" ]; then
 	if ! dpkg -s rstudio-server>/dev/null  2> /dev/null; then
 		netversion=$(wget --no-check-certificate -qO- https://s3.amazonaws.com/rstudio-server/current.ver)
+		pattern='^(([0-9]+)\.([0-9]+)\.([0-9]+)).*'
+		if  [[ $netversion =~ $pattern ]]; then 
+			netversion=${BASH_REMATCH[1]}
+		fi
 		logheredoc EOT
-		tee /tmp/get_rstudio_server_uri.R <<EOT
-repos=setNames('${repo_server}', 'CRAN')
-options(repos=repos);
-if(!require('rvest')) install.packages('rvest', Ncpus=8, lib = Sys.getenv("R_LIBS_USER"))
-if(!require('stringr')) install.packages('stringr', Ncpus=8, lib = Sys.getenv("R_LIBS_USER"))
-xpath='code:nth-child(3)'
-url = "https://www.rstudio.com/products/rstudio/download-server/"
-thepage<-xml2::read_html(url)
-link<-html_node(thepage, xpath) %>% html_text()
-cat(stringr::str_match(link, '^\\\\\$( wget)? (.*)\$')[[3]])
-EOT
-		Rscript /tmp/get_rstudio_server_uri.R
-		RSTUDIO_URI=$(Rscript /tmp/get_rstudio_server_uri.R)
+		RSTUDIO_URI="https://download2.rstudio.org/server/$(ubuntu-codename)/amd64/rstudio-server-${netversion}-amd64.deb"
 		logexec wget -c $RSTUDIO_URI --output-document ${deb_folder}/rstudio-server_${netversion}_amd64.deb
 		logexec sudo gdebi --n ${deb_folder}/rstudio-server_${netversion}_amd64.deb
 		out=$?
@@ -215,6 +210,10 @@ EOT
 		fi
 	fi
 fi
+
+
+
+
 
 logexec Rscript -e "update.packages(ask = FALSE, repos=setNames('${repo_server}', 'CRAN'))"
 logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);update.packages(ask = FALSE,lib = Sys.getenv('R_LIBS_USER'))"
