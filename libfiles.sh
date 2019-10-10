@@ -297,7 +297,7 @@ function get_cached_file {
 }
 
 function uncompress_cached_file {
-set -x
+#set -x
 	local filename="$1"
 	local destination="$2"
 	local usergr="$3"
@@ -369,7 +369,7 @@ set -x
 		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 	fi
 	popd
-set +x
+#set +x
 }
 
 function cp_file {

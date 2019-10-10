@@ -599,8 +599,8 @@ function gedit {
 		plik=$(get_cached_file gedit-ex-mortis.tar.gz https://github.com/jefferyto/gedit-ex-mortis/archive/master.tar.gz)
 		tmpdir=$(mktemp -d)
 		uncompress_cached_file $plik $tmpdir
-		logexec cp -R ${tmpdir}/gedit-ex-mortis-master/ex-mortis ~/.local/share/gedit/plugins
-		logexec cp ${tmpdir}/gedit-ex-mortis-master/ex-mortis.plugin ~/.local/share/gedit/plugins
+		logexec cp -R ${tmpdir}/gedit-ex-mortis/ex-mortis ~/.local/share/gedit/plugins
+		logexec cp ${tmpdir}/gedit-ex-mortis/ex-mortis.plugin ~/.local/share/gedit/plugins
 	fi
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins ex-mortis
 
@@ -615,8 +615,8 @@ function gedit {
 		plik=$(get_cached_file gedit-control-your-tabs.tar.gz https://github.com/jefferyto/gedit-control-your-tabs/archive/master.tar.gz)
 		tmpdir=$(mktemp -d)
 		uncompress_cached_file $plik $tmpdir
-		logexec cp -R ${tmpdir}/gedit-control-your-tabs-master/controlyourtabs ~/.local/share/gedit/plugins
-		logexec cp ${tmpdir}/gedit-control-your-tabs-master/controlyourtabs.plugin ~/.local/share/gedit/plugins
+		logexec cp -R ${tmpdir}/gedit-control-your-tabs/controlyourtabs ~/.local/share/gedit/plugins
+		logexec cp ${tmpdir}/gedit-control-your-tabs/controlyourtabs.plugin ~/.local/share/gedit/plugins
 	fi
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins controlyourtabs
 	install_apt_packages gedit-plugins gedit-plugin-text-size
