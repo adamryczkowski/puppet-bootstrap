@@ -106,7 +106,7 @@ if [ -z "$username" ]; then
     exit 1
 fi
 
-if [ -n "$connection_name" ]; then
+if [ -z "$connection_name" ]; then
     connection_name=$username
 fi
 
