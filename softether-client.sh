@@ -41,6 +41,7 @@ nicname=vpn0
 password=""
 username=""
 vpn_hub=VPN
+port=992
 connection_name=""
 
 while [[ $# > 0 ]]
@@ -74,6 +75,10 @@ case $key in
 	;;
 	--nicname)
 	nicname="$1"
+	shift
+	;;
+	--port)
+	port="$1"
 	shift
 	;;
 	--)
