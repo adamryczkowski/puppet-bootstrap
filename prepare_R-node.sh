@@ -152,7 +152,17 @@ if [ "$rstudio" == "1" ]; then
 	#/html/body/div[3]/div[4]/div/div[3]/div/div/table/tbody[1]/tr/td[1]/a
 		netversion=$(Rscript -e 'cat(stringr::str_match(scan("https://www.rstudio.org/links/check_for_update?version=1.0.0", what = character(0), quiet=TRUE), "^[^=]+=([^\\&]+)\\&.*")[[2]])')
 
-		install_apt_packages python3 python3-lxml
+		if ! python -c "import lxml" 2>/dev/null; then
+			pip install lxml
+		fi
+		
+		if ! python -c "import requests" 2>/dev/null; then
+			pip install requests
+		fi
+
+#		install_apt_packages python3 python3-lxml
+		
+		
 
 		logheredoc EOT
 		tee /tmp/get_rstudio_uri.py <<EOT

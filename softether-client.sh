@@ -119,11 +119,13 @@ logexec sudo vpnclient start
 
 if ! vpncmd localhost /CLIENT /CMD AccountList | grep "${connection_name}"; then
     # Create the connection
-    logexec vpncmd localhost /CLIENT /CMD AccountCreate ${connection_name} /SERVER "${server_address}:${port}" /HUB ${vpn_hub} /USERNAME ${username} /NICNAME ${nicname}
+    logexec vpncmd localhost /CLIENT /CMD AccountCreate ${connection_name} /SERVER:"${server_address}:${port}" /HUB:${vpn_hub} /USERNAME:${username} /NICNAME:${nicname}
+    logexec vpncmd localhost /CLIENT /CMD AccountPasswordSet ${username} /PASSWORD:${password} /TYPE:standard
 fi
 
 logexec vpncmd localhost /CLIENT /CMD RemoteEnble /CMD AccountConnect ${connection_name}
 
+logexec sudo vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
 
 #install_apt_package curl
 #last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
