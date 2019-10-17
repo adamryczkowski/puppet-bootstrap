@@ -108,7 +108,7 @@ function rlog()
 	fi
 	trap 'errorhdl' ERR
 	if [ "$exitstatus" -ne "0" ]; then
-		exit $exitstatus
+		return $exitstatus
 	fi
 	return -1
 }
@@ -183,7 +183,7 @@ function logexec()
 		if [ -n "$USE_X" ]; then
 			set -x
 		fi
-		exit $exitstatus
+		return $exitstatus
 	fi
 	if [ -n "$USE_E" ]; then
 		set -e
