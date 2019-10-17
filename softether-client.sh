@@ -65,6 +65,10 @@ case $key in
 	password="$1"
 	shift
 	;;
+	--connection-name)
+	connection_name="$1"
+	shift
+	;;
 	--username)
 	username="$1"
 	shift
