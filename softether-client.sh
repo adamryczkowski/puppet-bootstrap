@@ -127,6 +127,13 @@ logexec vpncmd localhost /CLIENT /CMD RemoteEnble /CMD AccountConnect ${connecti
 
 logexec sudo vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
 
+install_file files/softether_svc /etc/systemd/system/softether_client.service root
+
+logmkdir /usr/local/lib/softether root
+
+textfile /usr/local/lib/softether/start_vpn.sh "#!/bin/sh\nsudo /usr/bin/vpnclient start && sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name} && sudo dhclient vpn_n2n" root
+
+
 #install_apt_package curl
 #last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
 #link="https://github.com/SoftEtherVPN/SoftEtherVPN/archive/${last_version}.tar.gz"

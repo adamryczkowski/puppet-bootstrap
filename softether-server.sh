@@ -29,6 +29,8 @@ where
  --service-name           - Name of the server service, needed if you intent to install more than one.
                             Defaults to softether-server.
  --password               - Password for the management
+ --user                   - Adds user with this name
+ --userpassword           - Password for the user.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
 
@@ -91,6 +93,14 @@ case $key in
 	password="$1"
 	shift
 	;;
+	--user)
+	vpnuser="$1"
+	shift
+	;;
+	--userpassword)
+	vpnuserpassword="$1"
+	shift
+	;;
 	--dhcp-range)
 	dhcp_range="$1"
 	shift
@@ -115,6 +125,13 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
+if ! [ -n "${vpnuser}" ] && [ -n "${vpnuserpassword}" ]; then
+   if ! [ -n "${vpnuser}" ] && [ -n "${vpnuserpassword}" ]; then
+      errcho "You must provide either both --user and --userpassword or none"
+      exit 1
+   fi
+fi
+
 if [[ "$use_dhcp_server" == "0" && "$dhcp_range" == "" ]] ; then
 	errcho "Cannot add --dhcp-range if no dhcp server is in use. Add --dhcp-server option."
 	exit 1
@@ -127,7 +144,15 @@ fi
 add_ppa paskal-07/softethervpn
 install_apt_package softether-vpnserver
 
-vpncmd /SERVER localhost /CMD ServerPasswordSet "${password}" /CMD Hub VPN /CMD SecureNATEnable
+logexec vpncmd /SERVER localhost /CMD ServerPasswordSet "${password}" /CMD Hub VPN /CMD SecureNATEnable
+
+echo "${password}" | vpncmd /SERVER localhost /CMD HubCreate VPN /PASSWORD "${password}"
+
+logexec vpncmd /SERVER localhost /HUB:VPN /CMD  SecureNATEnable
+
+logexec vpncmd /SERVER localhost /HUB:VPN /CMD UserCreate adam /GROUP "" /REALNAME adam /NOTE ""
+
+logexec vpncmd /SERVER localhost /HUB:VPN /CMD UserPasswordSet adam /PASSWORD szakal
 
 
 #install_apt_package curl
