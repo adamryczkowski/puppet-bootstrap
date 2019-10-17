@@ -101,7 +101,7 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-if [ -n "$username" ]; then
+if [ -z "$username" ]; then
     errcho "You must specify user name!"
     exit 1
 fi
