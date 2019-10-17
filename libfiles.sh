@@ -131,7 +131,7 @@ function install_file {
 	fi
 	if [ ! -f "${input_file}" ]; then
 		errcho "Cannot find ${input_file}"
-		return 1
+#		return 1
 	fi
 	if [ -z "$dest" ]; then
 		dest=/usr/local/bin
@@ -157,7 +157,7 @@ function install_file {
 	fi
 	if [ ! -f "$dest" ]; then
 		errcho "Error when copying ${input_file} into ${dest}"
-		return 1
+#		return 1
 	fi
 	if [ $user != "auto" ]; then
 		cur_owner="$(stat --format '%U' "$dest")"

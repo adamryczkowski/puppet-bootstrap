@@ -127,7 +127,7 @@ if ! vpncmd localhost /CLIENT /CMD AccountList | grep "${connection_name}"; then
     logexec vpncmd localhost /CLIENT /CMD AccountPasswordSet ${username} /PASSWORD:${password} /TYPE:standard
 fi
 
-logexec sudo vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
+#logexec sudo vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
 
 install_file files/softether_svc /etc/systemd/system/softether_client.service root
 
