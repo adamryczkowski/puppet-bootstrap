@@ -37,7 +37,7 @@ Example:
 server_address=$1
 shift
 
-nicname=vpn0
+nicname=n2n
 password=""
 username=""
 vpn_hub=VPN
@@ -134,6 +134,10 @@ install_file files/softether_svc /etc/systemd/system/softether_client.service ro
 logmkdir /usr/local/lib/softether root
 
 textfile /usr/local/lib/softether/start_vpn.sh "#!/bin/sh\nsudo /usr/bin/vpnclient start && sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name} && sudo dhclient vpn_n2n" root
+
+logexec sudo systemctl daemon-reload
+
+logexec sudo systemctl enable softether_client.service
 
 
 #install_apt_package curl
