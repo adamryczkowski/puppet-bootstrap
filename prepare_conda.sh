@@ -44,7 +44,7 @@ conda_dir="/opt/conda"
 pip_cacher=""
 user="$USER"
 
-if [ -f /media/adam-minipc/other/debs/ ]; then
+if [ -d /media/adam-minipc/other/debs/ ]; then
    repo_path=/media/adam-minipc/other/debs
 else
    repo_path=/tmp/repo_path
