@@ -17,6 +17,9 @@ $(basename $0)  [--conda-dir <conda dir>] [--pip-cacher <ip[:port]]
 
 where
 
+ --repo-path                  - Alternative directory where to look for (and save) 
+                                downloaded files. Defaults to /media/adam-minipc/other/debs 
+                                if exists or /tmp/repo-path if it does not.
  --conda-dir                  - Directory where to install conda. Defaults to /opt/conda
  --pip-cacher                 - Host name and port to the pip cacher. If specified it will
                                 install appropriate ~/.pip/pip.conf so all pip operations will
@@ -41,6 +44,12 @@ conda_dir="/opt/conda"
 pip_cacher=""
 user="$USER"
 
+if [ -f /media/adam-minipc/other/debs/ ]; then
+   repo_path=/media/adam-minipc/other/debs
+else
+   repo_path=/tmp/repo_path
+fi
+
 while [[ $# > 0 ]]
 do
 key="$1"
@@ -56,6 +65,10 @@ case $key in
 	;;
 	--conda-dir)
 	conda_dir=$1
+	shift
+	;;
+	--repo-path)
+	repo_path=$1
 	shift
 	;;
 	--pip-cacher)
