@@ -109,7 +109,7 @@ if [[ ${need_to_install} == 1 ]]; then
       errcho "Cannot download the installer"
       exit 0
    fi
-   logexec ${installer_path} -b -p "${conda_path}"
+   logexec bash ${installer_path} -b -p "${conda_path}"
    export PATH="$HOME/miniconda/bin:$PATH"
 fi
 
