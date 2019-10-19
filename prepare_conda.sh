@@ -112,11 +112,11 @@ if [[ ${need_to_install} == 1 ]]; then
    logmkdir /opt $USER
    logexec bash ${installer_path} -b -p "${conda_dir}"
    logmkdir /opt root
-   export PATH="$HOME/opt/conda/bin:$PATH"
+   export PATH="${conda_dir}/bin:$PATH"
 fi
 
 if ! $(conda --version >/dev/null); then
-   export PATH="$HOME/opt/conda/bin:$PATH"
+   export PATH="${conda_dir}/bin:$PATH"
 fi
 
 if ! $(conda --version >/dev/null); then
@@ -124,7 +124,7 @@ if ! $(conda --version >/dev/null); then
    exit 0
 fi
 
-source $HOME/miniconda/bin/activate
+source ${conda_dir}/bin/activate
 
 logexec conda install python jupyter
 
