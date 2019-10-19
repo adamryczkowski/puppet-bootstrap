@@ -4,7 +4,6 @@
     
 [Service]
     Type=forking
-    EnvironmentFile=/usr/local/lib/softether
     ExecStart=/bin/bash /usr/local/lib/softether/start_vpn.sh
     ExecStop=/usr/bin/vpnclient stop
     KillMode=process
