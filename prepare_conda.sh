@@ -33,10 +33,10 @@ $(basename $0)
 
 "
 
-if [ -z "$1" ]; then
-	echo "$usage" >&2
-	exit 0
-fi
+#if [ -z "$1" ]; then
+#	echo "$usage" >&2
+#	exit 0
+#fi
 
 set -x
 
@@ -146,11 +146,11 @@ fi
 # logexec jt -t onedork
 # logexec jupyter contrib nbextension install --user
 node_key=$(get_cached_file nodesource.gpg.key https://deb.nodesource.com/gpgkey/nodesource.gpg.key)
-get_key_fingerprint ${node_key}
-textfile /etc/apt/sources.list.d/nodesource.list "deb https://deb.nodesource.com/node_10.x $(get_ubuntu_codename) main
-deb-src https://deb.nodesource.com/node_10.x $(get_ubuntu_codename) main" root
+
+add_apt_source_manual nodesource "deb https://deb.nodesource.com/node_10.x $(get_ubuntu_codename) main
+deb-src https://deb.nodesource.com/node_10.x $(get_ubuntu_codename) main" https://deb.nodesource.com/gpgkey/nodesource.gpg.key nodesource.gpg.key 
+
 refresh_apt_redirections
-refresh_apt_proxy
 install_apt_packages nodejs
 
 
