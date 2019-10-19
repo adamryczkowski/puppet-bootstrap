@@ -112,6 +112,7 @@ if [[ ${need_to_install} == 1 ]]; then
    logmkdir /opt $USER
    logexec bash ${installer_path} -b -p "${conda_dir}"
    logmkdir /opt root
+   logmkdir /opt/conda $USER
    export PATH="${conda_dir}/bin:$PATH"
 fi
 
@@ -129,7 +130,7 @@ source ${conda_dir}/bin/activate
 logexec conda install python jupyter
 
 if [ -n "${pip_cacher}" ]; then
-   logmkdir ~/.pip
+   logmkdir $HOME/.pip
    parse_URI "${pip_cacher}"
    
    textfile ~/.pip/pip.conf "[global]
