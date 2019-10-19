@@ -127,7 +127,7 @@ fi
 
 source ${conda_dir}/bin/activate
 
-logexec conda install python jupyter
+logexec conda install --yes python
 
 if [ -n "${pip_cacher}" ]; then
    logmkdir $HOME/.pip
@@ -142,8 +142,17 @@ index = http://${pip_cacher}/root/pypi/
 "  
 fi
 
-logexec pip install ipython jupyter jupyter_contrib_nbextensions jupyterthemes
-logexec jt -t onedork
-logexec jupyter contrib nbextension install --user
+# logexec pip install ipython jupyter jupyter_contrib_nbextensions jupyterthemes
+# logexec jt -t onedork
+# logexec jupyter contrib nbextension install --user
+node_key=$(get_cached_file nodesource.gpg.key https://deb.nodesource.com/gpgkey/nodesource.gpg.key)
+get_key_fingerprint ${node_key}
+textfile /etc/apt/sources.list.d/nodesource.list "deb https://deb.nodesource.com/node_10.x $(get_ubuntu_codename) main
+deb-src https://deb.nodesource.com/node_10.x $(get_ubuntu_codename) main" root
+refresh_apt_redirections
+refresh_apt_proxy
+install_apt_packages nodejs
 
+
+logexec pip install jupyterlab
 
