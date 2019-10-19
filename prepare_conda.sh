@@ -110,12 +110,12 @@ if [[ ${need_to_install} == 1 ]]; then
       exit 0
    fi
    logmkdir /opt/conda $USER
-   logexec bash ${installer_path} -b -p "${conda_path}"
-   export PATH="$HOME/miniconda/bin:$PATH"
+   logexec bash ${installer_path} -b -p "${conda_dir}"
+   export PATH="$HOME/opt/conda/bin:$PATH"
 fi
 
 if ! $(conda --version >/dev/null); then
-   export PATH="$HOME/miniconda/bin:$PATH"
+   export PATH="$HOME/opt/conda/bin:$PATH"
 fi
 
 if ! $(conda --version >/dev/null); then
