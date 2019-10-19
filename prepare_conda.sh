@@ -156,3 +156,28 @@ install_apt_packages nodejs
 
 logexec pip install jupyterlab
 
+#pip install jupyterlab-discovery ?
+#jupyter labextension install jupyterlab-drawio
+#jupyter labextension install @krassowski/jupyterlab-lsp
+jupyter labextension install jupyterlab-drawio @krassowski/jupyterlab-lsp @jupyterlab/theme-dark-extension @ryantam626/jupyterlab_code_formatter
+#jupyter labextension install @ryantam626/jupyterlab_code_formatter
+pip install jupyterlab_code_formatter
+pip install jupyter-conda
+jupyter serverextension enable --py jupyterlab_code_formatter
+#jupyter labextension install jupyterlab_toastify jupyterlab_conda
+
+#To add a specific kernel to jupyterlab:
+#
+#ipython kernel install --user --name=<any_name_for_kernel>
+
+#To update jupyter extensions:
+#
+#jupyter labextension update --all
+
+# To install latex support:
+#
+#pip install jupyterlab_latex
+#jupyter labextension install @jupyterlab/latex
+# <install latex>
+
+
