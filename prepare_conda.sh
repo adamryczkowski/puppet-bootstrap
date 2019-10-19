@@ -109,8 +109,9 @@ if [[ ${need_to_install} == 1 ]]; then
       errcho "Cannot download the installer"
       exit 0
    fi
-   logmkdir /opt/conda $USER
+   logmkdir /opt $USER
    logexec bash ${installer_path} -b -p "${conda_dir}"
+   logmkdir /opt root
    export PATH="$HOME/opt/conda/bin:$PATH"
 fi
 
