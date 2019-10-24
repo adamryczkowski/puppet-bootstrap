@@ -143,7 +143,7 @@ textfile /etc/systemd/system/softether_${connection_name}_client.service root "[
 [Install]
     WantedBy=multi-user.target"
     
-install_file files/softether_svc /etc/systemd/system/softether_${connection_name}_client.service root
+#install_file files/softether_svc /etc/systemd/system/softether_${connection_name}_client.service root
 
 logmkdir /usr/local/lib/softether root
 
