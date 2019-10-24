@@ -9,13 +9,5 @@
     KillMode=process
     Restart=on-failure
     
-    # Hardening
-#    PrivateTmp=yes
-#    ProtectHome=yes
-#    ProtectSystem=full
-#    ReadOnlyDirectories=/
-#    ReadWriteDirectories=-/opt2/softether
-#    CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_BIND_SERVICE CAP_NET_BROADCAST CAP_NET_RAW CAP_SYS_NICE CAP_SYS_ADMIN CAP_SETUID
-    
 [Install]
     WantedBy=multi-user.target

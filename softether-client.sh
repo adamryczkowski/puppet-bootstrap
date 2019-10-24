@@ -65,7 +65,7 @@ case $key in
 	password="$1"
 	shift
 	;;
-	--connection-name)
+	--connection_name)
 	connection_name="$1"
 	shift
 	;;
@@ -129,16 +129,30 @@ fi
 
 #logexec sudo vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
 
-install_file files/softether_svc /etc/systemd/system/softether_client.service root
+textfile /etc/systemd/system/softether_${connection_name}_client.service root "[Unit]
+    Description=SoftEther ${connection_name} Client
+    After=network.target auditd.service
+    
+[Service]
+    Type=forking
+    ExecStart=/bin/bash /usr/local/lib/softether/start_${connection_name}_vpn.sh
+    ExecStop=/usr/bin/vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
+    KillMode=process
+    Restart=on-failure
+    
+[Install]
+    WantedBy=multi-user.target"
+    
+install_file files/softether_svc /etc/systemd/system/softether_${connection_name}_client.service root
 
 logmkdir /usr/local/lib/softether root
 
-textfile /usr/local/lib/softether/start_vpn.sh "#!/bin/sh
+textfile /usr/local/lib/softether/start_${connection_name}_vpn.sh "#!/bin/sh
 sudo /usr/bin/vpnclient start && sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name} && sudo dhclient vpn_${nicname}" root
 
 logexec sudo systemctl daemon-reload
 
-logexec sudo systemctl enable softether_client.service
+logexec sudo systemctl enable softether_${connection_name}_client.service
 
 
 #install_apt_package curl
