@@ -133,7 +133,8 @@ install_file files/softether_svc /etc/systemd/system/softether_client.service ro
 
 logmkdir /usr/local/lib/softether root
 
-textfile /usr/local/lib/softether/start_vpn.sh "#!/bin/sh\nsudo /usr/bin/vpnclient start && sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name} && sudo dhclient vpn_n2n" root
+textfile /usr/local/lib/softether/start_vpn.sh "#!/bin/sh
+sudo /usr/bin/vpnclient start && sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name} && sudo dhclient vpn_${nicname}" root
 
 logexec sudo systemctl daemon-reload
 
