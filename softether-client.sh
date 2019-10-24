@@ -129,7 +129,7 @@ fi
 
 #logexec sudo vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
 
-textfile /etc/systemd/system/softether_${connection_name}_client.service root "[Unit]
+textfile /etc/systemd/system/softether_${connection_name}_client.service "[Unit]
     Description=SoftEther ${connection_name} Client
     After=network.target auditd.service
     
@@ -141,7 +141,7 @@ textfile /etc/systemd/system/softether_${connection_name}_client.service root "[
     Restart=on-failure
     
 [Install]
-    WantedBy=multi-user.target"
+    WantedBy=multi-user.target" root
     
 #install_file files/softether_svc /etc/systemd/system/softether_${connection_name}_client.service root
 
