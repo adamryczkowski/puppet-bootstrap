@@ -407,9 +407,8 @@ function virtualbox {
 }
 
 function kodi {
-	if add_ppa team-xbmc/ppa; then
-		install_apt_package kodi
-	fi
+	add_ppa team-xbmc/ppa
+	install_apt_package kodi
 	logmkdir "${home}/.kodi" ${USER}
 	logmkdir "${home}/.kodi/userdata" ${USER}
 	textfile "${home}/.kodi/userdata/advancedsettings.xml" "\
