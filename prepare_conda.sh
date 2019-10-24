@@ -155,6 +155,7 @@ install_apt_packages nodejs
 
 
 logexec pip install jupyterlab
+conda install jupyterlab
 
 #pip install jupyterlab-discovery ?
 #jupyter labextension install jupyterlab-drawio
@@ -165,6 +166,7 @@ pip install jupyterlab_code_formatter
 pip install jupyter-conda
 jupyter serverextension enable --py jupyterlab_code_formatter
 #jupyter labextension install jupyterlab_toastify jupyterlab_conda
+#jupyter labextension list
 
 #To add a specific kernel to jupyterlab:
 #
