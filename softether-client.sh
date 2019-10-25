@@ -121,8 +121,11 @@ install_apt_package softether-vpnclient
 
 logexec sudo vpnclient start
 
-if ! vpncmd localhost /CLIENT /CMD AccountList | grep "${connection_name}"; then
+if ! vpncmd localhost /CLIENT /CMD AccountList | grep -q "${connection_name}"; then
     # Create the connection
+    if ! vpncmd localhost /CLIENT /CMD NicList | grep -q "Name|${nicname}"; then
+      logexec vpncmd localhost /CLIENT /CMD NicCreate ${nicname}
+    fi
     logexec vpncmd localhost /CLIENT /CMD AccountCreate ${connection_name} /SERVER:"${server_address}:${port}" /HUB:${vpn_hub} /USERNAME:${username} /NICNAME:${nicname}
     logexec vpncmd localhost /CLIENT /CMD AccountPasswordSet ${username} /PASSWORD:${password} /TYPE:standard
 fi
