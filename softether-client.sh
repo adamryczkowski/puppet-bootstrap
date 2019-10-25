@@ -34,6 +34,16 @@ Example:
 
 "
 
+if [ "$1" == "" ]; then
+	echo "$usage" >&2
+	exit 1
+fi
+
+if [ "$1" == "--help" ]; then
+	echo "$usage" >&2
+	exit 1
+fi
+
 server_address=$1
 shift
 
