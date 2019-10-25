@@ -127,7 +127,7 @@ if ! vpncmd localhost /CLIENT /CMD AccountList | grep -q "${connection_name}"; t
       logexec vpncmd localhost /CLIENT /CMD NicCreate ${nicname}
     fi
     logexec vpncmd localhost /CLIENT /CMD AccountCreate ${connection_name} /SERVER:"${server_address}:${port}" /HUB:${vpn_hub} /USERNAME:${username} /NICNAME:${nicname}
-    logexec vpncmd localhost /CLIENT /CMD AccountPasswordSet ${username} /PASSWORD:${password} /TYPE:standard
+    logexec vpncmd localhost /CLIENT /CMD AccountPasswordSet ${connection_name} /PASSWORD:${password} /TYPE:standard
 fi
 
 #logexec sudo vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
