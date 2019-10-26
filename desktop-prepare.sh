@@ -345,11 +345,20 @@ function cuda {
 }
 
 function bumblebee {
-#	return 1 #not ready
+#	return 1 #not ready 
+#  see: https://askubuntu.com/questions/1029169/bumblebee-doesnt-work-on-ubuntu-18-04/1042950#1042950
 	add_ppa graphics-drivers/ppa
 	add_ppa bumblebee/testing
 	
 	do_update
+	
+	linetextfile /etc/environment "__GLVND_DISALLOW_PATCHING=1"
+
+	textfile /etc/modprobe.d/blacklist-nvidia.conf "/etc/modprobe.d/blacklist-nvidia.conf
+/etc/modprobe.d/blacklist-nvidia.conf" root
+
+	sudo systemctl disable nvidia-persistenced
+	sudo systemctl disable nvidia-fallback.service
 	
 	logexec sudo ubuntu-drivers autoinstall
 	nvidia_package=$(apt list --installed |grep -E 'nvidia-[0-9]+/')
