@@ -12,12 +12,13 @@ Installs and configures dhcp server
 
 Usage:
 
-$(basename $0) <ifname> --dhcp-range <ip-ip>
+$(basename $0) <ifname> --dhcp-range <ip-ip> [--ip <ip>]
 
 where
 
  --dhcp-range             - Range of the addresses to use in the network. 
                             Defaults to 'auto', which will randomly take 10.x.x.0/24 IP domain.
+ --ip                     - IP Address to set.
  --ifname                 - Name of the network device that dhcp will listen to.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
@@ -152,4 +153,9 @@ fi
 if [ "$restart_dhcp" == "1" ]; then
 	logexec sudo service isc-dhcp-server restart #Make sure the dhcp starts AFTER supernode and its client
 fi
+
+actual_server_ip=$(get_iface_ip $ifname)
+
+if [ "${actual_server_ip}" != "${server_ip}" ]; then
+   sudo ifcon
 

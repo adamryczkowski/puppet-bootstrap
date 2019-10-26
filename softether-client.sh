@@ -12,7 +12,8 @@ Prepares softether vpn server
 
 Usage:
 
-$(basename $0) <server-ip>
+$(basename $0) <server-ip> --username <username> --password <plaintext password> [--ip <static_ip>] [--vpn-hub <hub name>]
+                   [--connection_name <name>] [--nicname <vpn adapter name>] [--port <Server's IP port>]
 
 where
 
@@ -20,8 +21,9 @@ where
  --port                   - Port number. Defaults to 992
  --vpn-hub                - Name of the virtual hub to connect to, defaults to 'VPN'
  --username               - User name
+ --ip                     - Static ip to use (good for dhcp servers)
  --connection_name        - Connection name. Defaults to user name
- --password               - User password 
+ --password               - User password. In plaintext, so make sure this command is not placed in the history
  --nicname                - Name of the network adapter. Defaults to vpn0.
  --debug                  - Flag that sets debugging mode. 
  --service                - Add as a system service under name 'softether-client-{connection-name}'
@@ -50,6 +52,7 @@ shift
 nicname=n2n
 password=""
 username=""
+ip="dhcp"
 vpn_hub=VPN
 port=992
 connection_name=""
@@ -85,6 +88,10 @@ case $key in
 	;;
 	--vpn-hub)
 	vpn_hub="$1"
+	shift
+	;;
+	--ip)
+	ip="$1"
 	shift
 	;;
 	--nicname)
@@ -124,6 +131,14 @@ if [ -z "$connection_name" ]; then
     connection_name=$username
 fi
 
+if [ ! "${ip}" == "dhcp" ]; then
+   pattern='^([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)$'
+   if [[ ! "$ip" =~ $pattern ]]; then
+      errcho "Wrong format of the ip!"
+      exit 1
+   else
+   fi
+fi
 
 add_ppa paskal-07/softethervpn
 install_apt_package softether-vpnclient
@@ -148,7 +163,8 @@ textfile /etc/systemd/system/softether_${connection_name}_client.service "[Unit]
     
 [Service]
     Type=forking
-    ExecStart=/bin/bash /usr/local/lib/softether/start_${connection_name}_vpn.sh
+    ExecStart=/usr/bin/vpnclient start
+    ExecStartPost=/bin/bash /usr/local/lib/softether/start_${connection_name}_vpn.sh
     ExecStop=/usr/bin/vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
     KillMode=process
     Restart=on-failure
@@ -160,8 +176,20 @@ textfile /etc/systemd/system/softether_${connection_name}_client.service "[Unit]
 
 logmkdir /usr/local/lib/softether root
 
-textfile /usr/local/lib/softether/start_${connection_name}_vpn.sh "#!/bin/sh
-sudo /usr/bin/vpnclient start && sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name} && sudo dhclient vpn_${nicname}" root
+if [ "${ip}" == "dhcp" ]; then
+   textfile /usr/local/lib/softether/start_${connection_name}_vpn.sh "#!/bin/sh
+sudo /usr/bin/vpnclient start && 
+sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
+sudo dhclient vpn_${nicname}" root
+else
+   textfile /usr/local/lib/softether/start_${connection_name}_vpn.sh "#!/bin/sh
+sudo /usr/bin/vpnclient start && 
+sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
+sudo ifconfig vpn_${nicname} ${ip}
+if service --status-all | grep -Fq 'isc-dhcp-server'; then    
+  sudo systemctl restart isc-dhcp-server.service
+fi" root
+fi
 
 logexec sudo systemctl daemon-reload
 
