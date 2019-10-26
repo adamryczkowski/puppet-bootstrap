@@ -81,6 +81,15 @@ mypath=${0%/*}
 mypath=`dir_resolve $mypath`
 cd $mypath
 
+if [ "$1" == "" ]; then
+	echo "$usage" >&2
+	exit 1
+fi
+
+if [ "$1" == "--help" ]; then
+	echo "$usage" >&2
+	exit 1
+fi
 
 
 name=$1
