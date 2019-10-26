@@ -166,6 +166,7 @@ textfile /etc/systemd/system/softether_${connection_name}_client.service "[Unit]
     ExecStart=/usr/bin/vpnclient start
     ExecStartPost=/bin/bash /usr/local/lib/softether/start_${connection_name}_vpn.sh
     ExecStop=/usr/bin/vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
+    ExecStopPost=/bin/bash -c "ifconfig vpn_${nicname} down"
     KillMode=process
     Restart=on-failure
     
