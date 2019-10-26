@@ -1,7 +1,7 @@
 #!/bin/bash
 
-## dependency: n2n-client.sh
-## dependency: files/dhcpd_lease_to_slack.sh
+## dependency: dhcp-server.sh
+## dependency: softether-client.sh
 
 cd `dirname $0`
 . ./common.sh
@@ -148,7 +148,8 @@ logexec vpncmd /SERVER localhost /CMD ServerPasswordSet "${password}" /CMD Hub V
 
 echo "${password}" | vpncmd /SERVER localhost /CMD HubCreate VPN /PASSWORD "${password}"
 
-logexec vpncmd /SERVER localhost /HUB:VPN /CMD  SecureNATEnable
+# SecureNAT collides with the dhcp server
+# logexec vpncmd /SERVER localhost /HUB:VPN /CMD  SecureNATEnable
 
 logexec vpncmd /SERVER localhost /HUB:VPN /CMD UserCreate adam /GROUP "" /REALNAME adam /NOTE ""
 

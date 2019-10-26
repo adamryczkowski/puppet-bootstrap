@@ -1,6 +1,5 @@
 #!/bin/bash
 
-## dependency: n2n-client.sh
 ## dependency: files/dhcpd_lease_to_slack.sh
 
 cd `dirname $0`
@@ -22,8 +21,6 @@ where
  --ifname                 - Name of the network device that dhcp will listen to.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
- <options to n2n_client>  - You must provide password. Server address will be put automatically. 
-                            You can override --ip address of the dhcp server. 
 
 
 Example2:

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-## dependency: n2n-client.sh
-## dependency: files/dhcpd_lease_to_slack.sh
-
 cd `dirname $0`
 . ./common.sh
 
