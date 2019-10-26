@@ -93,7 +93,7 @@ if [ "${ip}" == "auto" ]; then
    server_ip=$(get_iface_ip $ifname)
 else
    server_ip="${ip}"
-fo
+fi
 
 pattern='([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)'
 if [[ "$server_ip" =~ $pattern ]]; then
@@ -151,19 +151,18 @@ install_script ${DIR}/files/dhcpd_lease_to_slack.sh /etc/dhcp/dhcpd_lease_to_sla
 if add_dhcpd_entry "${ip_prefix}.0" 255.255.255.0 $dhcp_range; then
 	restart_dhcp=1
 fi
-if add_dhcpd_entry "${ip_prefix}.0" 255.255.255.0 $dhcp_range; then
-	restart_dhcp=1
-fi
+
 if edit_dhcpd authoritative "<ON>"; then
 	restart_dhcp=1
 fi
 
 if [ "$restart_dhcp" == "1" ]; then
+   logexec sudo ifconfig ${ifname} up
 	logexec sudo service isc-dhcp-server restart #Make sure the dhcp starts AFTER supernode and its client
 fi
 
 actual_server_ip=$(get_iface_ip $ifname)
 
 if [ "${actual_server_ip}" != "${server_ip}" ]; then
-   sudo ifcon
-
+   logexec sudo ifconfig ${ifname} ${server_ip}
+fi
