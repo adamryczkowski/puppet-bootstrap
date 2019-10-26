@@ -136,7 +136,6 @@ if [ ! "${ip}" == "dhcp" ]; then
    if [[ ! "$ip" =~ $pattern ]]; then
       errcho "Wrong format of the ip!"
       exit 1
-   else
    fi
 fi
 
