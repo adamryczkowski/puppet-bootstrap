@@ -155,32 +155,43 @@ fi
 
 textfile /etc/systemd/system/softether_${connection_name}_client.service "[Unit]
     Description=SoftEther ${connection_name} Client
+    After=softether_client.service
+    Requires=softether_client.service
+    
+[Service]
+    Type=oneshot
+    ExecStart=/bin/bash /usr/local/lib/softether/start_${connection_name}_vpn.sh
+    ExecStop=/usr/bin/vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
+    ExecStop=/bin/bash -c \"ifconfig vpn_${nicname} down\"
+    RemainAfterExit=yes
+[Install]
+    WantedBy=multi-user.target" root
+    
+
+textfile /etc/systemd/system/softether_client.service "[Unit]
+    Description=SoftEther Client service
     After=network.target auditd.service
     
 [Service]
     Type=forking
     ExecStart=/usr/bin/vpnclient start
-    ExecStartPost=/bin/bash /usr/local/lib/softether/start_${connection_name}_vpn.sh
-    ExecStop=/usr/bin/vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
-    ExecStopPost=/bin/bash -c \"ifconfig vpn_${nicname} down\"
+    ExecStop=/usr/bin/vpnclient stop
     KillMode=process
     Restart=on-failure
     
 [Install]
     WantedBy=multi-user.target" root
-    
+
 #install_file files/softether_svc /etc/systemd/system/softether_${connection_name}_client.service root
 
 logmkdir /usr/local/lib/softether root
 
 if [ "${ip}" == "dhcp" ]; then
    textfile /usr/local/lib/softether/start_${connection_name}_vpn.sh "#!/bin/sh
-sudo /usr/bin/vpnclient start && 
 sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
 sudo dhclient vpn_${nicname}" root
 else
    textfile /usr/local/lib/softether/start_${connection_name}_vpn.sh "#!/bin/sh
-sudo /usr/bin/vpnclient start && 
 sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
 sudo ifconfig vpn_${nicname} ${ip}
 if service --status-all | grep -Fq 'isc-dhcp-server'; then    
@@ -190,6 +201,7 @@ fi
 
 logexec sudo systemctl daemon-reload
 
+logexec sudo systemctl enable softether_client.service
 logexec sudo systemctl enable softether_${connection_name}_client.service
 
 
