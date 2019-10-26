@@ -40,6 +40,7 @@ if [ "$1" == "--help" ]; then
 fi
 
 ifname="$1"
+ip="auto"
 shift
 
 
@@ -64,6 +65,10 @@ case $key in
 	dhcp_range="$1"
 	shift
 	;;
+	--ip)
+	ip="$1"
+	shift
+	;;
 	--)
 	break
 	;;
@@ -83,7 +88,13 @@ if [ -n "$debug" ]; then
 		opts="$opts --log $log"
 	fi
 fi
-server_ip=$(get_iface_ip $ifname)
+
+if [ "${ip}" == "auto" ]; then
+   server_ip=$(get_iface_ip $ifname)
+else
+   server_ip="${ip}"
+fo
+
 pattern='([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)'
 if [[ "$server_ip" =~ $pattern ]]; then
    server_prefix=${BASH_REMATCH[1]}.${BASH_REMATCH[2]}.${BASH_REMATCH[3]}
