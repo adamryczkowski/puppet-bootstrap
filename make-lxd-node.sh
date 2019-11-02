@@ -542,6 +542,7 @@ if [ -n "$actual_ip" ]; then
 	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
 fi
 
+set -x 
 logexec lxc exec $name -- chown ${lxcuser}:${lxcuser} -R ${sshhome}
 
 if [ ! -f "$private_key_path" ]; then
