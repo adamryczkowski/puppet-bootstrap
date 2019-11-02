@@ -296,8 +296,77 @@ function get_cached_file {
 	echo "${repo_path}/${filename}"
 }
 
+function get_from_cache_and_uncompress_file {
+	local filename="$1"
+	local download_link="$2"
+	local destination="$3"
+	local usergr="$4"
+	local user
+	local timestamp_path="${destination}.timestamp"
+	if [ -z "$usergr" ]; then
+		user=$USER
+		usergr=$user
+		group=""
+	else
+		local pattern='^([^:]+):([^:]+)$'
+		if [[ "$usergr" =~ $pattern ]]; then
+			group=${BASH_REMATCH[2]}
+			user=${BASH_REMATCH[1]}
+		else
+			group=""
+			user=$usergr
+		fi
+	fi
+	
+	if [ ! -f "$filename" ]; then
+		path_filename=$(get_cached_file "$filename" "${download_link}")
+	else
+		path_filename="$filename"
+	fi
+	if [ -z "$path_filename" ]; then
+		echo "no input file $path_filename"
+		return 1
+	fi
+	if [ -z "$destination" ]; then
+		echo "no destination $destination"
+		return 2
+	fi
+	if [ -d "$destination" ]; then
+		moddate_remote=$(stat -c %y "$destination")
+		if [ -f "$timestamp_path" ]; then
+			moddate_hdd=$(cat "$timestamp_path")
+			if [ "$moddate_hdd" == "$moddate_remote" ]; then
+				return 0
+			fi
+		fi
+	fi
+	pushd $(dirname $destination)
+	filename_no_ext="$(basename $destination)"
+	install_apt_package dtrx dtrx
+	if is_folder_writable $(dirname "$destination") "$user"; then
+		if [ "$user" == "$USER" ]; then
+#			logexec tar -xvf "$path_filename" -C "$destination"
+			logexec python2.7 $(which dtrx) --one here "$path_filename"
+			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
+		else
+#			echo sudo -u "$user" dtrx --one rename "$path_filename"
+			logexec sudo -u "$user" python2.7 $(which dtrx) --one here "$path_filename"
+#			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
+			echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
+		fi
+	else
+#		echo sudo dtrx --one rename "$path_filename"
+		logexec sudo python2.7 $(which dtrx) --one here "$path_filename"
+#		logexec sudo tar -xvf "$path_filename" -C "$destination"
+		logexec sudo chown "$usergr" "$destination"
+		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
+	fi
+	popd
+set +x
+}
+
 function uncompress_cached_file {
-#set -x
+set -x
 	local filename="$1"
 	local destination="$2"
 	local usergr="$3"
@@ -369,7 +438,7 @@ function uncompress_cached_file {
 		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 	fi
 	popd
-#set +x
+set +x
 }
 
 function cp_file {

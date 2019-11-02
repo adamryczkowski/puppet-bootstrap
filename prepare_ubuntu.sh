@@ -40,6 +40,7 @@ where
  --ag                     - ag (the silver searcher), 
  --entr                   - entr (watch), 
  --noti                   - noti (notification when something is done)
+ --dust                   - non-interactive replacement to du
  --aptitude               - aptitude
  --mc                     - mc (Midnight Commander)
  --git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
@@ -84,6 +85,7 @@ install_tldr=0
 install_ag=0
 install_entr=0
 install_noti=0
+install_dust=0
 install_aptitude=0
 install_mc=0
 install_git_extra=0
@@ -155,6 +157,7 @@ case $key in
 	install_ag=1
 	install_entr=1
 	install_noti=1
+	install_dust=1
 	install_mc=1
 	install_dtrx=1
 	install_aptitude=1
@@ -202,6 +205,9 @@ case $key in
 	;;
 	--noti)
 	install_noti=1
+	;;
+	--dust)
+	install_dust=1
 	;;
 	--mc)
 	install_mc=1
@@ -302,7 +308,6 @@ fi
 if [ "${install_diff}" == "1" ]; then
 	plik=$(get_cached_file diff-so-fancy https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy)
 	install_script "${plik}" /usr/local/bin/diff-so-fancy
-	
 fi
 
 if [ "${install_find}" == "1" ]; then
@@ -321,6 +326,14 @@ if [ "${install_du}" == "1" ]; then
 	logexec make
 	logexec sudo make install
 	logexec popd
+fi
+
+if [ "${install_dust}" == "1" ]; then
+   version=$(get_latest_github_release_name bootandy/dust)
+	file="dust-${version}-x86_64-unknown-linux-gnu.tar.gz"
+	link="https://github.com/bootandy/dust/releases/download/${version}/${file}"
+	filepath=$(get_cached_file ${file} ${link})
+   get_from_cache_and_uncompress_file ${filepath} ${link} "/usr/local/bin/dust" root
 fi
 
 if [ "${install_tldr}" == "1" ]; then
