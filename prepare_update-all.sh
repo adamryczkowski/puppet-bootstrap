@@ -92,7 +92,7 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-logmkdir "${install_dir}" adam
+logmkdir "${install_dir}" ${user}
 
 if [ ! -w ${install_dir} ] ; then 
 	errcho "${install_dir} is not writable for ${user}"
