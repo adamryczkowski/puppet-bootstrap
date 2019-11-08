@@ -222,6 +222,7 @@ function blender {
 function office2007 {
 	
 	echo "#TODO"
+	logexec sudo dpkg --add-architecture i386 
 	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/winehq.key)
 	if [[ $(get_distribution) == "LinuxMint" ]]; then
 		release=bionic
@@ -230,7 +231,7 @@ function office2007 {
 	fi
 	
 	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key
+	add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key winehq.key
 	
 #	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
 #	logexec sudo apt-key add "${release_key}"
@@ -394,7 +395,7 @@ function virtualbox {
 	logexec sudo apt-key add "${release_key}"
 	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
 	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual virtualbox "deb https://download.virtualbox.org/virtualbox/debian ${release} contrib"
+	add_apt_source_manual virtualbox "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian ${release} contrib"
 	add_ppa thebernmeister/ppa
 	install_apt_packages virtualbox-6.0 indicator-virtual-box
 	
