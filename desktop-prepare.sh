@@ -238,7 +238,8 @@ function office2007 {
 
 
 	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
-	
+	install_apt_package_file libfaudio0_19.07-0~bionic_amd64.deb libfaudio:amd64 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/amd64/libfaudio0_19.07-0~bionic_amd64.deb
+
 	do_update
 	install_apt_packages winehq-staging playonlinux gridsite-clients
 	
