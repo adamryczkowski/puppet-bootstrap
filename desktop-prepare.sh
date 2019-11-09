@@ -518,9 +518,19 @@ function waterfox {
 
 function firefox {
 	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
-	file=$(get_cached_file "waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2" "https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2")
+	pattern='^([0-9\.]+)\-(classic[0-9\-]+)$'
+	pattern='^([0-9\.]+)\-.*$'
+	if [[ "${waterfox_version}" =~ $pattern ]]; then
+	   ver_str="${BASH_REMATCH[1]}"
+	   clas_str="${BASH_REMATCH[2]}"
+   else
+      return 1
+   fi
+	link="https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-classic-${ver_str}.en-US.linux-x86_64.tar.bz2"
+	filename="waterfox-${ver_str}.en-US.linux-x86_64.tar.bz2"
+	file=$(get_cached_file "$filename" "$link")
 	
-	uncompress_cached_file waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2 "/opt/waterfox"
+	uncompress_cached_file ${filename} "/opt/waterfox"
 	
 	chown_dir "/opt/waterfox" root root
 
