@@ -114,6 +114,7 @@ if [[ ${need_to_install} == 1 ]]; then
    logmkdir /opt root
    logmkdir /opt/conda $USER
    export PATH="${conda_dir}/bin:$PATH"
+   logexec /opt/conda/bin/conda init
 fi
 
 if ! $(conda --version >/dev/null); then

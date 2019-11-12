@@ -222,6 +222,7 @@ function blender {
 function office2007 {
 	
 	echo "#TODO"
+	logexec sudo dpkg --add-architecture i386 
 	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/winehq.key)
 	if [[ $(get_distribution) == "LinuxMint" ]]; then
 		release=bionic
@@ -230,14 +231,16 @@ function office2007 {
 	fi
 	
 	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key
+	add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key winehq.key
 	
 #	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
 #	logexec sudo apt-key add "${release_key}"
 
 
 	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
-	
+	install_apt_package_file libfaudio0_19.07-0~bionic_amd64.deb libfaudio:amd64 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/amd64/libfaudio0_19.07-0~bionic_amd64.deb
+	install_apt_package_file libfaudio0_19.07-0~bionic_i386.deb libfaudio:i386 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/i386/libfaudio0_19.07-0~bionic_i386.deb
+
 	do_update
 	install_apt_packages winehq-staging playonlinux gridsite-clients
 	
@@ -394,7 +397,7 @@ function virtualbox {
 	logexec sudo apt-key add "${release_key}"
 	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
 	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual virtualbox "deb https://download.virtualbox.org/virtualbox/debian ${release} contrib"
+	add_apt_source_manual virtualbox "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian ${release} contrib"
 	add_ppa thebernmeister/ppa
 	install_apt_packages virtualbox-6.0 indicator-virtual-box
 	
@@ -515,9 +518,19 @@ function waterfox {
 
 function firefox {
 	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
-	file=$(get_cached_file "waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2" "https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2")
+	pattern='^([0-9\.]+)\-(classic[0-9\-]+)$'
+	pattern='^([0-9\.]+)\-.*$'
+	if [[ "${waterfox_version}" =~ $pattern ]]; then
+	   ver_str="${BASH_REMATCH[1]}"
+	   clas_str="${BASH_REMATCH[2]}"
+   else
+      return 1
+   fi
+	link="https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-classic-${ver_str}.en-US.linux-x86_64.tar.bz2"
+	filename="waterfox-${ver_str}.en-US.linux-x86_64.tar.bz2"
+	file=$(get_cached_file "$filename" "$link")
 	
-	uncompress_cached_file waterfox-${waterfox_version}.en-US.linux-x86_64.tar.bz2 "/opt/waterfox"
+	uncompress_cached_file ${filename} "/opt/waterfox"
 	
 	chown_dir "/opt/waterfox" root root
 

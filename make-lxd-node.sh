@@ -542,11 +542,8 @@ if [ -n "$actual_ip" ]; then
 	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
 fi
 
-if [[ $bare == 0 ]]; then
-	./execute-script-remotely.sh prepare_update-all.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --bat --ping --fzf --htop --find --ag --mc --liquidprompt --byobu --autojump --wormhole $aptproxy --need-apt-update
-else
-	./execute-script-remotely.sh prepare_update-all.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --need-apt-update
-fi
+set -x 
+logexec lxc exec $name -- chown ${lxcuser}:${lxcuser} -R ${sshhome}
 
 if [ ! -f "$private_key_path" ]; then
 	if ! lxc exec ${name} -- ls ~/.ssh/id_ed25519; then
@@ -581,7 +578,7 @@ if [ -n "${guestfolder}" ]; then
 fi
 
 if [[ $bare == 0 ]]; then
-	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --bat --ping --fzf --htop --find --ag --mc --liquidprompt --byobu --autojump --wormhole $aptproxy --need-apt-update
+	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --cli-improved --need-apt-update
 else
 	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --need-apt-update
 fi

@@ -142,7 +142,7 @@ function add_apt_source_manual {
 		else
 			release_key=$(get_cached_file /tmp/tmp.key "${release_key_URI}")
 		fi
-		fingerpr=$(get_key_fingerprint)
+		fingerpr=$(get_key_fingerprint ${release_key})
 		if ! apt-key finger | grep "$fingerpr" > /dev/null; then
 			logexec sudo apt-key add "${release_key}"
 		fi
@@ -209,11 +209,11 @@ function get_key_fingerprint {
 	local keyfile="$1"
 	local fingerpr
 	local pattern
+	pattern='^\s*(Key fingerprint = )?([0-9A-F]{40})$'
 	if [ -f "${keyfile}" ]; then
-		fingerpr=$(cat "${keyfile}" | gpg --with-fingerprint | grep "Key fingerprint")
-		pattern='^\s*Key fingerprint = ([0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4}  [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4} [0-9A-F]{4})$'
+		fingerpr=$(gpg ${keyfile} | grep -E "$pattern")
 		if [[ "$fingerpr" =~ $pattern ]]; then
-			fingerpr=${BASH_REMATCH[1]}
+			fingerpr=${BASH_REMATCH[2]}
 		else
 			fingerpr="error"
 		fi
