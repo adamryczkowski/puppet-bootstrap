@@ -145,6 +145,7 @@ function add_apt_source_manual {
 		fingerpr=$(get_key_fingerprint ${release_key})
 		if ! apt-key finger | grep "$fingerpr" > /dev/null; then
 			logexec sudo apt-key add "${release_key}"
+   		flag_need_apt_update=1
 		fi
 	fi
 }
