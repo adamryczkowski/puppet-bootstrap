@@ -148,24 +148,49 @@ fi
 # logexec jupyter contrib nbextension install --user
 node_key=$(get_cached_file nodesource.gpg.key https://deb.nodesource.com/gpgkey/nodesource.gpg.key)
 
-add_apt_source_manual nodesource "deb https://deb.nodesource.com/node_10.x $(get_ubuntu_codename) main
-deb-src https://deb.nodesource.com/node_10.x $(get_ubuntu_codename) main" https://deb.nodesource.com/gpgkey/nodesource.gpg.key nodesource.gpg.key 
+add_apt_source_manual nodesource "deb https://deb.nodesource.com/node_11.x $(get_ubuntu_codename) main
+deb-src https://deb.nodesource.com/node_11.x $(get_ubuntu_codename) main" https://deb.nodesource.com/gpgkey/nodesource.gpg.key nodesource.gpg.key 
 
 refresh_apt_redirections
 install_apt_packages nodejs
 
-
 logexec pip install jupyterlab
-conda install jupyterlab
+
+npm_packages="$(get_home_dir ${USER})/.npm-packages"
+logmkdir "$npm_packages" ${USER}
+logexec npm config set prefix "$npm_packages"
+
+textfile "$(get_home_dir ${USER}/.node_bashrc" "export NPM_PACKAGES='${$npm_packages}'
+export NODE_PATH=\"\$NPM_PACKAGES/lib/node_modules\${NODE_PATH:+:\$NODE_PATH}\"
+export PATH=\"\$NPM_PACKAGES/bin:\$PATH\"
+unset MANPATH  # delete if you already modified MANPATH elsewhere in your config
+export MANPATH=\"\$NPM_PACKAGES/share/man:\$(manpath)\"" ${USER}
+
+linetextfile "$(get_home_dir ${USER}/.bashrc" "source $(get_home_dir ${USER}/.node_bashrc"
+
+logexec npm install -g yarn
+line=$(npm install -g yarn | grep -e "yarn -> .*/yarn\.js\$")
+pattern='yarn -> (.*/yarn\.js)$'
+if [[ "$line" =~ $pattern ]]; then
+	yarn_dir="${BASH_REMATCH[1]}"
+else
+	errcho "Cannot set new yarn. Possible problems with jupyterlab extensions expected."
+fi
+
 
 #pip install jupyterlab-discovery ?
 #jupyter labextension install jupyterlab-drawio
 #jupyter labextension install @krassowski/jupyterlab-lsp
-jupyter labextension install jupyterlab-drawio @krassowski/jupyterlab-lsp @jupyterlab/theme-dark-extension @ryantam626/jupyterlab_code_formatter
+#jupyter labextension install jupyterlab-drawio @jupyterlab/theme-dark-extension @ryantam626/jupyterlab_code_formatter @jupyter-widgets/jupyterlab-manager
+#jupyter labextension install @jupyterlab/theme-dark-extension
+#jupyter labextension install @krassowski/jupyterlab-lsp
+
 #jupyter labextension install @ryantam626/jupyterlab_code_formatter
-pip install jupyterlab_code_formatter
-pip install jupyter-conda
-jupyter serverextension enable --py jupyterlab_code_formatter
+
+#pip install jupyterlab_code_formatter
+#pip install jupyter-conda
+#jupyter serverextension enable --py jupyterlab_code_formatter
+
 #jupyter labextension install jupyterlab_toastify jupyterlab_conda
 #jupyter labextension list
 
