@@ -111,6 +111,12 @@ export CUDADIR=/usr/local/cuda-${cuda_version}
 export CUDA_PATH=/usr/local/cuda-${cuda_version}
 export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/cuda-${cuda_version}/lib64" root
 
+add_ppa graphics-drivers/ppa
+
+if [[ $driver_version != "auto" ]]; then
+   install_apt_packages nvidia-utils-${driver_version}
+fi
+
 sample_dir="$(get_home_dir ${user})/tmp"
 get_git_repo https://github.com/NVIDIA/cuda-samples.git $(get_home_dir ${user})/tmp cuda-samples
 sample_dir="${sample_dir}/cuda-samples/Samples"
