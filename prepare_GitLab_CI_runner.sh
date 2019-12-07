@@ -187,5 +187,7 @@ if [[ -n "${username}" ]]; then
 	#Adding gitlab to known hosts:
 	ssh-keyscan -H git1.imgw.pl | sudo -u ${username} -- tee -a ${sshhome}/.ssh/known_hosts
 
+   logmkdir $(get_home_dir)/.gitlab-runner
+
 	logexec sudo -H -u ${username} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
 fi
