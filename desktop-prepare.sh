@@ -689,7 +689,7 @@ function julia {
 	install_apt_packages hdf5-tools #for HDF5 Julia package
 	install_atom_packages uber-juno
 
-	$(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatsPlots" , "DataFrames", "JLD", "Flux", "TensorFlow", "Debugger", "Weave", "ScikitLearn"]);ENV["PYTHON"]=""; Pkg.build(); using Revise; using IJulia; using Rebugger; using RCall; using Knet; using Plots; using StatsPlots; using DataFrames; using JLD; using Flux; using TensorFlow; using Debugger'
+	$(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatsPlots" , "DataFrames", "JLD", "Flux", "Debugger", "Weave"]);ENV["PYTHON"]=""; Pkg.build(); using Revise; using IJulia; using Rebugger; using RCall; using Knet; using Plots; using StatsPlots; using DataFrames; using JLD; using Flux; using Debugger'
 }
 
 function i3wm {
