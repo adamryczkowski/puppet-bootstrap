@@ -76,7 +76,7 @@ esac
 done
 
 add_apt_source_manual bintray.rabbitmq "deb https://dl.bintray.com/rabbitmq-erlang/debian $(get_ubuntu_codename) erlang
-deb https://dl.bintray.com/rabbitmq/debian $(get_ubuntu_codename) main"https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc rabbitmq.key
+deb https://dl.bintray.com/rabbitmq/debian $(get_ubuntu_codename) main" https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc rabbitmq.key
 
 install_apt_packages rabbitmq-server
 
