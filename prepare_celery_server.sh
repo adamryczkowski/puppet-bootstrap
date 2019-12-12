@@ -75,43 +75,9 @@ case $key in
 esac
 done
 
-install_apt_packages git python
+add_apt_source_manual bintray.rabbitmq "deb https://dl.bintray.com/rabbitmq-erlang/debian $(get_ubuntu_codename) erlang
+deb https://dl.bintray.com/rabbitmq/debian $(get_ubuntu_codename) main"https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc rabbitmq.key
 
-#. Install spack
-need_bootstrap=0
+install_apt_packages rabbitmq-server
 
-if [ ! -d "${spack_location}" ]; then
-	base_location=$(dirname ${spack_location})
-	if [ ! -d "${base_location}" ]; then
-		logexec mkdir -p $base_location
-	fi
-	logexec pushd "${base_location}"
-	logexec sudo chown ${USER} $(dirname ${spack_location})
-	logexec git clone --depth 1 https://github.com/spack/spack ${spack_location}
-	need_bootstrap=1
-fi
-logexec pushd "${spack_location}"
-logexec git pull
-source "${spack_location}/share/spack/setup-env.sh"
 
-if [ "$spack_mirror" != "" ]; then
-	if ! spack mirror list | grep ${spack_mirror} >/dev/null; then
-		if spack mirror list | grep "^custom_mirror " >/dev/null; then
-			logexec spack mirror remove custom_mirror
-		fi
-		pattern='^file:/(/.*)$'
-		if [[ $spack_mirror =~ $pattern ]]; then
-			spack_mirror="${BASH_REMATCH[1]}"
-		fi
-		logexec spack mirror add custom_mirror file://${spack_mirror}
-	fi
-fi
-
-if [ "$need_bootstrap" == "1" ]; then
-	spack bootstrap
-	source "${spack_location}/share/spack/setup-env.sh"
-fi
-
-for spack_mod in ${pre_install[*]}; do
-	spack install ${spack_mod}
-done
