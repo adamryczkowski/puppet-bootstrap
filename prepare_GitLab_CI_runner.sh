@@ -3,10 +3,10 @@ cd `dirname $0`
 . ./common.sh
 
 usage="
-Prepares GitLab CI runner
+Prepares GitLab CI runner. Gitlab runner runs as 'gitlab-runner' user. 
 
 syntax:
-$(basename $0) [--user <username>] [--runner-name <name>]
+$(basename $0) [--runner-name <name>]
 		[--gitlab-server <uri>] --gitlab-token <string>
 		[--ssh-identity <path>]
 		[--build-dir <path>] [--max-threads <N>] [--max-mem <MB>]
@@ -15,18 +15,18 @@ $(basename $0) [--user <username>] [--runner-name <name>]
 
 where
 
- --user <username>          - Username which will run the CI
  --gitlab-server <uri>      - Path to the gitlab server. Defaults to https://git1.imgw.pl
  --gitlab-token <string>    - Token that will allow access to the server. Required.
- --build-dir <path>         - Path to the build dir. Optional parameter.
+ --build-dir <path>         - Path to the build dir. Relative to the home of gitlab-runnet. Defaults to 'build'.
  --runner-name              - Name of the runner. Defaults to hostname.
  --max-mem <MB>             - Maximum number of MB allowed for build in this runner. 
                               This value will get written to the configuration file, and
                               used during CI run. Default to auto, which is
-                              90% of (total mem - 1GB)
+                              90% of (total mem - 1GB). 
  --max-threads <N>          - Max number of build threads allowed. Defaults to all
                               CPU threads available (\"auto\")
- --ssh-identity <path>      - Path to the ssh identity file. Otherwise uses already present.
+ --ssh-identity <path>      - Path to the ssh identity file to be used by the gitlab-runner. 
+                              Otherwise uses already present.
  --debug                    - Flag. If set, all commands that change state of the container or
                               host machine will be displayed together with their output.
  --log                      - Redirects output from --debug into the log file.
@@ -154,20 +154,13 @@ install_apt_package gitlab-runner gitlab-runner
 if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 	logexec logmkdir /usr/share/ca-certificates/extra
 #	$loglog
-	echo -n | openssl s_client -connect git1.imgw.pl:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee /usr/share/ca-certificates/extra/imgwpl.crt
-	linetextfile /etc/ca-certificates.conf extra/imgwpl.crt
-	logexec sudo update-ca-certificates
+   add_host_ssh_certificate git1.imgw.pl
+   add_host_ssh_certificate github.com
+   
+#	echo -n | openssl s_client -connect git1.imgw.pl:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee /usr/share/ca-certificates/extra/imgwpl.crt
+#	linetextfile /etc/ca-certificates.conf extra/imgwpl.crt
+#	logexec sudo update-ca-certificates
 #	install_apt_package debconf-utils debconf-get-selections
-#	current=$(debconf-get-selections |grep ca-certificates/enable_crts)
-#	pattern='^(ca-certificates	ca-certificates/enable_crts	multiselect)	(.*)$'
-#	if ! [[ "$current" =~ $pattern ]]; then
-#		echo "ERROR"
-#		exit 1
-#	fi
-#	tmp=$(mktemp)
-#	echo "${BASH_REMATCH[1]} extra/imgwpl.crt, ${BASH_REMATCH[2]}">$tmp
-#	logexec sudo debconf-set-selections $tmp
-#	rm $tmp
 fi
 
 env_opts=$(echo ${env_opts} | xargs)
@@ -175,9 +168,9 @@ if [[ -n "$env_opts" ]]; then
 	opts="$opts --env $env_opts"
 fi
 
-echo ${sudoprefix} gitlab-runner register --non-interactive --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts}
+echo ${sudoprefix} gitlab-runner register --non-interactive --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --tls-ca-file=/usr/share/ca-certificates/extra/imgwpl.crt
 
-logexec ${sudoprefix} gitlab-runner register --non-interactive  --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} 
+logexec ${sudoprefix} gitlab-runner register --non-interactive  --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --tls-ca-file=/usr/share/ca-certificates/extra/imgwpl.crt
 
 #logexec sudo -H -u ${USER} -- gitlab-runner run &
 if [[ -n "${username}" ]]; then

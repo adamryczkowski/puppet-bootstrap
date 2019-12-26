@@ -1,0 +1,17 @@
+reset; bash -x ./softether-client.sh 172.104.148.166 --username serv --vpn-hub VPN --password "vSEUgNVxeplIS14hJpo6" --ip 192.168.42.1 --connection_name dom --nicname dom
+reset; bash -x ./dhcp-server.sh vpn_dom --dhcp-range "192.168.42.100-192.168.42.199" --ip 192.168.42.1
+
+reset; bash -x ./softether-client.sh 172.104.148.166 --username dhcp_kiev --vpn-hub Kiev --password 5oCK6aL58eVA7IW7BuY9 --ip 192.168.41.1 --connection_name kiev --nicname kiev
+reset; bash -x ./dhcp-server.sh vpn_kiev --dhcp-range "192.168.41.100-192.168.41.199" --ip 192.168.41.1
+
+reset; bash -x ./softether-client.sh 172.104.148.166 --username dhcp_sp6 --vpn-hub SP6 --password xSXXiZwz2KAeNUgEUDMM --ip 192.168.40.1 --connection_name sp6 --nicname sp6 
+reset; bash -x ./dhcp-server.sh vpn_sp6 --dhcp-range "192.168.40.100-192.168.40.199" --ip 192.168.40.1
+
+reset; bash -x ./softether-client.sh 172.104.148.166 --username dhcp_mimecast --vpn-hub Mimecast --password SsuN0J6i9G3dXWX10JQw --ip 192.168.43.1 --connection_name mime --nicname mime 
+reset; bash -x ./dhcp-server.sh vpn_mime --dhcp-range "192.168.43.100-192.168.43.199" --ip 192.168.43.1
+
+reset; bash -x ./softether-client.sh 172.104.148.166 --username dhcp_imgw --vpn-hub IMGW --password X1DECRW4FbVcR6qmm5Wu --ip 192.168.44.1 --connection_name imgw --nicname imgw
+
+HFCrLsAKZLN9etqKxnho
+
+2SjQ4RsJE3KGVZQo5hXM

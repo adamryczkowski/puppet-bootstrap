@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## dependency: IMGW-VPN.sh
+## dependency: softether-client.sh
 ## dependency: make-lxd-node.sh
 ## dependency: install_apt_packages.sh
 ## dependency: prepare_spack.sh
@@ -214,7 +214,7 @@ if [ -n "$vpn_username" ]; then
 		errcho "You must provide password"
 		exit 1
 	else
-		./execute-script-remotely.sh IMGW-VPN.sh --ssh-address ${container_ip} $external_opts --step-debug -- ${vpn_username}@vpn.imgw.pl --password ${vpn_password}
+		./execute-script-remotely.sh softether-client.sh --ssh-address ${container_ip} $external_opts --step-debug -- 172.104.148.166 --username ${vpn_username} --password ${vpn_password} --vpn-hub IMGW --nicname imgw
 	fi
 fi
 

@@ -84,7 +84,9 @@ function linetextfile {
 #			$loglog
 			echo "$line" | sudo tee -a "$plik"
 		fi
+		return 0
 	fi
+	return 1
 }
 
 function textfile {

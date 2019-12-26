@@ -149,6 +149,17 @@ function disable_host {
 	fi
 }
 
+function add_host_ssh_certificate {
+   local host=$1
+	local line=$(echo -n | openssl s_client -connect ${host}:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p')
+	textfile /usr/share/ca-certificates/extra/${host}.crt "${line}" root
+	already_done1=$?
+	linetextfile /etc/ca-certificates.conf extra/${host}.crt
+	already_done2=$?
+	if [[ "${already_done1}" == "0" || "${already_done2}" == "0" ]]; then
+	   logexec sudo update-ca-certificates
+   fi
+}
 
 function get_iface_ip {
 	local iface=$1

@@ -86,7 +86,7 @@ install_apt_packages rabbitmq-server redis-server
 
 install_file files/redis.conf /etc/redis/redis.conf root
 
-if [[ ${worker_pasword} == "" ]]; then
+if [[ "${worker_pasword}" == "" ]]; then
    password_phrase1=""
    password_phrase2=""
 else

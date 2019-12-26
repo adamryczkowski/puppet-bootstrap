@@ -18,3 +18,10 @@ reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --ssh-address ad
 reset; ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable id_ed25519 --lxc-name ci-runner --user adam --step-debug  -- --ssh-identity id_ed25519 --gitlab-server https://git1.imgw.pl --gitlab-token ENMnScUBNMFDJqjQ8N9z --runner-name upiorny
 
 
+
+
+----------------------
+
+reset;./execute-script-remotely.sh prepare_spack.sh --ssh-address aryczkowski@10.21.6.23 -- --pre-install jq
+
+reset; bash -x ./deploy_IMGW_CI.sh xen --git-address git@git.imgw.ad:aryczkowski/propoze.git --git-branch beetroot --preinstall-spack boost --source-dir tests/mpdata-gauge
