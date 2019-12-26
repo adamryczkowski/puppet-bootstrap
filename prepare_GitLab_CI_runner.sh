@@ -8,13 +8,15 @@ Prepares GitLab CI runner. Gitlab runner runs as 'gitlab-runner' user.
 syntax:
 $(basename $0) [--runner-name <name>]
 		[--gitlab-server <uri>] --gitlab-token <string>
-		[--ssh-identity <path>]
+		[--ssh-identity <path>] [--use-spack] [--spack-options \"opts\"]
 		[--build-dir <path>] [--max-threads <N>] [--max-mem <MB>]
 		[--debug] [--log <log path>] [--help]
 
 
 where
 
+ --use-spack                - If given, the script will also prepare spack.
+ --spack-options            - Options forwarded to the prepare_spack.sh script.
  --gitlab-server <uri>      - Path to the gitlab server. Defaults to https://git1.imgw.pl
  --gitlab-token <string>    - Token that will allow access to the server. Required.
  --build-dir <path>         - Path to the build dir. Relative to the home of gitlab-runnet. Defaults to 'build'.
@@ -40,7 +42,7 @@ if [ -z "$1" ]; then
 	echo "$usage"
 	exit 0
 fi
-username="$USER"
+username=gitlab-runner
 opts=""
 env_opts=""
 runner_name=$(hostname)
@@ -49,6 +51,7 @@ max_mem="auto"
 max_threads="auto"
 sudoprefix="sudo "
 build_dir="auto"
+use_spack=0
 
 while [[ $# > 0 ]]
 do
@@ -56,10 +59,12 @@ key="$1"
 shift
 
 case $key in
-	--user)
-	username="$1"
-#	opts="${opts} --user ${username}"
-	sudoprefix=""
+	--use-spack)
+	use_spack=1
+	;;
+	--spack-options)
+	use_spack=1
+	spack_options="$1"
 	shift
 	;;
 	--gitlab-server)
@@ -109,9 +114,9 @@ case $key in
 esac
 done
 
-sshhome=$(get_home_dir $username)
 
 if [[ -n "${username}" ]]; then
+   sshhome=$(get_home_dir $username)
 	if [ "$build_dir" == "auto" ]; then
 		build_dir="${sshhome}/build"
 		mkdir -p ${build_dir}
@@ -120,6 +125,7 @@ if [[ -n "${username}" ]]; then
 		build_dir="${sshhome}/build"
 	fi
 else
+   sshhome=$(get_home_dir)
 	if [ "$build_dir" == "auto" ]; then
 		build_dir="/opt/build"
 		sudo mkdir -p ${build_dir}
@@ -170,7 +176,9 @@ fi
 
 ./prepare_ubuntu.sh gitlab-runner
 
-./prepare_spack.sh 
+if [[ $use_spack == 1 ]]; then
+   ./prepare_spack.sh --user gitlab-runner ${spack_options}
+fi
 
 echo ${sudoprefix} gitlab-runner register --non-interactive --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --tls-ca-file=/usr/share/ca-certificates/extra/imgwpl.crt
 
@@ -184,7 +192,7 @@ if [[ -n "${username}" ]]; then
 	#Adding gitlab to known hosts:
 	ssh-keyscan -H git1.imgw.pl | sudo -u ${username} -- tee -a ${sshhome}/.ssh/known_hosts
 
-   logmkdir $(get_home_dir)/.gitlab-runner
+   logmkdir ${sshhome}/.gitlab-runner ${username}
 
-	logexec sudo -H -u ${username} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
+#	logexec sudo -H -u ${username} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
 fi
