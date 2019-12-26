@@ -168,6 +168,10 @@ if [[ -n "$env_opts" ]]; then
 	opts="$opts --env $env_opts"
 fi
 
+./prepare_ubuntu.sh gitlab-runner
+
+./prepare_spack.sh 
+
 echo ${sudoprefix} gitlab-runner register --non-interactive --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --tls-ca-file=/usr/share/ca-certificates/extra/imgwpl.crt
 
 logexec ${sudoprefix} gitlab-runner register --non-interactive  --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --tls-ca-file=/usr/share/ca-certificates/extra/imgwpl.crt
