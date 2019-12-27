@@ -2,7 +2,8 @@
 
 ## dependency: softether-client.sh
 ## dependency: make-lxd-node.sh
-## dependency: install_apt_packages.sh
+## dependency: prepare_GitLab_CI_runner.sh
+
 ## dependency: prepare_spack.sh
 ## dependency: IMGW-CI-runner.sh
 cd `dirname $0`
@@ -15,36 +16,44 @@ Prepares container that can do CI of the PROPOZE project
 
 Usage:
 
-$(basename $0) <container_name> [--vpn-password <vpn-password> --vpn-username <vpn-username>]
-		[--git-address <address of the repo>] [--git-branch <branch>] 
+$(basename $0) <container_name> --gitlab-token <string> [--softether-password <vpn-password>]
+		[--grant-sudo] [--make-lxd-node-opts \"opts\"] [--max-threads <N>] [--max-mem <MB>]
 		[--ssh-key-path <path>] [--host-repo-path <path>] [--guest-repo-path <path>]
-		[--release <release_name>] [--compile-using <compiler>]
+		[--release <release_name>] [--apt-proxy <proxy_address>] [--preinstall-spack <package> ...]
+		[--preinstall-apt <package>...]
 		[--help] [--debug] [--log <output file>]
 
 
 where
  <container_name>              - Name of the (LXC) container that will hold the CI runner
- --vpn-password <vpn-password> - If specified, it will also install a service that connects 
- --vpn-username <vpn-username> - with the IMGW VPN using theese credentials
- --git-address <path>          - Remote (read only) path to repository, which will be tested.
-                                 Defaults to «git@git.imgw.ad:aryczkowski/propoze.git»
- --git-branch <branch>         - Name of the branch to pull. Defaults to «develop».
- --ssh-key-path <path>         - Path to the ssh private key that allows pulling the source code
- --host-repo-path <path>       - Local path to the pulled repository. If no files in the path,
-                                 the script will pull the code.
- --guest-repo-path <path>      - Where the repository will be available in the guest.
-                                 Defaults to «~/propoze»
- --source-dir <path>           - Relative path to the source directory. Script will build this source in
-                                 created subdirectory \"build\". Defaults to the root of the repository.
+ --gitlab-token <string>       - Token that will allow access to the server. Required.
+ --softether-password          - Softether password. Username is fixed to the container_name. 
+                                 Hub is fixed to IMGW. If skept, no softether is installed.
+ --grant-sudo                  - Flag that gives passwordless sudo priviledge to the gitlab-runner.
+ --make-lxd-node-opts \"<opts>\"  - Options that will be forwarded to the make-lxd-node script.
+ --max-mem <MB>                - Maximum number of MB allowed for build in this runner. This limit will be
+                                 enforced using hard memory limit on the container and 
+                                 this value will get written to the configuration file to be
+                                 used during CI run. Default to auto, which is
+                                 90% of (total mem - 1GB). 
+ --max-threads <N>             - Max number of build threads allowed. Defaults to all
+                                 CPU threads available (\"auto\"). This is a hard limit enforced on the container.
+ --ssh-key-path <path>         - Path to the ssh private key that allows pulling the source code.
+                                 Most likely the deploy key. Otherwise it will install a new keypair,
+                                 and you will need to add this keypair to GitLab & GitHub.
+ --guest-repo-path <path>      - Build path in the container. It will be owned by the gitlab-runner user.
+                                 Defaults to /opt/CI
+ --host-repo-path <path>       - Location of the build path in the host. If not specified, the build path
+                                 will be visible only to the guest OS.
  --release <release_name>      - What Ubuntu flavour to test? Defaults to the current distro.
- --apt-proxy <proxy_address>   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
+ --apt-proxy <proxy_address>   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142. Defaults to the
+                                 already existing caching on the host.
+ --force-spack                 - If set the dependencies will be installed using spack rather apt.
  --preinstall-spack            - Name of the package to pre-install using spack
                                  (e.g. --preinstall-spack cmake --preinstall-spack gcc@6.4.0)
- --repo-path                   - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
- --spack-location              - Name of the directory to install spack into. Defaults to ~/tmp/spack
-                                 Needed only, when --preinstall-spack any package.
  --spack_mirror                - Location of local spack mirror. Mirror will be shared with the container.
                                  Needed only, when --preinstall-spack any package.
+ --repo-path                   - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
  --preinstall-apt              - Name of the packages to pre-install using package manager
  --debug                       - Flag that sets debugging mode. 
  --log                         - Path to the log file that will log all meaningful commands
@@ -52,24 +61,42 @@ where
 
 Example2:
 
-$(basename $0) runner1 --vpn-username aryczkowski --vpn-password Qwer12345679 --ssh-key-path ~/.ssh/id_rsa --host-repo-path ~/CI1 --debug
+$(basename $0) gitrunner8 --softether-password 1WTh3yAjAkXaQmiOz105 --ssh-key-path secrets/gitlab_ssh_key --host-repo-path /home/Adama-docs/Lib/CI --preinstall-spack cmake --preinstall-apt gcc-8 --preinstall-apt g++-8 --preinstall-apt gfortran-8
 "
 
-if [ -z "$1" ]; then
+if [[ -z "$1" ]] ||  [[ "$1" == "--help" ]] ; then
 	echo "$usage"
 	exit 0
 fi
 container_name=$1
-git_address='git@git.imgw.ad:aryczkowski/propoze.git'
-git_branch='develop'
-guest_path="/home/${USER}/propoze"
-release_opts=""
-spack_opts=""
-install_spack=0
-apt_opts=""
-repo_path_opts=""
-
 shift
+
+CI_opts=""
+makelxd_opts=""
+build_dir=/opt/build
+
+use_softether=0
+grant_sudo=0
+max_mem="auto"
+max_threads=""
+ssh_key_path=""
+guest_path="/opt/CI"
+host_path=""
+release=$(get_ubuntu_codename)
+release_opts=""
+aptproxy="auto"
+force_spack=0
+install_spack=0
+spack_opts=""
+if mount_network_cache; then
+   repo_path=/media/adam-minipc/other/debs
+else
+   repo_path=""
+fi
+repo_path_opts="--repo-path $1"
+
+apt_packages=()
+
 
 while [[ $# > 0 ]]
 do
@@ -77,6 +104,77 @@ key="$1"
 shift
 
 case $key in
+	--gitlab-token)
+	gitlab_token="$1"
+	shift
+	;;
+	--debug)
+	debug=1
+	;;
+	--softether-password)
+	softether_password=$1
+	use_softether=1
+	softether_username=$container_name
+	shift
+	;;
+	--grant-sudo)
+	grant_sudo=1
+	;;
+	--make-lxd-node-opts)
+	makelxd_opts="$makelxd_opts $1"
+	shift
+	;;
+	--max-mem)
+	max_mem="$1"
+	shift
+	;;
+	--max-threads)
+	max_threads="$1"
+	shift
+	;;
+	--ssh-key-path)
+	ssh_key_path=$1
+	shift
+	;;
+	--guest-repo-path)
+	guest_path=$1
+	shift
+	;;
+	--host-repo-path)
+	host_path=$1
+	shift
+	;;
+	--release)
+	makelxd_opts="$makelxd_opts --release $1"
+	shift
+	;;
+	--apt-proxy)
+	aptproxy=$1
+	shift
+	;;
+	--force-spack)
+   force_spack=1
+   install_spack=1
+   ;;
+	--preinstall-spack)
+	spack_opts="${spack_opts} --pre-install $1"
+	CI_opts="${CI_opts} --spack-load $1"
+	install_spack=1
+	shift
+	;;
+	--spack-mirror)
+	spack_opts="${spack_opts} --spack-mirror $1"
+	makelxd_opts="${makelxd_opts} --map-host-folder $1 $1"
+	shift
+	;;
+#	--repo-path)
+#	repo_path_opts="--repo-path $1"
+#	shift
+#	;;
+	--preinstall-apt)
+	apt_packages+=($1)
+	shift
+	;;
 	--debug)
 	debug=1
 	;;
@@ -85,73 +183,10 @@ case $key in
 	shift
 	;;
 	--help)
-        echo "$usage"
-        exit 0
+   echo "$usage"
+   exit 0
 	;;
-	--repo-path)
-	repo_path_opts="--repo-path $1"
-	shift
-	;;
-	--vpn-password)
-	vpn_password=$1
-	shift
-	;;
-	--vpn-username)
-	vpn_username=$1
-	shift
-	;;
-	--git-address)
-	git_address=$1
-	shift
-	;;
-	--git-branch)
-	git_branch=$1
-	shift
-	;;
-	--ssh-key-path)
-	ssh_key_path=$1
-	shift
-	;;
-	--host-repo-path)
-	host_path=$1
-	shift
-	;;
-	--guest-repo-path)
-	guest_path=$1
-	shift
-	;;
-	--source-dir)
-	CI_opts="${CI_opts} --source-dir $1"
-	shift
-	;;
-	--release)
-	release_opts="--release $1"
-	shift
-	;;
-	--apt-proxy)
-	aptproxy=$1
-	shift
-	;;
-	--preinstall-spack)
-	spack_opts="${spack_opts} --pre-install $1"
-	CI_opts="${CI_opts} --spack-load $1"
-	install_spack=1
-	shift
-	;;
-	--spack-location)
-	spack_opts="${spack_opts} --spack-location $1"
-	shift
-	;;
-	--spack-mirror)
-	spack_opts="${spack_opts} --spack-mirror $1"
-	makelxd_opts="${makelxd_opts} --map-host-folder $1 $1"
-	shift
-	;;
-	--preinstall-apt)
-	apt_opts="${apt_opts} $1"
-	shift
-	;;
-	-*)
+	*)
 	echo "Error: Unknown option: $1" >&2
 	echo "$usage" >&2
 	exit 1
@@ -166,15 +201,6 @@ if [ -n "$debug" ]; then
 	external_opts="--debug --step-debug"
 fi
 
-if [ -n "$vpn_password" ] && [ -n "$vpn_username" ]; then
-	flag_install_vpn=1
-elif [ -z "$vpn_password" ] && [ -z "$vpn_username" ]; then
-	flag_install_vpn=0
-else
-	errcho "You must either privde both --vpn-username --vpn-password or none."
-	exit 1
-fi
-
 if [ -n "$ssh_key_path" ]; then
 	if [ ! -f "$ssh_key_path" ]; then
 		errcho "Cannot find a key specified in the --ssh-key-path"
@@ -184,68 +210,59 @@ fi
 
 opts=""
 
-if [ -n "$aptproxy" ]; then
-	opts="${opts}--apt-proxy ${aptproxy} "
+if [[ "$aptproxy" == "auto" ]]; then
+   aptproxy=$(get_apt_proxy)
 fi
 
-if [ -n "$ssh_key_path" ]; then
-	opts="${opts}--private-key-path ${ssh_key_path} "
+if [ -n "$aptproxy" ]; then
+	makelxd_opts="${makelxd_opts} --apt-proxy ${aptproxy} "
 fi
 
 if [ -n "$host_path" ]; then
 	logmkdir "$host_path" ${USER}
-	opts="${opts}--map-host-user ${USER} "
 fi
 
 if [ -n "$debug" ]; then
 	opts="${opts}--debug "
 fi
 
+if [[ "$max_mem" == "auto" ]]; then
+   max_mem=$(echo "($(get_total_mem_MB)-1024)*0.9" | bc)
+fi
+
 # First we make the container
-./make-lxd-node.sh ${container_name} ${opts} ${repo_path_opts} ${makelxd_opts} ${release_opts}
+./make-lxd-node.sh ${container_name} ${makelxd_opts} 
 
 #get the IP of the running container
 container_ip=$(lxc exec $container_name --mode=non-interactive -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 
-# Then we install the VPN network (optionally)
-
-if [ -n "$vpn_username" ]; then
-	if [ -z "$vpn_password" ]; then
-		errcho "You must provide password"
-		exit 1
-	else
-		./execute-script-remotely.sh softether-client.sh --ssh-address ${container_ip} $external_opts --step-debug -- 172.104.148.166 --username ${vpn_username} --password ${vpn_password} --vpn-hub IMGW --nicname imgw
-	fi
+#Add limits to the container
+if [ -n "$max_mem" ]; then
+   logexec lxc config set $container_name limits.memory ${max_mem}MB
 fi
 
-# Now we can clone the repo and install its dependencies
-opts=""
-#if [ -n "$compile_using" ]; then
-#	opts="${opts}--compile-using ${compile_using}"
-#fi
-#if [ "$compile_using" == "cuda-9" ]; then
-#	lxc exec ${container_name} --mode=non-interactive -- /bin/mkdir -p /opt/sources
-#	lxc file push ~/tmp/debs/cmake-3.9* ${container_name}/opt/sources/cmake.tar.gz
-#	if [ "$release" == "xenial" ]; then
-#		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1604*" ]; then
-#			logmkdir ~/tmp/debs ${USER}
-#			logexec pushd ~/tmp/debs
-#			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_9.1.85-1_amd64.deb
-#			logexec popd
-#		fi
-#		lxc file push ~/tmp/debs/cuda-repo-ubuntu1604*.deb ${container_name}/opt/sources/
-#	elif [ "$release" == "zesty" ]; then
-#		if [ ! -f "~/tmp/debs/cuda-repo-ubuntu1704*" ]; then
-#			logexec pushd ~/tmp/debs
-#			logexec wget -c http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1704/x86_64/cuda-repo-ubuntu1704_9.1.85-1_amd64.deb
-#			logexec popd
-#		fi
-#		lxc file push ~/tmp/debs/cuda-repo-ubuntu1704*.deb ${container_name}/opt/sources/
-#	else
-#		errcho "Ubuntu $release is not supported by NVidia CUDA"
-#		exit 1
-#	fi
-#fi
+if [ -n "$max_threads" ]; then
+   logexec lxc config set $container_name limits.cpu $max_threads
+fi
+
+logexec lxc config set $container_name limits.cpu.priority 0
+
+# Then we install the VPN network (optionally)
+
+if [ -n "$softether_password" ]; then
+	./execute-script-remotely.sh softether-client.sh --ssh-address ${container_ip} $external_opts -- 172.104.148.166 --username ${container_name} --password ${softether_password} --vpn-hub IMGW --nicname imgw
+fi
+
+./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable secrets/deploy_git.key --ssh-address ${container_ip} $external_opts -- --gitlab-token ${gitlab_token} --ssh-identity deploy_git.key --build-dir ${build_dir}
+
+./execute-script-remotely.sh prepare_ubuntu.sh --ssh-address ${container_ip} $external_opts -- 
+
+
+lxc file push secrets/deploy_git.key ${container_name}/home/gitlab-runner/.ssh/id_ed25519
+lxc exec ${container_name} --mode=non-interactive chmod 0700 /home/gitlab-runner/.ssh/id_ed25519
+lxc exec ${container_name} --mode=non-interactive chown gitlab-runner:gitlab-runner /home/gitlab-runner/.ssh/id_ed25519
+
+./execute-script-remotely.sh prepare_for_imgw.sh --ssh-address ${container_ip} $external_opts -- --gcc 8
 
 if [ -n "$host_path" ]; then
 	if ! lxc config device show ${container_name} | grep -q repo_${container_name}; then

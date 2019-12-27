@@ -255,3 +255,7 @@ function add_usergroup {
 		logexec sudo usermod -a -G ${groupname} ${username}
 	fi
 }
+
+function get_total_mem_MB {
+   echo $(grep MemTotal /proc/meminfo | awk '{print $2}')/1024 | bc
+}

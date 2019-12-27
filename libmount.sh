@@ -1,5 +1,18 @@
 #!/bin/bash
 
+# Function tries to mount the local cache
+function mount_network_cache {
+   local mountpoint=$1
+   local smb_server=$2
+   if [[ "$mountpoint" == "" ]]; then
+      mountpoint=/media/adam-minipc/other
+   fi
+   if [[ "$smb_server" == "" ]]; then
+      smb_server=adam-minipc
+   fi
+   mount_smb_share $mountpoint $smb_server
+}
+
 function smb_share_client {
 	local server=$1
 	local remote_name=$2
@@ -17,12 +30,27 @@ function smb_share_client {
 
 function mount_smb_share {
 	local mountpoint=$1
+	local smbserver=$2
+	if is_host_up $2; then
+	   mount_dir $1
+	   return $?
+	fi
+	return 1
+}
+
+function mount_dir {
+	local mountpoint=$1
 	if [ ! -d "$mountpoint" ]; then
+	   if is_mounted "" $mountpoint; then
+	      return 0
+	   fi
 		while [ ! -d "$mountpoint" ]; do
 			mountpoint=$(dirname "$mountpoint")
 		done
 		logexec mount "$mountpoint"
+		return $?
 	fi
+	return 1
 }
 
 function fstab_entry {

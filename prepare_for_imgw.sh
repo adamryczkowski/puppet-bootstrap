@@ -17,9 +17,12 @@ $(basename $0) [--spack-location <path> [--force-spack] ] --gcc <number>
 
 
 where
- --spack-location         - Location of Spack installation. Defaults to $HOME/tmp/spack
+ --spack-location         - Location of Spack installation. Defaults to $HOME/tmp/spack or /opt/spack (first found)
+                            If spack is found, the script assumes its packages will be used. New packages
+                            will be installed on spack only if --force-spack. 
+                            Script does not install spack.
  --gcc <version>          - Flag. If set, will prepare gcc in the specified version. 
-                            Valid numbers: 5, 6 and 7.
+                            Valid numbers: 5, 6, 7, 8 and 9.
  --force-spack            - Flag. If set, installation will be done using spack.
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
@@ -31,7 +34,7 @@ $(basename $0) --docs --debug
 "
 
 home=$(get_home_dir ${USER})
-spack_location=${home}/tmp/spack
+spack_location=auto
 use_gcc=""
 force_spack=0
 
@@ -46,7 +49,13 @@ case $key in
 	shift
 	;;
 	--gcc)
-	use_gcc="$1"
+   if [ "$use_gcc" != "5" ] && [ "$use_gcc" != "6" ] && [ "$use_gcc" != "7" ] && [ "$use_gcc" != "8" ] && [ "$use_gcc" != "9" ]; then
+	   errcho "Must specify --gcc <N> with version number N 5, 6, 7, 8 or 9"
+	   echo "$usage"
+	   exit 1
+   fi
+   gccver="$1"
+	install_gcc${gccver}=1
 	shift
 	;;
 	--force-spack)
@@ -74,6 +83,16 @@ case $key in
 esac
 done
 
+if [[ "$spack_location" == "auto" ]]; then
+   if [ -f ${home}/tmp/spack/share/spack/setup-env.sh ]; then
+      spack_location=${home}/tmp/spack
+   elif [ -f /opt/spack/share/spack/setup-env.sh ]; then
+      spack_location=/opt/spack
+   else
+      spack_location=""
+   fi
+fi
+
 if [ -n "$debug" ]; then
 	if [ -z "$log" ]; then
 		log=/dev/stdout
@@ -81,140 +100,73 @@ if [ -n "$debug" ]; then
 	external_opts="--debug"
 fi
 
-if [ "$use_gcc" != "5" ] && [ "$use_gcc" != "6" ] && [ "$use_gcc" != "7" ]; then
-	errcho "Must specify --gcc <N> with version number N 5, 6 or 7"
-	echo "$usage"
-	exit 1
-fi
 
 install_cmake=1
 if which cmake>/dev/null; then
 	install_cmake=0
 fi
 
-install_gcc5=1
-if which gfortran-5>/dev/null && which gcc-5>/dev/null && which g++-5>/dev/null; then
-	install_gcc5=0
-fi
-
-install_gcc6=1
-if which gfortran-6>/dev/null && which gcc-6>/dev/null && which g++-6>/dev/null; then
-	install_gcc6=0
-fi
-
-install_gcc7=1
-if which gfortran-7>/dev/null && which gcc-7>/dev/null && which g++-7>/dev/null; then
-	install_gcc7=0
-fi
 
 if [ -f "${spack_location}/share/spack/setup-env.sh" ]; then
-	#First try using spack
-	source "${spack_location}/share/spack/setup-env.sh"
-
-	if ! spack find spack | grep "No package matches the query"; then
-		install_cmake=0
-	fi
-	
-	if ! spack find gcc@5 | grep "No package matches the query"; then
-		install_gcc5=0
-	fi
-	if ! spack find gcc@6 | grep "No package matches the query"; then
-		install_gcc6=0
-	fi
-	if ! spack find gcc@7 | grep "No package matches the query"; then
-		install_gcc7=0
-	fi
+   has_spack=1
+   source "${spack_location}/share/spack/setup-env.sh"
 else
-	if [ "$force_spack" == "1" ]; then
-		errcho "Cannot force spack if spack is not loaded. Specify path to the spack with --spack-location <path>. (You can install it using prepare_spack.sh script)"
-		echo "$usage"
-		exit 1
-	fi
+   has_spack=0
 fi
 
-
-
-if [ "$install_cmake" == "1" ]; then
-	if [ "$force_spack" == "1" ]; then
-		spack install cmake
-	else
-		install_apt_package cmake
-	fi
+if [[ "$force_spack" ]]; then
+   if ! [[ "$has_spack" ]]; then
+      errcho "Cannot find spack in ${spack_location}. Install spack first."
+      return -1
+   fi
 fi
 
-if [ "$use_gcc" == "5" ]; then
-	if [ "$install_gcc5" == "1" ]; then
-		if [ "$force_spack" == "1" ]; then
-			spack install gcc@5.5.0
-		else
-#			ubuntu_code=$(get_ubuntu_codename)
-#			if [ "$ubuntu_code" == "xenial" ]; then
-#				add_ppa ubuntu-toolchain-r/test
-#			fi
-			install_apt_packages gcc-5 g++-5 gfortran-5
-			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-5) 20
-			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-5) 20
-			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-5) 20
-		fi
-	fi
-	if [ "$force_spack" == "0" ]; then
-		logexec sudo update-alternatives --set g++ $(which g++-5)
-		logexec sudo update-alternatives --set gcc $(which gcc-5)
-		logexec sudo update-alternatives --set gfortran $(which gfortran-5)
-	fi
-fi
-
-if [ "$use_gcc" == "6" ]; then
-	if [ "$install_gcc6" == "1" ]; then
-		if [ "$force_spack" == "1" ]; then
-			spack install gcc@6.4.0
-		else
-			ubuntu_code=$(get_ubuntu_codename)
-			if [ "$ubuntu_code" == "xenial" ]; then
-				add_ppa ubuntu-toolchain-r/test
-			fi
-			install_apt_packages gcc-6 g++-6 gfortran-6
-			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-6) 15
-			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-6) 15
-			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-6) 15
-		fi
-	fi
-	if [ "$force_spack" == "0" ]; then
-		logexec sudo update-alternatives --set g++ $(which g++-6)
-		logexec sudo update-alternatives --set gcc $(which gcc-6)
-		logexec sudo update-alternatives --set gfortran $(which gfortran-6)
-	fi
-fi
+for i in {5..9}; do
+   if [[ "${install_gcc${i}}" == 1 ]]; then
+      if which gfortran-${i}>/dev/null && which gcc-${i}>/dev/null && which g++-${i}>/dev/null; then
+	      install_gcc${i}=0
+	   elif [[ "$has_spack" == "1" ]];
+	      if ! spack find gcc@${i} | grep "No package matches the query"; then
+   	      install_gcc${i}=0
+	      fi
+      fi
+   fi
+   if [[ "${install_gcc${i}}" == 1 ]]; then
+      if [[ "$force_spack" == 1 ]]; then
+         gcc_version=$(spack info gcc | grep -Eo " +${i}\.[[:digit:]]+\.[[:digit:]]+ " | head -n 1 | xargs)
+         spack install gcc@${gcc_version}
+      else
+			add_ppa ubuntu-toolchain-r/test
+			install_apt_packages gcc-${i} g++-${i} gfortran-${i}
+			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-${i}) 20
+			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-${i}) 20
+			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-${i}) 20
+      fi
+   fi
+done
 
 
-if [ "$use_gcc" == "7" ]; then
-	if [ "$install_gcc7" == "1" ]; then
-		if [ "$force_spack" == "1" ]; then
-			spack install gcc@7.3.0
-		else
-			ubuntu_code=$(get_ubuntu_codename)
-			if [ "$ubuntu_code" == "xenial" ]; then
-				add_ppa ubuntu-toolchain-r/test
-			fi
-			install_apt_packages gcc-7 g++-7 gfortran-7
-			logexec sudo update-alternatives --install /usr/bin/g++ g++ $(which g++-7) 10
-			logexec sudo update-alternatives --install /usr/bin/gcc gcc $(which gcc-7) 10
-			logexec sudo update-alternatives --install /usr/bin/gfortran gfortran $(which gfortran-7) 10
-		fi
-	fi
-	if [ "$force_spack" == "0" ]; then
-		logexec sudo update-alternatives --set g++ $(which g++-7)
-		logexec sudo update-alternatives --set gcc $(which gcc-7)
-		logexec sudo update-alternatives --set gfortran $(which gfortran-7)
-	fi
-fi
-
-if [ -f "${spack_location}/share/spack/setup-env.sh" ]; then
-	#First try using spack
+if [[ "${has_spack}" == "1" ]]; then
 	spack compiler find
 fi
 
-#install_apt_packages git cmake build-essential gfortran libboost-program-options-dev jq libboost-filesystem-dev libboost-system-dev libboost-log-dev libboost-date-time-dev libboost-thread-dev libboost-chrono-dev libboost-atomic-dev
+if [[ "${install_cmake}" == 1 ]]; then
+   if which cmake>/dev/null; then
+      install_cmake=0
+   elif [[ "$has_spack" == "1" ]];
+      if ! spack find cmake | grep "No package matches the query"; then
+	      install_cmake=0
+      fi
+   fi
+fi
+if [[ "${install_cmake}" == 1 ]]; then
+   if [[ "$force_spack" == 1 ]]; then
+      spack install cmake
+   else
+      add_apt_source_manual kitware "deb https://apt.kitware.com/ubuntu/ $(get_ubuntu_codename) main" https://apt.kitware.com/keys/kitware-archive-latest.asc kitware-archive-latest.key
+		install_apt_packages cmake
+   fi
+fi
 
 #Adding github to known hosts
 ssh-keyscan -H github.com | sudo -u ${USER} -- tee -a $home/.ssh/known_hosts

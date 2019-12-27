@@ -1,4 +1,8 @@
 #!/bin/bash
+
+## dependency: prepare_ubuntu.sh
+## dependency: prepare_spack.sh
+
 cd `dirname $0`
 . ./common.sh
 
@@ -15,10 +19,12 @@ $(basename $0) [--runner-name <name>]
 
 where
 
- --use-spack                - If given, the script will also prepare spack.
- --spack-options            - Options forwarded to the prepare_spack.sh script.
  --gitlab-server <uri>      - Path to the gitlab server. Defaults to https://git1.imgw.pl
  --gitlab-token <string>    - Token that will allow access to the server. Required.
+ --ssh-identity <path>      - Path to the ssh identity file to be used by the gitlab-runner. 
+                              Otherwise uses already present.
+ --use-spack                - If given, the script will also prepare spack.
+ --spack-options            - Options forwarded to the prepare_spack.sh script.
  --build-dir <path>         - Path to the build dir. Relative to the home of gitlab-runnet. Defaults to 'build'.
  --runner-name              - Name of the runner. Defaults to hostname.
  --max-mem <MB>             - Maximum number of MB allowed for build in this runner. 
@@ -27,8 +33,6 @@ where
                               90% of (total mem - 1GB). 
  --max-threads <N>          - Max number of build threads allowed. Defaults to all
                               CPU threads available (\"auto\")
- --ssh-identity <path>      - Path to the ssh identity file to be used by the gitlab-runner. 
-                              Otherwise uses already present.
  --debug                    - Flag. If set, all commands that change state of the container or
                               host machine will be displayed together with their output.
  --log                      - Redirects output from --debug into the log file.
@@ -115,25 +119,6 @@ esac
 done
 
 
-if [[ -n "${username}" ]]; then
-   sshhome=$(get_home_dir $username)
-	if [ "$build_dir" == "auto" ]; then
-		build_dir="${sshhome}/build"
-		mkdir -p ${build_dir}
-	else
-		ln -s "${build_dir}" "${sshhome}/build"
-		build_dir="${sshhome}/build"
-	fi
-else
-   sshhome=$(get_home_dir)
-	if [ "$build_dir" == "auto" ]; then
-		build_dir="/opt/build"
-		sudo mkdir -p ${build_dir}
-	else
-		sudo ln -s "${build_dir}" "/opt/build"
-		build_dir="${sshhome}/build"
-	fi
-fi
 env_opts="${env_opts} CI_BUILD_DIR=${build_dir}"
 
 if [ -z "${gitlab_token}" ]; then
@@ -156,6 +141,28 @@ if [ ! -f "/etc/apt/sources.list.d/runner_gitlab-runner.list" ]; then
 fi
 
 install_apt_package gitlab-runner gitlab-runner
+
+if [[ -n "${username}" ]]; then
+   sshhome=$(get_home_dir $username)
+	if [ "$build_dir" == "auto" ]; then
+		build_dir="${sshhome}/build"
+		mkdir -p ${build_dir}
+	else
+   	logmkdir ${build_dir} gitlab-runner
+		ln -s "${build_dir}" "${sshhome}/build"
+		build_dir="${sshhome}/build"
+	fi
+else
+   sshhome=$(get_home_dir)
+	if [ "$build_dir" == "auto" ]; then
+		build_dir="/opt/build"
+		sudo mkdir -p ${build_dir}
+	else
+		sudo ln -s "${build_dir}" "/opt/build"
+		build_dir="${sshhome}/build"
+	fi
+fi
+logmkdir ${sshhome}/.gitlab-runner ${username}
 
 if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 	logexec logmkdir /usr/share/ca-certificates/extra
@@ -184,15 +191,15 @@ echo ${sudoprefix} gitlab-runner register --non-interactive --builds-dir "${buil
 
 logexec ${sudoprefix} gitlab-runner register --non-interactive  --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --tls-ca-file=/usr/share/ca-certificates/extra/imgwpl.crt
 
-#logexec sudo -H -u ${USER} -- gitlab-runner run &
-if [[ -n "${username}" ]]; then
-	#Adding github to known hosts
-	ssh-keyscan -H github.com | sudo -u ${username} -- tee -a ${sshhome}/.ssh/known_hosts
+##logexec sudo -H -u ${USER} -- gitlab-runner run &
+#if [[ -n "${username}" ]]; then
+#	#Adding github to known hosts
+#	ssh-keyscan -H github.com | sudo -u ${username} -- tee -a ${sshhome}/.ssh/known_hosts
 
-	#Adding gitlab to known hosts:
-	ssh-keyscan -H git1.imgw.pl | sudo -u ${username} -- tee -a ${sshhome}/.ssh/known_hosts
+#	#Adding gitlab to known hosts:
+#	ssh-keyscan -H git1.imgw.pl | sudo -u ${username} -- tee -a ${sshhome}/.ssh/known_hosts
 
-   logmkdir ${sshhome}/.gitlab-runner ${username}
+#   logmkdir ${sshhome}/.gitlab-runner ${username}
 
-#	logexec sudo -H -u ${username} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
-fi
+##	logexec sudo -H -u ${username} -- byobu-tmux new-session -d -n code "gitlab-runner run; bash"
+#fi

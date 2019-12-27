@@ -102,7 +102,7 @@ done
 pattern='^file://(.*)$'
 if [[ "${repo_server}" =~ $pattern ]]; then
 	repo_folder=${BASH_REMATCH[1]}
-	mount_smb_share "$repo_folder"
+	mount_dir "$repo_folder"
 fi
 
 if [ -n "$debug" ]; then
