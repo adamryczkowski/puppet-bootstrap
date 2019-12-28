@@ -55,7 +55,7 @@ case $key in
 	   exit 1
    fi
    gccver="$1"
-	install_gcc${gccver}=1
+	eval "install_gcc${gccver}=1"
 	shift
 	;;
 	--force-spack)
@@ -122,16 +122,17 @@ if [[ "$force_spack" ]]; then
 fi
 
 for i in {5..9}; do
-   if [[ "${install_gcc${i}}" == 1 ]]; then
+   varname=install_gcc${i}
+   if [[ "${!varname}" == 1 ]]; then
       if which gfortran-${i}>/dev/null && which gcc-${i}>/dev/null && which g++-${i}>/dev/null; then
-	      install_gcc${i}=0
+	      eval "install_gcc${i}=0"
 	   elif [[ "$has_spack" == "1" ]];
 	      if ! spack find gcc@${i} | grep "No package matches the query"; then
-   	      install_gcc${i}=0
+   	      eval "install_gcc${i}=0"
 	      fi
       fi
    fi
-   if [[ "${install_gcc${i}}" == 1 ]]; then
+   if [[ "${!varname}" == 1 ]]; then
       if [[ "$force_spack" == 1 ]]; then
          gcc_version=$(spack info gcc | grep -Eo " +${i}\.[[:digit:]]+\.[[:digit:]]+ " | head -n 1 | xargs)
          spack install gcc@${gcc_version}
