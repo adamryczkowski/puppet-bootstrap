@@ -49,7 +49,7 @@ case $key in
 	shift
 	;;
 	--gcc)
-   if [ "$use_gcc" != "5" ] && [ "$use_gcc" != "6" ] && [ "$use_gcc" != "7" ] && [ "$use_gcc" != "8" ] && [ "$use_gcc" != "9" ]; then
+   if [ "$1" != "5" ] && [ "$1" != "6" ] && [ "$1" != "7" ] && [ "$1" != "8" ] && [ "$1" != "9" ]; then
 	   errcho "Must specify --gcc <N> with version number N 5, 6, 7, 8 or 9"
 	   echo "$usage"
 	   exit 1
