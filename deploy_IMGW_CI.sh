@@ -282,6 +282,3 @@ if [ "$apt_opts" != "" ]; then
 	./execute-script-remotely.sh install_apt_packages.sh --ssh-address ${container_ip} $external_opts --step-debug --  ${apt_opts}
 fi
 
-
-./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts --step-debug -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts} ${CI_opts}
-

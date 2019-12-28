@@ -559,14 +559,22 @@ fi
 #	fi
 #done
 
-set -x
+$loglog 
+ssh-keyscan -H $name >> $sshhome/.ssh/known_hosts 2>/dev/null
+$loglog 
+ssh-keyscan -H $lxcfqdn >> $sshhome/.ssh/known_hosts 2>/dev/null
+if [ -n "$actual_ip" ]; then
+	$loglog 
+	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
+fi
+
+
+#set -x
 if [[ $bare == 0 ]]; then
 	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ubuntu -- $lxcuser ${repopath_arg} --cli-improved --need-apt-update --external-key $(cat $sshhome/.ssh/id_ed25519.pub) --no-sudo-password
 else
 	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ubuntu -- $lxcuser ${repopath_arg} --need-apt-update --external-key $(cat $sshhome/.ssh/id_ed25519.pub) --no-sudo-password
 fi
-
-exit 0
 
 #echo "Adding the container to the hosts known_hosts file..."
 if [ ! -d $sshhome/.ssh ]; then
@@ -581,17 +589,9 @@ if [ -f "$sshhome/.ssh/known_hosts" ]; then
 	fi
 fi
 
-$loglog 
-ssh-keyscan -H $name >> $sshhome/.ssh/known_hosts 2>/dev/null
-$loglog 
-ssh-keyscan -H $lxcfqdn >> $sshhome/.ssh/known_hosts 2>/dev/null
-if [ -n "$actual_ip" ]; then
-	$loglog 
-	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
-fi
 
-set -x 
-logexec lxc exec $name -- chown ${lxcuser}:${lxcuser} -R ${sshhome}
+#set -x 
+#logexec lxc exec $name -- chown ${lxcuser}:${lxcuser} -R ${sshhome}
 
 if [ ! -f "$private_key_path" ]; then
 	if ! lxc exec ${name} -- ls ~/.ssh/id_ed25519; then
