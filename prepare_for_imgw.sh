@@ -154,7 +154,7 @@ fi
 if [[ "${install_cmake}" == 1 ]]; then
    if which cmake>/dev/null; then
       install_cmake=0
-   elif [[ "$has_spack" == "1" ]];
+   elif [[ "$has_spack" == "1" ]]; then
       if ! spack find cmake | grep "No package matches the query"; then
 	      install_cmake=0
       fi
