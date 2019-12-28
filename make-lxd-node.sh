@@ -559,15 +559,6 @@ fi
 #	fi
 #done
 
-$loglog 
-ssh-keyscan -H $name >> $sshhome/.ssh/known_hosts 2>/dev/null
-$loglog 
-ssh-keyscan -H $lxcfqdn >> $sshhome/.ssh/known_hosts 2>/dev/null
-if [ -n "$actual_ip" ]; then
-	$loglog 
-	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
-fi
-
 
 #set -x
 if [[ $bare == 0 ]]; then
@@ -587,6 +578,16 @@ if [ -f "$sshhome/.ssh/known_hosts" ]; then
 	if [ -n "$actual_ip" ]; then
 		logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $actual_ip 2>/dev/null >/dev/null
 	fi
+fi
+
+
+$loglog 
+ssh-keyscan -H $name >> $sshhome/.ssh/known_hosts 2>/dev/null
+$loglog 
+ssh-keyscan -H $lxcfqdn >> $sshhome/.ssh/known_hosts 2>/dev/null
+if [ -n "$actual_ip" ]; then
+	$loglog 
+	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
 fi
 
 
