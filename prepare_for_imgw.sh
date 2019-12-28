@@ -126,7 +126,7 @@ for i in {5..9}; do
    if [[ "${!varname}" == 1 ]]; then
       if which gfortran-${i}>/dev/null && which gcc-${i}>/dev/null && which g++-${i}>/dev/null; then
 	      eval "install_gcc${i}=0"
-	   elif [[ "$has_spack" == "1" ]];
+	   elif [[ "$has_spack" == "1" ]]; then
 	      if ! spack find gcc@${i} | grep "No package matches the query"; then
    	      eval "install_gcc${i}=0"
 	      fi
