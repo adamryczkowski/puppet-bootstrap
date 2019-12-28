@@ -229,6 +229,7 @@ if [ -n "$internalif" ]; then
 	regex="\|\s+([^ ]+)\s+\|\s+bridge\s+\|\sYES"
 	if [[ $tmp =~ $regex ]]; then
 		internalif=${BASH_REMATCH[1]}
+		externalif=0
 	else
 		externalif=1
 	fi
@@ -311,19 +312,19 @@ if $sudoprefix lxc info ${name}>/dev/null 2>/dev/null; then
 		exit 1
 	fi
 
-	echo "container ${name} already installed!"
-	while :
-	do
-		echo "(P)roceed or (A)bort?"
-		read ans
-		if [ "$ans" == "p" ] || [ "$ans" == "P" ]; then
-			break
-		else
-			if [ "$ans" == "A" ] || [ "$ans" == "a" ]; then
-				exit 1
-			fi
-		fi
-	done
+	echo "container ${name} already installed! Skipping its creation"
+#	while :
+#	do
+#		echo "(P)roceed or (A)bort?"
+#		read ans
+#		if [ "$ans" == "p" ] || [ "$ans" == "P" ]; then
+#			break
+#		else
+#			if [ "$ans" == "A" ] || [ "$ans" == "a" ]; then
+#				exit 1
+#			fi
+#		fi
+#	done
 else
 	if [ -n "${lxd_storage}" ]; then
 		args="-s ${lxd_storage}"
@@ -335,25 +336,45 @@ else
 			errcho "Cannot create the lxc container"
 			exit 1
 	fi
-	if [[ -n "$hostuser" ]]; then
-		hostuid=$(id -u ${hostuser})
-		hostgid=$(id -g ${hostuser})
-		if [[ $hostuid == $hostgid ]]; then
-			logexec lxc config set ${name} raw.idmap "both ${hostuid} 1001"
-		else
-			logexec lxc config set ${name} raw.idmap "uid ${hostuid} 1001"
-			logexec lxc config set ${name} raw.idmap "gid ${hostgid} 1001"
-		fi
-	fi
 #	logexec lxc stop ${name}
 fi
 
-if [ -n "${internalif}" ]; then
-	if [ -n "$externalif" ]; then
-		logexec lxc config device add ${name} eth0 nic name=eth0 nictype=bridged parent=${internalif}
+if [[ -n "$hostuser" ]]; then
+	hostuid=$(id -u ${hostuser})
+	hostgid=$(id -g ${hostuser})
+	if [[ $hostuid == $hostgid ]]; then
+	   if ! lxc config get proba raw.idmap | grep -q "both ${hostuid} 1001"; then
+   		logexec lxc config set ${name} raw.idmap "both ${hostuid} 1001"
+   	fi
 	else
-		logexec lxc network attach ${internalif} ${name} eth0
+	   if ! lxc config get proba raw.idmap | grep -q "uid ${hostuid} 1001"; then
+   		logexec lxc config set ${name} raw.idmap "uid ${hostuid} 1001"
+   	fi
+	   if ! lxc config get proba raw.idmap | grep -q "gid ${hostgid} 1001"; then
+   		logexec lxc config set ${name} raw.idmap "gid ${hostgid} 1001"
+   	fi
 	fi
+fi
+
+
+if [ -n "${internalif}" ]; then
+   if ! lxc config device show ${name} | grep "type: nic" -B 7 | grep -qE '^[^:]+:$'; then
+   	if [ -n "$externalif" ]; then
+   		logexec lxc config device add ${name} eth0 nic name=eth0 nictype=bridged parent=${internalif}
+   	else
+   	   logexec lxc network attach ${internalif} ${name} eth0
+   	fi
+	else
+      parentif=$(lxc config device show ${name} -v | grep "eth0:" -A 4 | grep "parent:" | grep -oE "[^ ]+$")
+	   if [[ "$parentif" != "${internalif}" ]]; then
+         logexec lxc config device remove ${name} eth0
+      	if [ -n "$externalif" ]; then
+      		logexec lxc config device add ${name} eth0 nic name=eth0 nictype=bridged parent=${internalif}
+      	else
+      	   logexec lxc network attach ${internalif} ${name} eth0
+      	fi
+   	fi
+   fi
 fi
 
 if [ -n "${forward_ports}" ]; then
@@ -361,12 +382,39 @@ if [ -n "${forward_ports}" ]; then
 	for forward_port in ${forward_ports[*]}; do
 		if [[ "$forward_port" =~ $pattern ]]; then
 			host_address="${BASH_REMATCH[1]}:${BASH_REMATCH[4]}:${BASH_REMATCH[5]}"
-			lxc_address="${BASH_REMATCH[1]}:localhost:${BASH_REMATCH[6]}"
-			logexec lxc config device add ${name} forward${BASH_REMATCH[1]}${BASH_REMATCH[5]} proxy listen=${host_address} connect=${lxc_address}
+			lxc_address="${BASH_REMATCH[1]}:127.0.0.1:${BASH_REMATCH[6]}"
+			forward_name="forward${BASH_REMATCH[1]}${BASH_REMATCH[5]}"
+
+         if ! lxc config device show ${name} | grep "type: proxy" -B 3 | grep -qE '^[^:]+:$'; then
+            proxy_name=$(lxc config device show ${name} | grep -E "type: proxy" -B 3 | head -n 1 | grep -oE '^[^:]+')
+		      listen_str=$(lxc config device show ${name}  | grep "${proxy_name}:" -A 3 | grep "listen:" | grep -oE "[^ ]+$")
+		      connect_str=$(lxc config device show ${name} | grep "${proxy_name}:" -A 3 | grep "connect:" | grep -oE "[^ ]+$")
+
+            if [[ "${proxy_name}" == "${forward_name}" ]]; then
+               if [[ "${listen_str}" != "${host_address}" ]] || [[ "${connect_str}" == "${lxc_address}" ]]; then
+         			logexec lxc config device remove ${name} ${forward_name}
+         			lobexec lxc config device add ${name} ${forward_name} proxy listen=${host_address} connect=${lxc_address}
+               fi
+            else
+               logexec lxc config device add ${name} ${forward_name} proxy listen=${host_address} connect=${lxc_address}
+            fi
+         fi
+      else
+         errcho "Cannot parse forward port ${forward_port}"
+         exit 1
 		fi
 	done
-	
 fi
+
+
+#         if ! lxc config device show ${name} | grep "type: disk" -B 3 | grep -qE '^[^:]+:$'; then
+#            share_name=$(lxc config device show gitrunner8 | grep -E "type: disk" -B 3 | head -n 1 | grep -oE '^[^:]+')
+#		      disk_source=$(lxc config device show ${name} -v | grep "${share_name}:" -A 3 | grep "source:" | grep -oE "[^ ]+$")
+#		      disk_path=$(lxc config device show ${name} -v | grep "${share_name}:" -A 3 | grep "path:" | grep -oE "[^ ]+$")
+#            if [[  ]]		      
+#         fi
+#			
+
 
 
 #Ustawiamy wpis w hosts
@@ -383,44 +431,35 @@ if [ "$lxcip" != "auto" ]; then
 			errcho "IP address $lxcip already reserved!"
 			exit 1
 		fi
-		lxc config device set ${name} eth0 ipv4.address ${lxcip}
-
-		if grep -q "^[\\s\\d\\.]+$lxcname" $staticleases; then
-			#We need to replace the line rather than append
-			if [ "$lxcname" == "$lxcfqdn" ]; then
-				logexec sudo sed -i -e "/^[\\s\\d\\.]+$lxcname/$lxcip $lxcname/" $staticleases
-			else
-				logexec sudo sed -i -e "/^[\\s\\d\\.]+$lxcname/$lxcip $lxcname $lxcfqdn/" $staticleases
-			fi
-		else
-			if [ "$lxcname" == "$lxcfqdn" ]; then
-				$loglog
-				echo "$lxcip $lxcname" | sudo tee -a $staticleases >/dev/null
-			else
-				$loglog
-				echo "$lxcip $lxcname $lxcfqdn" | sudo tee -a $staticleases >/dev/null
-			fi
-		fi
-		restartcontainer=1
 	fi
-	logexec lxc config device set ${name} eth0 ipv4.address ${lxcip}
+		
+   current_ip=$(lxc config device show ${name} -v | grep "eth0:" -A 4 | grep "ipv4.address:" | grep -oE "[^ ]+$")
+   if [[ "${current_ip}" !=  "${lxcip}" ]]; then
+		logexec lxc config device set ${name} eth0 ipv4.address ${lxcip}
+	fi
+
+   add_host ${lxcname} ${lxcip}
+
+	restartcontainer=1
 fi
 
 
+if [[ "${restartcontainer}" == "1" ]]; then
+   logexec lxc stop $name
+   sleep 5   
+fi
 
 #Upewniamy się, że kontener jest uruchomiony
 if lxc config get ${name} volatile.last_state.power | grep -q -F "STOPPED" 2>/dev/null  ; then
 	echo "Starting the container..."
-	logexec $sudoprefix lxc start $name
+	logexec lxc start $name
 fi
 
 if [ -z $(lxc config get ${name} volatile.last_state.power) ] ; then
 	echo "Starting the container..."
-	logexec $sudoprefix lxc start $name
+	logexec lxc start $name
 fi
 
-
-	
 if lxc config get ${name} volatile.last_state.power | grep -q -F "STOPPED"; then
 	errcho "Failed to start lxc container $name!"
 	exit 1
@@ -495,30 +534,39 @@ if [ -n "$aptproxy" ]; then
 	aptproxy="--apt-proxy $aptproxy"
 fi
 
-# Creating user $lxcuser in the container
-if [ "$lxcuser" != "ubuntu" ]; then
-	logexec lxc exec $name -- adduser --quiet $lxcuser --disabled-password --gecos ""
-	logexec lxc exec $name -- su -l $lxcuser -c "mkdir ~/.ssh"
-	logexec lxc exec $name -- chmod 700 /home/$lxcuser/.ssh
+## Creating user $lxcuser in the container
+#if [ "$lxcuser" != "ubuntu" ]; then
+#	logexec lxc exec $name -- adduser --quiet $lxcuser --disabled-password --gecos ""
+#	logexec lxc exec $name -- su -l $lxcuser -c "mkdir ~/.ssh"
+#	logexec lxc exec $name -- chmod 700 /home/$lxcuser/.ssh
+#fi
+
+#logexec lxc exec ${name} -- usermod -aG sudo  $lxcuser
+
+#if [ -f "$sshkey" ]; then
+#	mypubkey=$(cat $sshhome/.ssh/id_ed25519.pub)
+#	authorized_keys+=("$mypubkey")
+#	if ! lxc exec $name -- grep -q -F "$mypubkey" $sshhome/.ssh/authorized_keys 2>/dev/null; then
+#		$loglog
+#		cat $sshhome/.ssh/id_ed25519.pub | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
+#	fi
+#fi
+
+#for key in "${authorized_keys[@]}"; do
+#	if ! lxc exec $name -- grep -q -F "$key" $sshhome/.ssh/authorized_keys 2>/dev/null; then
+#		$loglog
+#		echo "$key" | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
+#	fi
+#done
+
+set -x
+if [[ $bare == 0 ]]; then
+	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ubuntu -- $lxcuser ${repopath_arg} --cli-improved --need-apt-update --external-key $(cat $sshhome/.ssh/id_ed25519.pub) --no-sudo-password
+else
+	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ubuntu -- $lxcuser ${repopath_arg} --need-apt-update --external-key $(cat $sshhome/.ssh/id_ed25519.pub) --no-sudo-password
 fi
 
-logexec lxc exec ${name} -- usermod -aG sudo  $lxcuser
-
-if [ -f "$sshkey" ]; then
-	mypubkey=$(cat $sshhome/.ssh/id_ed25519.pub)
-	authorized_keys+=("$mypubkey")
-	if ! lxc exec $name -- grep -q -F "$mypubkey" $sshhome/.ssh/authorized_keys 2>/dev/null; then
-		$loglog
-		cat $sshhome/.ssh/id_ed25519.pub | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
-	fi
-fi
-
-for key in "${authorized_keys[@]}"; do
-	if ! lxc exec $name -- grep -q -F "$key" $sshhome/.ssh/authorized_keys 2>/dev/null; then
-		$loglog
-		echo "$key" | lxc exec $name -- su -l $lxcuser -c "tee --append ~/.ssh/authorized_keys" >/dev/null
-	fi
-done
+exit 0
 
 #echo "Adding the container to the hosts known_hosts file..."
 if [ ! -d $sshhome/.ssh ]; then
@@ -577,11 +625,6 @@ if [ -n "${guestfolder}" ]; then
 	fi
 fi
 
-if [[ $bare == 0 ]]; then
-	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --cli-improved --need-apt-update
-else
-	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ${lxcuser} -- $lxcuser ${repopath_arg} --need-apt-update
-fi
 
 if [ "${update_all}" == "1" ]; then
 	if [ -n "$debug" ]; then

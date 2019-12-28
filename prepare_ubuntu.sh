@@ -21,13 +21,14 @@ where
  -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
  --need-apt-update        - If the flag is set the script will assume the apt cache needs apdate. 
  --private_key_path       - This argument gets handled to 'prepare_ubuntu_user' for the first given user.
- --external-key <string>  - Sets external public key to access the account. It
-                            populates authorized_keys
+ --external-key           - Sets external public key to access the account. It
+    <cipher> <key> <name>   populates authorized_keys
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
  --repo-path              - Path to the common repository
  --user <username>        - Additional user to install the tricks to. Can be specified
                             multiple times, each time adding another user.
+ --no-sudo-password       - If set, sudo will not ask for password
  --cli-improved           - Install all the following recommended command line tools:
  --bat                    - cat replacement (bat)
  --ping                   - prettyping (ping),
@@ -122,8 +123,13 @@ case $key in
 	aptproxy=$1
 	shift
 	;;
+	--no-sudo-password)
+	user_opts="${user_opts} --no-sudo-password $1"
+	;;
 	--external-key)
-	user_opts="${--external-key} $1"
+	user_opts="${user_opts} --external-key $1 $2 $3"
+	shift
+	shift
 	shift
 	;;
 	--private-key-path)
@@ -419,6 +425,7 @@ if [ -n "$users" ] ; then
 		user_opts="--log ${log} ${user_opts}"
 	fi
 	pushd "$DIR"
+#	set -x
 	bash -x ./prepare_ubuntu_user.sh ${users[0]} ${user_opts} ${private_key_path}
 	for user in ${users[@]:1}; do
 		sudo -H -u ${user} -- bash -x ./prepare_ubuntu_user.sh ${user} ${user_opts}

@@ -11,7 +11,7 @@ The script must be run as a root.
 
 Usage:
 
-$(basename $0) <user-name> [--private-key-path <path to the private key>] [--external-key <string with external public key to access the account>]
+$(basename $0) <user-name> [--private-key-path <path to the private key>] [--external-key <cipher> <key> <name>]
                         [--help] [--debug] [--log <output file>
 
 where
@@ -19,8 +19,9 @@ where
  --private_key_path       - Path to the file with the ssh private key. 
                             If set, installs private key on the user's 
                             account in the container.
- --external-key <string>  - Sets external public key to access the account. It
-                            populates authorized_keys
+ --no-sudo-password       - If set, sudo will not ask for password
+ --external-key           - Sets external public key to access the account. It
+    <cipher> <key> <name>   populates authorized_keys
  --repo-path              - Path to the common repository
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
@@ -68,7 +69,8 @@ fi
 shift
 debug=0
 repo_path=""
-
+no_sudo_passwd=0
+external_key=""
 
 while [[ $# > 0 ]]
 do
@@ -92,8 +94,13 @@ case $key in
 	shift
 	;;
 	--external-key)
-	external_key="$1"
+	external_key="$1 $2 $3"
 	shift
+	shift
+	shift
+	;;
+	--no-sudo-password)
+	no_sudo_passwd=1
 	;;
 	--private_key_path)
 	private_key_path=$1
@@ -151,6 +158,7 @@ if [ -n "$user" ]; then
 			logexec sudo chown ${user}:${user} "$sshhome/.ssh"
 		fi
 	fi
+   set -x
 	if [ -n "$external_key" ]; then
 		if ! sudo [ -f ${sshhome}/.ssh/authorized_keys ]; then
 			loglog
@@ -168,12 +176,13 @@ if [ -n "$user" ]; then
 		fi
 	fi
 
-        
-	if ! sudo [ -f /etc/sudoers.d/${user}_nopasswd ]; then
-		loglog
-		echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/${user}_nopasswd
-	fi
-        
+   if [[ "${no_sudo_passwd}" == 1 ]]; then
+	   if ! sudo [ -f /etc/sudoers.d/${user}_nopasswd ]; then
+		   loglog
+		   echo "${user} ALL=(ALL) NOPASSWD:ALL" | sudo tee /etc/sudoers.d/${user}_nopasswd
+	   fi
+   fi
+           
 	if sudo [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
 		if [ -f "$sshhome/.ssh/id_ed25519" ]; then
 			errcho "Abnormal condition: private key is installed without the corresponding public key. Please make sure both files are present, or neither of them. Exiting."

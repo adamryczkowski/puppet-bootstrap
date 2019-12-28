@@ -111,10 +111,22 @@ function parse_URI {
 function add_host {
 	local host=$1
 	local ip=$2
-	local HOSTS_LINE="${ip} ${host}"
-	if [ ! -n "$(grep ${host} /etc/hosts)" ]; then
-		$loglog
-		echo "$HOSTS_LINE" | sudo tee -a /etc/hosts
+	local fqdn=$3
+	if grep -q "^[\\s\\d\\.]+$host" /etc/hosts; then
+		#We need to replace the line rather than append
+		if [[ "$fqdn" == "" ]]; then
+			logexec sudo sed -i -e "/^[\\s\\d\\.]+$host/$ip $host/" /etc/hosts
+		else
+			logexec sudo sed -i -e "/^[\\s\\d\\.]+$host/$ip $host $fqdn/" /etc/hosts
+		fi
+	else
+		if [[ "$fqdn" == "" ]]; then
+			$loglog
+			echo "$ip $host" | sudo tee -a /etc/hosts >/dev/null
+		else
+			$loglog
+			echo "$ip $host $fqdn" | sudo tee -a /etc/hosts >/dev/null
+		fi
 	fi
 }
 
