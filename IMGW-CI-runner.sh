@@ -139,11 +139,11 @@ function check_for_dep {
 	fi
 }
 
-check_for_dep gcc build-essential
-check_for_dep g++ build-essential
-check_for_dep gfortran gfortran
-check_for_dep cmake cmake
-check_for_dep python python
+#check_for_dep gcc build-essential
+#check_for_dep g++ build-essential
+#check_for_dep gfortran gfortran
+#check_for_dep cmake cmake
+#check_for_dep python python
 
 ##Only the essential dependencies
 #if [ -z "$compile_using" ]; then
