@@ -61,7 +61,7 @@ where
 
 Example2:
 
-$(basename $0) gitrunner8 --softether-password 1WTh3yAjAkXaQmiOz105 --ssh-key-path secrets/gitlab_ssh_key --host-repo-path /home/Adama-docs/Lib/CI --preinstall-spack cmake --preinstall-apt gcc-8 --preinstall-apt g++-8 --preinstall-apt gfortran-8
+$(basename $0) gitrunner8 --softether-password 1WTh3yAjAkXaQmiOz105 --ssh-key-path secrets/gitlab_ssh_key --host-repo-path /home/Adama-docs/Lib/CI --preinstall-spack cmake --preinstall-apt gcc-8 --preinstall-apt g++-8 --preinstall-apt gfortran-8 --gitlab-token ENMnScUBNMFDJqjQ8N9z
 "
 
 if [[ -z "$1" ]] ||  [[ "$1" == "--help" ]] ; then
@@ -231,7 +231,7 @@ if [[ "$max_mem" == "auto" ]]; then
 fi
 
 # First we make the container
-./make-lxd-node.sh ${container_name} ${makelxd_opts} 
+./make-lxd-node.sh ${container_name} ${makelxd_opts} --bare
 
 #get the IP of the running container
 container_ip=$(lxc exec $container_name --mode=non-interactive -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
@@ -262,6 +262,10 @@ lxc file push secrets/deploy_git.key ${container_name}/home/gitlab-runner/.ssh/i
 lxc exec ${container_name} --mode=non-interactive chmod 0700 /home/gitlab-runner/.ssh/id_ed25519
 lxc exec ${container_name} --mode=non-interactive chown gitlab-runner:gitlab-runner /home/gitlab-runner/.ssh/id_ed25519
 
+if [ "$install_spack" != 0 ]; then
+	./execute-script-remotely.sh prepare_spack.sh --ssh-address ${container_ip} $external_opts --step-debug --  ${opts} ${spack_opts}
+fi
+
 ./execute-script-remotely.sh prepare_for_imgw.sh --ssh-address ${container_ip} $external_opts -- --gcc 8
 
 if [ -n "$host_path" ]; then
@@ -278,9 +282,6 @@ if [ "$apt_opts" != "" ]; then
 	./execute-script-remotely.sh install_apt_packages.sh --ssh-address ${container_ip} $external_opts --step-debug --  ${apt_opts}
 fi
 
-if [ "$install_spack" != 0 ]; then
-	./execute-script-remotely.sh prepare_spack.sh --ssh-address ${container_ip} $external_opts --step-debug --  ${opts} ${spack_opts}
-fi
 
 ./execute-script-remotely.sh IMGW-CI-runner.sh --ssh-address ${container_ip} $external_opts --step-debug -- --git-address "${git_address}" --git-branch "${git_branch}" --repo-path "${guest_path}" ${opts} ${CI_opts}
 

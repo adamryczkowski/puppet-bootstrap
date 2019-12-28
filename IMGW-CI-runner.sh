@@ -245,7 +245,7 @@ fi
 #xargs to trim the white spaces
 app_deps=$(cat "${build_dir}/apt_dependencies.txt" | xargs) 
 pip_deps=$(cat "${build_dir}/pip_dependencies.txt" | xargs)
-spack_deps=$(cat "${build_dir}/pip_dependencies.txt" | xargs)
+spack_deps=$(cat "${build_dir}/spack_dependencies.txt" | xargs)
 
 if [ -n "${app_deps}" ]; then
 	install_apt_packages ${app_deps}
