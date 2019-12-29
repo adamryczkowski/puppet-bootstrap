@@ -90,7 +90,7 @@ if [[ "${spack_location}" == "auto" ]]; then
    spack_location=$(get_home_dir ${user})/tmp/spack
 fi
 
-if [ ! -d "${spack_location}" ]; then
+if [ ! -d "${spack_location}/.git" ]; then
 	base_location=$(dirname ${spack_location})
 	if [ ! -d "${base_location}" ]; then
 	   logmkdir $base_location $user

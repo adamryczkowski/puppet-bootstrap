@@ -12,7 +12,8 @@ Prepares GitLab CI runner. Gitlab runner runs as 'gitlab-runner' user.
 syntax:
 $(basename $0) [--runner-name <name>]
 		[--gitlab-server <uri>] --gitlab-token <string>
-		[--ssh-identity <path>] [--use-spack] [--spack-options \"opts\"]
+		[--ssh-identity <path_private> <path_public>] 
+		[--use-spack] [--spack-options \"opts\"]
 		[--build-dir <path>] [--max-threads <N>] [--max-mem <MB>]
 		[--debug] [--log <log path>] [--help]
 
@@ -21,8 +22,8 @@ where
 
  --gitlab-server <uri>      - Path to the gitlab server. Defaults to https://git1.imgw.pl
  --gitlab-token <string>    - Token that will allow access to the server. Required.
- --ssh-identity <path>      - Path to the ssh identity file to be used by the gitlab-runner. 
-                              Otherwise uses already present.
+ --ssh-identity             - Path to the ssh identity files to be used by the gitlab-runner. 
+     <path_prv> <path_pub>    Otherwise uses already present.
  --use-spack                - If given, the script will also prepare spack.
  --spack-options            - Options forwarded to the prepare_spack.sh script.
  --build-dir <path>         - Path to the build dir. Relative to the home of gitlab-runnet. Defaults to 'build'.
@@ -56,6 +57,7 @@ max_threads="auto"
 sudoprefix="sudo "
 build_dir="auto"
 use_spack=0
+ssh_identity_source=""
 
 while [[ $# > 0 ]]
 do
@@ -85,6 +87,9 @@ case $key in
 	;;
 	--ssh-identity)
 	opts="${opts} --ssh-identity-file $1"
+	ssh_identity_source_priv="$1"
+	ssh_identity_source_pub="$2"
+	shift
 	shift
 	;;
 	--build-dir)
@@ -190,6 +195,11 @@ fi
 echo ${sudoprefix} gitlab-runner register --non-interactive --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --tls-ca-file=/usr/share/ca-certificates/extra/imgwpl.crt
 
 logexec ${sudoprefix} gitlab-runner register --non-interactive  --builds-dir "${build_dir}" --run-untagged --name "${runner_name}" --url  ${gitlab_server} --registration-token ${gitlab_token} --executor shell ${opts} --tls-ca-file=/usr/share/ca-certificates/extra/imgwpl.crt
+
+if [ -n "$ssh_identity_source_priv" ]; then
+   install_data_file "${ssh_identity_source_priv}" $(get_home_dir gitlab-runner)/.ssh/id_ed25519 gitlab-runner
+   install_data_file "${ssh_identity_source_pub}" $(get_home_dir gitlab-runner)/.ssh/id_ed25519.pub gitlab-runner
+fi
 
 ##logexec sudo -H -u ${USER} -- gitlab-runner run &
 #if [[ -n "${username}" ]]; then

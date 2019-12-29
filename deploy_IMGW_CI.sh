@@ -253,7 +253,7 @@ if [ -n "$softether_password" ]; then
 	./execute-script-remotely.sh softether-client.sh --ssh-address ${container_ip} $external_opts -- 172.104.148.166 --username ${container_name} --password ${softether_password} --vpn-hub IMGW --nicname imgw
 fi
 
-./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable secrets/deploy_git.key --ssh-address ${container_ip} $external_opts -- --gitlab-token ${gitlab_token} --ssh-identity deploy_git.key --build-dir ${build_dir}
+./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable secrets/gitlab_ssh_key --extra-executable secrets/gitlab_ssh_key.pub --ssh-address ${container_ip} $external_opts -- --gitlab-token ${gitlab_token} --ssh-identity gitlab_ssh_key gitlab_ssh_key.pub --build-dir ${build_dir}
 
 ./execute-script-remotely.sh prepare_ubuntu.sh --ssh-address ${container_ip} $external_opts -- 
 

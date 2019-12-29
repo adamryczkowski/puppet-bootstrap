@@ -2,10 +2,10 @@
 cd `dirname $0`
 . ./common.sh
 
+## prepare_spack.sh
 
 usage="
-Prepares the machine for compilation of the IMGW PROPOZE code. It tries to load the essential packages via spack (if found),
-otherwise it installs them from packages (requires root). 
+Prepares the machine for compilation of the IMGW PROPOZE code. If has sudo priviledges by default for elligible packages it prefers installation from apt, otherwise installs them from spack. 
 
 TODO: Update packages as well
 
@@ -168,6 +168,28 @@ if [[ "${install_cmake}" == 1 ]]; then
 		install_apt_packages cmake
    fi
 fi
+
+#install_apt_packages python
+#logmkdir "/tmp/boost/build"
+#textfile "/tmp/boost/CMakeLists.txt" "cmake_minimum_required(VERSION 3.5)
+#project(check_boost)
+#enable_language(CXX)
+#find_package(Boost)
+#if(Boost_FOUND)
+#    file(WRITE \"${CMAKE_CURRENT_BINARY_DIR}/boost_version.txt\" \"${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}\")
+#else()
+#    file(WRITE \"boost_version.txt\" \"NO_BOOST\")
+#endif()"
+#pushd "/tmp/boost/build"
+#cmake ..
+#boost_version=$(cat boost_version.txt)
+#popd
+
+#if [[ "$boost_version" == "NO_BOOST" ]]; then
+#   pass
+#fi
+
+./prepare_spack.sh --pre-install boost@1.69.0 --spack-location /opt/spack
 
 #Adding github to known hosts
 ssh-keyscan -H github.com | sudo -u ${USER} -- tee -a $home/.ssh/known_hosts

@@ -176,16 +176,41 @@ function install_file {
 function set_executable {
 	local input_file="$1"
 	
-	if [[ ! -x "$dest" ]]; then
-		if [ -w "$dest" ]; then
-			logexec chmod +x "$dest"
-		else
-			logexec sudo chmod +x "$dest"
-		fi
+	if [[ -f "$dest" ]]; then
+	   if [[ ! -x "$dest" ]]; then
+		   if [ -w "$dest" ]; then
+			   logexec chmod +x "$dest"
+		   else
+			   logexec sudo chmod +x "$dest"
+		   fi
+	   fi
+	   if [[ ! -x "$dest" ]]; then
+		   errcho "Cannot set executable permission to $dest"
+		   return 1
+	   fi
+	else
+	   errcho "File $dest is not found"
+	   return 1
 	fi
-	if [[ ! -x "$dest" ]]; then
-		errcho "Cannot set executable permission to $dest"
-		return 1
+}
+
+function set_non_executable {
+	local input_file="$1"
+	if [[ -f "$dest" ]]; then
+	   if [[ ! -x "$dest" ]]; then
+		   if [ -w "$dest" ]; then
+			   logexec chmod -x "$dest"
+		   else
+			   logexec sudo chmod -x "$dest"
+		   fi
+	   fi
+	   if [[ -x "$dest" ]]; then
+		   errcho "Cannot unset executable permission to $dest"
+		   return 1
+	   fi
+	else
+	   errcho "File $dest is not found"
+	   return 1
 	fi
 }
 
@@ -195,6 +220,14 @@ function install_script {
 	local user=$3
 	install_file $input_file $dest $user
 	set_executable $dest
+}
+
+function install_data_file {
+	local input_file="$1"
+	local dest="$2"
+	local user=$3
+	install_file $input_file $dest $user
+	set_non_executable $dest
 }
 
 function chmod_file {

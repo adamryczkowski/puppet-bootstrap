@@ -39,6 +39,7 @@ where
  --du                     - ncdu (replaces du), 
  --tldr                   - tldr,
  --ag                     - ag (the silver searcher), 
+ --rg                     - ripgrep,
  --entr                   - entr (watch), 
  --noti                   - noti (notification when something is done)
  --dust                   - non-interactive replacement to du
@@ -84,6 +85,7 @@ install_find=0
 install_du=0
 install_tldr=0
 install_ag=0
+install_rg=0
 install_entr=0
 install_noti=0
 install_dust=0
@@ -160,7 +162,7 @@ case $key in
 	install_du=1
 	user_opts="${user_opts} --du"
 	install_tldr=1
-	install_ag=1
+	install_rg=1
 	install_entr=1
 	install_noti=1
 	install_dust=1
@@ -205,6 +207,9 @@ case $key in
 	;;
 	--ag)
 	install_ag=1
+	;;
+	--rg)
+	install_rg=1
 	;;
 	--entr)
 	install_entr=1
@@ -353,6 +358,11 @@ if [ "${install_ag}" == "1" ]; then
 	local rg_link="https://github.com/BurntSushi/ripgrep/releases/download/${rg_version}/${rg_file}"
 	install_apt_package_file ${rg_file} "ripgrep" "${rg_link}"
 	make_symlink /usr/bin/rg /usr/local/bin/ag
+fi
+
+if [ "${install_rg}" == "1" ]; then
+   add_ppa x4121/ripgrep
+   install_apt_packages ripgrep
 fi
 
 if [ "${install_entr}" == "1" ]; then
