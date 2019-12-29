@@ -90,18 +90,7 @@ if [[ "${spack_location}" == "auto" ]]; then
    spack_location=$(get_home_dir ${user})/tmp/spack
 fi
 
-if [ ! -d "${spack_location}/.git" ]; then
-	base_location=$(dirname ${spack_location})
-	if [ ! -d "${base_location}" ]; then
-	   logmkdir $base_location $user
-	fi
-	logexec sudo -u ${user} git clone --depth 1 https://github.com/spack/spack ${spack_location}
-	need_bootstrap=1
-else
-   logexec pushd "${spack_location}"
-   logexec sudo -u ${user} git pull
-   logexec popd
-fi
+get_git_repo https://github.com/spack/spack $(dirname ${spack_location}) $(basename ${spack_location}) ${user}
 
 tmpscript=$(mktemp --suffix=.sh)
 echo "#!/bin/bash" > ${tmpscript}

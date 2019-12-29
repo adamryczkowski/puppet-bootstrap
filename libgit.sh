@@ -73,11 +73,17 @@ function make_sure_git_exists {
 	fi
 }
 
-
+# pulls git repo as a current user $USER
 function get_git_repo {
 	local repo=$1
 	local dir=$2
 	local name=$3
+	local user=$4
+	
+	if [ -z "${user}" ]; then
+	   user=$USER
+	fi
+
 	if [ -z "${name}" ]; then
 		local pattern='^.*/([^/]+)(\.git)$'
 		if [[ "$repo" =~ $pattern ]]; then
@@ -97,18 +103,32 @@ function get_git_repo {
 		errcho "Cannot find ${dir} directory to clone git repo ${repo}"
 		return 1
 	fi
-	if [ -w "$dir" ]; then
-		local prefix=""
-	else
-		local prefix="sudo "
+	if [ ! -d "$dest" ]; then
+	   logmkdir $spack_location $user
 	fi
 	
-	if [ -d ${dest} ]; then
+	if [ -d ${dest}/.git ]; then
 		# update repo
-		logexec $prefix git pull
+		file_owner=$(stat -c '%U' ${dest}/.git)
+		if [[ "${file_owner}" != "${USER}" ]]; then
+   		logexec sudo -u ${file_owner} -- git pull
+   	else
+   		logexec git pull
+      fi
 	else
-		# clone repo
-		logexec $prefix git clone --depth 1 --recursive ${repo} ${dest}
+	   if [ -w ${dest} ]; then
+   		logexec git clone --depth 1 --recursive ${repo} ${dest}
+   	else
+   	   if [[ "$user" != "$USER" ]]; then
+      	   need_root=$(sudo -u ${user} -H sh -c "if [ -w $dest ] ; then echo 0; else; echo 1; fi")
+      	else
+      	   need_root=1
+      	fi
+      	if [[ "${need_root}" == 1 ]]; then
+      	   logexec chown ${user} ${dest}
+      	fi
+   		logexec sudo -u ${user} -- git clone --depth 1 --recursive ${repo} ${dest}
+   	fi
 	fi
 }
 
