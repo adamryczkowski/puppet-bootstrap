@@ -119,4 +119,4 @@ for spack_mod in ${pre_install[*]}; do
 	echo "spack install ${spack_mod}" >> ${tmpscript}
 done
 
-sudo bash -u ${user} -x ${tmpscript}
+sudo -u ${user} bash -x ${tmpscript}
