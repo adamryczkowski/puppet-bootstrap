@@ -90,6 +90,10 @@ if [[ "${spack_location}" == "auto" ]]; then
    spack_location=$(get_home_dir ${user})/tmp/spack
 fi
 
+if [ ! -f "${spack_location}/share/spack/setup-env.sh" ]; then
+    need_bootstrap=1
+fi
+
 get_git_repo https://github.com/spack/spack $(dirname ${spack_location}) $(basename ${spack_location}) ${user}
 
 tmpscript=$(mktemp --suffix=.sh)
