@@ -37,6 +37,7 @@ where
  --diff                   - diff-so-fancy (diff),
  --find                   - fd (replaces find)
  --du                     - ncdu (replaces du), 
+ --bandwidth              - bandwidth (Terminal bandwidth utilization tool), 
  --tldr                   - tldr,
  --ag                     - ag (the silver searcher), 
  --rg                     - ripgrep,
@@ -83,6 +84,7 @@ install_htop=0
 install_diff=0
 install_find=0
 install_du=0
+install_bandwidth=0
 install_tldr=0
 install_ag=0
 install_rg=0
@@ -163,6 +165,7 @@ case $key in
 	user_opts="${user_opts} --du"
 	install_tldr=1
 	install_rg=1
+   install_bandwidth=1
 	install_entr=1
 	install_noti=1
 	install_dust=1
@@ -201,6 +204,9 @@ case $key in
 	--du)
 	install_du=1
 	user_opts="${user_opts} --du"
+	;;
+	--bandwidth)
+	install_bandwidth=1
 	;;
 	--tldr)
 	install_tldr=1
@@ -337,6 +343,14 @@ if [ "${install_du}" == "1" ]; then
 	logexec make
 	logexec sudo make install
 	logexec popd
+fi
+
+if [ "${install_bandwidth}" == "1" ]; then
+   version=$(get_latest_github_release_name imsnif/bandwhich)
+   file="bandwhich-v${version}-x86_64-unknown-linux-musl.tar.gz"
+	link="https://github.com/imsnif/bandwhich/releases/download/${version}/${file}"
+	filepath=$(get_cached_file ${file} ${link})
+   get_from_cache_and_uncompress_file ${filepath} ${link} "/usr/local/bin/bandwidth" root   
 fi
 
 if [ "${install_dust}" == "1" ]; then
