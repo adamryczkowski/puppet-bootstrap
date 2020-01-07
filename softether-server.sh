@@ -155,6 +155,16 @@ logexec vpncmd /SERVER localhost /HUB:VPN /CMD UserCreate adam /GROUP "" /REALNA
 
 logexec vpncmd /SERVER localhost /HUB:VPN /CMD UserPasswordSet adam /PASSWORD szakal
 
+logexec vpncmd /SERVER localhost /HUB:VPN /CMD UserPasswordSet adam /PASSWORD szakal
+
+#IPsecEnable #keep hitting yes and setup shared key for LT2P
+#
+##Optional enable openvpn protocol
+#ServerCertRegenerate <your_server_IP OR domain>
+#ServerCertGet ~/cert.cer
+#SstpEnable yes
+#OpenVpnEnable yes /PORTS:1194
+
 
 #install_apt_package curl
 #last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)
