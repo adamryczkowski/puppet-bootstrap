@@ -125,17 +125,17 @@ if [ -n "${which_python}" ]; then
   fi
 fi
 
-local julia_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
-local pattern='^([0-9]+\.[0-9])\..*'
+julia_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
+pattern='^([0-9]+\.[0-9])\..*'
 if [[ $julia_version =~ $pattern ]]; then
-	local short_version=${BASH_REMATCH[1]}
+	short_version=${BASH_REMATCH[1]}
 else
 	echo "Wrong format of version: ${julia_version}"
 	return 1
 fi
-local julia_file="julia-${julia_version}-linux-x86_64.tar.gz"
-local julia_link="https://julialang-s3.julialang.org/bin/linux/x64/${short_version}/${julia_file}"
-local julia_path=$(get_cached_file "${julia_file}" "${julia_link}")
+julia_file="julia-${julia_version}-linux-x86_64.tar.gz"
+julia_link="https://julialang-s3.julialang.org/bin/linux/x64/${short_version}/${julia_file}"
+julia_path=$(get_cached_file "${julia_file}" "${julia_link}")
 uncompress_cached_file "${julia_path}" "$install_dir" $user
 
 make_symlink "${install_dir}/bin/julia" /usr/local/bin/julia
