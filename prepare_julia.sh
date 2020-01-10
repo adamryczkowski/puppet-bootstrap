@@ -69,6 +69,7 @@ case $key in
 	--deb-folder)
 	deb_folder=$1
 	shift
+	;;
 	--install-dir)
 	install_dir="$1"
 	shift
