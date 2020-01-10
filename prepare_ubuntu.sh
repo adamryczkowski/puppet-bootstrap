@@ -273,6 +273,8 @@ if check_for_root; then
 	return 1
 fi
 
+install_apt_package wget wget 
+
 if [ -n "$aptproxy" ]; then
 	$loglog
 	echo "Acquire::http::Proxy \"http://$aptproxy\";" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
