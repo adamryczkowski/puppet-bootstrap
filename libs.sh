@@ -129,6 +129,22 @@ function custom_systemd_service {
 	return 1
 }
 
+function check_for_root {
+	if which sudo >/dev/null; then
+		if ! sudo -n true 2>/dev/null; then
+			 errcho "User $USER doesn't have admin rights"
+			 return 1
+		fi
+	else
+		if [[ "$UID" != 0 ]]; then
+			errcho "No sudo present and user $USER is not root!"
+			return 1
+		else
+			logexec apt install sudo --yes
+		fi
+	fi
+	return 0
+}
 
 function get_home_dir {
 	if [ -n "$1" ]; then

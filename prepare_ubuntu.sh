@@ -269,9 +269,8 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-if ! sudo -n true 2>/dev/null; then
-    errcho "User $USER doesn't have admin rights"
-    exit 1
+if check_for_root; then
+	return 1
 fi
 
 if [ -n "$aptproxy" ]; then
