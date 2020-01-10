@@ -115,6 +115,7 @@ if [[ "${which_python}" == "auto" ]]; then
       exit 1
     fi
     which_python=$(which python 2>/dev/null)
+  fi
 fi
 
 if [ -n "${which_python}" ]; then
