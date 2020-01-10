@@ -108,7 +108,7 @@ fi
 
 if [[ "${which_python}" == "auto" ]]; then
   which_python=$(which python 2>/dev/null)
-  if $?; then
+  if ![[ "$?" == "0" ]]; then
     errcho "Cannot find python. Will install python from distribution."
     if ! install_apt_package python3 python; then
       errcho "Error while installing python. There will be no python in the install"
