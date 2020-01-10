@@ -119,7 +119,7 @@ if [[ "${which_python}" == "auto" ]]; then
 fi
 
 if [ -n "${which_python}" ]; then
-  if ! $(${which_python} >/dev/null 2>/dev/null); then
+  if ! $(${which_python} --version >/dev/null 2>/dev/null); then
     errcho "Cannot execute python binary in ${which_python}"
     return 1
   fi
