@@ -326,7 +326,7 @@ function nvidia {
 	fi
 	
 	do_update
-	
+	install_apt_packages ubuntu-drivers-common
 	logexec sudo ubuntu-drivers autoinstall
 	nvidia_package=$(apt list --installed |grep -E 'nvidia-[0-9]+/')
 	pattern='nvidia-([0-9]+)/'
