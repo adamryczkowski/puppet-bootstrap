@@ -115,7 +115,7 @@ fi
 
 
 if [ -n "$spack_python" ]; then
-  if [[ -d "${spack_python}" == "" ]]; then
+  if [ -d "${spack_python}" ]; then
     source ${spack_python}/share/spack/setup-env.sh
     spack install python py-setuptools py-pip py-ipython
     spack load py-setuptools
