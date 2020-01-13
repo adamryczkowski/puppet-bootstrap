@@ -103,9 +103,7 @@ function get_git_repo {
 		errcho "Cannot find ${dir} directory to clone git repo ${repo}"
 		return 1
 	fi
-	if [ ! -d "$dest" ]; then
-	   logmkdir $spack_location $user
-	fi
+   logmkdir $dest $user
 	
 	if [ -d ${dest}/.git ]; then
 		# update repo

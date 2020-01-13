@@ -67,9 +67,13 @@ function logmkdir {
 	local user=$2
 	if ! [ -d "$dir" ]; then
 		logexec sudo mkdir -p "$dir"
+	else
 	fi
 	if [ -n "$user" ]; then
-		logexec sudo chown -R ${user}:${user} "$dir"
+		curuser=$(stat -c '%U' "${dir}")
+		if [[ "$curuser" != "$user" ]]; then
+			logexec sudo chown -R ${user}:${user} "$dir"
+		fi
 	fi
 }
 
