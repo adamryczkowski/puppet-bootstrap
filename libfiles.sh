@@ -67,7 +67,6 @@ function logmkdir {
 	local user=$2
 	if ! [ -d "$dir" ]; then
 		logexec sudo mkdir -p "$dir"
-	else
 	fi
 	if [ -n "$user" ]; then
 		curuser=$(stat -c '%U' "${dir}")
