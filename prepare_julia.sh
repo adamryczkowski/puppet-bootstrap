@@ -124,6 +124,7 @@ if [ -n "$spack_python" ]; then
     spack load python
     which_python=$(which python)
   fi
+fi
 
 if [[ "${which_python}" == "auto" ]]; then
   which_python=$(which python 2>/dev/null)
