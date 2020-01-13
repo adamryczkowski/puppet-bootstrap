@@ -21,6 +21,8 @@ where
  --juno                       - Flag to specify whether to install juno if atom exists. --atom implies --juno.
  --atom                       - Flag to specify whether to install atom (in order to install juno)
  --dev                        - Include development packages: Revise, Rebugger, Debugger, OhMyREPL
+ --preload-spack-python-from  - Path with the spack installation directory from which python will be preloaded.
+                                Implies --pycall <path to python>
  --pycall <path to python>    - Installs PyCall in julia and sets the python interpreter. Auto sets the interpreter
                                 to \`which python\` or installs the python itself if python not found.
  --install-dir <path>         - Place to install julia to. Defaults to /opt/julia
@@ -47,6 +49,7 @@ use_juno=0
 use_atom=0
 use_dev=0
 which_python=""
+spack_python=""
 install_dir=/opt/julia
 
 while [[ $# > 0 ]]
@@ -81,6 +84,10 @@ case $key in
 	user=$1
 	shift
 	;;
+  --preload-spack-python-from)
+  spack_python="$1"
+  shift
+  ;;
 	--debug)
 	debug=1
 	;;
@@ -105,6 +112,18 @@ if [ -n "$debug" ]; then
 		log=/dev/stdout
 	fi
 fi
+
+
+if [ -n "$spack_python" ]; then
+  if [[ -d "${spack_python}" == "" ]]; then
+    source ${spack_python}/share/spack/setup-env.sh
+    spack install python py-setuptools py-pip py-ipython
+    spack load py-setuptools
+    spack load py-pip
+    spack load py-ipython
+    spack load python
+    which_python=$(which python)
+  fi
 
 if [[ "${which_python}" == "auto" ]]; then
   which_python=$(which python 2>/dev/null)
