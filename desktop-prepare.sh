@@ -317,6 +317,7 @@ function laptop {
 	install_script files/fix_permissions.sh /usr/local/lib/adam/scripts/fix_permissions.sh root
 	linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
 	install_file files/bright /usr/local/bin
+	install_file files/bright /usr/local/lib/adam/scripts	
 }
 
 function nvidia {
