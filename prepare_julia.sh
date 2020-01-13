@@ -174,7 +174,8 @@ if [[ "${use_dev}" == "1" ]]; then
 fi
 
 if [[ ! "${which_python}" == "" ]]; then
-  $(which julia) -e "using Pkg;Pkg.add([\"PyCall\"]);ENV[\"PYTHON\"]=\"${which_python}\";  ENV["PYCALL_DEBUG_BUILD"] = \"yes\"; Pkg.build(\"PyCall\"); using PyCall"
+#  $(which julia) -e "using Pkg;Pkg.add([\"PyCall\"]);ENV[\"PYTHON\"]=\"${which_python}\";  ENV["PYCALL_DEBUG_BUILD"]=\"yes\"; Pkg.build(\"PyCall\"); using PyCall"
+  $(which julia) -e "using Pkg;Pkg.add([\"PyCall\"]);ENV[\"PYTHON\"]=\"${which_python}\"; Pkg.build(\"PyCall\"); using PyCall"
 fi
 
 #$(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatsPlots" , "DataFrames", "JLD", "Flux", "Debugger", "Weave"]);ENV["PYTHON"]=""; Pkg.build(); using Revise; using IJulia; using Rebugger; using RCall; using Knet; using Plots; using StatsPlots; using DataFrames; using JLD; using Flux; using Debugger'
