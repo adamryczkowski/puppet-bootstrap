@@ -1,0 +1,67 @@
+#!/bin/bash
+
+USAGE="Usage: `basename $0` -c k|s +|-|<number>"
+
+#co=1 - co - 1 = klawiatura, 2 = screen
+co=s
+# Parse command line options.
+while getopts ":c:" OPT; do
+    case "$OPT" in
+        c)
+            co=$OPTARG
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "`basename $0` version 0.1"
+            echo $USAGE >&2
+            echo "-c    k (jak Keyboard) lub s (jak Screen). Informuje co ma być podświetlane"
+	    echo "+|-   Jaśniej/ciemniej"
+            echo "number - konkretny poziom jasności"
+            exit 1
+            ;;
+    esac
+done
+# Remove the switches we parsed above.
+
+if [ "$co" == "k" ]; then
+	sciezka="/sys/class/leds/asus::kbd_backlight"
+else
+	sciezka="/sys/class/backlight/intel_backlight"
+fi
+
+
+#If bright 0 then use the following. This works if there is any ACPI support
+#vbetool dpms off
+
+
+shift `expr $OPTIND - 1`
+if [ "$1" == "+" ]; then
+	maxbright=`cat $sciezka/max_brightness`
+	bright=`cat $sciezka/brightness`
+	bright=`echo "print(int(min($maxbright,$bright + max($bright * 0.5, 1))))" | python`
+else
+   if [ "$1" == "-" ]; then
+	bright=`cat $sciezka/brightness`
+	bright=`echo "print(int(max(0,$bright - max($bright * 0.33, 1))))" | python`
+   else
+	if [ "$1" == "max" ]; then
+		maxbright=`cat $sciezka/max_brightness`
+		bright=$maxbright
+	else
+		if ! [[ "$1" =~ ^[0-9]+$ ]] ; then
+		    echo "`basename $0` version 0.1"
+		    echo $USAGE >&2
+		    echo "-c    k (jak Keyboard) lub s (jak Screen). Informuje co ma być podświetlane"
+		    echo "+|-   Jaśniej/ciemniej"
+		    echo "number - konkretny poziom jasności"
+		    exit 1
+		else
+		    bright=$1
+		fi
+	fi
+   fi
+fi
+
+
+ bash -c "echo $bright > $sciezka/brightness"
+
