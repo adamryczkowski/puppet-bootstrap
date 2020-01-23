@@ -202,8 +202,8 @@ function refresh_apt_proxy {
 		turn_https_all signal.org
 		turn_https_all bintray.com/zulip
 		turn_https_all packagecloud.io/AtomEditor
-		turn_http_all dl.bintray.com/fedarovich/qbittorrent
-		turn_http_all mkvtoolnix.download
+		turn_https_all dl.bintray.com/fedarovich/qbittorrent
+		turn_https_all mkvtoolnix.download
 	fi
 }
 
