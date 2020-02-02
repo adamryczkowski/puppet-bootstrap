@@ -517,31 +517,36 @@ function mod3 {
 }
 
 function waterfox {
-	firefox
+   add_apt_source_manual waterfox "deb http://download.opensuse.org/repositories/home:/hawkeye116477:/waterfox/xUbuntu_$(get_ubuntu_version)/ /" https://download.opensuse.org/repositories/home:hawkeye116477:waterfox/xUbuntu_$(get_ubuntu_version)/Release.key waterfox.key 
+   install_apt_package waterfox
+
+	#TODO: Install addon: https://github.com/iamadamdev/bypass-paywalls-firefox
+
+
+#	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
+#	pattern='^([0-9\.]+)\-(classic[0-9\-]+)$'
+#	pattern='^([0-9\.]+)\-.*$'
+#	if [[ "${waterfox_version}" =~ $pattern ]]; then
+#	   ver_str="${BASH_REMATCH[1]}"
+#	   clas_str="${BASH_REMATCH[2]}"
+#   else
+#      return 1
+#   fi
+#	link="https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-classic-${ver_str}.en-US.linux-x86_64.tar.bz2"
+#	filename="waterfox-${ver_str}.en-US.linux-x86_64.tar.bz2"
+#	file=$(get_cached_file "$filename" "$link")
+#	
+#	uncompress_cached_file ${filename} "/opt/waterfox"
+#	
+#	chown_dir "/opt/waterfox" root root
+
+#	install_script ${DIR}/files/waterfox.desktop /usr/share/applications/waterfox.desktop
+#	
+#	make_symlink /opt/waterfox/waterfox /usr/local/bin/waterfox
 }
 
 function firefox {
-	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
-	pattern='^([0-9\.]+)\-(classic[0-9\-]+)$'
-	pattern='^([0-9\.]+)\-.*$'
-	if [[ "${waterfox_version}" =~ $pattern ]]; then
-	   ver_str="${BASH_REMATCH[1]}"
-	   clas_str="${BASH_REMATCH[2]}"
-   else
-      return 1
-   fi
-	link="https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-classic-${ver_str}.en-US.linux-x86_64.tar.bz2"
-	filename="waterfox-${ver_str}.en-US.linux-x86_64.tar.bz2"
-	file=$(get_cached_file "$filename" "$link")
-	
-	uncompress_cached_file ${filename} "/opt/waterfox"
-	
-	chown_dir "/opt/waterfox" root root
-
-	install_script ${DIR}/files/waterfox.desktop /usr/share/applications/waterfox.desktop
-	
-	make_symlink /opt/waterfox/waterfox /usr/local/bin/waterfox
-	#TODO: Install addon: https://github.com/iamadamdev/bypass-paywalls-firefox
+   install_apt_package firefox
 }
 
 function zulip {

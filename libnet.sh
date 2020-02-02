@@ -188,6 +188,12 @@ function is_host_up {
 	ping -c 1 -w 1  $1 >/dev/null
 }
 
+function is_host_tcp_port_up {
+   local host=$1
+   local port=$2
+   nc -zw3 $1 $2
+}
+
 function get_local_ip {
 	local line=$(ip route get 1)
 	local pattern='^.* src (.*) uid'
