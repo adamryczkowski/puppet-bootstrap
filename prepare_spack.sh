@@ -114,6 +114,8 @@ if [ "$spack_mirror" != "" ]; then
 	fi
 fi
 
+spack compiler find
+
 if [ "$need_bootstrap" == "1" ]; then
 	echo "spack bootstrap" >> ${tmpscript}
 	echo "source \"${spack_location}/share/spack/setup-env.sh\"" >> ${tmpscript}

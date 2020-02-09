@@ -44,7 +44,6 @@ fi
 
 set -x
 
-deb_folder='/tmp'
 use_juno=0
 use_atom=0
 use_dev=0
@@ -70,7 +69,7 @@ case $key in
 	shift
 	;;
 	--deb-folder)
-	deb_folder=$1
+	repo_path=$1
 	shift
 	;;
 	--install-dir)
