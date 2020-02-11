@@ -145,6 +145,7 @@ function add_apt_source_manual {
 		fingerpr=$(get_key_fingerprint ${release_key})
 		
 		if ! apt-key finger | grep -Eo '([0-9A-F]{4} ? ?){10}+' | sed -e "s/\([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\)  \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\)/\1\2\3\4\5\6\7\8\9/g" | grep "$fingerpr" > /dev/null; then
+			echo "Adding ${release_key}..."
 			sudo apt-key add "${release_key}"
    		flag_need_apt_update=1
 		fi
