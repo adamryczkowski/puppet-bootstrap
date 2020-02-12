@@ -226,11 +226,10 @@ function get_key_fingerprint {
 }
 
 
-
-
 function find_apt_list {
-	phrase="$1"
-	if [[ -f /etc/apt/sources.list.d/*.list ]]; then
+	local phrase="$1"
+	files=$(shopt -s nullglob dotglob; echo /etc/apt/sources.list.d/*.list)
+	if (( ${#files} )); then
 		grep -l /etc/apt/sources.list.d/*.list -e "${phrase}"
 	fi
 }
