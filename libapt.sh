@@ -177,6 +177,7 @@ function refresh_apt_proxy {
 		turn_http_all skype.com
 		turn_http_all docker
 		turn_http_all rstudio.com
+		turn_http_all repo.mongodb.org
 		turn_http_all virtualbox.org
 		turn_http_all signal.org
 		turn_http_all bintray.com/zulip
@@ -198,6 +199,7 @@ function refresh_apt_proxy {
 		turn_https_all skype.com
 		turn_https_all docker
 		turn_https_all rstudio.com
+		turn_https_all repo.mongodb.org
 		turn_https_all virtualbox.org
 		turn_https_all signal.org
 		turn_https_all bintray.com/zulip
