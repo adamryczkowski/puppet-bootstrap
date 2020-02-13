@@ -167,7 +167,7 @@ function get_apt_proxy {
 }
 
 function refresh_apt_proxy {
-   local apt_proxy=$(get_apt_proxy)
+   get_apt_proxy
 	if ping -c 1 -w 1  $aptproxy_ip >/dev/null; then
 		turn_http_all winehq.org
 		turn_http_all nodesource.com
