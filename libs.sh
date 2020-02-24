@@ -18,6 +18,7 @@ source libmount.sh
 source libnet.sh
 source libexec.sh
 source libatom.sh
+source liblxc.sh
 
 
 #Gets ubuntu version in format e.g. 1804 or 1604
