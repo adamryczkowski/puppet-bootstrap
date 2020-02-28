@@ -181,7 +181,10 @@ function get_iface_ip {
 	else
 		return 1
 	fi
+}
 
+function get_bridge_ifaces {
+	brctl show | awk 'NF>1 && NR>1 {print $1}' 
 }
 
 function is_host_up {

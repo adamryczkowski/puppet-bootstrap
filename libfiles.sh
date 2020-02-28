@@ -1,9 +1,5 @@
 #!/bin/bash
 
-function cmake_install {
-	folder="$1"
-	
-}
 
 function calcshasum {
 	file="$1"
