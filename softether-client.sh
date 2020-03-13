@@ -17,7 +17,7 @@ where
  <sever-ip>               - Server address
  --port                   - Port number. Defaults to 992
  --vpn-hub                - Name of the virtual hub to connect to, defaults to 'VPN'
- --username               - User name
+ --username               - User name (defaults to hostname)
  --ip                     - Static ip to use (good for dhcp servers)
  --connection_name        - Connection name. Defaults to user name
  --password               - User password. In plaintext, so make sure this command is not placed in the history
@@ -46,9 +46,9 @@ fi
 server_address=$1
 shift
 
-nicname=n2n
+nicname=vpn
 password=""
-username=""
+username="$(hostname)"
 ip="dhcp"
 vpn_hub=VPN
 port=992
@@ -204,6 +204,10 @@ logexec sudo systemctl daemon-reload
 logexec sudo systemctl enable softether_client.service
 logexec sudo systemctl enable softether_${connection_name}_client.service
 
+logexec sudo systemctl stop softether_client.service
+logexec sudo systemctl start softether_client.service
+logexec sudo systemctl stop softether_${connection_name}_client.service
+logexec sudo systemctl start softether_${connection_name}_client.service
 
 #install_apt_package curl
 #last_version=$(get_latest_github_release_name SoftEtherVPN/SoftEtherVPN)

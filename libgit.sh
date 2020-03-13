@@ -130,3 +130,13 @@ function get_git_repo {
 	fi
 }
 
+function get_current_git_branch {
+  local gitpath=$1
+  if [[ "$gitpath" != "" ]]; then
+    pushd  $gitpath >/dev/null
+  fi
+  git rev-parse --abbrev-ref HEAD
+  if [[ "$gitpath" != "" ]]; then
+    popd >/dev/null
+  fi
+}

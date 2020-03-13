@@ -8,17 +8,24 @@
 ## dependency: libnet.sh
 ## dependency: libexec.sh
 ## dependency: libatom.sh
+## dependency: liblxc.sh
 
 
-source libapt.sh
-source libfiles.sh
-source libgsettings.sh
-source libgit.sh
-source libmount.sh
-source libnet.sh
-source libexec.sh
-source libatom.sh
-source liblxc.sh
+#!/bin/bash
+[[ $0 != $BASH_SOURCE ]] || echo "Script is not intended to be run, but rather sourced"
+
+adamlibpath=$(dirname $BASH_SOURCE)
+
+
+source ${adamlibpath}/libapt.sh
+source ${adamlibpath}/libfiles.sh
+source ${adamlibpath}/libgsettings.sh
+source ${adamlibpath}/libgit.sh
+source ${adamlibpath}/libmount.sh
+source ${adamlibpath}/libnet.sh
+source ${adamlibpath}/libexec.sh
+source ${adamlibpath}/libatom.sh
+source ${adamlibpath}/liblxc.sh
 
 
 #Gets ubuntu version in format e.g. 1804 or 1604
