@@ -28,6 +28,11 @@ function get_ubuntu_version {
 		echo ${BASH_REMATCH[1]}${BASH_REMATCH[2]}
 		return 0
 	fi
+	local ubuntu_codename=$(get_ubuntu_codename)
+	if [[ "$ubuntu_codename" == "bionic" ]]; then
+		echo 1804
+		return 0
+	fi
 	return 1
 }
 
@@ -39,6 +44,9 @@ function get_ubuntu_codename {
 	fi
 	local codename=${BASH_REMATCH[1]}
 	if [[ "${codename}" == "tina" ]]; then
+		codename=bionic
+	fi 
+	if [[ "${codename}" == "tara" ]]; then
 		codename=bionic
 	fi 
 	echo "${codename}"
