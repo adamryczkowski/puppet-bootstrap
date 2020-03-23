@@ -269,10 +269,11 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-if ! sudo -n true 2>/dev/null; then
-    errcho "User $USER doesn't have admin rights"
-    exit 1
+if check_for_root; then
+	return 1
 fi
+
+install_apt_package wget wget 
 
 if [ -n "$aptproxy" ]; then
 	$loglog
@@ -358,7 +359,8 @@ if [ "${install_dust}" == "1" ]; then
 	file="dust-${version}-x86_64-unknown-linux-gnu.tar.gz"
 	link="https://github.com/bootandy/dust/releases/download/${version}/${file}"
 	filepath=$(get_cached_file ${file} ${link})
-   get_from_cache_and_uncompress_file ${filepath} ${link} "/usr/local/bin/dust" root
+   get_from_cache_and_uncompress_file ${filepath} ${link} "/usr/local/share/dust" root
+	make_symlink /usr/local/share/dust-${version}-x86_64-unknown-linux-gnu/dust /usr/local/bin/dust
 fi
 
 if [ "${install_tldr}" == "1" ]; then

@@ -143,7 +143,8 @@ function add_apt_source_manual {
 			release_key=$(get_cached_file /tmp/tmp.key "${release_key_URI}")
 		fi
 		fingerpr=$(get_key_fingerprint ${release_key})
-		if ! apt-key finger | grep "$fingerpr" > /dev/null; then
+		
+		if ! apt-key finger | grep -Eo '([0-9A-F]{4} ? ?){10}+' | sed -e "s/\([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\)  \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\)/\1\2\3\4\5\6\7\8\9/g" | grep "$fingerpr" > /dev/null; then
 			logexec sudo apt-key add "${release_key}"
    		flag_need_apt_update=1
 		fi
@@ -166,7 +167,7 @@ function get_apt_proxy {
 }
 
 function refresh_apt_proxy {
-   local apt_proxy=${get_apt_proxy}
+   get_apt_proxy
 	if ping -c 1 -w 1  $aptproxy_ip >/dev/null; then
 		turn_http_all winehq.org
 		turn_http_all nodesource.com
@@ -176,6 +177,7 @@ function refresh_apt_proxy {
 		turn_http_all skype.com
 		turn_http_all docker
 		turn_http_all rstudio.com
+		turn_http_all repo.mongodb.org
 		turn_http_all virtualbox.org
 		turn_http_all signal.org
 		turn_http_all bintray.com/zulip
@@ -197,12 +199,13 @@ function refresh_apt_proxy {
 		turn_https_all skype.com
 		turn_https_all docker
 		turn_https_all rstudio.com
+		turn_https_all repo.mongodb.org
 		turn_https_all virtualbox.org
 		turn_https_all signal.org
 		turn_https_all bintray.com/zulip
 		turn_https_all packagecloud.io/AtomEditor
-		turn_http_all dl.bintray.com/fedarovich/qbittorrent
-		turn_http_all mkvtoolnix.download
+		turn_https_all dl.bintray.com/fedarovich/qbittorrent
+		turn_https_all mkvtoolnix.download
 	fi
 }
 
@@ -225,11 +228,10 @@ function get_key_fingerprint {
 }
 
 
-
-
 function find_apt_list {
-	phrase="$1"
-	if [[ -f /etc/apt/sources.list.d/*.list ]]; then
+	local phrase="$1"
+	files=$(shopt -s nullglob dotglob; echo /etc/apt/sources.list.d/*.list)
+	if (( ${#files} )); then
 		grep -l /etc/apt/sources.list.d/*.list -e "${phrase}"
 	fi
 }

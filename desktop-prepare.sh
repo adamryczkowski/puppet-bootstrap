@@ -127,8 +127,8 @@ fi
 #Makes sure basic scripts are installed
 function tweak_base  {
 set -x
-	logmkdir /usr/local/lib/adam/scritps root
-	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scritps
+	logmkdir /usr/local/lib/adam/scripts root
+	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scripts
 	install_apt_packages git gdebi-core
 	mount_dir "$repo_path"
 set +x
@@ -310,9 +310,13 @@ function laptop {
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method 'edge-scrolling'
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad tap-to-click true
 	gsettings_set_value org.gnome.desktop.peripherals.touchpad natural-scroll false
-#TODO: install bright script + pam.d permissions
 	install_apt_package_file xserver-xorg-input-synaptics
 	install_file files/30-touchpad.conf /etc/X11/xorg.conf.d root
+	
+	install_script files/fix_permissions.sh /usr/local/lib/adam/scripts/fix_permissions.sh root
+	linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
+	install_file files/bright /usr/local/bin
+	install_file files/bright /usr/local/lib/adam/scripts	
 }
 
 function nvidia {
@@ -326,7 +330,7 @@ function nvidia {
 	fi
 	
 	do_update
-	
+	install_apt_packages ubuntu-drivers-common
 	logexec sudo ubuntu-drivers autoinstall
 	nvidia_package=$(apt list --installed |grep -E 'nvidia-[0-9]+/')
 	pattern='nvidia-([0-9]+)/'
@@ -513,31 +517,36 @@ function mod3 {
 }
 
 function waterfox {
-	firefox
+   add_apt_source_manual waterfox "deb http://download.opensuse.org/repositories/home:/hawkeye116477:/waterfox/xUbuntu_$(get_ubuntu_version)/ /" https://download.opensuse.org/repositories/home:hawkeye116477:waterfox/xUbuntu_$(get_ubuntu_version)/Release.key waterfox.key 
+   install_apt_package waterfox
+
+	#TODO: Install addon: https://github.com/iamadamdev/bypass-paywalls-firefox
+
+
+#	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
+#	pattern='^([0-9\.]+)\-(classic[0-9\-]+)$'
+#	pattern='^([0-9\.]+)\-.*$'
+#	if [[ "${waterfox_version}" =~ $pattern ]]; then
+#	   ver_str="${BASH_REMATCH[1]}"
+#	   clas_str="${BASH_REMATCH[2]}"
+#   else
+#      return 1
+#   fi
+#	link="https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-classic-${ver_str}.en-US.linux-x86_64.tar.bz2"
+#	filename="waterfox-${ver_str}.en-US.linux-x86_64.tar.bz2"
+#	file=$(get_cached_file "$filename" "$link")
+#	
+#	uncompress_cached_file ${filename} "/opt/waterfox"
+#	
+#	chown_dir "/opt/waterfox" root root
+
+#	install_script ${DIR}/files/waterfox.desktop /usr/share/applications/waterfox.desktop
+#	
+#	make_symlink /opt/waterfox/waterfox /usr/local/bin/waterfox
 }
 
 function firefox {
-	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
-	pattern='^([0-9\.]+)\-(classic[0-9\-]+)$'
-	pattern='^([0-9\.]+)\-.*$'
-	if [[ "${waterfox_version}" =~ $pattern ]]; then
-	   ver_str="${BASH_REMATCH[1]}"
-	   clas_str="${BASH_REMATCH[2]}"
-   else
-      return 1
-   fi
-	link="https://storage-waterfox.netdna-ssl.com/releases/linux64/installer/waterfox-classic-${ver_str}.en-US.linux-x86_64.tar.bz2"
-	filename="waterfox-${ver_str}.en-US.linux-x86_64.tar.bz2"
-	file=$(get_cached_file "$filename" "$link")
-	
-	uncompress_cached_file ${filename} "/opt/waterfox"
-	
-	chown_dir "/opt/waterfox" root root
-
-	install_script ${DIR}/files/waterfox.desktop /usr/share/applications/waterfox.desktop
-	
-	make_symlink /opt/waterfox/waterfox /usr/local/bin/waterfox
-	#TODO: Install addon: https://github.com/iamadamdev/bypass-paywalls-firefox
+   install_apt_package firefox
 }
 
 function zulip {

@@ -1,9 +1,5 @@
 #!/bin/bash
 
-function cmake_install {
-	folder="$1"
-	
-}
 
 function calcshasum {
 	file="$1"
@@ -69,7 +65,10 @@ function logmkdir {
 		logexec sudo mkdir -p "$dir"
 	fi
 	if [ -n "$user" ]; then
-		logexec sudo chown -R ${user}:${user} "$dir"
+		curuser=$(stat -c '%U' "${dir}")
+		if [[ "$curuser" != "$user" ]]; then
+			logexec sudo chown -R ${user}:${user} "$dir"
+		fi
 	fi
 }
 
@@ -397,11 +396,9 @@ function get_from_cache_and_uncompress_file {
 		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 	fi
 	popd
-set +x
 }
 
 function uncompress_cached_file {
-set -x
 	local filename="$1"
 	local destination="$2"
 	local usergr="$3"
@@ -473,7 +470,6 @@ set -x
 		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 	fi
 	popd
-set +x
 }
 
 function cp_file {
