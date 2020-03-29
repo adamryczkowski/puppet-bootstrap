@@ -21,6 +21,7 @@ where
  --juno                       - Flag to specify whether to install juno if atom exists. --atom implies --juno.
  --atom                       - Flag to specify whether to install atom (in order to install juno)
  --dev                        - Include development packages: Revise, Rebugger, Debugger, OhMyREPL
+ --user								- Username for whom install extra bits, like startup.jl. Defaults to the $USER
  --preload-spack-python-from  - Path with the spack installation directory from which python will be preloaded.
                                 Implies --pycall <path to python>
  --pycall <path to python>    - Installs PyCall in julia and sets the python interpreter. Auto sets the interpreter
@@ -158,6 +159,9 @@ julia_path=$(get_cached_file "${julia_file}" "${julia_link}")
 uncompress_cached_file "${julia_path}" "$install_dir" $user
 
 make_symlink "${install_dir}/bin/julia" /usr/local/bin/julia
+
+startup_jl=$(get_cached_file files/startup.jl)
+install_file ${startup_jl} $(get_home_dir $user) ${user}
 
 if [[ "${use_atom}" == "1" ]]; then
   add_apt_source_manual atom "deb [arch=amd64] https://packagecloud.io/AtomEditor/atom/any/ any main" https://packagecloud.io/AtomEditor/atom/gpgkey atom.key
