@@ -175,10 +175,11 @@ function refresh_apt_proxy {
 		turn_http_all syncthing.net
 		turn_http_all gitlab
 		turn_http_all skype.com
+		turn_http_all download.jitsi.org
 		turn_http_all docker
 		turn_http_all rstudio.com
-		turn_http_all repo.mongodb.org
 		turn_http_all virtualbox.org
+		turn_http_all nvidia.github.io
 		turn_http_all signal.org
 		turn_http_all bintray.com/zulip
 		turn_http_all packagecloud.io/AtomEditor
@@ -197,10 +198,11 @@ function refresh_apt_proxy {
 		turn_https_all syncthing.net
 		turn_https_all gitlab
 		turn_https_all skype.com
+		turn_https_all download.jitsi.org
 		turn_https_all docker
 		turn_https_all rstudio.com
-		turn_https_all repo.mongodb.org
 		turn_https_all virtualbox.org
+		turn_https_all nvidia.github.io
 		turn_https_all signal.org
 		turn_https_all bintray.com/zulip
 		turn_https_all packagecloud.io/AtomEditor
