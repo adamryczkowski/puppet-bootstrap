@@ -470,6 +470,10 @@ echo "Waiting for the container to obtain ip address..."
 
 while [ -z "${actual_ip}" ]
 do
+actual_ip=$(lxc exec $name -- ip addr show | grep eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
+if [ -n "${actual_ip}" ]; then
+	break
+fi
 actual_ip=$(lxc exec $name -- ifconfig eth0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/\2/p')
 sleep 1
 done
