@@ -377,10 +377,15 @@ function get_from_cache_and_uncompress_file {
 	pushd $(dirname $destination)
 	filename_no_ext="$(basename $destination)"
 	install_apt_package dtrx dtrx
+	if [[ "$?" != "0" ]]; then
+		if which dtrx >/dev/null; then
+			pip3 install dtrx
+		fi
+	fi
 	if is_folder_writable $(dirname "$destination") "$user"; then
 		if [ "$user" == "$USER" ]; then
 #			logexec tar -xvf "$path_filename" -C "$destination"
-			logexec python2.7 $(which dtrx) --one here "$path_filename"
+			logexec dtrx --one here "$path_filename"
 			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
 		else
 #			echo sudo -u "$user" dtrx --one rename "$path_filename"
@@ -390,7 +395,7 @@ function get_from_cache_and_uncompress_file {
 		fi
 	else
 #		echo sudo dtrx --one rename "$path_filename"
-		logexec sudo python2.7 $(which dtrx) --one here "$path_filename"
+		logexec sudo $(which dtrx) --one here "$path_filename"
 #		logexec sudo tar -xvf "$path_filename" -C "$destination"
 		logexec sudo chown "$usergr" "$destination"
 		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
