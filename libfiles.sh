@@ -389,7 +389,7 @@ function get_from_cache_and_uncompress_file {
 			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
 		else
 #			echo sudo -u "$user" dtrx --one rename "$path_filename"
-			logexec sudo -u "$user" python2.7 $(which dtrx) --one here "$path_filename"
+			logexec sudo -u "$user" $(which dtrx) --one here "$path_filename"
 #			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
 			echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 		fi
@@ -456,19 +456,19 @@ function uncompress_cached_file {
 	if is_folder_writable $(dirname "$destination") "$user"; then
 		if [ "$user" == "$USER" ]; then
 #			logexec tar -xvf "$path_filename" -C "$destination"
-			logexec python2.7 $(which dtrx) --one rename "$path_filename"
+			logexec $(which dtrx) --one rename "$path_filename"
 			logexec mv $(basename $filename_no_ext) $(basename $destination) 
 			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
 		else
 #			echo sudo -u "$user" dtrx --one rename "$path_filename"
-			logexec sudo -u "$user" python2.7 $(which dtrx) --one rename "$path_filename"
+			logexec sudo -u "$user" $(which dtrx) --one rename "$path_filename"
 			logexec sudo mv $(basename $filename_no_ext) $(basename $destination) 
 #			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
 			echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 		fi
 	else
 #		echo sudo dtrx --one rename "$path_filename"
-		logexec sudo python2.7 $(which dtrx) --one rename "$path_filename"
+		logexec sudo $(which dtrx) --one rename "$path_filename"
 		logexec sudo mv $(basename $filename_no_ext) $(basename $destination) 
 #		logexec sudo tar -xvf "$path_filename" -C "$destination"
 		logexec sudo chown -R "$usergr" "$destination"
