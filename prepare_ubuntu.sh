@@ -301,8 +301,8 @@ set -x
 if [ "${install_bat}" == "1" ]; then
 	version=$(get_latest_github_release_name sharkdp/bat skip_v)
 	
-	link=$(get_latest_github_release_link sharkdp/bat bat_${version}_amd64.deb bat_${version}_amd64.deb )
-	install_apt_package_file bat_${version}_amd64.deb bat $link
+	link=$(get_latest_github_release_link sharkdp/bat bat_${version}_$(cpu_arch).deb bat_${version}_$(cpu_arch).deb )
+	install_apt_package_file bat_${version}_$(cpu_arch).deb bat $link
 fi
 
 if [ "${install_ping}" == "1" ]; then
@@ -329,7 +329,7 @@ if [ "${install_diff}" == "1" ]; then
 fi
 
 if [ "${install_find}" == "1" ]; then
-	file="fd_$(get_latest_github_release_name sharkdp/fd skip_v)_amd64.deb"
+	file="fd_$(get_latest_github_release_name sharkdp/fd skip_v)_$(cpu_arch).deb"
 	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
 	install_apt_package_file ${file} fd $link
 fi
@@ -370,7 +370,7 @@ fi
 
 if [ "${install_ag}" == "1" ]; then
 	local rg_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
-	local rg_file="ripgrep_${rg_version}_amd64.deb"
+	local rg_file="ripgrep_${rg_version}_$(cpu_arch).deb"
 	local rg_link="https://github.com/BurntSushi/ripgrep/releases/download/${rg_version}/${rg_file}"
 	install_apt_package_file ${rg_file} "ripgrep" "${rg_link}"
 	make_symlink /usr/bin/rg /usr/local/bin/ag
@@ -421,7 +421,7 @@ if [ "${install_byobu}" == "1" ]; then
 fi
 
 if [ "${install_hexyl}" == "1" ]; then
-	file="hexyl_$(get_latest_github_release_name sharkdp/hexyl skip_v)_amd64.deb"
+	file="hexyl_$(get_latest_github_release_name sharkdp/hexyl skip_v)_$(cpu_arch).deb"
 	link=$(get_latest_github_release_link sharkdp/hexyl ${file} ${file})
 	install_apt_package_file ${file} hexyl $link
 

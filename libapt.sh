@@ -10,6 +10,14 @@ function purge_apt_package {
 	return 1
 }
 
+function cpu_arch {
+	local arch=$(uname -m)
+	if [[ "$arch" == "x86_64" ]]; then
+		arch=amd64
+	fi
+	echo $arch
+}
+
 function install_apt_package {
 	local ans=0
 	local package=$1
