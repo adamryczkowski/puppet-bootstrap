@@ -120,10 +120,7 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	release=$(get_ubuntu_codename)
 	$loglog
 	echo "deb https://cloud.r-project.org/bin/linux/ubuntu ${release}-cran40/" | sudo tee /etc/apt/sources.list.d/r.list
-	logexec gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-	$loglog
-	sudo gpg -a --export E084DAB9 | sudo apt-key add -
-	#logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E084DAB9
+	logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
 	flag_need_apt_update=1
 fi
 
@@ -149,34 +146,13 @@ logexec Rscript /tmp/prepare_R.R
 
 if [ "$rstudio" == "1" ]; then
 	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
-	#/html/body/div[3]/div[4]/div/div[3]/div/div/table/tbody[1]/tr/td[1]/a
-		netversion=$(Rscript -e 'cat(stringr::str_match(scan("https://www.rstudio.org/links/check_for_update?version=1.0.0", what = character(0), quiet=TRUE), "^[^=]+=([^\\&]+)\\&.*")[[2]])')
-
-		if ! python -c "import lxml" 2>/dev/null; then
-			pip install lxml
+		latest_version=$(get_latest_github_tag rstudio/rstudio 1)
+		codename=$(get_ubuntu_codename)
+		if [[ "$codename" == "focal" ]]; then
+			codename="bionic"
 		fi
-		
-		if ! python -c "import requests" 2>/dev/null; then
-			pip install requests
-		fi
+		RSTUDIO_URI="https://download1.rstudio.org/desktop/${codename}/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"		
 
-#		install_apt_packages python3 python3-lxml
-		
-		
-
-		logheredoc EOT
-		tee /tmp/get_rstudio_uri.py <<EOT
-import requests
-from lxml import html
-page=requests.get('https://rstudio.com/products/rstudio/download/#download')
-root = html.fromstring(page.text)
-result = root.xpath('//*[text()[contains(.,"Ubuntu 18")] and contains(@href,".deb")]')
-hits = [a.attrib['href'] for a in result]
-print(hits[0])
-EOT
-		python3 /tmp/get_rstudio_uri.py
-		RSTUDIO_URI=$(python3 /tmp/get_rstudio_uri.py)
-		
 		wget -c $RSTUDIO_URI -O ${deb_folder}/rstudio_${netversion}_amd64.deb
 		logexec sudo gdebi --n ${deb_folder}/rstudio_${netversion}_amd64.deb
 		out=$?
@@ -186,14 +162,29 @@ EOT
 	fi
 	homedir="$(get_home_dir)"
 	if ! fc-list |grep -q -F "Fira Code"; then
-		dest_dir="${homedir}/.local/share/fonts"
-		logmkdir $dest_dir
-		for type in Bold Light Medium Regular Retina; do
-			src_file=$(get_cached_file "FiraCode-${type}.ttf" "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true")
-			cp_file "$src_file" "$dest_dir" "$user"
-			# logexec wget -O ~/.local/share/fonts/FiraCode-${type}.ttf "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true";
-		done
-		fc-cache -f
+		if !install_apt_packages fonts-firacode; then
+			dest_dir="${homedir}/.local/share/fonts"
+			logmkdir $dest_dir
+			for type in Bold Light Medium Regular Retina; do
+				src_file=$(get_cached_file "FiraCode-${type}.ttf" "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true")
+				cp_file "$src_file" "$dest_dir" "$user"
+				# logexec wget -O ~/.local/share/fonts/FiraCode-${type}.ttf "https://github.com/tonsky/FiraCode/blob/master/distr/ttf/FiraCode-${type}.ttf?raw=true";
+			done
+			fc-cache -f
+		fi
+		textfile /etc/fonts/conf.d/80-firacode-spacing.conf '<?xml version="1.0"?>
+<!DOCTYPE fontconfig SYSTEM "fonts.dtd">
+<fontconfig>
+<match target="scan">
+ <test name="family">
+   <string>Fira Code</string>
+ </test>
+ <edit name="spacing">
+   <int>100</int>
+ </edit>
+</match>
+</fontconfig>' root
+	logexec sudo fc-cache -f
 	fi
 
 	if fc-list |grep -q FiraCode; then
@@ -211,8 +202,12 @@ if [ "$rstudio_server" == "1" ]; then
 		if  [[ $netversion =~ $pattern ]]; then 
 			netversion=${BASH_REMATCH[1]}
 		fi
+		codename=$(get_ubuntu_codename)
+		if [[ "$codename" == "focal" ]]; then
+			codename="bionic"
+		fi
 		logheredoc EOT
-		RSTUDIO_URI="https://download2.rstudio.org/server/$(get_ubuntu_codename)/amd64/rstudio-server-${netversion}-amd64.deb"
+		RSTUDIO_URI="https://download2.rstudio.org/server/${codename}/$(cpu_arch)/rstudio-server-${netversion}-$(cpu_arch).deb"
 		logexec wget -c $RSTUDIO_URI --output-document ${deb_folder}/rstudio-server_${netversion}_amd64.deb
 		logexec sudo gdebi --n ${deb_folder}/rstudio-server_${netversion}_amd64.deb
 		out=$?

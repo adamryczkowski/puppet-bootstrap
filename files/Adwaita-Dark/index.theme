@@ -1,0 +1,10 @@
+[X-GNOME-Metatheme]
+Name=Adwaita-Dark
+Type=X-GNOME-Metatheme
+Comment=This is the second one
+Encoding=UTF-8
+GtkTheme=Adwaita-Dark
+MetacityTheme=Adwaita-Dark
+IconTheme=gnome
+CursorTheme=Adwaita
+CursorSize=24

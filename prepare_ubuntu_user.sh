@@ -188,10 +188,14 @@ if [ -n "$user" ]; then
 			errcho "Abnormal condition: private key is installed without the corresponding public key. Please make sure both files are present, or neither of them. Exiting."
 			exit 1
 		fi
-		logexec sudo ssh-keygen -q -t ed25519 -N "" -a 100 -f "$sshhome/.ssh/id_ed25519"
+		tmpfile=$(mktemp)
+		logexec ssh-keygen -q -t ed25519 -N "" -a 100 -f "$tmpfile"
+
 		if [ $? -ne 0 ]; then
 			exit 1
 		fi
+		logexec sudo mv "$tmpfile"  "$sshhome/.ssh/id_ed25519"
+		logexec sudo mv "${tmpfile}.pub"  "$sshhome/.ssh/id_ed25519.pub"
 		if [[ "$user" != "root" ]]; then
 			logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519"
 			logexec sudo chown ${user}:${user} "$sshhome/.ssh/id_ed25519.pub"

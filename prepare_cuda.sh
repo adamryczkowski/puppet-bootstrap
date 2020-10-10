@@ -64,6 +64,10 @@ case $key in
 	driver_version=$1
 	shift
 	;;
+	-c|--cuda-version)
+	cuda_version=$1
+	shift
+	;;
 	--repo-path)
 	repo_path=$1
 	shift
@@ -103,6 +107,12 @@ if [[ $cuda_version == "10.0" ]]; then
 elif [[ $cuda_version == "10.1" ]]; then
    install_apt_packages cuda-command-line-tools-10-1 cuda-compat-10-1 cuda-core-10-1 cuda-compiler-10-1 cuda-cudart-10-1 cuda-cudart-dev-10-1 cuda-cufft-dev-10-1 cuda-cufft-10-1 cuda-cuobjdump-10-1 cuda-cupti-10-1 cuda-curand-10-1 cuda-curand-dev-10-1 cuda-cusolver-10-1 cuda-cusolver-dev-10-1 cuda-cusparse-10-1 cuda-cusparse-dev-10-1 cuda-gdb-src-10-1 cuda-gdb-10-1 cuda-gpu-library-advisor-10-1 cuda-libraries-10-1 cuda-libraries-dev-10-1 cuda-license-10-1 cuda-memcheck-10-1 cuda-minimal-build-10-1 cuda-misc-headers-10-1 cuda-npp-10-1 cuda-npp-dev-10-1 cuda-nvcc-10-1 cuda-nvdisasm-10-1 cuda-nvgraph-10-1 cuda-nvgraph-dev-10-1 cuda-nvjpeg-10-1 cuda-nvjpeg-dev-10-1 cuda-nvml-dev-10-1 cuda-nvprof-10-1 cuda-nvprune-10-1 cuda-nvrtc-10-1 cuda-nvrtc-dev-10-1 cuda-nvtx-10-1
    cuda_prefix="/usr/local/cuda-10.1"
+elif [[ $cuda_version == "11.1" ]]; then
+   install_apt_packages cuda-toolkit-11-1 
+   cuda_prefix="/usr/local/cuda-11.1"
+elif [[ $cuda_version == "11.0" ]]; then
+   install_apt_packages cuda-toolkit-11-0 
+   cuda_prefix="/usr/local/cuda-11.0"
 fi
 
 
