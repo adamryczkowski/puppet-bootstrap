@@ -188,7 +188,7 @@ if [ -n "$user" ]; then
 			errcho "Abnormal condition: private key is installed without the corresponding public key. Please make sure both files are present, or neither of them. Exiting."
 			exit 1
 		fi
-		tmpfile=$(mktemp)
+		tmpfile=$(mktemp -u)
 		logexec ssh-keygen -q -t ed25519 -N "" -a 100 -f "$tmpfile"
 
 		if [ $? -ne 0 ]; then
