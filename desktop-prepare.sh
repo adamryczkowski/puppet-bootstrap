@@ -237,17 +237,19 @@ function office2007 {
 #	logexec sudo apt-key add "${release_key}"
 
 
-	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
-	install_apt_package_file libfaudio0_19.07-0~bionic_amd64.deb libfaudio:amd64 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/amd64/libfaudio0_19.07-0~bionic_amd64.deb
-	install_apt_package_file libfaudio0_19.07-0~bionic_i386.deb libfaudio:i386 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/i386/libfaudio0_19.07-0~bionic_i386.deb
+#	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
+	if [[ $(get_ubuntu_codename) == bionic ]]; then
+		install_apt_package_file libfaudio0_19.07-0~bionic_amd64.deb libfaudio:amd64 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/amd64/libfaudio0_19.07-0~bionic_amd64.deb
+		install_apt_package_file libfaudio0_19.07-0~bionic_i386.deb libfaudio:i386 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/i386/libfaudio0_19.07-0~bionic_i386.deb
+	fi
 
 	do_update
-	install_apt_packages winehq-staging playonlinux gridsite-clients
+	install_apt_packages winehq-staging #playonlinux gridsite-clients
 	
 	add_group wine_office
 	add_usergroup "$user" wine_office
 	local office_install="/opt/Office2007"
-	uncompress_cached_file office2007_pl.tar.xz "${office_install}" 
+	uncompress_cached_file office2007_pl.tar.xz /opt ${user}:wine_office Office2007 
 	chown_dir ${office_install} "${user}:wine_office" wine_office
 	#Make sure all office is writable by anyone with execute permission preserverd
 	chmod_dir ${office_install} 777 666 777
@@ -314,6 +316,7 @@ function laptop {
 	install_file files/30-touchpad.conf /etc/X11/xorg.conf.d root
 	
 	install_script files/fix_permissions.sh /usr/local/lib/adam/scripts/fix_permissions.sh root
+	install_apt_packages python-is-python3
 	linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
 	install_file files/bright /usr/local/bin
 	install_file files/bright /usr/local/lib/adam/scripts	
@@ -364,8 +367,8 @@ function bumblebee {
 #	textfile /etc/modprobe.d/blacklist-nvidia.conf "/etc/modprobe.d/blacklist-nvidia.conf
 #/etc/modprobe.d/blacklist-nvidia.conf" root
 
-	sudo systemctl disable nvidia-persistenced
-	sudo systemctl disable nvidia-fallback.service
+#	sudo systemctl disable nvidia-persistenced
+#	sudo systemctl disable nvidia-fallback.service
 	
 	install_apt_package ubuntu-drivers-common ubuntu-drivers
 	logexec sudo ubuntu-drivers autoinstall
@@ -377,11 +380,14 @@ function bumblebee {
 		errcho "Unexpected error"
 		exit 1
 	fi
-	install_apt_packages bumblebee bumblebee-nvidia tlp powertop
+	install_apt_packages bumblebee bumblebee-nvidia tlp powertop nvidia-prime
+	install_file files/bumblebee.conf /etc/bumblebee/bumblebee.conf root
+	logexec sudo prime-select intel
 	#TODO: https://gist.github.com/whizzzkid/37c0d365f1c7aa555885d102ec61c048
 }
 
 function cli {
+	#TODO: remove entirely, in favour of prepare_ubuntu.sh
 	tweak_base
 	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu openssh-server software-properties-common curl dtrx
 	logexec liquidprompt_activate
@@ -582,9 +588,10 @@ function smb {
 	textfile /etc/samba/user "username=adam
 password=Zero tolerancji"
 	
-	declare -a folders=("wielodysk/filmy" "wielodysk/niezbednik" "wielodysk/docs" "wielodysk/public" "wielodysk/zdjecia")
-	declare -a shares=("rozne" "smiecie" "docs" "public" "zdjecia")
-	host=adam-990fx
+	declare -a folders=("szesciodysk/filmy" "szesciodysk/niezbednik" "szesciodysk/docs" "szesciodysk/adam" "szesciodysk/zdjecia")
+	declare -a shares=("filmy" "niezbednik" "docs" "adam" "zdjecia")
+	host=szesciodysk
+	add_host $host 192.168.10.6 ${host}.dom.statystyka.net
 	
 	local i=1
 	arraylength=${#folders[@]}
@@ -600,6 +607,7 @@ password=Zero tolerancji"
 	declare -a folders=("adam-minipc/download" "adam-minipc/other" "adam-minipc/unfinished" "adam-minipc/videos")
 	declare -a shares=("download" "other" "partial" "videos")
 	host=adam-minipc
+	add_host $host 192.168.10.2 ${host}.dom.statystyka.net
 	
 	local i=1
 	arraylength=${#folders[@]}
@@ -615,23 +623,27 @@ password=Zero tolerancji"
 
 function gedit {
 	localhome=$(get_home_dir $user)
+	logmkdir /opt/gedit-plugins
 	
 	if [ ! -f "${localhome}/.local/share/gedit/plugins/pair_char_completion.py" ]; then
 		plik=$(get_cached_file gedit-pair-char-completion-1.0.6-gnome3.tar.gz https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/gedit-pair-char-autocomplete/gedit-pair-char-completion-1.0.6-gnome3.tar.gz)
 		tmpdir=$(mktemp -d)
-		uncompress_cached_file $plik $tmpdir
-		pushd $tmpdir/gedit-pair-char-completion-1.0.6-gnome3
-		logexec ${tmpdir}/gedit-pair-char-completion-1.0.6-gnome3/install.sh
+		
+		uncompress_cached_file $plik $tmpdir $user pair_char_completion
+		pushd $tmpdir/pair_char_completion
+		logexec ${tmpdir}/pair_char_completion/install.sh
 		popd
 	fi
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins pair_char_completion
 	
 	if [ ! -f "${localhome}/.local/share/gedit/plugins/ex-mortis.plugin" ]; then
-		plik=$(get_cached_file gedit-ex-mortis.tar.gz https://github.com/jefferyto/gedit-ex-mortis/archive/master.tar.gz)
-		tmpdir=$(mktemp -d)
-		uncompress_cached_file $plik $tmpdir
-		logexec cp -R ${tmpdir}/gedit-ex-mortis/ex-mortis ~/.local/share/gedit/plugins
-		logexec cp ${tmpdir}/gedit-ex-mortis/ex-mortis.plugin ~/.local/share/gedit/plugins
+		install_gh_source jefferyto/gedit-ex-mortis /opt/gedit-plugins "" ex-mortis
+
+#		plik=$(get_cached_file gedit-ex-mortis.tar.gz https://github.com/jefferyto/gedit-ex-mortis/archive/master.tar.gz)
+#		tmpdir=$(mktemp -d)
+#		uncompress_cached_file $plik $tmpdir $user ex-mortis
+		logexec cp -R /opt/gedit-plugins/ex-mortis/ex-mortis ${localhome}/.local/share/gedit/plugins
+		logexec cp /opt/gedit-plugins/ex-mortis/ex-mortis.plugin ${localhome}/.local/share/gedit/plugins
 	fi
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins ex-mortis
 
@@ -643,11 +655,10 @@ function gedit {
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
 	
 	if [ ! -f "${localhome}/.local/share/gedit/plugins/controlyourtabs.plugin" ]; then
-		plik=$(get_cached_file gedit-control-your-tabs.tar.gz https://github.com/jefferyto/gedit-control-your-tabs/archive/master.tar.gz)
-		tmpdir=$(mktemp -d)
-		uncompress_cached_file $plik $tmpdir
-		logexec cp -R ${tmpdir}/gedit-control-your-tabs/controlyourtabs ~/.local/share/gedit/plugins
-		logexec cp ${tmpdir}/gedit-control-your-tabs/controlyourtabs.plugin ~/.local/share/gedit/plugins
+		install_gh_source jefferyto/gedit-control-your-tabs /opt/gedit-plugins "" control-your-tabs
+
+		logexec cp -R /opt/gedit-plugins/control-your-tabs/controlyourtabs ${localhome}/.local/share/gedit/plugins
+		logexec cp $/opt/gedit-plugins/control-your-tabs/controlyourtabs.plugin ${localhome}/.local/share/gedit/plugins
 	fi
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins controlyourtabs
 	install_apt_packages gedit-plugins gedit-plugin-text-size
@@ -673,7 +684,7 @@ function gedit {
 
 function keepass {
 	add_ppa jtaylor/keepass
-	install_apt_package keepass2 xdotool libmono-system-configuration-install4.0-cil libmono-system-management4.0-cil libmono-csharp4.0c-cil libmono-microsoft-csharp4.0-cil mono-dmcs mono-mcs
+	install_apt_package keepass2 xdotool libmono-system-configuration-install4.0-cil libmono-system-management4.0-cil libmono-csharp4.0c-cil libmono-microsoft-csharp4.0-cil mono-mcs
 	file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 	echo "file=$file"
 	cp_file "$file" /usr/lib/keepass2/plugins/KeePassRPC.plgx root
@@ -704,7 +715,8 @@ function julia {
 
 function i3wm {
 	set -x
-	install_apt_package_file sur5r-keyring_2019.02.01_all.deb sur5r-keyring http://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2019.02.01_all.deb
+	
+	install_apt_package_file keyring.deb sur5r-keyring https://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2020.02.03_all.deb
 	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe"
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
@@ -735,9 +747,36 @@ function i3wm {
 	
 	install_apt_packages albert pcmanfm units
 	
+	
 	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
 	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb 
 		
+	
+	#Dark theme
+	install_apt_packages gnome-themes-extra
+	if [ ! -f  "${home}/.config/gtk-3.0/settings.ini" ]; then
+		logmkdir "${home}/.config/gtk-3.0"
+		textfile "${home}/.config/gtk-3.0/settings.ini" "[Settings]
+gtk-application-prefer-dark-theme=1
+gtk-theme-name=Adwaita-dark
+gtk-icon-theme-name=hicolor
+gtk-font-name=Sans 10
+gtk-cursor-theme-name=Adwaita
+gtk-cursor-theme-size=0
+gtk-toolbar-style=GTK_TOOLBAR_BOTH
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=1
+gtk-menu-images=1
+gtk-enable-event-sounds=1
+gtk-enable-input-feedback-sounds=1
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle=hintfull
+" ${user}
+	else
+		linetextfile ${home}/.config/gtk-3.0/settings.ini "gtk-application-prefer-dark-theme=1"
+		linetextfile ${home}/.config/gtk-3.0/settings.ini "gtk-theme-name=Adwaita-dark"
+	fi	
 	
 	#https://i3wm.org/docs/repositories.html
 	#https://askubuntu.com/questions/1080671/how-can-i-install-playerctl

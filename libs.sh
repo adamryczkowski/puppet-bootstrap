@@ -9,6 +9,7 @@
 ## dependency: libexec.sh
 ## dependency: libatom.sh
 ## dependency: liblxc.sh
+## dependency: libinstall.sh
 
 
 #!/bin/bash
@@ -26,6 +27,7 @@ source ${adamlibpath}/libnet.sh
 source ${adamlibpath}/libexec.sh
 source ${adamlibpath}/libatom.sh
 source ${adamlibpath}/liblxc.sh
+source ${adamlibpath}/libinstall.sh
 
 
 #Gets ubuntu version in format e.g. 1804 or 1604
@@ -192,6 +194,13 @@ function get_special_dir {
 }
 
 
+function make_sure_dir_is_in_a_path {
+	local newpath="$1"
+	
+	if ! echo "$PATH" | tr ':' '\n' | grep '^\\one\\two$' >/dev/null; then
+		export PATH=${PATH}:${newpath}
+	fi
+}
 
 function get_ui_context {
 	local user=$1

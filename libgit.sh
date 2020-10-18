@@ -7,7 +7,7 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 	local skip_v=$2
 	if ! which curl >/dev/null; then	
 		install_apt_package curl curl
-		exit 1
+		return 1
 	fi
 	ans=$(curl $github_token --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
 		grep '"tag_name":' |                                            # Get tag line
@@ -28,16 +28,16 @@ function get_latest_github_tag {
 	local skip_v=$2
 	if ! which curl >/dev/null; then	
 		install_apt_package curl curl
-		exit 1
+		return 1
 	fi
 	if ! which jq >/dev/null; then	
 		install_apt_package jq jq
-		exit 1
+		return 1
 	fi
 	ans=$(curl $github_token --silent "https://api.github.com/repos/$1/tags" | 
 	jq '.[1].name')
 	if [ -n "$skip_v" ]; then
-		pattern='v(.*)$'
+		pattern='v(.*).{1}$'
 		if [[ ! "$ans" =~ $pattern ]]; then
 			echo "Cannot strip \"v\" prefix from  $version"
 			return -1 
@@ -47,6 +47,46 @@ function get_latest_github_tag {
 	fi
 	echo "$ans"
 }
+
+
+function get_app_link_gh {
+	local name="$1" # e.g. "BurntSushi/ripgrep"
+	local _arch="$2"
+	local _ext="$3"	
+	if [[ "${_arch}" == "" ]]; then 
+		_arch=$(cpu_arch)
+	fi
+	if [[ "${_ext}" == "" ]]; then 
+		_ext=".*$"
+	else
+		_ext="\.${_ext}$"
+	fi
+
+	local releases=$(get_github_releases $name)
+	
+	if [[ "$_arch" == "amd64" ]]; then
+		to_try=("amd64.*linux" "x86_64.*linux" "i686.*linux" "amd64" "x86_64" "i686" )
+	elif [[ "$_arch" == "arm64" ]]; then
+		to_try=("arm64.*linux" "arm.*linux" "arm64" "arm")
+	elif [[ "$_arch" == "i386" ]]; then
+		to_try=("i386.*linux" "i386")
+	elif [[ "$_arch" == "none" ]]; then
+		to_try=(".*")
+	else
+		return 1
+	fi
+	
+	for phrase in "${to_try[@]}"; do
+		links="$(is_arch_supported "$releases" "${phrase}.*${_ext}")"
+		if [ $? == 1 ] ; then
+			echo "$links" | head -n 1
+			return 0
+		fi
+	done
+	echo ""
+	return 0
+}
+
 
 #Gets the file from latest release of github, or specific release
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)

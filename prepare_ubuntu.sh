@@ -320,7 +320,9 @@ if [ "${install_htop}" == "1" ]; then
 fi
 
 if [ "${install_dtrx}" == "1" ]; then
-	install_apt_package dtrx
+	if ! install_apt_package dtrx; then
+		install_pip3_packages dtrx
+	fi
 fi
 
 if [ "${install_diff}" == "1" ]; then
@@ -329,9 +331,14 @@ if [ "${install_diff}" == "1" ]; then
 fi
 
 if [ "${install_find}" == "1" ]; then
-	file="fd_$(get_latest_github_release_name sharkdp/fd skip_v)_$(cpu_arch).deb"
-	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
-	install_apt_package_file ${file} fd $link
+	install_gh_deb sharkdp/fd
+#	fd_arch=$(cpu_arch)
+#	if [ "${fd_arch}" == "arm64" ]; then
+#		fd_arch="armhf"
+#	fi
+#	file="fd_$(get_latest_github_release_name sharkdp/fd skip_v)_$(cpu_arch).deb"
+#	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
+#	install_apt_package_file ${file} fd $link
 fi
 
 if [ "${install_du}" == "1" ]; then
@@ -347,20 +354,35 @@ if [ "${install_du}" == "1" ]; then
 fi
 
 if [ "${install_bandwidth}" == "1" ]; then
-   version=$(get_latest_github_release_name imsnif/bandwhich)
-   file="bandwhich-v${version}-x86_64-unknown-linux-musl.tar.gz"
-	link="https://github.com/imsnif/bandwhich/releases/download/${version}/${file}"
-	filepath=$(get_cached_file ${file} ${link})
-   get_from_cache_and_uncompress_file ${filepath} ${link} "/usr/local/bin/bandwidth" root   
+	install_gh_binary imsnif/bandwhich /usr/local/share bandwhich
+
+#	
+
+#	_arch=$(cpu_arch)
+#	if [ "${_arch}" == "amd64" ]; then
+#		_arch="x86_64-unknown-linux-musl"
+#	fi
+#   version=$(get_latest_github_release_name imsnif/bandwhich)
+#   file="bandwhich-v${version}-${_arch}.tar.gz"
+#	link="https://github.com/imsnif/bandwhich/releases/download/${version}/${file}"
+#	filepath=$(get_cached_file ${file} ${link})
+#   get_from_cache_and_uncompress_file ${filepath} bandwhich ${link} "/usr/local/bin/bandwhich" root   
 fi
 
 if [ "${install_dust}" == "1" ]; then
-   version=$(get_latest_github_release_name bootandy/dust)
-	file="dust-${version}-x86_64-unknown-linux-gnu.tar.gz"
-	link="https://github.com/bootandy/dust/releases/download/${version}/${file}"
-	filepath=$(get_cached_file ${file} ${link})
-   get_from_cache_and_uncompress_file ${filepath} ${link} "/usr/local/share/dust" root
-	make_symlink /usr/local/share/dust-${version}-x86_64-unknown-linux-gnu/dust /usr/local/bin/dust
+	install_gh_binary bootandy/dust /usr/local/share dust
+#	_arch=$(cpu_arch)
+#	if [ "${_arch}" == "amd64" ]; then
+#		_arch="x86_64-unknown-linux-gnu"
+#	elif [ "${_arch}" == "arm64" ]; then
+#		_arch="arm-unknown-linux-gnueabihf"
+#	fi
+#   version=$(get_latest_github_release_name bootandy/dust)
+#	file="dust-${version}-${_arch}.tar.gz"
+#	link="https://github.com/bootandy/dust/releases/download/${version}/${file}"
+#	filepath=$(get_cached_file ${file} ${link})
+#   get_from_cache_and_uncompress_file ${filepath} ${link} "/usr/local/share/dust" root
+#	make_symlink /usr/local/share/dust-${version}-x86_64-unknown-linux-gnu/dust /usr/local/bin/dust
 fi
 
 if [ "${install_tldr}" == "1" ]; then
@@ -369,20 +391,30 @@ if [ "${install_tldr}" == "1" ]; then
 fi
 
 if [ "${install_ag}" == "1" ]; then
-	local rg_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
-	local rg_file="ripgrep_${rg_version}_$(cpu_arch).deb"
-	local rg_link="https://github.com/BurntSushi/ripgrep/releases/download/${rg_version}/${rg_file}"
-	install_apt_package_file ${rg_file} "ripgrep" "${rg_link}"
-	make_symlink /usr/bin/rg /usr/local/bin/ag
+	install_apt_packages silversearcher-ag
 fi
 
 if [ "${install_rg}" == "1" ]; then
-   add_ppa x4121/ripgrep
-   install_apt_packages ripgrep
+	install_gh_deb BurntSushi/ripgrep
+	if $?; then
+		 install_gh_binary BurntSushi/ripgrep /usr/local/share rg "" "" "" "" rg
+	fi
+#	_arch=$(cpu_arch)
+#	if [ "${_arch}" == "arm64" ]; then
+#		_arch="arm-unknown-linux-gnueabihf"
+#	fi
+#   version=$(get_latest_github_release_name BurntSushi/ripgrep)
+#	file="ripgrep-${version}-${_arch}.tar.gz"
+#	link="https://github.com/BurntSushi/ripgrep/releases/download/${version}/${file}"
+#	filepath=$(get_cached_file ${file} ${link})
+#   get_from_cache_and_uncompress_file ${filepath} ${link} "/usr/local/share/ripgrep" root
+#	make_symlink /usr/local/share/ripgrep/ripgrep /usr/local/bin/ripgrep
+#   add_ppa x4121/ripgrep
+#   install_apt_packages ripgrep
 fi
 
 if [ "${install_entr}" == "1" ]; then
-	get_cached_file entr-4.1.tar.gz http://entrproject.org/code/entr-4.2.tar.gz
+	get_cached_file entr-4.2.tar.gz http://entrproject.org/code/entr-4.2.tar.gz
 	tmp=$(mktemp -d)
 	pushd $tmp
 	uncompress_cached_file entr-4.2.tar.gz eradman
@@ -421,9 +453,10 @@ if [ "${install_byobu}" == "1" ]; then
 fi
 
 if [ "${install_hexyl}" == "1" ]; then
-	file="hexyl_$(get_latest_github_release_name sharkdp/hexyl skip_v)_$(cpu_arch).deb"
-	link=$(get_latest_github_release_link sharkdp/hexyl ${file} ${file})
-	install_apt_package_file ${file} hexyl $link
+	install_gh_deb sharkdp/hexyl
+#	file="hexyl_$(get_latest_github_release_name sharkdp/hexyl skip_v)_$(cpu_arch).deb"
+#	link=$(get_latest_github_release_link sharkdp/hexyl ${file} ${file})
+#	install_apt_package_file ${file} hexyl $link
 
 
 #	install_apt_package_file fd-musl_7.1.0_amd64.debhexyl_0.3.1_amd64.deb hexyl https://github.com/sharkdp/hexyl/releases/download/v0.3.1/hexyl_0.3.1_amd64.deb

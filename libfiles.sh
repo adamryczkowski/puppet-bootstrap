@@ -1,6 +1,7 @@
 #!/bin/bash
 
 
+
 function calcshasum {
 	file="$1"
 	if [ -f "$file" ]; then 
@@ -305,7 +306,7 @@ function get_cached_file {
 	local filename="$1"
 	local download_link="$2"
 	if [ ! -d "${repo_path}" ]; then
-		mkdir -p /tmp/repo_path
+		mkdir -p "/tmp/repo_path/$(dirname "${filename}")"
 		local repo_path="/tmp/repo_path"
 	fi
 	if [ ! -f "${repo_path}/${filename}" ]; then
@@ -330,85 +331,192 @@ function get_cached_file {
 	echo "${repo_path}/${filename}"
 }
 
-function get_from_cache_and_uncompress_file {
-	local filename="$1"
-	local download_link="$2"
-	local destination="$3"
-	local usergr="$4"
-	local user
-	local timestamp_path="${destination}.timestamp"
-	if [ -z "$usergr" ]; then
-		user=$USER
-		usergr=$user
-		group=""
-	else
-		local pattern='^([^:]+):([^:]+)$'
-		if [[ "$usergr" =~ $pattern ]]; then
-			group=${BASH_REMATCH[2]}
-			user=${BASH_REMATCH[1]}
+function logexec {
+	exec $@ | true
+}
+
+function extract_archive {
+	local archive_path="$1"
+	local destination_parent="$2"
+	local act_as_user="$3"
+	local single_item_policy="$4" #'rename' - if archive with single folder - the files in that  folder will be extracted to the extracted_name subfolder of the destination_parent. The same, if archive with a single file - that file will be renamed into extracted_name, and put in destination_parent.
+	#'original' - (default) the archive with single folder will be extracted directly to destination_parent, ignoring extracted_name. Similarily, if archive with a single file - that file will be extracted in the destination_parent under its original name.
+	#'onedir' - if archive with single folder - acts exactly as 'rename' policy. If archive with a single file - that file will be put in the subfolder extracted_name with the name extracted_name.
+	local extracted_name="$5" #Defaults to the archive name minus extensions
+	
+	if [[ "$single_item_policy" == "" ]]; then
+		single_item_policy=original
+	fi
+
+	if [[ "$extracted_name" == "" ]]; then
+		local extension="${archive_path##*.}"
+		extracted_name="${archive_path%.*}"
+	fi
+	make_sure_dtrx_exists
+	
+	
+	
+	local dest_path="${destination_parent}/${extracted_name}"
+	logmkdir "${dest_path}" "$act_as_user"
+	if is_folder_writable $(dirname "$destination_parent") "$act_as_user"; then
+		if [ "$act_as_user" == "$USER" ]; then
+			mode=1
+			(cd "${dest_path}" ; dtrx --one here "$archive_path")
 		else
-			group=""
-			user=$usergr
+			mode=2
+			(cd "${dest_path}" ; sudo -u "$act_as_user" $(which dtrx) --one here "$archive_path")
 		fi
+	else
+		mode=2
+		(cd "${dest_path}" ; sudo -u "$act_as_user" $(which dtrx) --one here "$archive_path")
 	fi
 	
-	if [ ! -f "$filename" ]; then
-		path_filename=$(get_cached_file "$filename" "${download_link}")
-	else
-		path_filename="$filename"
-	fi
-	if [ -z "$path_filename" ]; then
-		echo "no input file $path_filename"
-		return 1
-	fi
-	if [ -z "$destination" ]; then
-		echo "no destination $destination"
-		return 2
-	fi
-	if [ -d "$destination" ]; then
-		moddate_remote=$(stat -c %y "$destination")
-		if [ -f "$timestamp_path" ]; then
-			moddate_hdd=$(cat "$timestamp_path")
-			if [ "$moddate_hdd" == "$moddate_remote" ]; then
-				return 0
+	filecount=$(ls "${dest_path}" | wc -l)
+	if [[ $filecount == 1 ]]; then
+		filename1=$(ls "${dest_path}" | head -n 1)
+		if [ -d "${dest_path}/${filename1}" ]; then
+		
+		
+			if [[ $single_item_policy == original ]]; then
+				if [[ $mode == 1 ]]; then
+					mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
+					rmdir "${dest_path}"
+				else
+					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
+					sudo -u "$act_as_user" rmdir "${dest_path}"
+				fi
+				
+				
+			elif [[ $single_item_policy == rename || $single_item_policy == onedir ]]; then
+				if [[ $mode == 1 ]]; then
+					find "${dest_path}/${filename1}/" -mindepth 1 -maxdepth 1 -exec mv -t "${dest_path}" -- {} +
+					rmdir "${dest_path}/${filename1}"
+				else
+					sudo -u "$act_as_user" find "${dest_path}/${filename1}/" -mindepth 1 -maxdepth 1 -exec mv -t "${dest_path}" -- {} +
+					sudo -u "$act_as_user" rmdir "${dest_path}/${filename1}"
+				fi
+			fi
+		elif [ -f "${dest_path}/${filename1}" ]; then
+
+
+			if [[ $single_item_policy == original ]]; then
+				if [[ $mode == 1 ]]; then
+					mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
+					rmdir "${dest_path}"
+				else
+					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
+					sudo -u "$act_as_user" rmdir "${dest_path}"
+				fi
+
+
+			elif [[ $single_item_policy == rename ]]; then
+				if [[ $mode == 1 ]]; then
+					tmpname=$(mktemp -p "${destination_parent}" --dry-run)
+					mv "${dest_path}/${filename1}" "${tmpname}"
+					rmdir "${dest_path}"
+					mv "${tmpname}" "${dest_path}"
+				else
+					tmpname=$(sudo -u "$act_as_user" mktemp -p "${destination_parent}" --dry-run)
+					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${tmpname}"
+					sudo -u "$act_as_user" rmdir "${dest_path}"
+					sudo -u "$act_as_user" mv "${tmpname}" "${dest_path}"
+				fi
+
+
+			elif [[ $single_item_policy == onedir ]]; then
+				if [[ $mode == 1 ]]; then
+					mv "${dest_path}/${filename1}" "${dest_path}/${extracted_name}"
+				else
+					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${dest_path}/${extracted_name}"
+				fi
 			fi
 		fi
-	fi
-	pushd $(dirname $destination)
-	filename_no_ext="$(basename $destination)"
-	install_apt_package dtrx dtrx
-	if [[ "$?" != "0" ]]; then
-		if which dtrx >/dev/null; then
-			pip3 install dtrx
-		fi
-	fi
-	if is_folder_writable $(dirname "$destination") "$user"; then
-		if [ "$user" == "$USER" ]; then
-#			logexec tar -xvf "$path_filename" -C "$destination"
-			logexec dtrx --one here "$path_filename"
-			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
-		else
-#			echo sudo -u "$user" dtrx --one rename "$path_filename"
-			logexec sudo -u "$user" $(which dtrx) --one here "$path_filename"
-#			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
-			echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
-		fi
-	else
-#		echo sudo dtrx --one rename "$path_filename"
-		logexec sudo $(which dtrx) --one here "$path_filename"
-#		logexec sudo tar -xvf "$path_filename" -C "$destination"
-		logexec sudo chown "$usergr" "$destination"
-		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
-	fi
-	popd
+	fi 
 }
+
+function make_sure_dtrx_exists {
+	local mute="$1"
+	if ! which dtrx >/dev/null; then
+		if [[ $mute == "" ]]; then
+			install_apt_package dtrx dtrx
+		else
+			install_apt_package dtrx dtrx >/dev/null 2>/dev/null
+		fi
+		if [[ "$?" != "0" ]]; then
+			if [[ $mute == "" ]]; then
+				pip3 install dtrx
+			else
+				pip3 install dtrx >/dev/null 2>/dev/null
+			fi
+			make_sure_dir_is_in_a_path $(get_home_dir)/.local/bin
+		fi
+	fi
+	which dtrx >/dev/null
+}
+
+
+#function get_from_cache_and_uncompress_file {
+#	local filename="$1"
+#	local download_link="$2"
+#	local destination_parent="$3"
+#	local folder_name="$4"
+#	local usergr="$5"
+#	local user
+#	if [ -z "$usergr" ]; then
+#		user=$USER
+#		usergr=$user
+#		group=""
+#	else
+#		local pattern='^([^:]+):([^:]+)$'
+#		if [[ "$usergr" =~ $pattern ]]; then
+#			group=${BASH_REMATCH[2]}
+#			user=${BASH_REMATCH[1]}
+#		else
+#			group=""
+#			user=$usergr
+#		fi
+#	fi
+#	
+#	if [ ! -f "$filename" ]; then
+#		path_filename=$(get_cached_file "$filename" "${download_link}")
+#	else
+#		path_filename="$filename"
+#	fi
+#	if [ -z "$path_filename" ]; then
+#		echo "no input file $path_filename"
+#		return 1
+#	fi
+#	if [ -z "$destination_parent" ]; then
+#		echo "no destination $destination_parent"
+#		return 2
+#	fi
+#	if [ -d "$destination_parent" ]; then
+#		moddate_remote=$(stat -c %y "$destination_parent")
+#		if [ -f "$timestamp_path" ]; then
+#			moddate_hdd=$(cat "$timestamp_path")
+#			if [ "$moddate_hdd" == "$moddate_remote" ]; then
+#				return 0
+#			fi
+#		fi
+#	fi
+#	
+#	extract_archive "$path_filename" "$destination_parent" "$folder_name" "$user"
+#	local timestamp_path="${destination_parent}/${folder_name}.timestamp"
+
+#	if [[ $mode == 1 ]]; then
+#		echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
+#	elif [[ $mode == 2 ]]; then
+#		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
+#	fi
+#}
 
 function uncompress_cached_file {
 	local filename="$1"
-	local destination="$2"
+	local destination_parent="$2"
 	local usergr="$3"
+	local extracted_name="$4"
+	local skip_timestamps="$5"
 	local user
-	local timestamp_path="$(dirname ${destination})/$(basename ${filename}).timestamp"
 	if [ -z "$usergr" ]; then
 		user=$USER
 		usergr=$user
@@ -423,7 +531,12 @@ function uncompress_cached_file {
 			user=$usergr
 		fi
 	fi
+	if [ -z "$extracted_name" ]; then
+		errcho "Empty extracted_name argument to uncompress_cached_file"
+	fi
+	local timestamp_path="$(dirname ${destination_parent})/${extracted_name}/.timestamp"
 	
+
 	if [ ! -f "$filename" ]; then
 		path_filename=$(get_cached_file "$filename")
 	else
@@ -433,48 +546,31 @@ function uncompress_cached_file {
 		echo "no input file $path_filename"
 		return 1
 	fi
-	if [ -z "$destination" ]; then
-		echo "no destination $destination"
+	if [ -z "$destination_parent" ]; then
+		echo "no destination $destination_parent"
 		return 2
 	fi
-	if [ -d "$destination" ]; then
-		moddate_remote=$(stat -c %y "$destination")
-		if [ -f "$timestamp_path" ]; then
-			moddate_hdd=$(cat "$timestamp_path")
-			if [ "$moddate_hdd" == "$moddate_remote" ]; then
-				return 0
+	if [[ "$skip_timestampls" == "" ]]; then
+		if [ -d "$destination_parent" ]; then
+			moddate_remote=$(stat -c %y "$destination_parent")
+			if [ -f "$timestamp_path" ]; then
+				moddate_hdd=$(cat "$timestamp_path")
+				if [ "$moddate_hdd" == "$moddate_remote" ]; then
+					return 0
+				fi
 			fi
 		fi
-	fi
-	pushd $(dirname $destination)
-	extension="${path_filename##*.}"
-	filename_no_ext="${path_filename%.*}"
-	if [ ! -d "$filename_no_ext" ]; then
-		filename_no_ext="${filename_no_ext%.*}"
-	fi
-	install_apt_package dtrx dtrx
-	if is_folder_writable $(dirname "$destination") "$user"; then
-		if [ "$user" == "$USER" ]; then
-#			logexec tar -xvf "$path_filename" -C "$destination"
-			logexec $(which dtrx) --one rename "$path_filename"
-			logexec mv $(basename $filename_no_ext) $(basename $destination) 
+	fi	
+	extract_archive "$path_filename" "$destination_parent" "$user" onedir "$extracted_name"
+
+
+	if [[ "$skip_timestampls" == "" ]]; then
+		if [[ $mode == 1 ]]; then
 			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
-		else
-#			echo sudo -u "$user" dtrx --one rename "$path_filename"
-			logexec sudo -u "$user" $(which dtrx) --one rename "$path_filename"
-			logexec sudo mv $(basename $filename_no_ext) $(basename $destination) 
-#			logexec sudo -u "$user" -- tar -xvf "$path_filename" -C "$destination"
+		elif [[ $mode == 2 ]]; then
 			echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 		fi
-	else
-#		echo sudo dtrx --one rename "$path_filename"
-		logexec sudo $(which dtrx) --one rename "$path_filename"
-		logexec sudo mv $(basename $filename_no_ext) $(basename $destination) 
-#		logexec sudo tar -xvf "$path_filename" -C "$destination"
-		logexec sudo chown -R "$usergr" "$destination"
-		echo "$moddate_remote" | sudo -u "$user" -- tee "$timestamp_path" >/dev/null
 	fi
-	popd
 }
 
 function cp_file {
@@ -514,6 +610,7 @@ function is_folder_writable {
 	local folder="$1"
 	local user="$2"
 	
+	
 	#source: https://stackoverflow.com/questions/14103806/bash-test-if-a-directory-is-writable-by-a-given-uid
 	# Use -L to get information about the target of a symlink,
 	# not the link itself, as pointed out in the comments
@@ -548,6 +645,11 @@ function is_folder_writable {
 	fi
 }
 
+function get_usergr_owner_of_file {
+	local path="$1"
+	stat -c '%U:%G' "${path}"
+}
+
 function get_files_matching_regex {
 	local path="$1"
 	local regex="$2"
@@ -573,6 +675,24 @@ function guess_repo_path {
 	fi
 }
 
+function basename_extension {
+	#from https://stackoverflow.com/a/1403489/1261153
+	local filename="$1"
+	base="${filename%.[^.]*}"                       # Strip shortest match of . plus at least one non-dot char from end
+	ext="${filename:${#base} + 1}"                  # Substring from len of base thru end
+	if [[ -z "$base" && -n "$ext" ]]; then          # If we have an extension and no base, it's really the base
+		base=".$ext"
+		ext=""
+		return
+	fi
+	local base2="${base%.[^.]*}"
+	local ext2="${base:${#base2} + 1}"
+	if [[ "$ext2" == "tar" ]]; then
+		ext="tar.${ext}"
+		base="$base2"
+	fi    
+}
+
 function make_symlink {
 	local source="$1"
 	local dest="$2"
@@ -583,11 +703,11 @@ function make_symlink {
 	if [ -L "$dest" ]; then
 		if [ "$(readlink -f $dest)"!="$(readlink -f $source)" ]; then
 			if is_folder_writable $(dirname "$dest") "$user"; then
-				logexec rm $dest
-				logexec ln -s $source $dest
+				$logexec rm $dest
+				$logexec ln -s $source $dest
 			else
-				logexec sudo rm $dest
-				logexec sudo ln -s $source $dest
+				$logexec sudo rm $dest
+				$logexec sudo ln -s $source $dest
 			fi
 		fi
 		return 0

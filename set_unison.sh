@@ -30,7 +30,7 @@ where
 
 Example:
 
-$(basename $0) --server adam-990fx --server-doc-root /media/wielodysk/docs/Adam --local-doc-root /home/Adama-docs/Adam --server-history-root /media/wielodysk/docs/backups
+$(basename $0) --server szesciodysk --server-doc-root /nas_zfs/adam --local-doc-root /home/Adama-docs/Adam 
 "
 
 dir_resolve()
@@ -134,5 +134,5 @@ install_file ${DIR}/files/unison/unison.prf "${local_doc_root}/${unison_settings
 install_file ${DIR}/files/unison/do/do-unison.prf "${local_doc_root}/${unison_settings_relpath}/do" $user
 
 # 5. Upload synchronization script
-install_script files/sync-local "/usr/local/bin" root
+install_script files/sync-local "/usr/local/bin/sync-local" root
 #TODO: dokończ skrypt sync-local. 

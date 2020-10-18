@@ -153,8 +153,8 @@ if [ "$rstudio" == "1" ]; then
 		fi
 		RSTUDIO_URI="https://download1.rstudio.org/desktop/${codename}/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"		
 
-		wget -c $RSTUDIO_URI -O ${deb_folder}/rstudio_${netversion}_amd64.deb
-		logexec sudo gdebi --n ${deb_folder}/rstudio_${netversion}_amd64.deb
+		wget -c "$RSTUDIO_URI" -O ${deb_folder}/rstudio_${latest_version}_$(cpu_arch).deb
+		logexec sudo gdebi --n ${deb_folder}/rstudio_${latest_version}_$(cpu_arch).deb
 		out=$?
 		if [ "$out" != "0" ]; then
 			logexec sudo apt install -f --yes

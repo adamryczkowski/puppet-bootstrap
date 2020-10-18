@@ -156,7 +156,7 @@ fi
 julia_file="julia-${julia_version}-linux-x86_64.tar.gz"
 julia_link="https://julialang-s3.julialang.org/bin/linux/x64/${short_version}/${julia_file}"
 julia_path=$(get_cached_file "${julia_file}" "${julia_link}")
-uncompress_cached_file "${julia_path}" "$install_dir" $user
+uncompress_cached_file "${julia_path}" "$(dirname "$install_dir")" $user "$(basename "$install_dir")"
 
 make_symlink "${install_dir}/bin/julia" /usr/local/bin/julia
 

@@ -140,4 +140,8 @@ pushd "${sample_dir}/bandwidthTest"
 make
 popd
 
-${sample_dir}/bandwidthTest/bandwidthTest
+if which optirun>/dev/null; then
+	optirun ${sample_dir}/bandwidthTest/bandwidthTest
+else
+	${sample_dir}/bandwidthTest/bandwidthTest
+fi

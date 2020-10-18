@@ -27,14 +27,14 @@ function install_apt_package {
 	if [ -n "$command" ]; then
 		if ! which "$command">/dev/null  2> /dev/null; then
 			do_update
-			logexec sudo apt-get --yes --force-yes -q install "$package"
-			return 0
+			sudo apt-get --yes --force-yes -q install "$package"
+			return $?
 		fi
 	else
 		if ! dpkg -s "$package">/dev/null  2> /dev/null; then
 			do_update
-			logexec sudo apt-get --yes --force-yes -q install "$package"
-			return 0
+			sudo apt-get --yes --force-yes -q install "$package"
+			return $?
 		fi
 	fi
 	return 1
