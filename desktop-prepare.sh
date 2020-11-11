@@ -410,16 +410,15 @@ function virtualbox {
 	logexec sudo apt-key add "${release_key}"
 	add_apt_source_manual virtualbox "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian ${release} contrib"
 	add_ppa thebernmeister/ppa
-	install_apt_packages virtualbox-6.0 indicator-virtual-box
-	
+	install_apt_packages virtualbox-6.1 indicator-virtual-box
 	if ! sudo VBoxManage list extpacks | grep -q -F "Oracle VM VirtualBox Extension Pack"; then
 		version=$(VBoxManage -v)
 		pattern='^([0-9\.]+)r.*'
 		if [[ $version =~ $pattern ]]; then
 			version=${BASH_REMATCH[1]}
 			vb_ext_filename="Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
-			vb_ext_path=$(get_cached_file ${vb_ext_filename} https://download.virtualbox.org/virtualbox/${version}/${vb_ext_path})
-			logexec sudo VBoxManage extpack install ${vb_ext_path} --replace
+			vb_ext_path=$(get_cached_file ${vb_ext_filename} https://download.virtualbox.org/virtualbox/${version}/${vb_ext_filename})
+			echo "y" | sudo VBoxManage extpack install ${vb_ext_path} --replace
 		fi
 	fi
 	homedir=$(get_home_dir)
