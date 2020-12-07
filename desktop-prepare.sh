@@ -126,7 +126,7 @@ fi
 
 #Makes sure basic scripts are installed
 function tweak_base  {
-set -x
+#set -x
 	logmkdir /usr/local/lib/adam/scripts root
 	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scripts
 	install_apt_packages git gdebi-core
@@ -621,6 +621,8 @@ password=Zero tolerancji"
 }
 
 function gedit {
+	set -x
+	install_apt_packages jq
 	localhome=$(get_home_dir $user)
 	logmkdir /opt/gedit-plugins
 	

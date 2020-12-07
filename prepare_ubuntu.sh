@@ -295,7 +295,6 @@ do_update
 do_upgrade
 
 install_apt_packages bash-completion curl
-set -x
 #	install_byobu=1
 
 if [ "${install_bat}" == "1" ]; then
@@ -340,11 +339,12 @@ if [ "${install_find}" == "1" ]; then
 #	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
 #	install_apt_package_file ${file} fd $link
 fi
-
+set -x
 if [ "${install_du}" == "1" ]; then
-	get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz
+	cached_file=$(get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz)
 	tmp=$(mktemp -d)
-	uncompress_cached_file ncdu.tar.gz $tmp
+	skip_timestamp=1
+	uncompress_cached_file ${cached_file} $tmp 
 	install_apt_packages build-essential libncurses5-dev
 	logexec pushd ${tmp}/ncdu
 	logexec ./configure
@@ -352,7 +352,7 @@ if [ "${install_du}" == "1" ]; then
 	logexec sudo make install
 	logexec popd
 fi
-
+set +x
 if [ "${install_bandwidth}" == "1" ]; then
 	install_gh_binary imsnif/bandwhich /usr/local/share bandwhich
 
