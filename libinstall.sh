@@ -48,7 +48,7 @@ function install_update_hook {
 	
 	local updater_path=/usr/local/lib/adam/updater/records
 	
-	if [[ "$gh_name" == "" ]]; then
+	if [[ "$gh_name" != "" ]]; then
 		pattern="([^/]+)/([^/]+)"
 		if [[ "$gh_name" =~ $pattern ]]; then
 			app_name=${BASH_REMATCH[2]}
@@ -235,7 +235,8 @@ function install_gh_deb {
 	#Installs deb from the github
 	set -x
 	local gh_name="$1"
-	local override_arch="$2"
+	local package_name="$2"
+	local override_arch="$3"
 		
 	local link="$(get_app_link_gh "$gh_name" "${override_arch}" deb)"
 	if [[ "$link" == "" ]]; then
@@ -259,7 +260,7 @@ function install_gh_deb {
 
 	filepath="$(get_cached_file "$filename" "$link")"
 	
-	install_apt_package_file "${filepath}" ripgrep
+	install_apt_package_file "${filepath}" "$package_name"
 
 	install_update_hook "$gh_name" "${dest_dir}/${app_name}" deb "$version"  "" "$filename"
 	set +x
