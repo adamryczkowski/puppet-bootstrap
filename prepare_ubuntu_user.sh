@@ -145,7 +145,7 @@ fi
 
 if [ -n "$user" ]; then
 	if ! grep -q "${user}:" /etc/passwd; then
-		logexec sudo adduser --quiet $user --disabled-password --add_extra_groups --gecos ''
+		sudo adduser --quiet $user --disabled-password --add_extra_groups --gecos ''
 	fi
 	sshhome=$(getent passwd $user | awk -F: '{ print $6 }')
         
