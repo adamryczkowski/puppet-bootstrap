@@ -48,6 +48,7 @@ set -x
 use_juno=0
 use_atom=0
 use_dev=0
+user=$USER
 which_python=""
 spack_python=""
 install_dir=/opt/julia
