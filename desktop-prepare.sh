@@ -553,6 +553,25 @@ function waterfox {
 
 function firefox {
    install_apt_package firefox
+   #TODO: Install scrapbook with python -m pip install -U webscrapbook
+   #Then make a user systemd script on ~/.local/share/systemd/user/scrapbook.service with contents:
+   #[Unit]
+   #Description=WebScrapbook serve component
+   #
+   #[Service]
+   #WorkingDirectory=/home/Adama-docs/Adam/Scrapbook
+   #RemainAfterExit=true
+   #ExecStart=/home/adam/.local/bin/wsb serve
+   #
+   #[Install]
+   #WantedBy=default.target
+   #
+   #
+	# enable the script with systemctl --user enable scrapbook
+	# and then run it with systemctl --user start scrapbook
+	#
+   # To convert from the old scrapbook X with wsb convert sb2wsb /path/to/webscrapbook /path/to/scrapbookX
+   
 }
 
 function zulip {
@@ -741,6 +760,7 @@ function i3wm {
 	make_symlink ${home}/.config/i3-config/terminator ${home}/.config/terminator
 	make_symlink ${home}/.config/i3blocks-config ${home}/.config/i3blocks
 	make_symlink ${home}/.config/i3-config/albert ${home}/.config/albert
+	make_symlink ${home}/.config/i3-config/fusuma ${home}/.config/fusuma
 	
 	add_apt_source_manual manuelschneid3r 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_18.04/ /' https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
 	
@@ -791,6 +811,9 @@ gtk-xft-hintstyle=hintfull
 #	fi
 	
 	install_apt_packages fonts-noto fonts-hack fonts-font-awesome fonts-powerline
+	
+	install_apt_packages libinput-tools ruby
+	logexec gem install fusuma
 	
 #	get_git_repo https://github.com/flumm/Themes.git ${home}/tmp/i3themes i3themes
 	
