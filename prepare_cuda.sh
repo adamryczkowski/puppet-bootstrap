@@ -94,8 +94,7 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-
-add_apt_source_manual cuda  "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(get_ubuntu_version)/x86_64/ /" "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub" cuda.key
+add_apt_source_manual cuda  "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(get_ubuntu_version)/x86_64/ /" "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub" cuda.key
 
 if [[ ! $driver_version == "auto" ]]; then
    install_apt_package nvidia-utils-${driver_version} nvidia-smi
@@ -114,6 +113,7 @@ elif [[ $cuda_version == "11.0" ]]; then
    install_apt_packages cuda-toolkit-11-0 
    cuda_prefix="/usr/local/cuda-11.0"
 fi
+
 
 
 textfile /opt/cuda-${cuda_version}.env "export PATH=\$PATH:/usr/local/cuda-${cuda_version}/bin

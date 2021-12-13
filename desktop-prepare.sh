@@ -305,21 +305,30 @@ MimeType=application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocum
 }
 
 function laptop {
-	desktop
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad click-method "fingers"
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad edge-scrolling-enabled true
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad two-finger-scrolling-enabled false
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method 'edge-scrolling'
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad tap-to-click true
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad natural-scroll false
-	install_apt_package_file xserver-xorg-input-synaptics
-	install_file files/30-touchpad.conf /etc/X11/xorg.conf.d root
+#	desktop
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad click-method "fingers"
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad edge-scrolling-enabled true
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad two-finger-scrolling-enabled false
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method 'edge-scrolling'
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad tap-to-click true
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad natural-scroll false
+#	install_apt_package_file xserver-xorg-input-synaptics
+#	install_file files/30-touchpad.conf /etc/X11/xorg.conf.d root
+#	
+#	install_script files/fix_permissions.sh /usr/local/lib/adam/scripts/fix_permissions.sh root
+#	install_apt_packages python-is-python3
+#	linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
+#	install_file files/bright /usr/local/bin
+#	install_file files/bright /usr/local/lib/adam/scripts	
 	
-	install_script files/fix_permissions.sh /usr/local/lib/adam/scripts/fix_permissions.sh root
-	install_apt_packages python-is-python3
-	linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
-	install_file files/bright /usr/local/bin
-	install_file files/bright /usr/local/lib/adam/scripts	
+	# udev rules for charging
+	install_file files/60-onbattery.rules /etc/udev/rules.d
+	install_file files/ac_changed.sh /usr/local/bin
+	install_apt_packages acpitool ubuntu-touch-sounds
+	crontab -l -u $USER > /tmp/cron_tmp.cron
+	linetextfile /tmp/cron_tmp.cron "* * * * * [ -f /tmp/discharging ] && play /usr/share/sounds/ubuntu/notifications/Blip.ogg"
+	sudo sudo udevadm control --reload
+	crontab -u $USER /tmp/cron_tmp.cron
 }
 
 function nvidia {
