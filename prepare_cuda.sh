@@ -17,7 +17,7 @@ $(basename $0)  [--cuda-version <cuda_version>] [--driver-version <driver_versio
 
 where
 
- --cuda-version <cuda_version>- Version of cuda to install. Defaults to 10.1
+ --cuda-version <cuda_version>- Version of cuda to install. Defaults to 11.1
  --repo-path                  - Alternative directory where to look for (and save) 
                                 downloaded files. Defaults to /media/adam-minipc/other/debs 
                                 if exists or /tmp/repo-path if it does not.
@@ -46,7 +46,7 @@ else
    repo_path=/tmp/repo_path
 fi
 driver_version="auto"
-cuda_version="10.1"
+cuda_version="11.1"
 while [[ $# > 0 ]]
 do
 key="$1"
