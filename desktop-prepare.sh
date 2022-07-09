@@ -220,7 +220,7 @@ function blender {
 }
 
 function office2007 {
-	
+	set -x
 	echo "#TODO"
 	logexec sudo dpkg --add-architecture i386 
 	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/winehq.key)
