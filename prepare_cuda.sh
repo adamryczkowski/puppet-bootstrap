@@ -46,7 +46,7 @@ else
    repo_path=/tmp/repo_path
 fi
 driver_version="auto"
-cuda_version="11.1"
+cuda_version="11.7"
 while [[ $# > 0 ]]
 do
 key="$1"
@@ -94,7 +94,11 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-add_apt_source_manual cuda  "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(get_ubuntu_version)/x86_64/ /" "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub" cuda.key
+arch=x86_64
+distro="ubuntu$(get_ubuntu_version)"
+install_apt_package_file "cuda-keyring_1.0-1_all.deb" cuda-keyring "https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-keyring_1.0-1_all.deb"
+
+add_apt_source_manual "cuda-$distro-$arch" "deb [signed-by=/usr/share/keyrings/cuda-archive-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/ /"
 
 if [[ ! $driver_version == "auto" ]]; then
    install_apt_package nvidia-utils-${driver_version} nvidia-smi
@@ -112,6 +116,9 @@ elif [[ $cuda_version == "11.1" ]]; then
 elif [[ $cuda_version == "11.0" ]]; then
    install_apt_packages cuda-toolkit-11-0 
    cuda_prefix="/usr/local/cuda-11.0"
+elif [[ $cuda_version == "11.7" ]]; then
+   install_apt_packages cuda-toolkit-11-7 
+   cuda_prefix="/usr/local/cuda-11.7"
 fi
 
 

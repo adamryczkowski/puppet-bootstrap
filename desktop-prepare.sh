@@ -750,7 +750,7 @@ function i3wm {
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
 	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme  acpi
-   install_apt_packages qt4-qtconfig
+   install_apt_packages qt4-qtconfig 
 	
 	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
 	if ! which i3blocks >/dev/null; then
@@ -770,6 +770,7 @@ function i3wm {
 	make_symlink ${home}/.config/i3blocks-config ${home}/.config/i3blocks
 	make_symlink ${home}/.config/i3-config/albert ${home}/.config/albert
 	make_symlink ${home}/.config/i3-config/fusuma ${home}/.config/fusuma
+	logexec usermod -aG input ${user}
 	
 	add_apt_source_manual manuelschneid3r 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_18.04/ /' https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
 	
