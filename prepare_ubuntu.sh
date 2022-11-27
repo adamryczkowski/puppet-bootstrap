@@ -311,8 +311,10 @@ if [ "${install_ping}" == "1" ]; then
 fi
 
 if [ "${install_fzf}" == "1" ]; then
-	get_git_repo https://github.com/junegunn/fzf.git /usr/local/lib 
-	logexec sudo /usr/local/lib/fzf/install --all --xdg
+	if ! install_apt_package fzf; then
+		get_git_repo https://github.com/junegunn/fzf.git /usr/local/lib 
+		logexec sudo /usr/local/lib/fzf/install --all --xdg
+	fi
 fi
 
 if [ "${install_htop}" == "1" ]; then
