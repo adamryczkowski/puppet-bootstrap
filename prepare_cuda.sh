@@ -17,7 +17,7 @@ $(basename $0)  [--cuda-version <cuda_version>] [--driver-version <driver_versio
 
 where
 
- --cuda-version <cuda_version>- Version of cuda to install. Defaults to 10.1
+ --cuda-version <cuda_version>- Version of cuda to install. Defaults to 11.1
  --repo-path                  - Alternative directory where to look for (and save) 
                                 downloaded files. Defaults to /media/adam-minipc/other/debs 
                                 if exists or /tmp/repo-path if it does not.
@@ -46,7 +46,7 @@ else
    repo_path=/tmp/repo_path
 fi
 driver_version="auto"
-cuda_version="10.1"
+cuda_version="11.7"
 while [[ $# > 0 ]]
 do
 key="$1"
@@ -94,8 +94,11 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
+arch=x86_64
+distro="ubuntu$(get_ubuntu_version)"
+install_apt_package_file "cuda-keyring_1.0-1_all.deb" cuda-keyring "https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/cuda-keyring_1.0-1_all.deb"
 
-add_apt_source_manual cuda  "deb http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(get_ubuntu_version)/x86_64/ /" "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub" cuda.key
+add_apt_source_manual "cuda-$distro-$arch" "deb [signed-by=/usr/share/keyrings/cuda-archive-keyring.gpg] https://developer.download.nvidia.com/compute/cuda/repos/$distro/$arch/ /"
 
 if [[ ! $driver_version == "auto" ]]; then
    install_apt_package nvidia-utils-${driver_version} nvidia-smi
@@ -113,7 +116,11 @@ elif [[ $cuda_version == "11.1" ]]; then
 elif [[ $cuda_version == "11.0" ]]; then
    install_apt_packages cuda-toolkit-11-0 
    cuda_prefix="/usr/local/cuda-11.0"
+elif [[ $cuda_version == "11.7" ]]; then
+   install_apt_packages cuda-toolkit-11-7 
+   cuda_prefix="/usr/local/cuda-11.7"
 fi
+
 
 
 textfile /opt/cuda-${cuda_version}.env "export PATH=\$PATH:/usr/local/cuda-${cuda_version}/bin

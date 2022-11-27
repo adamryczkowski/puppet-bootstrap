@@ -1,0 +1,2 @@
+SUBSYSTEM=="power_supply",RUN+="/usr/local/bin/ac_changed.sh"
+

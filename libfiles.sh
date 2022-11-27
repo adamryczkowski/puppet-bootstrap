@@ -513,29 +513,36 @@ function make_sure_dtrx_exists {
 function uncompress_cached_file {
 	local filename="$1"
 	local destination_parent="$2"
-	local usergr="$3"
-	local extracted_name="$4"
-	local skip_timestamps="$5"
+	if [ -n "$3" ]; then
+		local usergr="$3"
+	fi
+		
+	if [ -n "$4" ]; then
+		local extracted_name="$4"
+	fi
+	if [ "$5" != "" ]; then
+		local skip_timestamps="$5"
+	fi
 	local user
 	if [ -z "$usergr" ]; then
-		user=$USER
+		local user=$USER
 		usergr=$user
-		group=""
+		local group="$(id -gn)"
 	else
 		local pattern='^([^:]+):([^:]+)$'
 		if [[ "$usergr" =~ $pattern ]]; then
-			group=${BASH_REMATCH[2]}
-			user=${BASH_REMATCH[1]}
+			local group=${BASH_REMATCH[2]}
+			local user=${BASH_REMATCH[1]}
 		else
-			group=""
-			user=$usergr
+			local group=""
+			local user=$usergr
 		fi
 	fi
 	if [ -z "$extracted_name" ]; then
-		errcho "Empty extracted_name argument to uncompress_cached_file"
+		basename_extension $filename
+		extracted_name=$(basename $base)
+#		errcho "Empty extracted_name argument to uncompress_cached_file"
 	fi
-	local timestamp_path="$(dirname ${destination_parent})/${extracted_name}/.timestamp"
-	
 
 	if [ ! -f "$filename" ]; then
 		path_filename=$(get_cached_file "$filename")
@@ -553,6 +560,7 @@ function uncompress_cached_file {
 	if [[ "$skip_timestampls" == "" ]]; then
 		if [ -d "$destination_parent" ]; then
 			moddate_remote=$(stat -c %y "$destination_parent")
+			local timestamp_path="$(dirname ${destination_parent})/${extracted_name}/.timestamp"
 			if [ -f "$timestamp_path" ]; then
 				moddate_hdd=$(cat "$timestamp_path")
 				if [ "$moddate_hdd" == "$moddate_remote" ]; then

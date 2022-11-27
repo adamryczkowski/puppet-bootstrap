@@ -120,7 +120,8 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	release=$(get_ubuntu_codename)
 	$loglog
 	echo "deb https://cloud.r-project.org/bin/linux/ubuntu ${release}-cran40/" | sudo tee /etc/apt/sources.list.d/r.list
-	logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+	# logexec sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
+	wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | sudo tee -a /etc/apt/trusted.gpg.d/cran_ubuntu_key.asc
 	flag_need_apt_update=1
 fi
 

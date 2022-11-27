@@ -126,7 +126,7 @@ fi
 
 #Makes sure basic scripts are installed
 function tweak_base  {
-set -x
+#set -x
 	logmkdir /usr/local/lib/adam/scripts root
 	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scripts
 	install_apt_packages git gdebi-core
@@ -220,7 +220,7 @@ function blender {
 }
 
 function office2007 {
-	
+	set -x
 	echo "#TODO"
 	logexec sudo dpkg --add-architecture i386 
 	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/winehq.key)
@@ -305,21 +305,30 @@ MimeType=application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocum
 }
 
 function laptop {
-	desktop
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad click-method "fingers"
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad edge-scrolling-enabled true
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad two-finger-scrolling-enabled false
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method 'edge-scrolling'
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad tap-to-click true
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad natural-scroll false
-	install_apt_package_file xserver-xorg-input-synaptics
-	install_file files/30-touchpad.conf /etc/X11/xorg.conf.d root
+#	desktop
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad click-method "fingers"
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad edge-scrolling-enabled true
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad two-finger-scrolling-enabled false
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method 'edge-scrolling'
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad tap-to-click true
+#	gsettings_set_value org.gnome.desktop.peripherals.touchpad natural-scroll false
+#	install_apt_package_file xserver-xorg-input-synaptics
+#	install_file files/30-touchpad.conf /etc/X11/xorg.conf.d root
+#	
+#	install_script files/fix_permissions.sh /usr/local/lib/adam/scripts/fix_permissions.sh root
+#	install_apt_packages python-is-python3
+#	linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
+#	install_file files/bright /usr/local/bin
+#	install_file files/bright /usr/local/lib/adam/scripts	
 	
-	install_script files/fix_permissions.sh /usr/local/lib/adam/scripts/fix_permissions.sh root
-	install_apt_packages python-is-python3
-	linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
-	install_file files/bright /usr/local/bin
-	install_file files/bright /usr/local/lib/adam/scripts	
+	# udev rules for charging
+	install_file files/60-onbattery.rules /etc/udev/rules.d
+	install_file files/ac_changed.sh /usr/local/bin
+	install_apt_packages acpitool ubuntu-touch-sounds
+	crontab -l -u $USER > /tmp/cron_tmp.cron
+	linetextfile /tmp/cron_tmp.cron "* * * * * [ -f /tmp/discharging ] && play /usr/share/sounds/ubuntu/notifications/Blip.ogg"
+	sudo sudo udevadm control --reload
+	crontab -u $USER /tmp/cron_tmp.cron
 }
 
 function nvidia {
@@ -410,16 +419,15 @@ function virtualbox {
 	logexec sudo apt-key add "${release_key}"
 	add_apt_source_manual virtualbox "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian ${release} contrib"
 	add_ppa thebernmeister/ppa
-	install_apt_packages virtualbox-6.0 indicator-virtual-box
-	
+	install_apt_packages virtualbox-6.1 indicator-virtual-box
 	if ! sudo VBoxManage list extpacks | grep -q -F "Oracle VM VirtualBox Extension Pack"; then
 		version=$(VBoxManage -v)
 		pattern='^([0-9\.]+)r.*'
 		if [[ $version =~ $pattern ]]; then
 			version=${BASH_REMATCH[1]}
 			vb_ext_filename="Oracle_VM_VirtualBox_Extension_Pack-${version}.vbox-extpack"
-			vb_ext_path=$(get_cached_file ${vb_ext_filename} https://download.virtualbox.org/virtualbox/${version}/${vb_ext_path})
-			logexec sudo VBoxManage extpack install ${vb_ext_path} --replace
+			vb_ext_path=$(get_cached_file ${vb_ext_filename} https://download.virtualbox.org/virtualbox/${version}/${vb_ext_filename})
+			echo "y" | sudo VBoxManage extpack install ${vb_ext_path} --replace
 		fi
 	fi
 	homedir=$(get_home_dir)
@@ -554,6 +562,25 @@ function waterfox {
 
 function firefox {
    install_apt_package firefox
+   #TODO: Install scrapbook with python -m pip install -U webscrapbook
+   #Then make a user systemd script on ~/.local/share/systemd/user/scrapbook.service with contents:
+   #[Unit]
+   #Description=WebScrapbook serve component
+   #
+   #[Service]
+   #WorkingDirectory=/home/Adama-docs/Adam/Scrapbook
+   #RemainAfterExit=true
+   #ExecStart=/home/adam/.local/bin/wsb serve
+   #
+   #[Install]
+   #WantedBy=default.target
+   #
+   #
+	# enable the script with systemctl --user enable scrapbook
+	# and then run it with systemctl --user start scrapbook
+	#
+   # To convert from the old scrapbook X with wsb convert sb2wsb /path/to/webscrapbook /path/to/scrapbookX
+   
 }
 
 function zulip {
@@ -622,6 +649,8 @@ password=Zero tolerancji"
 }
 
 function gedit {
+	set -x
+	install_apt_packages jq
 	localhome=$(get_home_dir $user)
 	logmkdir /opt/gedit-plugins
 	
@@ -721,7 +750,7 @@ function i3wm {
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
 	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme  acpi
-   install_apt_packages qt4-qtconfig
+   install_apt_packages qt4-qtconfig 
 	
 	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
 	if ! which i3blocks >/dev/null; then
@@ -740,6 +769,8 @@ function i3wm {
 	make_symlink ${home}/.config/i3-config/terminator ${home}/.config/terminator
 	make_symlink ${home}/.config/i3blocks-config ${home}/.config/i3blocks
 	make_symlink ${home}/.config/i3-config/albert ${home}/.config/albert
+	make_symlink ${home}/.config/i3-config/fusuma ${home}/.config/fusuma
+	logexec usermod -aG input ${user}
 	
 	add_apt_source_manual manuelschneid3r 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_18.04/ /' https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
 	
@@ -790,6 +821,9 @@ gtk-xft-hintstyle=hintfull
 #	fi
 	
 	install_apt_packages fonts-noto fonts-hack fonts-font-awesome fonts-powerline
+	
+	install_apt_packages libinput-tools ruby
+	logexec gem install fusuma
 	
 #	get_git_repo https://github.com/flumm/Themes.git ${home}/tmp/i3themes i3themes
 	

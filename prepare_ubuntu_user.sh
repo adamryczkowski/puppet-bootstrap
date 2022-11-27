@@ -145,7 +145,7 @@ fi
 
 if [ -n "$user" ]; then
 	if ! grep -q "${user}:" /etc/passwd; then
-		logexec sudo adduser --quiet $user --disabled-password --add_extra_groups --gecos ''
+		sudo adduser --quiet $user --disabled-password --add_extra_groups --gecos ''
 	fi
 	sshhome=$(getent passwd $user | awk -F: '{ print $6 }')
         
@@ -158,7 +158,6 @@ if [ -n "$user" ]; then
 			logexec sudo chown ${user}:${user} "$sshhome/.ssh"
 		fi
 	fi
-   set -x
 	if [ -n "$external_key" ]; then
 		if ! sudo [ -f ${sshhome}/.ssh/authorized_keys ]; then
 			loglog
@@ -189,7 +188,7 @@ if [ -n "$user" ]; then
 			exit 1
 		fi
 		tmpfile=$(mktemp -u)
-		logexec ssh-keygen -q -t ed25519 -N "" -a 100 -f "$tmpfile"
+		ssh-keygen -q -t ed25519 -N "" -a 100 -f "$tmpfile"
 
 		if [ $? -ne 0 ]; then
 			exit 1
@@ -239,10 +238,11 @@ if [ -n "$user" ]; then
 			git config --global color.diff.whitespace "red reverse"
 		fi
 	fi
-	
+   set -x
 	if [ "${install_du}" == "1" ]; then
 		linetextfile ${sshhome}/.bashrc 'alias du="ncdu --color dark -rr -x --exclude .git --exclude node_modules"'
 	fi
+	set +x
 	
 	if [ "${install_git_extra}" == "1" ]; then
 		linetextfile ${sshhome}/.bashrc 'export PATH="$PATH:/usr/local/lib/git-extra-commands/bin"'

@@ -295,7 +295,6 @@ do_update
 do_upgrade
 
 install_apt_packages bash-completion curl
-set -x
 #	install_byobu=1
 
 if [ "${install_bat}" == "1" ]; then
@@ -333,7 +332,7 @@ if [ "${install_diff}" == "1" ]; then
 fi
 
 if [ "${install_find}" == "1" ]; then
-	install_gh_deb sharkdp/fd
+	install_gh_deb sharkdp/fd fd
 #	fd_arch=$(cpu_arch)
 #	if [ "${fd_arch}" == "arm64" ]; then
 #		fd_arch="armhf"
@@ -342,11 +341,12 @@ if [ "${install_find}" == "1" ]; then
 #	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
 #	install_apt_package_file ${file} fd $link
 fi
-
+set -x
 if [ "${install_du}" == "1" ]; then
-	get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz
+	cached_file=$(get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz)
 	tmp=$(mktemp -d)
-	uncompress_cached_file ncdu.tar.gz $tmp
+	skip_timestamp=1
+	uncompress_cached_file ${cached_file} $tmp 
 	install_apt_packages build-essential libncurses5-dev
 	logexec pushd ${tmp}/ncdu
 	logexec ./configure
@@ -354,7 +354,7 @@ if [ "${install_du}" == "1" ]; then
 	logexec sudo make install
 	logexec popd
 fi
-
+set +x
 if [ "${install_bandwidth}" == "1" ]; then
 	install_gh_binary imsnif/bandwhich /usr/local/share bandwhich
 
@@ -397,7 +397,7 @@ if [ "${install_ag}" == "1" ]; then
 fi
 
 if [ "${install_rg}" == "1" ]; then
-	install_gh_deb BurntSushi/ripgrep
+	install_gh_deb BurntSushi/ripgrep ripgrep
 	if $?; then
 		 install_gh_binary BurntSushi/ripgrep /usr/local/share rg "" "" "" "" rg
 	fi
@@ -455,7 +455,7 @@ if [ "${install_byobu}" == "1" ]; then
 fi
 
 if [ "${install_hexyl}" == "1" ]; then
-	install_gh_deb sharkdp/hexyl
+	install_gh_deb sharkdp/hexyl hexyl
 #	file="hexyl_$(get_latest_github_release_name sharkdp/hexyl skip_v)_$(cpu_arch).deb"
 #	link=$(get_latest_github_release_link sharkdp/hexyl ${file} ${file})
 #	install_apt_package_file ${file} hexyl $link

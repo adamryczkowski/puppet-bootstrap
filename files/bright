@@ -24,9 +24,13 @@ done
 # Remove the switches we parsed above.
 
 if [ "$co" == "k" ]; then
-	sciezka="/sys/class/leds/asus::kbd_backlight"
+	return 0
+	#sciezka1="/sys/class/leds/asus::kbd_backlight"
+	#sciezka2="/sys/class/leds/asus::kbd_backlight"
 else
-	sciezka="/sys/class/backlight/intel_backlight"
+	sciezka1="/sys/class/backlight/amdgpu_bl1"
+	sciezka2="/sys/class/backlight/nvidia_wmi_ec_backlight"
+#	sciezka="/sys/class/backlight/intel_backlight"
 fi
 
 
@@ -35,18 +39,23 @@ fi
 
 
 shift `expr $OPTIND - 1`
+bright1=`cat $sciezka1/brightness`
+bright2=`cat $sciezka2/brightness`
 if [ "$1" == "+" ]; then
-	maxbright=`cat $sciezka/max_brightness`
-	bright=`cat $sciezka/brightness`
-	bright=`echo "print(int(min($maxbright,$bright + max($bright * 0.5, 1))))" | python`
+	maxbright1=`cat $sciezka1/max_brightness`
+	bright1=`echo "print(int(min($maxbright1,$bright1 + max($bright1 * 0.5, 1))))" | python3`
+	maxbright2=`cat $sciezka2/max_brightness`
+	bright2=`echo "print(int(min($maxbright2,$bright2 + max($bright2 * 0.5, 1))))" | python3`
 else
    if [ "$1" == "-" ]; then
-	bright=`cat $sciezka/brightness`
-	bright=`echo "print(int(max(0,$bright - max($bright * 0.33, 1))))" | python`
+	bright1=`echo "print(int(max(0,$bright1 - max($bright1 * 0.33, 1))))" | python3`
+	bright2=`echo "print(int(max(0,$bright2 - max($bright2 * 0.33, 1))))" | python3`
    else
 	if [ "$1" == "max" ]; then
-		maxbright=`cat $sciezka/max_brightness`
-		bright=$maxbright
+		maxbright1=`cat $sciezka1/max_brightness`
+		bright1=$maxbright1
+		maxbright2=`cat $sciezka2/max_brightness`
+		bright2=$maxbright2
 	else
 		if ! [[ "$1" =~ ^[0-9]+$ ]] ; then
 		    echo "`basename $0` version 0.1"
@@ -56,12 +65,14 @@ else
 		    echo "number - konkretny poziom jasności"
 		    exit 1
 		else
-		    bright=$1
+		    bright1=$1
+		    bright2=$1
 		fi
 	fi
    fi
 fi
 
 
- bash -c "echo $bright > $sciezka/brightness"
+bash -c "echo $bright1 > $sciezka1/brightness"
+bash -c "echo $bright2 > $sciezka2/brightness"
 

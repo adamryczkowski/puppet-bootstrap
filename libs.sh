@@ -180,17 +180,21 @@ function get_special_dir {
 	local folder
 	HOME=$(get_home_dir $user)
 	if [ -f "${HOME}/.config/user-dirs.dirs" ]; then
-		line=$(grep "^[^#].*${dirtype}" "${HOME}/.config/user-dirs.dirs")
-		pattern="^.*${dirtype}.*=\"?([^\"]+)\"?$"
-		if [[ "$line" =~ $pattern ]]; then
-			folder=${BASH_REMATCH[1]}
-			ans=$(echo $folder | envsubst )
-			if [ "$ans" == "$HOME" ]; then
-				ans=""
-			fi
-		fi
+		source "${HOME}/.config/user-dirs.dirs"
+		varname="XDG_${dirtype}_DIR"
+		echo "${!varname}"
+		return
+#		line=$(grep "^[^#].*${dirtype}" "${HOME}/.config/user-dirs.dirs")
+#		pattern="^.*${dirtype}.*=\"?([^\"]+)\"?$"
+#		if [[ "$line" =~ $pattern ]]; then
+#			folder=${BASH_REMATCH[1]}
+#			ans=$(echo $folder | envsubst )
+#			if [ "$ans" == "$HOME" ]; then
+#				ans=""
+#			fi
+#		fi
 	fi
-	echo "$ans"
+	echo ""
 }
 
 
