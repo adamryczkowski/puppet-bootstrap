@@ -26,6 +26,10 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 
 function get_latest_github_tag {
 	local skip_v=$2
+	local offset=$3
+	if [[ "$offset" == "" ]]; then
+		offset=1
+	fi
 	if ! which curl >/dev/null; then	
 		install_apt_package curl curl
 		return 1
@@ -35,7 +39,7 @@ function get_latest_github_tag {
 		return 1
 	fi
 	ans=$(curl $github_token --silent "https://api.github.com/repos/$1/tags" | 
-	jq '.[1].name')
+	jq ".[${offset}].name")
 	if [ -n "$skip_v" ]; then
 		pattern='v(.*).{1}$'
 		if [[ ! "$ans" =~ $pattern ]]; then

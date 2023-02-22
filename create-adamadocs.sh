@@ -33,7 +33,7 @@ while getopts ":k:" OPT; do
             echo "                 Defults to 161061273600 bytes"
             echo "<crypt-device>   Path to the LUKS device, that will be initialized"
             echo "<mountpoint>     Path to the place, where the LUKS device will be mounted."
-            echo "                 Defaults to /home/Adama-docs"
+            echo "                 Defaults to /home/Adama-docs/Adam"
             exit 1
             ;;
     esac
@@ -41,7 +41,7 @@ done
 
 
 MyDocsCryptFile="dokumenty.bin"
-MyDocsCryptDir="/home/Adama-docs"
+MyDocsCryptDir="/home/Adama-docs/Adam"
 MyDocsCryptMapperName="adama-docs"
 
 shift `expr $OPTIND - 1`

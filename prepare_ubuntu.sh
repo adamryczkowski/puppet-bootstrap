@@ -274,6 +274,7 @@ if check_for_root; then
 fi
 
 install_apt_package wget wget 
+install_apt_package jq jq
 
 if [ -n "$aptproxy" ]; then
 	$loglog

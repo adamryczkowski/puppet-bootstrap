@@ -147,12 +147,14 @@ logexec Rscript /tmp/prepare_R.R
 
 if [ "$rstudio" == "1" ]; then
 	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
-		latest_version=$(get_latest_github_tag rstudio/rstudio 1)
+		latest_version=$(get_latest_github_tag rstudio/rstudio 1 0)
+		latest_version=${latest_version//+/-}
 		codename=$(get_ubuntu_codename)
 		if [[ "$codename" == "focal" ]]; then
 			codename="bionic"
 		fi
-		RSTUDIO_URI="https://download1.rstudio.org/desktop/${codename}/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"		
+#		RSTUDIO_URI="https://download1.rstudio.org/desktop/${codename}/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"		
+		RSTUDIO_URI="https://download1.rstudio.org/electron/bionic/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"		
 
 		wget -c "$RSTUDIO_URI" -O ${deb_folder}/rstudio_${latest_version}_$(cpu_arch).deb
 		logexec sudo gdebi --n ${deb_folder}/rstudio_${latest_version}_$(cpu_arch).deb

@@ -750,7 +750,7 @@ function i3wm {
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
 	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme  acpi
-   install_apt_packages qt4-qtconfig 
+   install_apt_packages qt4-qtconfig
 	
 	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
 	if ! which i3blocks >/dev/null; then
