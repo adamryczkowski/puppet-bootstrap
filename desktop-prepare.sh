@@ -150,9 +150,8 @@ function unity {
 }
 
 function desktop {
-	add_ppa fixnix/netspeed
 	add_ppa yktooo/ppa
-	install_apt_packages meld chromium-browser gparted indicator-netspeed-unity indicator-sound-switcher
+	install_apt_packages meld chromium-browser gparted  indicator-sound-switcher
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
 	gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1
@@ -184,6 +183,7 @@ function desktop {
 	
 	gsettings_set_value org.gnome.desktop.wm.preferences num-workspaces 9
 	install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
+	sudo apt-key export Skype | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/skype.gpg
 	
 	install_apt_packages redshift-gtk dconf-editor ibus-table-translit
 	redshift-gtk &
@@ -404,6 +404,9 @@ function cli {
 	home=$(get_home_dir)
 	logmkdir ${home}/tmp
 	get_git_repo https://github.com/adamryczkowski/update-all ${home}/tmp
+	
+	install_file files/snap /usr/local/bin/snap root
+	set_executable /usr/local/bin/snap
 	#youtube-dl
 }
 
@@ -413,11 +416,11 @@ function rdesktop {
 }
 
 function virtualbox {
-	release_key=$(get_cached_file Oracle_2016_Release.key https://www.virtualbox.org/download/oracle_vbox_2016.asc)
-	logexec sudo apt-key add "${release_key}"
-	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
-	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual virtualbox "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian ${release} contrib"
+#	release_key=$(get_cached_file Oracle_2016_Release.key https://www.virtualbox.org/download/oracle_vbox_2016.asc)
+#	logexec sudo apt-key add "${release_key}"
+#	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
+#	logexec sudo apt-key add "${release_key}"
+	add_apt_source_manual virtualbox "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian ${release} contrib" https://www.virtualbox.org/download/oracle_vbox.asc
 	add_ppa thebernmeister/ppa
 	install_apt_packages virtualbox-6.1 indicator-virtual-box
 	if ! sudo VBoxManage list extpacks | grep -q -F "Oracle VM VirtualBox Extension Pack"; then
@@ -760,6 +763,7 @@ function i3wm {
 		logexec ./configure
 		logexec make
 		logexec sudo make install
+		popd
 	fi
 	logmkdir ${home}/.config
 	
@@ -770,6 +774,7 @@ function i3wm {
 	make_symlink ${home}/.config/i3blocks-config ${home}/.config/i3blocks
 	make_symlink ${home}/.config/i3-config/albert ${home}/.config/albert
 	make_symlink ${home}/.config/i3-config/fusuma ${home}/.config/fusuma
+	logexec sudo gem install fusuma
 	logexec usermod -aG input ${user}
 	
 	add_apt_source_manual manuelschneid3r 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_18.04/ /' https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
@@ -823,7 +828,6 @@ gtk-xft-hintstyle=hintfull
 	install_apt_packages fonts-noto fonts-hack fonts-font-awesome fonts-powerline
 	
 	install_apt_packages libinput-tools ruby
-	logexec gem install fusuma
 	
 #	get_git_repo https://github.com/flumm/Themes.git ${home}/tmp/i3themes i3themes
 	
