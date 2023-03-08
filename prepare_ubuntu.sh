@@ -398,7 +398,8 @@ if [ "${install_ag}" == "1" ]; then
 fi
 
 if [ "${install_rg}" == "1" ]; then
-	install_gh_deb BurntSushi/ripgrep ripgrep
+	install_apt_packages ripgrep
+#	install_gh_deb BurntSushi/ripgrep ripgrep
 	if $?; then
 		 install_gh_binary BurntSushi/ripgrep /usr/local/share rg "" "" "" "" rg
 	fi

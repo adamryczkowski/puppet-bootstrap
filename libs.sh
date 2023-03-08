@@ -32,15 +32,16 @@ source ${adamlibpath}/libinstall.sh
 
 #Gets ubuntu version in format e.g. 1804 or 1604
 function get_ubuntu_version {
+	local infix="$1"
 	local tmp=$(lsb_release -a 2>/dev/null | grep Release)
 	local pattern='^Release:\s*([0-9]+)\.([0-9]+)$'
 	if [[ "$tmp" =~ $pattern ]]; then
-		echo ${BASH_REMATCH[1]}${BASH_REMATCH[2]}
+		echo ${BASH_REMATCH[1]}${infix}${BASH_REMATCH[2]}
 		return 0
 	fi
 	local ubuntu_codename=$(get_ubuntu_codename)
 	if [[ "$ubuntu_codename" == "bionic" ]]; then
-		echo 1804
+		echo 18${infix}04
 		return 0
 	fi
 	return 1

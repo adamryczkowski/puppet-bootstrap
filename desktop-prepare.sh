@@ -417,10 +417,11 @@ function rdesktop {
 
 function virtualbox {
 #	release_key=$(get_cached_file Oracle_2016_Release.key https://www.virtualbox.org/download/oracle_vbox_2016.asc)
+#	cat "${release_key}" | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/virtualbox.gpg
 #	logexec sudo apt-key add "${release_key}"
 #	release_key=$(get_cached_file Oracle_Release.key https://www.virtualbox.org/download/oracle_vbox.asc)
 #	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual virtualbox "deb [arch=amd64] https://download.virtualbox.org/virtualbox/debian ${release} contrib" https://www.virtualbox.org/download/oracle_vbox.asc
+	add_apt_source_manual virtualbox "deb [arch=amd64 signed-by=/etc/apt/trusted.gpg.d/virtualbox.gpg] https://download.virtualbox.org/virtualbox/debian jammy contrib" https://www.virtualbox.org/download/oracle_vbox_2016.asc
 	add_ppa thebernmeister/ppa
 	install_apt_packages virtualbox-6.1 indicator-virtual-box
 	if ! sudo VBoxManage list extpacks | grep -q -F "Oracle VM VirtualBox Extension Pack"; then
@@ -535,7 +536,7 @@ function mod3 {
 }
 
 function waterfox {
-   add_apt_source_manual waterfox "deb http://download.opensuse.org/repositories/home:/hawkeye116477:/waterfox/xUbuntu_$(get_ubuntu_version)/ /" https://download.opensuse.org/repositories/home:hawkeye116477:waterfox/xUbuntu_$(get_ubuntu_version)/Release.key waterfox.key 
+   add_apt_source_manual waterfox "deb http://download.opensuse.org/repositories/home:/hawkeye116477:/waterfox/xUbuntu_$(get_ubuntu_version .)/ /" https://download.opensuse.org/repositories/home:hawkeye116477:waterfox/xUbuntu_$(get_ubuntu_version .)/Release.key waterfox.key 
    install_apt_package waterfox
 
 	#TODO: Install addon: https://github.com/iamadamdev/bypass-paywalls-firefox
@@ -748,8 +749,8 @@ function julia {
 function i3wm {
 	set -x
 	
-	install_apt_package_file keyring.deb sur5r-keyring https://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2020.02.03_all.deb
-	add_apt_source_manual sur5r-i3 "deb http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe"
+	install_apt_package_file keyring.deb sur5r-keyring https://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2023.02.18_all.deb
+	add_apt_source_manual sur5r-i3 "deb [arch=amd64] http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe" 
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
 	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme  acpi
