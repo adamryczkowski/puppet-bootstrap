@@ -32,6 +32,7 @@ where
  --cli-improved           - Install all the following recommended command line tools:
  --bat                    - cat replacement (bat)
  --ping                   - prettyping (ping),
+ --gping						  - gping (https://github.com/orf/gping)
  --fzf                    - fzf (for bash ctr+r)
  --htop                   - htop
  --diff                   - diff-so-fancy (diff),
@@ -79,6 +80,7 @@ wormhole=0
 repo_path=""
 install_bat=0
 install_ping=0
+install_gping=0
 install_fzf=0
 install_htop=0
 install_diff=0
@@ -154,7 +156,9 @@ case $key in
 	install_bat=1
 	user_opts="${user_opts} --bat"
 	install_ping=1
+	install_gping=1
 	user_opts="${user_opts} --ping"
+	user_opts="${user_opts} --gping"
 	install_fzf=1
 	user_opts="${user_opts} --fzf"
 	install_htop=1
@@ -186,6 +190,10 @@ case $key in
 	--ping)
 	install_ping=1
 	user_opts="${user_opts} --ping"
+	;;
+	--gping)
+	install_gping=1
+	user_opts="${user_opts} --gping"
 	;;
 	--fzf)
 	install_fzf=1
@@ -308,6 +316,11 @@ fi
 if [ "${install_ping}" == "1" ]; then
 	plik=$(get_cached_file prettyping https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping)
 	install_script "${plik}" /usr/local/bin/prettyping root
+fi
+
+if [ "${install_gping}" == "1" ]; then
+	add_apt_source_manual gping "deb http://packages.azlux.fr/debian/ buster main" https://azlux.fr/repo.gpg.key gping.gpg.key
+	install_apt_packages gping
 fi
 
 if [ "${install_fzf}" == "1" ]; then

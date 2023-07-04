@@ -112,6 +112,9 @@ case $key in
 	--ping)
 	install_ping=1
 	;;
+	--gping)
+	install_gping=1
+	;;
 	--fzf)
 	install_fzf=1
 	;;
