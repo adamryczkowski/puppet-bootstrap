@@ -136,8 +136,15 @@ if [ ! "${ip}" == "dhcp" ]; then
    fi
 fi
 
-add_ppa paskal-07/softethervpn
-install_apt_package softether-vpnclient
+#add_ppa paskal-07/softethervpn
+#install_apt_package softether-vpnclient
+
+get_git_repo https://github.com/SoftEtherVPN/SoftEtherVPN /usr/local/lib 
+install_apt_packages cmake gcc g++ make pkgconf libncurses5-dev libssl-dev libsodium-dev libreadline-dev zlib1g-dev
+cd /usr/local/lib/SoftEtherVPN
+logexec ./configure
+logexec make -C build -j 4
+logexec sudo make -C build install
 
 
 logexec sudo vpnclient start
@@ -161,7 +168,7 @@ textfile /etc/systemd/system/softether_${connection_name}_client.service "[Unit]
 [Service]
     Type=oneshot
     ExecStart=/bin/bash /usr/local/lib/softether/start_${connection_name}_vpn.sh
-    ExecStop=/usr/bin/vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
+    ExecStop=/usr/local/bin/vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
     ExecStop=/bin/bash -c \"ifconfig vpn_${nicname} down\"
     RemainAfterExit=yes
 [Install]
@@ -174,8 +181,8 @@ textfile /etc/systemd/system/softether_client.service "[Unit]
     
 [Service]
     Type=forking
-    ExecStart=/usr/bin/vpnclient start
-    ExecStop=/usr/bin/vpnclient stop
+    ExecStart=/usr/local/bin/vpnclient start
+    ExecStop=/usr/local/bin/vpnclient stop
     KillMode=process
     Restart=on-failure
     
@@ -188,11 +195,11 @@ logmkdir /usr/local/lib/softether root
 
 if [ "${ip}" == "dhcp" ]; then
    textfile /usr/local/lib/softether/start_${connection_name}_vpn.sh "#!/bin/sh
-sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
+sudo /usr/local/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
 sudo dhclient vpn_${nicname}" root
 else
    textfile /usr/local/lib/softether/start_${connection_name}_vpn.sh "#!/bin/sh
-sudo /usr/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
+sudo /usr/local/bin/vpncmd localhost /CLIENT /CMD accountconnect ${connection_name}
 sudo ifconfig vpn_${nicname} ${ip}
 if service --status-all | grep -Fq 'isc-dhcp-server'; then    
   sudo systemctl restart isc-dhcp-server.service
