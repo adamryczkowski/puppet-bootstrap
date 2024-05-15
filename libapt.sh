@@ -90,7 +90,11 @@ function install_pip3_packages {
 	done
 	if [[ "${to_install}" != "" ]]; then
 		do_update
-		logexec sudo -H pip3 install $to_install
+		install_apt_package pipx pipx
+		pipx install pipx
+		pipx ensurepath
+		purge_apt_package pipx
+		logexec pipx install $to_install
 		return 0
 	fi
 	return 1

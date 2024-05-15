@@ -434,6 +434,7 @@ function extract_archive {
 	fi 
 }
 
+
 function make_sure_dtrx_exists {
 	local mute="$1"
 	if ! which dtrx >/dev/null; then
@@ -443,10 +444,11 @@ function make_sure_dtrx_exists {
 			install_apt_package dtrx dtrx >/dev/null 2>/dev/null
 		fi
 		if [[ "$?" != "0" ]]; then
+			install_apt_package pipx pipx
 			if [[ $mute == "" ]]; then
-				pip3 install dtrx
+				pipx install dtrx
 			else
-				pip3 install dtrx >/dev/null 2>/dev/null
+				pipx install dtrx >/dev/null 2>/dev/null
 			fi
 			make_sure_dir_is_in_a_path $(get_home_dir)/.local/bin
 		fi
