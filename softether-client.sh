@@ -168,6 +168,7 @@ textfile /etc/systemd/system/softether_${connection_name}_client.service "[Unit]
 [Service]
     Type=oneshot
     ExecStart=/bin/bash /usr/local/lib/softether/start_${connection_name}_vpn.sh
+    ExecStartPre= /bin/sh -c 'until ping -c1 ${server_address}; do sleep 1; done;'
     ExecStop=/usr/local/bin/vpncmd localhost /CLIENT /CMD accountdisconnect ${connection_name}
     ExecStop=/bin/bash -c \"ifconfig vpn_${nicname} down\"
     RemainAfterExit=yes
