@@ -65,11 +65,12 @@ repo_path=/media/adam-minipc/other/debs
 release=$(get_ubuntu_codename)
 user=$USER
 common_debug=0
+tweaks=""
+log=""
 
 while [[ $# > 0 ]]
 do
 key="$1"
-tweaks=""
 shift
 
 case $key in
