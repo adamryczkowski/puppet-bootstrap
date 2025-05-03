@@ -4,8 +4,9 @@
 
 function calcshasum {
 	file="$1"
+	local shasum
 	if [ -f "$file" ]; then 
-		local shasum=$(shasum "$file")
+		shasum=$(shasum "$file")
 		local pattern='^([^ ]+) '
 		if [[ "$shasum" =~ $pattern ]]; then
 			shasum=${BASH_REMATCH[1]}
@@ -15,7 +16,7 @@ function calcshasum {
 	else
 		shasum=""
 	fi
-	echo $shasum
+	echo "$shasum"
 }
 
 function apply_patch {
@@ -23,9 +24,10 @@ function apply_patch {
 	local hash_orig="$2"
 	local hash_dest="$3"
 	local patchfile="$4"
+	local shasum
 	if [[ -f "$file" ]] && [[ -f "$patchfile" ]]; then
-		local shasum=$(calcshasum "$file")
-		if [[ "$shasum"=="$hash_orig" ]]; then
+		shasum=$(calcshasum "$file")
+		if [[ "$shasum" == "$hash_orig" ]]; then
 			if patch --dry-run "$file" "$patchfile" >/dev/null; then
 				if [ -w "$file" ]; then
 					logexec patch "$file" "$patchfile"
@@ -35,7 +37,7 @@ function apply_patch {
 			else
 				errcho "Error while applying the patch"
 			fi
-		elif [[ "$(shasum "$file")"=="$hash_dest" ]]; then
+		elif [[ "$(shasum "$file")" == "$hash_dest" ]]; then
 			#Do nothing. Work is already done
 			return 0
 		else
@@ -52,8 +54,9 @@ function edit_bash_augeas {
 	local file=$1
 	local var=$2
 	local value=$3
+	local oldvalue
 	install_apt_package augeas-tools augtool
-	local oldvalue=$(sudo augtool -L -A --transform "Shellvars incl $file" get "/files${file}/${var}" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
+	oldvalue=$(sudo augtool -L -A --transform "Shellvars incl $file" get "/files${file}/${var}" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
 	if [ "$value" != "$oldvalue" ]; then
 		logexec sudo augtool -L -A --transform "Shellvars incl $file" set "/files${file}/${var}" "${value}" >/dev/null
 	fi
@@ -68,7 +71,7 @@ function logmkdir {
 	if [ -n "$user" ]; then
 		curuser=$(stat -c '%U' "${dir}")
 		if [[ "$curuser" != "$user" ]]; then
-			logexec sudo chown -R ${user}:${user} "$dir"
+			logexec sudo chown -R "${user}:${user}" "$dir"
 		fi
 	fi
 }
@@ -99,13 +102,13 @@ function textfile {
 	fi
 	
 	local flag
-	logmkdir $(dirname ${plik}) $user
+	logmkdir "$(dirname "${plik}")" "$user"
 	if [ ! -f "${plik}" ]; then
 		flag=1
 	else
 		tmpfile=$(mktemp)
 		echo "$contents" > "${tmpfile}"
-		if ! cmp $tmpfile $plik; then
+		if ! cmp "$tmpfile" "$plik"; then
 			flag=1
 		fi
 	fi
@@ -128,7 +131,7 @@ function install_file {
 	local dest="$2"
 	local user=$3
 	
-	if [ -z ${user} ]; then
+	if [ -z "${user}" ]; then
 		user=auto
 	fi
 	if [ ! -f "${input_file}" ]; then
@@ -161,13 +164,13 @@ function install_file {
 		errcho "Error when copying ${input_file} into ${dest}"
 #		return 1
 	fi
-	if [ $user != "auto" ]; then
+	if [ "$user" != "auto" ]; then
 		cur_owner="$(stat --format '%U' "$dest")"
 		if [ "$user" != "$cur_owner" ]; then
 			if [ -w "$dest" ]; then
-				logexec chown $user "$dest"
+				logexec chown "$user" "$dest"
 			else
-				logexec sudo chown $user "$dest"
+				logexec sudo chown "$user" "$dest"
 			fi
 		fi
 	fi
@@ -217,22 +220,26 @@ function set_non_executable {
 function install_script {
 	local input_file="$1"
 	local dest="$2"
-	local user=$3
-	install_file $input_file $dest $user
-	set_executable $dest
+	if [ -z ${3+x} ]; then 
+		local user="$USER"
+	else 
+		local user="${3}"
+	fi
+	install_file "$input_file" "$dest" "$user"
+	set_executable "$dest"
 }
 
 function install_data_file {
 	local input_file="$1"
 	local dest="$2"
 	local user=$3
-	install_file $input_file $dest $user
-	set_non_executable $dest
+	install_file "$input_file" "$dest" "$user"
+	set_non_executable "$dest"
 }
 
 function chmod_file {
-	local file=$1
-	local desired_mode=$2
+	local file="$1"
+	local desired_mode="$2"
 	local pattern='^[[:digit:]]+$'
 	local actual_mode
 	if [[ ! "${desired_mode}" =~ $pattern ]]; then
@@ -243,9 +250,9 @@ function chmod_file {
 		errcho "File ${file} doesn't exist"
 		return 1
 	fi
-	actual_mode=$(stat -c "%a" ${file})
+	actual_mode=$(stat -c "%a" "${file}")
 	if [ "${desired_mode}" != "${actual_mode}" ]; then
-		logexec sudo chmod ${desired_mode} ${file}
+		logexec sudo chmod "${desired_mode}" "${file}"
 	fi
 }
 
@@ -315,7 +322,7 @@ function get_cached_file {
 			return 1
 		fi
 		if [ ! -w "${repo_path}" ]; then
-			if ! sudo chown ${USER} "${repo_path}"; then
+			if ! sudo chown "${USER}" "${repo_path}"; then
 				echo "Cannot write to the repo ${repo_path}" >/dev/stderr
 				return 1
 			fi
@@ -332,7 +339,7 @@ function get_cached_file {
 }
 
 function logexec {
-	exec $@ | true
+	exec "$@" | true
 }
 
 function extract_archive {
@@ -349,7 +356,7 @@ function extract_archive {
 	fi
 
 	if [[ "$extracted_name" == "" ]]; then
-		local extension="${archive_path##*.}"
+#		local extension="${archive_path##*.}"
 		extracted_name="${archive_path%.*}"
 	fi
 	make_sure_dtrx_exists
@@ -358,22 +365,22 @@ function extract_archive {
 	
 	local dest_path="${destination_parent}/${extracted_name}"
 	logmkdir "${dest_path}" "$act_as_user"
-	if is_folder_writable $(dirname "$destination_parent") "$act_as_user"; then
+	if is_folder_writable "$(dirname "$destination_parent")" "$act_as_user"; then
 		if [ "$act_as_user" == "$USER" ]; then
 			mode=1
-			(cd "${dest_path}" ; dtrx --one here "$archive_path")
+			(cd "${dest_path}" || exit 1; dtrx --one here "$archive_path")
 		else
 			mode=2
-			(cd "${dest_path}" ; sudo -u "$act_as_user" $(which dtrx) --one here "$archive_path")
+			(cd "${dest_path}" || exit 1; sudo -u "$act_as_user" "$(which dtrx)" --one here "$archive_path")
 		fi
 	else
 		mode=2
-		(cd "${dest_path}" ; sudo -u "$act_as_user" $(which dtrx) --one here "$archive_path")
+		(cd "${dest_path}" || exit 1; sudo -u "$act_as_user" "$(which dtrx)" --one here "$archive_path")
 	fi
 	
-	filecount=$(ls "${dest_path}" | wc -l)
+	filecount="$(find "${dest_path}" -mindepth 1 -maxdepth 1 | wc -l)"
 	if [[ $filecount == 1 ]]; then
-		filename1=$(ls "${dest_path}" | head -n 1)
+		filename1=$(find "${dest_path}" -mindepth 1 -maxdepth 1 | head -n 1)
 		if [ -d "${dest_path}/${filename1}" ]; then
 		
 		
@@ -435,6 +442,7 @@ function extract_archive {
 }
 
 
+# shellcheck disable=SC2120
 function make_sure_dtrx_exists {
 	local mute="$1"
 	if ! which dtrx >/dev/null; then
@@ -443,6 +451,7 @@ function make_sure_dtrx_exists {
 		else
 			install_apt_package dtrx dtrx >/dev/null 2>/dev/null
 		fi
+		# shellcheck disable=SC2181
 		if [[ "$?" != "0" ]]; then
 			install_apt_package pipx pipx
 			if [[ $mute == "" ]]; then
@@ -450,7 +459,7 @@ function make_sure_dtrx_exists {
 			else
 				pipx install dtrx >/dev/null 2>/dev/null
 			fi
-			make_sure_dir_is_in_a_path $(get_home_dir)/.local/bin
+			make_sure_dir_is_in_a_path "$(get_home_dir)/.local/bin"
 		fi
 	fi
 	which dtrx >/dev/null
@@ -515,8 +524,12 @@ function make_sure_dtrx_exists {
 function uncompress_cached_file {
 	local filename="$1"
 	local destination_parent="$2"
+	local group
+	local user
+	local usergr
+	local timestamp_path
 	if [ -n "$3" ]; then
-		local usergr="$3"
+		usergr="$3"
 	fi
 		
 	if [ -n "$4" ]; then
@@ -527,22 +540,22 @@ function uncompress_cached_file {
 	fi
 	local user
 	if [ -z "$usergr" ]; then
-		local user=$USER
+		user=$USER
 		usergr=$user
-		local group="$(id -gn)"
+		group="$(id -gn)"
 	else
 		local pattern='^([^:]+):([^:]+)$'
 		if [[ "$usergr" =~ $pattern ]]; then
-			local group=${BASH_REMATCH[2]}
-			local user=${BASH_REMATCH[1]}
+			group=${BASH_REMATCH[2]}
+			user=${BASH_REMATCH[1]}
 		else
-			local group=""
-			local user=$usergr
+			group=""
+			user=$usergr
 		fi
 	fi
 	if [ -z "$extracted_name" ]; then
-		basename_extension $filename
-		extracted_name=$(basename $base)
+		basename_extension "$filename"
+		extracted_name=$(basename "$base")
 #		errcho "Empty extracted_name argument to uncompress_cached_file"
 	fi
 
@@ -559,10 +572,10 @@ function uncompress_cached_file {
 		echo "no destination $destination_parent"
 		return 2
 	fi
-	if [[ "$skip_timestampls" == "" ]]; then
+	if [[ "$skip_timestamps" == "" ]]; then
 		if [ -d "$destination_parent" ]; then
 			moddate_remote=$(stat -c %y "$destination_parent")
-			local timestamp_path="$(dirname ${destination_parent})/${extracted_name}/.timestamp"
+			timestamp_path="$(dirname "${destination_parent}")/${extracted_name}/.timestamp"
 			if [ -f "$timestamp_path" ]; then
 				moddate_hdd=$(cat "$timestamp_path")
 				if [ "$moddate_hdd" == "$moddate_remote" ]; then
@@ -574,7 +587,7 @@ function uncompress_cached_file {
 	extract_archive "$path_filename" "$destination_parent" "$user" onedir "$extracted_name"
 
 
-	if [[ "$skip_timestampls" == "" ]]; then
+	if [[ "$skip_timestamps" == "" ]]; then
 		if [[ $mode == 1 ]]; then
 			echo "$moddate_remote" | tee "$timestamp_path" >/dev/null
 		elif [[ $mode == 2 ]]; then
@@ -594,10 +607,10 @@ function cp_file {
 	last="${dest:$i:1}"
 	if [ "$last" == "/" ]; then
 		destdir="${dest:0:$i}"
-		destfile="$(basename $source)"
+		destfile="$(basename "$source")"
 	else
-		destdir="$(dirname $dest)"
-		destfile="$(basename $dest)"
+		destdir="$(dirname "$dest")"
+		destfile="$(basename "$dest")"
 	fi
 	if [ ! -d "$destdir" ]; then
 		logmkdir "$destdir" "$user"
@@ -624,29 +637,29 @@ function is_folder_writable {
 	#source: https://stackoverflow.com/questions/14103806/bash-test-if-a-directory-is-writable-by-a-given-uid
 	# Use -L to get information about the target of a symlink,
 	# not the link itself, as pointed out in the comments
-	INFO=( $(stat -L -c "0%a %G %U" $folder) )
+	mapfile -t INFO < <(stat -L -c "0%a %G %U" "$folder")
 	PERM=${INFO[0]}
 	GROUP=${INFO[1]}
 	OWNER=${INFO[2]}
 
 	ACCESS=no
-	if (( ($PERM & 0002) != 0 )); then
+	if (( (PERM & 0002) != 0 )); then
 		# Everyone has write access
 		ACCESS=yes
-	elif (( ($PERM & 0020) != 0 )); then
+	elif (( (PERM & 0020) != 0 )); then
 		# Some group has write access.
 		# Is user in that group?
-		gs=( $(groups $user) )
+		mapfile -t gs < <(groups "$user")
 		for g in "${gs[@]}"; do
-			if [[ $GROUP == $g ]]; then
+			if [[ $GROUP == "$g" ]]; then
 				ACCESS=yes
 				break
 			fi
 		done
-	elif (( ($PERM & 0200) != 0 )); then
+	elif (( (PERM & 0200) != 0 )); then
 		# The owner has write access.
 		# Does the user own the file?
-		[[ $user == $OWNER ]] && ACCESS=yes
+		[[ $user == "$OWNER" ]] && ACCESS=yes
 	fi
 	if [ "$ACCESS" == 'yes' ]; then
 		return 0
@@ -711,13 +724,13 @@ function make_symlink {
 		return 1
 	fi
 	if [ -L "$dest" ]; then
-		if [ "$(readlink -f $dest)"!="$(readlink -f $source)" ]; then
-			if is_folder_writable $(dirname "$dest") "$user"; then
-				$logexec rm $dest
-				$logexec ln -s $source $dest
+		if [ "$(readlink -f "$dest")" != "$(readlink -f "$source")" ]; then
+			if is_folder_writable "$(dirname "$dest")" "$user"; then
+				$logexec rm "$dest"
+				$logexec ln -s "$source" "$dest"
 			else
-				$logexec sudo rm $dest
-				$logexec sudo ln -s $source $dest
+				$logexec sudo rm "$dest"
+				$logexec sudo ln -s "$source" "$dest"
 			fi
 		fi
 		return 0
@@ -726,10 +739,10 @@ function make_symlink {
 			errcho "$dest already exists"
 			return 1
 		fi
-		if is_folder_writable $(dirname "$dest") "$user"; then
-			logexec ln -s $source $dest
+		if is_folder_writable "$(dirname "$dest")" "$user"; then
+			logexec ln -s "$source" "$dest"
 		else
-			logexec sudo ln -s $source $dest
+			logexec sudo ln -s "$source" "$dest"
 		fi
 		return 0
 	fi
