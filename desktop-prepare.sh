@@ -749,12 +749,12 @@ function julia {
 function i3wm {
 	set -x
 	
-	install_apt_package_file keyring.deb sur5r-keyring https://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2023.02.18_all.deb
-	add_apt_source_manual sur5r-i3 "deb [arch=amd64] http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe" 
+#	install_apt_package_file keyring.deb sur5r-keyring https://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2023.02.18_all.deb
+#	add_apt_source_manual sur5r-i3 "deb [arch=amd64] http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe" 
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
 	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme  acpi
-   install_apt_packages qt4-qtconfig
+#   install_apt_packages qt4-qtconfig
 	
 	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
 	if ! which i3blocks >/dev/null; then
