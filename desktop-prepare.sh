@@ -69,6 +69,7 @@ common_debug=0
 while [[ $# > 0 ]]
 do
 key="$1"
+tweaks=""
 shift
 
 case $key in
