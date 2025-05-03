@@ -758,7 +758,7 @@ function i3wm {
 	
 	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
 	if ! which i3blocks >/dev/null; then
-		install_apt_packages autoconf automake
+		install_apt_packages autoconf automake build-essential
 		pushd ${home}/tmp/i3blocks
 		logexec ./autogen.sh
 		logexec ./configure
@@ -778,7 +778,7 @@ function i3wm {
 	logexec sudo gem install fusuma
 	logexec usermod -aG input ${user}
 	
-	add_apt_source_manual manuelschneid3r 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_18.04/ /' https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
+#	add_apt_source_manual manuelschneid3r 'deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_18.04/ /' https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
 	
 	install_script files/i3exit '/usr/local/bin' root
 	
