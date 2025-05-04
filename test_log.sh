@@ -5,7 +5,7 @@ log=/dev/stdout
 
 a=23
 
-#logexec echo "Próba $a"
+logexec echo "Próba $a"
 
 fn="blu"
 
@@ -23,7 +23,7 @@ export IFS=","
 for tweak in $tweaks; do
 	export IFS=${oldifs}
 	echo "Current tweak: ${tweak}"
-	$(${tweak})
+	logexec $(${tweak})
 done
 
 

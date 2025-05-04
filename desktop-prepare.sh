@@ -11,7 +11,7 @@ Prepares an Ubuntu installation with common tweaks.
 
 Usage:
 
-$(basename $0) [-r|--release <ubuntu release>] [--user <name of user>]
+$(basename "$0") [-r|--release <ubuntu release>] [--user <name of user>]
 			[--tweaks <comma separated sets of tweaks]
 			[--repo-path <repo-path>]
 			[--help] [--debug] [--log <output file>]
@@ -49,17 +49,17 @@ where
 
 Example:
 
-./$(basename $0) --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox,i3wm,virtualbox,kitty,julia
+./$(basename "$0") --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox,i3wm,virtualbox,kitty,julia
 "
 
 dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
-	echo "`pwd -P`" # output full, link-resolved path
+	pwd -P # output full, link-resolved path
 }
 mypath=${0%/*}
-mypath=`dir_resolve $mypath`
-cd $mypath
+mypath=$(dir_resolve "$mypath")
+cd "$mypath"
 
 repo_path=/media/adam-minipc/other/debs
 release=$(get_ubuntu_codename)
@@ -119,7 +119,7 @@ else
 	tweaks="tweak_base,${tweaks}"
 fi
 
-home=$(get_home_dir ${user})
+home=$(get_home_dir "${user}")
 
 if [ -n "$common_debug" ]; then
 	if [ -z "$log" ]; then
@@ -169,7 +169,7 @@ function desktop {
 	if [ "$release" == "bionic" ]; then
 		install_apt_package gnome-tweak-tool
 		ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
-		install_gnome_extension ${ext_path}
+		install_gnome_extension "${ext_path}"
 		
 		gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
 		gsettings_set_value org.gnome.mutter dynamic-workspaces false
@@ -688,7 +688,7 @@ function gedit {
 
 	if [ ! -d "/usr/share/gedit/plugins/crypto" ]; then
 		plik=$(get_cached_file gedit-crypto.deb http://pietrobattiston.it/_media/gedit-crypto:gedit-crypto-plugin_0.5-1_all.deb)
-		install_apt_package_file $plik gedit-crypto-plugin
+		install_apt_package_file "$plik" gedit-crypto-plugin
 		gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
 	fi
 	gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
@@ -764,34 +764,34 @@ function i3wm {
 	install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme  acpi
 #   install_apt_packages qt4-qtconfig
 	
-	get_git_repo https://github.com/vivien/i3blocks ${home}/tmp
+	get_git_repo https://github.com/vivien/i3blocks "${home}/tmp"
 	if ! which i3blocks >/dev/null; then
 		install_apt_packages autoconf automake build-essential
-		pushd ${home}/tmp/i3blocks
+		pushd "${home}/tmp/i3blocks"
 		logexec ./autogen.sh
 		logexec ./configure
 		logexec make
 		logexec sudo make install
 		popd
 	fi
-	logmkdir ${home}/.config
+	logmkdir "${home}/.config"
 	
-	get_git_repo https://gitlab.com/adamwam/i3-config.git ${home}/.config
-	get_git_repo https://gitlab.com/adamwam/i3blocks-config.git ${home}/.config
-	make_symlink ${home}/.config/i3-config/i3 ${home}/.config/i3
-	make_symlink ${home}/.config/i3-config/terminator ${home}/.config/terminator
-	make_symlink ${home}/.config/i3blocks-config ${home}/.config/i3blocks
-	make_symlink ${home}/.config/i3-config/albert ${home}/.config/albert
-	make_symlink ${home}/.config/i3-config/fusuma ${home}/.config/fusuma
+	get_git_repo https://gitlab.com/adamwam/i3-config.git "${home}/.config"
+	get_git_repo https://gitlab.com/adamwam/i3blocks-config.git "${home}/.config"
+	make_symlink "${home}/.config/i3-config/i3" "${home}/.config/i3"
+	make_symlink "${home}/.config/i3-config/terminator" "${home}/.config/terminator"
+	make_symlink "${home}/.config/i3blocks-config" "${home}/.config/i3blocks"
+	make_symlink "${home}/.config/i3-config/albert" "${home}/.config/albert"
+	make_symlink "${home}/.config/i3-config/fusuma" "${home}/.config/fusuma"
 	logexec sudo gem install fusuma
-	logexec usermod -aG input ${user}
+	logexec sudo usermod -aG input "${user}"
 	
 	add_apt_source_manual manuelschneid3r "deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_$(get_ubuntu_version .)/ /" https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
 	
 	install_script files/i3exit '/usr/local/bin' root
 	
-	install_apt_packages albert pcmanfm units playerctl
-	
+	install_apt_packages pcmanfm units playerctl  # albert
+
 	
 #	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
 #	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb 
@@ -817,10 +817,10 @@ gtk-enable-input-feedback-sounds=1
 gtk-xft-antialias=1
 gtk-xft-hinting=1
 gtk-xft-hintstyle=hintfull
-" ${user}
+" "${user}"
 	else
-		linetextfile ${home}/.config/gtk-3.0/settings.ini "gtk-application-prefer-dark-theme=1"
-		linetextfile ${home}/.config/gtk-3.0/settings.ini "gtk-theme-name=Adwaita-dark"
+		linetextfile "${home}/.config/gtk-3.0/settings.ini" "gtk-application-prefer-dark-theme=1"
+		linetextfile "${home}/.config/gtk-3.0/settings.ini" "gtk-theme-name=Adwaita-dark"
 	fi	
 	
 	#https://i3wm.org/docs/repositories.html

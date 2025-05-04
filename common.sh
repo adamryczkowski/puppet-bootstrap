@@ -7,6 +7,10 @@ if [ -z ${USE_X+x} ]; then
   USE_X=""
 fi
 
+if [ -z ${log+x} ]; then
+  log=""
+fi
+
 shopt -s extdebug
 repetition_count=0
 
@@ -56,7 +60,7 @@ function rlog()
 	if [ "$1" == "1" ]; then
 		set -x
 	fi
-	trap - ERR
+#	trap - ERR
 	file=${BASH_SOURCE[1]##*/}
 	line="$(sed "1,$((myline-1)) d;${myline} s/^ *//; q" "$DIR/$file")"
 	tmpcmd=$(mktemp)
@@ -105,7 +109,7 @@ function rlog()
 		cp "$tmpoutput" /tmp/tmp.log
 	fi
 	if [ "$exitstatus" -ne "0" ]; then
-		echo "## Exit status: $exitstatus" >>"$log"
+		echo "Command returned error code: $exitstatus" >>"$log"
 	fi
 	echo >>"$log"
 	if [ -n "$USE_X" ]; then
@@ -114,7 +118,7 @@ function rlog()
 	if [ -n "$USE_E" ]; then
 		set -e
 	fi
-	trap 'errorhdl' ERR
+#	trap 'errorhdl' ERR
 	if [ "$exitstatus" -ne "0" ]; then
 		return $exitstatus
 	fi
@@ -124,8 +128,10 @@ function rlog()
 # shellcheck disable=SC2034
 # shellcheck disable=SC2016
 log_next_line='eval if [ -n "$log" ]; then myline=$(($LINENO+1)); trap "rlog" DEBUG; fi;'
-# shellcheck disable=SC2034
-logoff='trap - DEBUG'
+
+## shellcheck disable=SC2034
+#logoff='trap - DEBUG'
+
 # shellcheck disable=SC2034
 # shellcheck disable=SC2016
 loglog='eval if [ -n "$log" ]; then myline=$(($LINENO+1)); trap "rlog" DEBUG; fi;'
@@ -148,7 +154,7 @@ function logexec()
 	if [ "$common_debug" -eq "1" ]; then
 		set -x
 	fi
-	trap - ERR
+#	trap - ERR
 	_file=${BASH_SOURCE[1]##*/}
 	linenr=$((BASH_LINENO[0]-1))
 	if [ ! -f "$DIR/$_file" ]; then
@@ -157,31 +163,62 @@ function logexec()
 		echo "$line" >>"$log"
 	else
 		line=$(sed "1,${linenr} d;$((linenr+1)) s/^\\s*//; q" "$DIR/$_file")
-		line=${line:${#FUNCNAME[0]}}
+		line=${line:$(( ${#FUNCNAME[0]} + (common_debug == 1 ? 3 : 0) ))}
 	fi
 	tmpcmd=$(mktemp)
 	echo "$line" > "$tmpcmd"
 	tmpoutput=$(mktemp)
 	if [ -n "$log" ]; then
 		mymsg=$(msg)
-		exec 3>&1 4>&2 >"$tmpoutput" 2>&1
+		exec 3>&1 4>&2 >"$tmpoutput" 2>&1 # redirect stdout and stderr to tmpoutput
 		set -x
 		# shellcheck disable=SC1090
 		source "$tmpcmd"
+    exitstatus=$?
 		set +x
 		if [ "$common_debug" -eq "1" ]; then
 			set -x
 		fi
-		exitstatus=$?
-		exec 1>&3 2>&4 4>&- 3>&-
+		exec 1>&3 2>&4 4>&- 3>&- # restore stdout and stderr
+#		set +x
+#		echo "exitstatus=$exitstatus"
+#		echo "## line:"
+#		cat $tmpcmd
+#		echo "## output:"
+#		cat $tmpoutput
+#		echo "## End ouf output"
+#		echo "## _file: $DIR/$_file"
+#		echo "## linenr: $linenr"
+#		echo "## tmpcmd: $tmpcmd"
+#		set -x
 		line=$(awk '/^\+\+/ { print $0; exit; }' "$tmpoutput")
 		echo "${mymsg}${line:3}" >>"$log"
-		if [ -n "$USE_X" ]; then
-			awk 'BEGIN {start=0;stop=0} /^\+\+/ { if (start==0) start=NR+1; else stop=1; } /^\+[^\+]/ { if (start>0) {stop=1;} } 1 { if (start>0 && NR>=start && stop==0) print $0; }' "$tmpoutput" | tee -a "$log"
-		else
-			awk 'BEGIN {start=0;stop=0} /^\+\+/ { if (start==0) start=NR+1; else stop=1; } /^\+[^\+]/ { if (start>0) {stop=1;} } 1 { if (start>0 && NR>=start && stop==0) print $0; }' "$tmpoutput" >> "$log"
-		fi
-		rm "$tmpoutput"
+    if [ -n "$log" ]; then
+    	tmpoutput2=$(mktemp)
+      awk -v file="$DIR/$_file" -v linenr="$linenr" -v tmpfile="$tmpcmd" '
+        BEGIN {start=0; stop=0}
+        /^\+\+/ {if (start==0) start=NR+1; else stop=1;}
+        /^\+[^\+]/ {if (start>0) stop=1;}
+        {if (start>0 && NR>=start && stop==0) print $0;}
+      ' "$tmpoutput" > $tmpoutput2
+#      if [ -n "$USE_X" ]; then
+#      else
+#        awk -v file="$DIR/$_file" -v linenr="$linenr" -v tmpfile="$tmpcmd" '
+#          BEGIN {start=0; stop=0}
+#          /^\+\+/ {if (start==0) start=NR+1; else stop=1;}
+#          /^\+[^\+]/ {if (start>0) stop=1;}
+#          {if (start>0 && NR>=start && stop==0) print $0;}
+#        ' "$tmpoutput" >> "$log"
+#      fi
+
+      awk -v file="$DIR/$_file" -v linenr="$linenr" -v tmpfile="$tmpcmd" '
+        $0 ~ "^" tmpfile ": line 1:" {
+          sub("^" tmpfile ": line 1:", file ": line " linenr ":");
+          exit;
+        }
+      ' "$tmpoutput2" | tee -a "$log"
+    fi
+#		echo rm "$tmpoutput"
 		if [ "$exitstatus" -ne "0" ]; then
 			echo "## Exit status: $exitstatus" >>"$log"
 		fi
@@ -192,7 +229,7 @@ function logexec()
 		exitstatus=$?
 	fi
 	rm "$tmpcmd"
-	trap 'errorhdl' ERR
+#	trap 'errorhdl' ERR
 	if [ "$exitstatus" -ne "0" ]; then
 		if [ -n "$USE_E" ]; then
 			set -e
@@ -258,7 +295,7 @@ function logheredoc()
 	case $- in *x*) USE_X="-x";; *) USE_X=;; esac
 	set +x
 	if [ -n "$log" ]; then
-		trap - ERR
+#		trap - ERR
 		token=$1
 		shift
 		_file=${BASH_SOURCE[1]##*/}
@@ -273,7 +310,7 @@ function logheredoc()
 				n=1
 			fi
 		done <<< "$lines"
-		trap 'errorhdl' ERR
+#		trap 'errorhdl' ERR
 	fi
 	if [ -n "$USE_X" ]; then
 		set -x
@@ -288,7 +325,7 @@ function loglog()
 #		set -x
 #	fi
 	if [ -n "$log" ]; then
-		trap - ERR
+#		trap - ERR
 		_file=${BASH_SOURCE[1]##*/}
 		linenr=$((BASH_LINENO[0] ))
 		lines=$(sed "1,${linenr} d;$((linenr+1)) s/^\s*//; q" "$DIR/$_file")
@@ -301,7 +338,7 @@ function loglog()
 				n=1
 			fi
 		done <<< "$lines"
-		trap 'errorhdl' ERR
+#		trap 'errorhdl' ERR
 	fi
 	if [ -n "$USE_X" ]; then
 		set -x
@@ -332,11 +369,11 @@ function errorhdl()
 		return
 	fi
 	if [ -n "$log" ]; then
-		_file=${BASH_SOURCE[1]##*/}
-		myline=${BASH_LINENO[0]}
-		line=$(sed "1,$((myline-1)) d;${myline} s/^ *//; q" "$DIR/$_file")
-		msg "$line" >>"$log"
-		echo "Trapped ERROR in the line above!!" >>"$log"
+#		_file=${BASH_SOURCE[1]##*/}
+#		myline=${BASH_LINENO[0]}
+#		line=$(sed "1,$((myline-1)) d;${myline} s/^ *//; q" "$DIR/$_file")
+		#msg "$line" >>"$log"
+		echo "Command returned error code $exitstatus." >>"$log"
 	fi
 	if [ -n "$USE_X" ]; then
 		set -x
@@ -346,7 +383,7 @@ function errorhdl()
 	fi
 }
 
-trap 'errorhdl' ERR
+#trap 'errorhdl' ERR
 
 function dir_resolve
 {
