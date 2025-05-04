@@ -10,46 +10,53 @@
 ## dependency: libatom.sh
 ## dependency: liblxc.sh
 ## dependency: libinstall.sh
-
+## dependency: librust.sh
+## dependency: libbashrc.sh
 
 #!/bin/bash
-[[ $0 != $BASH_SOURCE ]] || echo "Script is not intended to be run, but rather sourced"
+# shellcheck disable=SC2128
+[[ $0 != "$BASH_SOURCE" ]] || echo "Script is not intended to be run, but rather sourced"
 
-adamlibpath=$(dirname $BASH_SOURCE)
+adamlibpath=$(dirname "$BASH_SOURCE")
 
 
-source ${adamlibpath}/libapt.sh
-source ${adamlibpath}/libfiles.sh
-source ${adamlibpath}/libgsettings.sh
-source ${adamlibpath}/libgit.sh
-source ${adamlibpath}/libmount.sh
-source ${adamlibpath}/libnet.sh
-source ${adamlibpath}/libexec.sh
-source ${adamlibpath}/libatom.sh
-source ${adamlibpath}/liblxc.sh
-source ${adamlibpath}/libinstall.sh
-
+source "${adamlibpath}/libapt.sh"
+source "${adamlibpath}/libfiles.sh"
+source "${adamlibpath}/libgsettings.sh"
+source "${adamlibpath}/libgit.sh"
+source "${adamlibpath}/libmount.sh"
+source "${adamlibpath}/libnet.sh"
+source "${adamlibpath}/libexec.sh"
+source "${adamlibpath}/libatom.sh"
+source "${adamlibpath}/liblxc.sh"
+source "${adamlibpath}/libinstall.sh"
+source "${adamlibpath}/librust.sh"
+source "${adamlibpath}/libbashrc.sh"
 
 #Gets ubuntu version in format e.g. 1804 or 1604
 function get_ubuntu_version {
 	local infix="$1"
-	local tmp=$(lsb_release -a 2>/dev/null | grep Release)
+	local tmp
+
 	local pattern='^Release:\s*([0-9]+)\.([0-9]+)$'
+	local ubuntu_codename
+	tmp=$(lsb_release -a 2>/dev/null | grep Release)
 	if [[ "$tmp" =~ $pattern ]]; then
-		echo ${BASH_REMATCH[1]}${infix}${BASH_REMATCH[2]}
+		echo "${BASH_REMATCH[1]}${infix}${BASH_REMATCH[2]}"
 		return 0
 	fi
-	local ubuntu_codename=$(get_ubuntu_codename)
+	ubuntu_codename=$(get_ubuntu_codename)
 	if [[ "$ubuntu_codename" == "bionic" ]]; then
-		echo 18${infix}04
+		echo "18${infix}04"
 		return 0
 	fi
 	return 1
 }
 
 function get_ubuntu_codename {
-	local tmp=$(lsb_release --codename 2>/dev/null | grep Codename)
+	local tmp
 	local pattern='^Codename:\s*([^ ]+)$'
+	tmp=$(lsb_release --codename 2>/dev/null | grep Codename)
 	if [[ ! "$tmp" =~ $pattern ]]; then
 		return 1
 	fi
@@ -65,10 +72,11 @@ function get_ubuntu_codename {
 }
 
 function get_distribution {
-	local tmp=$(lsb_release --id 2>/dev/null)
+	local tmp
 	local pattern='^Distributor ID:\s*([^ ]+)$'
+	tmp=$(lsb_release --id 2>/dev/null)
 	if [[ "$tmp" =~ $pattern ]]; then
-		echo ${BASH_REMATCH[1]}
+		echo "${BASH_REMATCH[1]}"
 		return 0
 	fi
 	return 1
@@ -80,15 +88,15 @@ function simple_systemd_service {
 	local description="$2"
 	local program=$3
 	shift;shift;shift;shift
-	local args="$@"
+	local args="$*"
 	local is_active
 	
 	if [ ! -f "$program" ]; then
-		if which $program >/dev/null; then
-			program=$(which ${program})
+		if which "$program" >/dev/null; then
+			program=$(which "${program}")
 		fi
 	fi
-	logexec sudo chmod +x ${program}
+	logexec sudo chmod +x "${program}"
 	
 cat > /tmp/tmp_service <<EOT
 [Unit]
@@ -101,9 +109,9 @@ Restart=on-failure
 [Install]
 WantedBy=multi-user.target
 EOT
-	if ! cmp --silent /tmp/${name}.service /lib/systemd/system/${name}.service; then
+	if ! cmp --silent "/tmp/${name}.service" "/lib/systemd/system/${name}.service"; then
 logheredoc EOT
-sudo tee /lib/systemd/system/${name}.service>/dev/null <<EOT
+sudo tee "/lib/systemd/system/${name}.service">/dev/null <<EOT
 [Unit]
 Description=$description
 
@@ -115,14 +123,14 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOT
 		logexec sudo systemctl daemon-reload
-		is_active=$(systemctl is-active $name)
+		is_active=$(systemctl is-active "$name")
 		if [ ! "$is_active" == "active" ]; then
-			logexec sudo systemctl enable $name
+			logexec sudo systemctl enable "$name"
 		fi
 	fi 
 
-	if ! systemctl status $name | grep -q running; then
-		logexec sudo service $name start
+	if ! systemctl status "$name" | grep -q running; then
+		logexec sudo service "$name" start
 		return 0
 	fi
 	return 1
@@ -134,15 +142,15 @@ function custom_systemd_service {
 	local contents="$2"
 	local is_active
 	
-	textfile /lib/systemd/system/${name}.service "${contents}" root
+	textfile "/lib/systemd/system/${name}.service" "${contents}" root
 	logexec sudo systemctl daemon-reload
-	is_active=$(systemctl is-active $name)
+	is_active=$(systemctl is-active "$name")
 	if [ ! "$is_active" == "active" ]; then
-		logexec sudo systemctl enable $name
+		logexec sudo systemctl enable "$name"
 	fi
 
-	if ! systemctl status $name | grep -q running; then
-		logexec sudo service $name start
+	if ! systemctl status "$name" | grep -q running; then
+		logexec sudo service "$name" start
 		return 0
 	fi
 	return 1
@@ -169,17 +177,17 @@ function get_home_dir {
 	if [ -n "$1" ]; then
 		local USER=$1
 	fi
-	echo $( getent passwd "$USER" | cut -d: -f6 )
+	getent passwd "$USER" | cut -d: -f6
 }
 
 function get_special_dir {
 	local dirtype=$1
 	local user=$2
-	local ans=""
+#	local ans=""
 	local HOME
 	local pattern
-	local folder
-	HOME=$(get_home_dir $user)
+#	local folder
+	HOME=$(get_home_dir "$user")
 	if [ -f "${HOME}/.config/user-dirs.dirs" ]; then
 		source "${HOME}/.config/user-dirs.dirs"
 		varname="XDG_${dirtype}_DIR"
@@ -214,13 +222,13 @@ function get_ui_context {
 	fi
 	if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ]; then
 		compatiblePrograms=( nemo unity nautilus kdeinit kded4 pulseaudio trackerd )
-		for index in ${compatiblePrograms[@]}; do
-			PIDS=$(pidof -s ${index})
+		for index in "${compatiblePrograms[@]}"; do
+			PIDS=$(pidof -s "${index}")
 			if [[ "${PIDS}" != "" ]]; then
-				for PID in ${PIDS[@]}; do
-					uid=$(awk '/^Uid:/{print $2}' /proc/${PID}/status)
+				for PID in "${PIDS[@]}"; do
+					uid=$(awk '/^Uid:/{print $2}' "/proc/${PID}/status")
 					piduser=$(getent passwd "$uid" | awk -F: '{print $1}')
-					if [[ "$piduser" == ${user} ]]; then
+					if [[ "$piduser" == "${user}" ]]; then
 						break;
 					fi
 				done
@@ -230,10 +238,10 @@ function get_ui_context {
 			ercho "Could not detect active login session"
 			return 1
 		fi
-		if [ -r /proc/${PID}/environ ]; then
-			QUERY_ENVIRON="$(cat /proc/${PID}/environ | tr '\0' '\n' | grep "DBUS_SESSION_BUS_ADDRESS" | cut -d "=" -f 2-)"
+		if [ -r "/proc/${PID}/environ" ]; then
+			QUERY_ENVIRON="$(tr '\0' '\n' < "/proc/${PID}/environ" | grep "DBUS_SESSION_BUS_ADDRESS" | cut -d "=" -f 2-)"
 		else
-			QUERY_ENVIRON="$(sudo cat /proc/${PID}/environ | tr '\0' '\n' | grep "DBUS_SESSION_BUS_ADDRESS" | cut -d "=" -f 2-)"
+			QUERY_ENVIRON="$(sudo cat "/proc/${PID}/environ" | tr '\0' '\n' | grep "DBUS_SESSION_BUS_ADDRESS" | cut -d "=" -f 2-)"
 		fi
 		if [[ "${QUERY_ENVIRON}" != "" ]]; then
 			export DBUS_SESSION_BUS_ADDRESS="${QUERY_ENVIRON}"
@@ -281,8 +289,8 @@ function make_service_user {
 	if [ -n "$homedir" ]; then
 		homedir=" --home-dir $homedir"
 	fi
-	if ! id -u $username 2>/dev/null; then
-		logexec sudo useradd -r $homedir --shell /bin/false $username 
+	if ! id -u "$username" 2>/dev/null; then
+		logexec sudo useradd -r "$homedir" --shell /bin/false "$username"
 	fi
 }
 
@@ -290,18 +298,18 @@ function make_service_user {
 function add_group {
 	local groupname=$1
 	if ! grep -q "^$groupname:" /etc/group; then
-		logexec sudo groupadd $groupname
+		logexec sudo groupadd "$groupname"
 	fi
 }
 
 function add_usergroup {
 	local username=$1
 	local groupname=$1
-	if ! groups $username | grep -q "\b${groupname}\b" ;then
-		logexec sudo usermod -a -G ${groupname} ${username}
+	if ! groups "$username" | grep -q "\b${groupname}\b" ;then
+		logexec sudo usermod -a -G "${groupname}" "${username}"
 	fi
 }
 
 function get_total_mem_MB {
-   echo $(grep MemTotal /proc/meminfo | awk '{print $2}')/1024 | bc
+   echo "$(grep MemTotal /proc/meminfo | awk '{print $2}')/1024" | bc
 }
