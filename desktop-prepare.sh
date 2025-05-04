@@ -3,7 +3,7 @@ set -euo pipefail
 
 ## dependency: prepare_R-node.sh
 
-cd `dirname $0`
+cd "$(dirname "$0")"
 . ./common.sh
 
 usage="
@@ -68,7 +68,7 @@ common_debug=0
 tweaks=""
 log=""
 
-while [[ $# > 0 ]]
+while [[ $# -gt 0 ]]
 do
 key="$1"
 shift
@@ -129,18 +129,18 @@ fi
 
 #Makes sure basic scripts are installed
 function tweak_base  {
-#set -x
+set -x
 	logmkdir /usr/local/lib/adam/scripts root
-	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scripts
+	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scripts 0
 	install_apt_packages git gdebi-core
-	mount_dir "$repo_path"
+	mount_dir "$repo_path" || true
 set +x
 }
 
 function unity {
 	if [ "$release" == "bionic" ]; then
 		ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
-		install_gnome_extension ${ext_path}
+		install_gnome_extension "${ext_path}"
 		
 		gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
 		gsettings_set_value org.gnome.mutter dynamic-workspaces false
@@ -360,7 +360,7 @@ function nvidia {
 function cuda {
 	install_apt_package_file "cuda-repo-ubuntu${release}_9.1.85-1_amd64.deb" "cuda-repo-ubuntu${release}" http://developer.download.nvidia.com/compute/cuda/repos/ubuntu${release}/x86_64/cuda-repo-ubuntu${release}_9.1.85-1_amd64.deb
 	if [ "$?" == "0" ]; then
-		logexec sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(get_ubuntu_version)/x86_64/7fa2af80.pub
+		logexec sudo apt-key adv --fetch-keys "http://developer.download.nvidia.com/compute/cuda/repos/ubuntu$(get_ubuntu_version)/x86_64/7fa2af80.pub"
 	fi
 	install_apt_package cuda
 	
@@ -387,6 +387,7 @@ function bumblebee {
 	nvidia_package=$(apt list --installed |grep -E 'nvidia-[0-9]+/')
 	pattern='nvidia-([0-9]+)/'
 	if [[ "${nvidia_package}" =~ $pattern ]]; then
+		# shellcheck disable=SC2034
 		nvidia_version=${BASH_REMATCH[1]}
 	else
 		errcho "Unexpected error"
@@ -470,11 +471,12 @@ function kodi {
     <importresumepoint>true</importresumepoint>
   </videolibrary>
 </advancedsettings>"
+	# shellcheck disable=SC1078
 	textfile "${home}/.kodi/userdata/passwords.xml" "\
 <passwords>
     <path>
-        <from pathversion="1">smb://szesciodysk/filmy</from>
-        <to pathversion="1">smb://adam:Zero%20tolerancji@szesciodysk/filmy/</to>
+        <from pathversion=\"1\">smb://szesciodysk/filmy</from>
+        <to pathversion=\"1\">smb://adam:Zero%20tolerancji@szesciodysk/filmy/</to>
     </path>
 </passwords>"
 }
@@ -493,10 +495,10 @@ function nemo {
 	gsettings_set_value org.nemo.preferences show-hidden-files true
 	
 	logmkdir "${home}/.local/bin" ${user}
-	cp_file $(get_cached_file apply_exif_rotation.sh https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/apply_exif_rotation.sh) "${home}/.local/bin" ${user}
+	cp_file "$(get_cached_file apply_exif_rotation.sh https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/apply_exif_rotation.sh)" "${home}/.local/bin" "${user}"
 	set_executable "${home}/.local/bin/apply_exif_rotation.sh"
-	cp_file $(get_cached_file fix_jpeg_rotation_dir.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation_dir.nemo_action) "${home}/.local/share/nemo/actions" ${user}
-	cp_file $(get_cached_file fix_jpeg_rotation_files.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation_files.nemo_action) "${home}/.local/share/nemo/actions" ${user}
+	cp_file "$(get_cached_file fix_jpeg_rotation_dir.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation_dir.nemo_action)" "${home}/.local/share/nemo/actions" "${user}"
+	cp_file "$(get_cached_file fix_jpeg_rotation_files.nemo_action https://raw.githubusercontent.com/adamryczkowski/puppet-bootstrap/master/passive_storage/fix_jpeg_rotation_files.nemo_action)" "${home}/.local/share/nemo/actions" "${user}"
 }
 
 function mod3 {
@@ -515,7 +517,7 @@ function mod3 {
      // Fake keys for virtual<->real modifiers mapping:"
 	echo "$patch">/tmp/symbols_pc.patch
 	apply_patch /usr/share/X11/xkb/symbols/pc 2019c40a10ccb69d6b1d95c5762f8c3a09fce64b 63867d13946f00aa9017937ef0b4d3aad25caa52 /tmp/symbols_pc.patch
-	if [ $(get_distribution) == "LinuxMint" ]; then
+	if [ "$(get_distribution)" == "LinuxMint" ]; then
 		gsettings_set_value org.cinnamon.desktop.wm.keybindings move-to-workspace-down "['<Shift><Mod3>Down']"
 		gsettings_set_value org.cinnamon.desktop.wm.keybindings move-to-workspace-left "['<Shift><Mod3>Left']"
 		gsettings_set_value org.cinnamon.desktop.wm.keybindings move-to-workspace-up "['<Shift><Mod3>Up']"
@@ -525,7 +527,7 @@ function mod3 {
 		gsettings_set_value org.cinnamon.desktop.wm.keybindings switch-to-workspace-left "['<Mod3>Left']"
 		gsettings_set_value org.cinnamon.desktop.wm.keybindings switch-to-workspace-up "['<Mod3>Up']"
 		gsettings_set_value org.cinnamon.desktop.wm.keybindings switch-to-workspace-right "['<Mod3>Right']"
-	elif [ $(get_distribution) == "Ubuntu" ]; then
+	elif [ "$(get_distribution)" == "Ubuntu" ]; then
 		gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-down "['<Shift><Mod3>Down']"
 		gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-left "['<Shift><Mod3>Left']"
 		gsettings_set_value org.gnome.desktop.wm.keybindings move-to-workspace-up "['<Shift><Mod3>Up']"
@@ -539,7 +541,7 @@ function mod3 {
 }
 
 function waterfox {
-   add_apt_source_manual waterfox "deb http://download.opensuse.org/repositories/home:/hawkeye116477:/waterfox/xUbuntu_$(get_ubuntu_version .)/ /" https://download.opensuse.org/repositories/home:hawkeye116477:waterfox/xUbuntu_$(get_ubuntu_version .)/Release.key waterfox.key 
+   add_apt_source_manual waterfox "deb http://download.opensuse.org/repositories/home:/hawkeye116477:/waterfox/xUbuntu_$(get_ubuntu_version .)/ /" "https://download.opensuse.org/repositories/home:hawkeye116477:waterfox/xUbuntu_$(get_ubuntu_version .)/Release.key" waterfox.key
    install_apt_package waterfox
 
 	#TODO: Install addon: https://github.com/iamadamdev/bypass-paywalls-firefox
@@ -593,6 +595,7 @@ function firefox {
 function zulip {
 	logexec sudo apt-key adv --keyserver pool.sks-keyservers.net --recv 69AD12704E71A4803DCA3A682424BE5AE9BD10D9
 	textfile /etc/apt/sources.list.d/zulip.list "deb https://dl.bintray.com/zulip/debian/ stable main"
+	# shellcheck disable=SC2034
 	flag_need_apt_update=1
 	install_apt_package zulip
 	add_host zulip.statystyka.net 10.55.181.62
@@ -728,7 +731,9 @@ function keepass {
 
 function julia {
 	set -x
-	local julia_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
+	local julia_version
+	local julia_path
+	julia_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
 	local pattern='^([0-9]+\.[0-9])\..*'
 	if [[ $julia_version =~ $pattern ]]; then
 		local short_version=${BASH_REMATCH[1]}
@@ -738,7 +743,7 @@ function julia {
 	fi
 	local julia_file="julia-${julia_version}-linux-x86_64.tar.gz"
 	local julia_link="https://julialang-s3.julialang.org/bin/linux/x64/${short_version}/${julia_file}"
-	local julia_path=$(get_cached_file "${julia_file}" "${julia_link}")
+	julia_path="$(get_cached_file "${julia_file}" "${julia_link}")"
 	uncompress_cached_file "${julia_path}" /opt/julia $user
 
 	make_symlink /opt/julia/bin/julia /usr/local/bin/julia
@@ -840,9 +845,12 @@ gtk-xft-hintstyle=hintfull
 
 
 function kitty {
-	local version=$(get_latest_github_release_name kovidgoyal/kitty skip_v)
+  local version
+  local kitty_source
+	version=$(get_latest_github_release_name kovidgoyal/kitty skip_v)
 	local file="kitty-${version}-x86_64.txz"
-	local kitty_source=$(get_latest_github_release kovidgoyal/kitty "${file}" "${file}")
+	# shellcheck disable=SC2034
+	kitty_source=$(get_latest_github_release kovidgoyal/kitty "${file}" "${file}")
 	uncompress_cached_file "$file" /opt/kitty $user
 
 	make_symlink /opt/kitty/bin/kitty /usr/local/bin/kitty

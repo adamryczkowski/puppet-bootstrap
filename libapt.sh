@@ -1,7 +1,9 @@
 #!/bin/bash 
 
+flag_need_apt_update=0
+
 function purge_apt_package {
-	local ans=0
+#	local ans=0
 	local package=$1
 	if dpkg -s "$package">/dev/null  2> /dev/null; then
 		logexec sudo apt-get --yes --force-yes -q purge "$package"
@@ -11,19 +13,25 @@ function purge_apt_package {
 }
 
 function cpu_arch {
-	local arch=$(uname -m)
+  local arch
+	arch=$(uname -m)
 	if [[ "$arch" == "x86_64" ]]; then
 		arch=amd64
 	elif [[ "$arch" == "aarch64" ]]; then
 		arch=arm64
 	fi
-	echo $arch
+	echo "$arch"
 }
 
 function install_apt_package {
-	local ans=0
+#	local ans=0
 	local package=$1
-	local command=$2
+	local command
+	if [ -z ${2+x} ]; then
+    command=""
+	else
+	  command="$2"
+  fi
 	if [ -n "$command" ]; then
 		if ! which "$command">/dev/null  2> /dev/null; then
 			do_update
@@ -36,36 +44,38 @@ function install_apt_package {
 			sudo apt-get --yes --force-yes -q install "$package"
 			return $?
 		fi
+		return 0
 	fi
-	return 1
-}  
+	return 0
+}
 
 function install_apt_packages {
-	local ans=0
+#	local ans=0
 	local to_install=""
-	local packages="$@"
-	for package in ${packages[@]}; do
+	local packages="$*"
+	for package in "${packages[@]}"; do
 		if ! dpkg -s "$package">/dev/null  2> /dev/null; then
 			to_install="${to_install} ${package}"
 		fi
 	done
 	if [[ "${to_install}" != "" ]]; then
-		do_update
+		do_update || true;
+		# shellcheck disable=SC2086
 		logexec sudo apt-get --yes --force-yes -q  install $to_install
 		return 0
 	fi
-	return 1
 }
 
 
 function install_apt_package_file {
-	local ans=0
+#	local ans=0
 	local filename=$1
 	local package=$2
 	local source="$3"
+	local cfilename
 	if ! dpkg -s "$package">/dev/null  2> /dev/null; then
 		if [ ! -f "${filename}" ]; then
-			local cfilename=$(get_cached_file $(basename ${filename}) "$source")
+			cfilename=$(get_cached_file "$(basename "${filename}")" "$source")
 			if [ ! -f "${cfilename}" ]; then
 				errcho "Cannot find ${filename}"
 				return 255
@@ -80,10 +90,9 @@ function install_apt_package_file {
 }
 
 function install_pip3_packages {
-	local ans=0
 	local to_install=""
-	local packages="$@"
-	for package in ${packages[@]}; do
+	local packages="$*"
+	for package in "${packages[@]}"; do
 		if ! pip3 list | grep -qF "$package" >/dev/null  2> /dev/null; then
 			to_install="${to_install} ${package}"
 		fi
@@ -94,15 +103,22 @@ function install_pip3_packages {
 		pipx install pipx
 		pipx ensurepath
 		purge_apt_package pipx
-		logexec pipx install $to_install
+		logexec pipx install "$to_install"
 		return 0
 	fi
 	return 1
 }  
 
+# shellcheck disable=SC2120
 function do_update {
+  local force_update
+  if [ -z ${1+x} ]; then
+    force_update=""
+  else
+    force_update=$1
+  fi
 	refresh_apt_redirections
-	if [ "$flag_need_apt_update" == "1" ] || [ -n "$1" ]; then
+	if [ "$flag_need_apt_update" == "1" ] || [ -n "$force_update" ]; then
 		logexec sudo apt update
 		flag_need_apt_update=0
 		return 0
@@ -125,10 +141,10 @@ function add_ppa {
 		install_apt_package software-properties-common add-apt-repository
 		release=$(get_ubuntu_codename)
 		if [ "$release" == "xenial" ]; then
-			logexec sudo add-apt-repository -y ppa:${the_ppa}
+			logexec sudo add-apt-repository -y "ppa:${the_ppa}"
 		else
-			if ! sudo add-apt-repository --no-update -y ppa:${the_ppa}; then
-				logexec sudo add-apt-repository -y ppa:${the_ppa}
+			if ! sudo add-apt-repository --no-update -y "ppa:${the_ppa}"; then
+				logexec sudo add-apt-repository -y "ppa:${the_ppa}"
 			fi
 		fi
 		refresh_apt_redirections
@@ -145,8 +161,7 @@ function add_apt_source_manual {
 	local release_key_URI="$3"
 	local cached_release_key="$4"
 	local release_key
-	textfile "/etc/apt/sources.list.d/${filename}.list" "${contents}" root
-	if [ "$?" == "0" ]; then
+	if textfile "/etc/apt/sources.list.d/${filename}.list" "${contents}" root; then
 		flag_need_apt_update=1
 		refresh_apt_redirections
 	fi
@@ -156,13 +171,16 @@ function add_apt_source_manual {
 		else
 			release_key=$(get_cached_file /tmp/tmp.key "${release_key_URI}")
 		fi
-		fingerpr=$(get_key_fingerprint ${release_key})
+		fingerpr=$(get_key_fingerprint "${release_key}")
 		
 		if ! apt-key finger | grep -Eo '([0-9A-F]{4} ? ?){10}+' | sed -e "s/\([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\)  \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\) \([0-9A-F]\{4\}\)/\1\2\3\4\5\6\7\8\9/g" | grep "$fingerpr" > /dev/null; then
-			logexec sudo cp "${release_key}" /etc/apt/trusted.gpg.d/${filename}.gpg
+		  if [ ! -f "/etc/apt/trusted.gpg.d/${filename}.gpg" ]; then
+  			logexec sudo cp "${release_key}" "/etc/apt/trusted.gpg.d/${filename}.gpg"
+     		flag_need_apt_update=1
+        sudo gpg --dearmour -o "/etc/apt/trusted.gpg.d/${filename}.gpg" < "${release_key}"
+  		fi
 #			logexec sudo apt-key add "${release_key}"
-			cat "${release_key}" | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/${filename}.gpg
-   		flag_need_apt_update=1
+      # shellcheck disable=SC2024
 		fi
 	fi
 }
@@ -170,7 +188,8 @@ function add_apt_source_manual {
 function get_apt_proxy {
    local pattern1='(#?)Acquire::http::Proxy "https?://(.*):([0-9]+)";$'
    local pattern2="^([^:]+):$pattern1"
-   local myproxy=$(grep -rE "^$pattern1" /etc/apt/apt.conf.d | head -n 1)
+   local myproxy
+   myproxy=$(grep -rE "^$pattern1" /etc/apt/apt.conf.d | head -n 1)
    if [[ $myproxy =~ $pattern2 ]]; then
       echo "$myproxy"
 	   aptproxy_file=${BASH_REMATCH[1]}
@@ -184,7 +203,7 @@ function get_apt_proxy {
 
 function refresh_apt_proxy {
    get_apt_proxy
-	if ping -c 1 -w 1  $aptproxy_ip >/dev/null; then
+	if ping -c 1 -w 1  "$aptproxy_ip" >/dev/null; then
 		turn_http_all winehq.org
 		turn_http_all nodesource.com
 		turn_http_all slacktechnologies
@@ -202,11 +221,11 @@ function refresh_apt_proxy {
 		turn_http_all dl.bintray.com/fedarovich/qbittorrent
 		turn_http_all mkvtoolnix.download
 		if [ -n "$aptproxy_enabled" ]; then
-			echo "Acquire::http::Proxy \"http://${aptproxy_ip}:${aptproxy_port}\";" | sudo tee ${aptproxy_file}
+			echo "Acquire::http::Proxy \"http://${aptproxy_ip}:${aptproxy_port}\";" | sudo tee "${aptproxy_file}"
 		fi
 	else
 		if [ -z "$aptproxy_enabled" ]; then
-			echo "#Acquire::http::Proxy \"http://${aptproxy_ip}:${aptproxy_port}\";" | sudo tee ${aptproxy_file}
+			echo "#Acquire::http::Proxy \"http://${aptproxy_ip}:${aptproxy_port}\";" | sudo tee "${aptproxy_file}"
 		fi
 		turn_https_all winehq.org
 		turn_https_all nodesource.com
@@ -233,7 +252,7 @@ function get_key_fingerprint {
 	local pattern
 	pattern='^\s*(Key fingerprint = )?([0-9A-F]{40})$'
 	if [ -f "${keyfile}" ]; then
-		fingerpr=$(gpg ${keyfile} | grep -E "$pattern")
+		fingerpr=$(gpg "${keyfile}" | grep -E "$pattern")
 		if [[ "$fingerpr" =~ $pattern ]]; then
 			fingerpr=${BASH_REMATCH[2]}
 		else
@@ -250,7 +269,7 @@ function find_apt_list {
 	local phrase="$1"
 	files=$(shopt -s nullglob dotglob; echo /etc/apt/sources.list.d/*.list)
 	if (( ${#files} )); then
-		grep -l /etc/apt/sources.list.d/*.list -e "${phrase}"
+		grep -l "/etc/apt/sources.list.d/*.list" -e "${phrase}"
 	fi
 }
 
@@ -259,7 +278,7 @@ function turn_https {
 #	plik="/etc/apt/sources.list.d/$1"
 	plik="$1"
 	if [ -f "$plik" ]; then
-		sudo sed -i 's/http:/https:/g' ${plik}*
+		sudo sed -i 's/http:/https:/g' "${plik}*"
 	fi
 }
 
@@ -268,29 +287,31 @@ function turn_http {
 #	plik="/etc/apt/sources.list.d/$1"
 	plik="$1"
 	if [ -f "${plik}" ]; then
-		sudo sed -i 's/https/http/g' ${plik}*
+		sudo sed -i 's/https/http/g' "${plik}*"
 	fi
 }
 
 function turn_https_all {
-	find_apt_list "$1" | while read file; do turn_https ${file}; done
+	find_apt_list "$1" | while read -r file; do turn_https "${file}"; done
 }
 
 function turn_http_all {
-	find_apt_list "$1" | while read file; do turn_http ${file}; done
+	find_apt_list "$1" | while read -r file; do turn_http "${file}"; done
 }
 
 function refresh_apt_redirections {
-	pattern1='(#?)Acquire::http::Proxy "https?://(.*):([0-9]+)";$'
-	pattern2="^([^:]+):$pattern1"
-	myproxy=$(grep -rE "^$pattern1" /etc/apt/apt.conf.d | head -n 1)
+	local pattern1='(#?)Acquire::http::Proxy "https?://(.*):([0-9]+)";$'
+	local pattern2="^([^:]+):$pattern1"
+	if ! myproxy=$(grep -rE "^$pattern1" /etc/apt/apt.conf.d | head -n 1); then
+    myproxy=""
+  fi
 	if [[ $myproxy =~ $pattern2 ]]; then
 		aptproxy_file=${BASH_REMATCH[1]}
 		aptproxy_enabled=${BASH_REMATCH[2]}
 		aptproxy_ip=${BASH_REMATCH[3]}
 		aptproxy_port=${BASH_REMATCH[4]}
 		echo "Found aptproxy: ${aptproxy_ip}:${aptproxy_port} in ${aptproxy_file}"
-		if ping -c 1 -w 1  $aptproxy_ip >/dev/null; then
+		if ping -c 1 -w 1  "$aptproxy_ip" >/dev/null; then
 			turn_http_all winehq.org
 			turn_http_all nodesource.com
 			turn_http_all slacktechnologies
@@ -303,11 +324,11 @@ function refresh_apt_redirections {
 			turn_http_all signal.org
 			turn_http_all bintray.com/zulip
 			if [ -n "$aptproxy_enabled" ]; then
-				echo "Acquire::http::Proxy \"http://${aptproxy_ip}:${aptproxy_port}\";" | sudo tee ${aptproxy_file}
+				echo "Acquire::http::Proxy \"http://${aptproxy_ip}:${aptproxy_port}\";" | sudo tee "${aptproxy_file}"
 			fi
 		else
 			if [ -z "$aptproxy_enabled" ]; then
-				echo "#Acquire::http::Proxy \"http://${aptproxy_ip}:${aptproxy_port}\";" | sudo tee ${aptproxy_file}
+				echo "#Acquire::http::Proxy \"http://${aptproxy_ip}:${aptproxy_port}\";" | sudo tee "${aptproxy_file}"
 			fi
 			turn_https_all winehq.org
 			turn_https_all nodesource.com

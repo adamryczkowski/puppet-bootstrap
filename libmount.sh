@@ -10,7 +10,7 @@ function mount_network_cache {
    if [[ "$smb_server" == "" ]]; then
       smb_server=adam-minipc
    fi
-   mount_smb_share $mountpoint $smb_server
+   mount_smb_share "$mountpoint" "$smb_server"
 }
 
 function smb_share_client {
@@ -25,14 +25,16 @@ function smb_share_client {
 	if [ -n "${extra_opt}" ]; then
 		extra_opt=",${extra_opt}"
 	fi
-	fstab_entry "//${server}/${remote_name}" ${local_path} cifs users,credentials=${credentials_file},noexec,noauto${extra_opt} 0 0
+	fstab_entry "//${server}/${remote_name}" "${local_path}" "cifs users,credentials=${credentials_file},noexec,noauto${extra_opt}" 0 0
 }
 
 function mount_smb_share {
-	local mountpoint=$1
-	local smbserver=$2
-	if is_host_up $2; then
-	   mount_dir $1
+	local mountpoint
+	local smbserver
+	mountpoint=$1
+	smbserver=$2
+	if is_host_up "$smbserver"; then
+	   mount_dir "$mountpoint"
 	   return $?
 	fi
 	return 1
@@ -41,14 +43,13 @@ function mount_smb_share {
 function mount_dir {
 	local mountpoint=$1
 	if [ ! -d "$mountpoint" ]; then
-	   if is_mounted "" $mountpoint; then
+	   if is_mounted "" "$mountpoint"; then
 	      return 0
 	   fi
 		while [ ! -d "$mountpoint" ]; do
 			mountpoint=$(dirname "$mountpoint")
 		done
 		logexec mount "$mountpoint"
-		return $?
 	fi
 	return 1
 }
@@ -103,7 +104,7 @@ EOT
 		else
 			echo "set \$entry/opt[last()] \"$entry\"">>/tmp/fstab.augeas
 		fi
-		let "i=i+1"
+		(( i++ ))
 	done
 	export IFS="$OLDIFS"
 	echo "set \$entry/dump \"${dump}\"">>/tmp/fstab.augeas
@@ -120,10 +121,10 @@ function find_device_in_dmapper {
 	local line
 	local device
 	local backend
-	sudo dmsetup ls | while read line; do
+	sudo dmsetup ls | while read -r line; do
 		if [[ "$line" =~ $pattern1 ]]; then
 			device=${BASH_REMATCH[1]}
-			backend=$(sudo cryptsetup status $device | grep -F "device:")
+			backend=$(sudo cryptsetup status "$device" | grep -F "device:")
 			if [[ "${backend}" =~ $pattern2 ]]; then
 				device=${BASH_REMATCH[1]}
 				if [ "$device" == "$target" ]; then
@@ -135,7 +136,7 @@ function find_device_in_dmapper {
 			errcho "Syntax error of the output of dmsetup."
 		fi
 	done
-	return -1 #not found
+	return 254 #not found
 }
 
 function is_mounted {
@@ -149,12 +150,12 @@ function is_mounted {
 		ans=$(mount | grep -F " on ${mountpoint}")
 	else
 		errcho "is_mounted called with no arguments"
-		return -1
+		return 254
 	fi
 	if [ "$ans" != "" ]; then
 		return 0
 	else
-		return -1
+		return 254
 	fi
 }
 
@@ -167,31 +168,33 @@ function find_device_from_mountpoint {
 		echo "${BASH_REMATCH[1]}"
 		return 0
 	fi
-	return -1
+	return 254
 }
 
 #Gets the backing device from the dm device if it uses cryptsetup
 function device_from_crypt_dmapper {
 	local dmdevice=$1
 	local pattern='device: *([^ ]+)$'
-	local backend_line=$(sudo cryptsetup status "/dev/mapper/${dmdevice}" | grep -F "device:")
+	local backend_line
+	backend_line=$(sudo cryptsetup status "/dev/mapper/${dmdevice}" | grep -F "device:")
 	if [[ "$backend_line" =~ $pattern ]]; then
 		echo "${BASH_REMATCH[1]}"
 		return 0
 	else
 		echo ""
-		return -1
+		return 254
 	fi
 }
 
 function backing_luks_device_from_mount_point {
 	local mountpoint="$1"
 	local pattern='^/dev/mapper/(.*)$'
-	local actual_dmdevice=$(find_device_from_mountpoint "${mount_point}")
+	local actual_dmdevice
+	actual_dmdevice=$(find_device_from_mountpoint "${mount_point}")
 	if [ -n "${actual_dmdevice}" ]; then
 		if [[ "$actual_dmdevice" =~ $pattern ]]; then
 			local actual_dmdevice="${BASH_REMATCH[1]}"
-			local actual_device=device_from_crypt_dmapper ${actual_dmdevice}
+			local actual_device=device_from_crypt_dmapper "${actual_dmdevice}"
 			if [ -n "${actual_device}" ]; then
 				echo "$actual_device"
 				return 0

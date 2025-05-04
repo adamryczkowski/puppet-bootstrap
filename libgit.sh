@@ -9,14 +9,14 @@ function get_latest_github_release_name { #source: https://gist.github.com/lukec
 		install_apt_package curl curl
 		return 1
 	fi
-	ans=$(curl $github_token --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
+	ans=$(curl "$github_token" --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
 		grep '"tag_name":' |                                            # Get tag line
 		sed -E 's/.*"([^"]+)".*/\1/') # Pluck JSON value
 	if [ -n "$skip_v" ]; then
 		pattern='v(.*)$'
 		if [[ ! "$ans" =~ $pattern ]]; then
 			echo "Cannot strip \"v\" prefix from  $version"
-			return -1 
+			return 253
 		else
 			ans=${BASH_REMATCH[1]}
 		fi
@@ -38,13 +38,13 @@ function get_latest_github_tag {
 		install_apt_package jq jq
 		return 1
 	fi
-	ans=$(curl $github_token --silent "https://api.github.com/repos/$1/tags" | 
+	ans=$(curl "$github_token" --silent "https://api.github.com/repos/$1/tags" |
 	jq ".[${offset}].name")
 	if [ -n "$skip_v" ]; then
 		pattern='v(.*).{1}$'
 		if [[ ! "$ans" =~ $pattern ]]; then
 			echo "Cannot strip \"v\" prefix from  $version"
-			return -1 
+			return 253
 		else
 			ans=${BASH_REMATCH[1]}
 		fi
@@ -56,7 +56,8 @@ function get_latest_github_tag {
 function get_app_link_gh {
 	local name="$1" # e.g. "BurntSushi/ripgrep"
 	local _arch="$2"
-	local _ext="$3"	
+	local _ext="$3"
+	local releases
 	if [[ "${_arch}" == "" ]]; then 
 		_arch=$(cpu_arch)
 	fi
@@ -66,8 +67,8 @@ function get_app_link_gh {
 		_ext="\.${_ext}$"
 	fi
 
-	local releases=$(get_github_releases $name)
-	
+	releases="$(get_github_releases "$name")"
+
 	if [[ "$_arch" == "amd64" ]]; then
 		to_try=("amd64.*linux" "x86_64.*linux" "i686.*linux" "amd64" "x86_64" "i686" )
 	elif [[ "$_arch" == "arm64" ]]; then
@@ -96,11 +97,12 @@ function get_app_link_gh {
 # example: file=$(get_latest_github_release kee-org/keepassrpc KeePassRPC.plgx)
 function get_latest_github_release {
 	local local_filename="$3"
+	local file
 	if [ -z "$local_filename" ]; then
 		local_filename="$2"
 	fi
 	link=$(get_latest_github_release_link "$@")
-	local file=$(get_cached_file "${local_filename}" "$link")
+	file=$(get_cached_file "${local_filename}" "$link")
 	echo "$file"	
 }
 
@@ -109,13 +111,14 @@ function get_latest_github_release_link {
 	local github_name="$1"
 	local remote_filename="$2"
 	local local_filename="$3"
+	local release
 	if [ -z "$remote_filename" ]; then
-		return -1
+		return 253
 	fi
 	remote_filename=$(basename -- "$remote_filename") #We need only file name, no folders
-	local release="$4"
+	release="$4"
 	if [ -z "$release" ]; then
-		local release=$(get_latest_github_release_name $github_name)
+		release=$(get_latest_github_release_name "$github_name")
 	fi
 	local extension="${remote_filename##*.}"
 	local noextension="${remote_filename%.*}"
@@ -148,11 +151,17 @@ function make_sure_git_exists {
 function get_git_repo {
 	local repo=$1
 	local dir=$2
-	local name=$3
-	local user=$4
-	
-	if [ -z "${user}" ]; then
-	   user=$USER
+	local name
+	local user
+	if [ -z ${3+x} ]; then
+	  name=""
+	else
+	  name="$3"
+	fi
+	if [ -z ${4+x} ]; then
+	  user=$USER
+	else
+	  user="$4"
 	fi
 
 	if [ -z "${name}" ]; then
@@ -174,29 +183,31 @@ function get_git_repo {
 		errcho "Cannot find ${dir} directory to clone git repo ${repo}"
 		return 1
 	fi
-   logmkdir $dest $user
+   logmkdir "$dest" "$user"
 	
-	if [ -d ${dest}/.git ]; then
+	if [ -d "${dest}/.git" ]; then
 		# update repo
-		file_owner=$(stat -c '%U' ${dest}/.git)
+		file_owner=$(stat -c '%U' "${dest}/.git")
 		if [[ "${file_owner}" != "${USER}" ]]; then
-   		logexec sudo -u ${file_owner} -- git pull
+   		logexec sudo -u "${file_owner}" -- git pull
    	else
+   	  logexec pushd "${dest}" >/dev/null || return 1
    		logexec git pull
+   		logexec popd >/dev/null || return 1
       fi
 	else
-	   if [ -w ${dest} ]; then
-   		logexec git clone --depth 1 --recursive ${repo} ${dest}
+	   if [ -w "${dest}" ]; then
+   		logexec git clone --depth 1 --recursive "${repo}" "${dest}"
    	else
    	   if [[ "$user" != "$USER" ]]; then
-      	   need_root=$(sudo -u ${user} -H sh -c "if [ -w $dest ] ; then echo 0; else; echo 1; fi")
+      	   need_root=$(sudo -u "${user}" -H sh -c "if [ -w $dest ] ; then echo 0; else; echo 1; fi")
       	else
       	   need_root=1
       	fi
       	if [[ "${need_root}" == 1 ]]; then
-      	   logexec chown ${user} ${dest}
+      	   logexec chown "${user}" "${dest}"
       	fi
-   		logexec sudo -u ${user} -- git clone --depth 1 --recursive ${repo} ${dest}
+   		logexec sudo -u "${user}" -- git clone --depth 1 --recursive "${repo}" "${dest}"
    	fi
 	fi
 }
@@ -204,10 +215,13 @@ function get_git_repo {
 function get_current_git_branch {
   local gitpath=$1
   if [[ "$gitpath" != "" ]]; then
-    pushd  $gitpath >/dev/null
+    if ! pushd  "$gitpath" >/dev/null; then
+      errcho "Cannot change directory to $gitpath"
+      return 1
+    fi
   fi
   git rev-parse --abbrev-ref HEAD
   if [[ "$gitpath" != "" ]]; then
-    popd >/dev/null
+    popd >/dev/null || return 1
   fi
 }

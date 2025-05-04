@@ -1,12 +1,12 @@
 #!/bin/bash 
 
 function errcho {
-	echo "ERROR: $@"
+	echo "ERROR: $*"
 }
 
-function logexec {
- $@
-}
+#function logexec {
+# "$*"
+#}
 
 function get_app_version {
 	local app="$1" # name/path to the app
@@ -25,7 +25,7 @@ function get_app_version {
 	fi
 	pattern='([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+)'
 	if [[ "$ans" =~ $pattern ]]; then
-		echo ${BASH_REMATCH[1]}
+		echo "${BASH_REMATCH[1]}"
 	else 
 		echo ""
 	fi 
@@ -34,7 +34,7 @@ function get_app_version {
 
 function get_github_releases {
 	local name="$1" # e.g. "BurntSushi/ripgrep"
-	curl -s https://api.github.com/repos/$1/releases/latest | jq -r ".assets[] | select(.name | contains(\"\")) | .browser_download_url"
+	curl -s "https://api.github.com/repos/$name/releases/latest" | jq -r ".assets[] | select(.name | contains(\"\")) | .browser_download_url"
 }
 
 function install_update_hook {
@@ -44,7 +44,8 @@ function install_update_hook {
 	local version="$4"
 	local update_script_text="$5"
 	local cache_filename="$6"
-	local timestamp=$(date)
+	local timestamp
+	timestamp=$(date)
 	
 	local updater_path=/usr/local/lib/adam/updater/records
 	
@@ -88,8 +89,8 @@ function install_update_hook {
 	filename="${app_name}.${user_name}.rec"
 	script_filename="${app_name}.${user_name}.sh"
 	
-	echo "#github_name	asset_path	asset_type(source,deb,binary,git)	version	update_script_name	filename_in_cache timestamp" | sudo tee ${updater_path}/${filename} >/dev/null
-	echo "$record" | sudo tee -a ${updater_path}/${filename} >/dev/null
+	echo "#github_name	asset_path	asset_type(source,deb,binary,git)	version	update_script_name	filename_in_cache timestamp" | sudo tee "${updater_path}/${filename}" >/dev/null
+	echo "$record" | sudo tee -a "${updater_path}/${filename}" >/dev/null
 }
 
 function read_update_hook {
@@ -131,9 +132,11 @@ function install_gh_source {
 	local update_script_text="$3"
 	local override_name="$4"
 	local override_user="$5"
-	
-	local link="$(get_github_source_zipball "$gh_name")"
-	local version="$(get_latest_github_release_name "$gh_name")"
+	local link
+	local version
+
+	link="$(get_github_source_zipball "$gh_name")"
+	version="$(get_latest_github_release_name "$gh_name")"
 
 	if [[ "$gh_name" == "" ]]; then
 		pattern="([^/]+)/([^/]+)"
@@ -179,14 +182,16 @@ function install_gh_binary {
 	local override_arch="$6"
 	local bindir="$7"
 	local override_exe_name="$8"
-		
-	local link="$(get_app_link_gh "$gh_name" "${override_arch}" "tar\.gz")"
+	local link
+	local version
+
+	link="$(get_app_link_gh "$gh_name" "${override_arch}" "tar\.gz")"
 	if [[ "$link" == "" ]]; then
 		set +x
 		return 1
 	fi
 
-	local version="$(get_latest_github_release_name "$gh_name")"
+	version="$(get_latest_github_release_name "$gh_name")"
 
 	if [[ "$gh_name" != "" ]]; then
 		pattern="([^/]+)/([^/]+)"
@@ -227,7 +232,7 @@ function install_gh_binary {
 
 	make_symlink "${dest_dir}/${app_name}/${binary_relpath}" "${bindir}/${override_exe_name}"
 	install_update_hook "$gh_name" "${dest_dir}/${app_name}" source "$version"  "$update_script_text" "$filename"
-	chmod_file ${dest_dir}/${app_name}/${binary_relpath} 
+	chmod_file "${dest_dir}/${app_name}/${binary_relpath}"
 	set +x
 }
 
@@ -237,13 +242,15 @@ function install_gh_deb {
 	local gh_name="$1"
 	local package_name="$2"
 	local override_arch="$3"
-		
-	local link="$(get_app_link_gh "$gh_name" "${override_arch}" deb)"
+	local link
+	local version=
+
+	link="$(get_app_link_gh "$gh_name" "${override_arch}" deb)"
 	if [[ "$link" == "" ]]; then
 		set +x
 		return 1
 	fi
-	local version="$(get_latest_github_release_name "$gh_name")"
+	version="$(get_latest_github_release_name "$gh_name")"
 
 	if [[ "$gh_name" != "" ]]; then
 		pattern="([^/]+)/([^/]+)"
@@ -269,13 +276,15 @@ function install_gh_deb {
 function get_github_source_zipball {
 	# Attention! You need to rename the file returned by the link
 	local name="$1" # e.g. "BurntSushi/ripgrep"
-	curl -s https://api.github.com/repos/$1/releases/latest | jq -r ".zipball_url"
+	curl -s "https://api.github.com/repos/$name/releases/latest" | jq -r ".zipball_url"
 }
 
 function is_arch_supported {
-	local releases="$1"
-	local regexp="$2"
-	ans="$(echo "$1" | grep -E "[_\-]$2")"
+  local releases
+  local regexp
+	releases="$1"
+	regexp="$2"
+	ans="$(echo "$releases" | grep -E "[_\-]$regexp")"
 	
 	echo "$ans"
 	if [[ "$ans" == "" ]]; then
@@ -360,7 +369,7 @@ function github_install_app {
 		return 1
 	fi
 	pattern1='\.tar\.gz$'
-	pattern2='\.deb$'
+#	pattern2='\.deb$'
 	
 	if [[ "$download_link" =~ $pattern1 ]]; then
 		install_app_tar_gz "$app_name" "$download_link" "$filename" "$exe_name" "$user"

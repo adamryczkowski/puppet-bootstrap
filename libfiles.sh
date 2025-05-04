@@ -25,7 +25,7 @@ function apply_patch {
 	local hash_dest="$3"
 	local patchfile="$4"
 	local shasum
-	if [[ -f "$file" ]] && [[ -f "$patchfile" ]]; then
+	if [ -f "$file" ] && [ -f "$patchfile" ]; then
 		shasum=$(calcshasum "$file")
 		if [[ "$shasum" == "$hash_orig" ]]; then
 			if patch --dry-run "$file" "$patchfile" >/dev/null; then
@@ -64,7 +64,12 @@ function edit_bash_augeas {
 
 function logmkdir {
 	local dir=$1
-	local user=$2
+	local user
+	if [ -z ${2+x} ]; then
+	  user=""
+	else
+	  user="$2"
+	fi
 	if ! [ -d "$dir" ]; then
 		logexec sudo mkdir -p "$dir"
 	fi
@@ -89,7 +94,7 @@ function linetextfile {
 		fi
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 function textfile {
@@ -101,7 +106,7 @@ function textfile {
 		user="$USER"
 	fi
 	
-	local flag
+	local flag=0
 	logmkdir "$(dirname "${plik}")" "$user"
 	if [ ! -f "${plik}" ]; then
 		flag=1
@@ -130,6 +135,13 @@ function install_file {
 	local input_file="$1"
 	local dest="$2"
 	local user=$3
+	local set_executable
+
+	if [ -z ${4+x} ]; then
+	  set_executable=0
+	else
+	  set_executable="$4"
+  fi
 	
 	if [ -z "${user}" ]; then
 		user=auto
@@ -174,32 +186,41 @@ function install_file {
 			fi
 		fi
 	fi
+	if [ -n "$set_executable" ]; then
+		if [ "$user" != "$cur_owner" ]; then
+			if [ -w "$dest" ]; then
+        logexec chmod +x "$dest"
+			else
+    	  logexec sudo chmod +x "$dest"
+			fi
+		fi
+  fi
 }
 
 function set_executable {
 	local input_file="$1"
-	
-	if [[ -f "$dest" ]]; then
-	   if [[ ! -x "$dest" ]]; then
-		   if [ -w "$dest" ]; then
-			   logexec chmod +x "$dest"
+
+	if [ -f "$input_file" ]; then
+	   if [[ ! -x "$input_file" ]]; then
+		   if [ -w "$input_file" ]; then
+			   logexec chmod +x "$input_file"
 		   else
-			   logexec sudo chmod +x "$dest"
+			   logexec sudo chmod +x "$input_file"
 		   fi
 	   fi
-	   if [[ ! -x "$dest" ]]; then
-		   errcho "Cannot set executable permission to $dest"
+	   if [[ ! -x "$input_file" ]]; then
+		   errcho "Cannot set executable permission to $input_file"
 		   return 1
 	   fi
 	else
-	   errcho "File $dest is not found"
+	   errcho "File $input_file is not found"
 	   return 1
 	fi
 }
 
 function set_non_executable {
 	local input_file="$1"
-	if [[ -f "$dest" ]]; then
+	if [ -f "$dest" ]; then
 	   if [[ ! -x "$dest" ]]; then
 		   if [ -w "$dest" ]; then
 			   logexec chmod -x "$dest"
@@ -219,14 +240,16 @@ function set_non_executable {
 
 function install_script {
 	local input_file="$1"
-	local dest="$2"
-	if [ -z ${3+x} ]; then 
-		local user="$USER"
+	local dest_folder="$2"
+	local set_executable="$3"
+	local user
+	if [ -z ${4+x} ]; then
+		user="$USER"
 	else 
-		local user="${3}"
+		user="${4}"
 	fi
-	install_file "$input_file" "$dest" "$user"
-	set_executable "$dest"
+	logmkdir "$dest_folder" "$user"
+	install_file "$input_file" "$dest_folder" "$user" "$set_executable"
 }
 
 function install_data_file {
@@ -338,9 +361,9 @@ function get_cached_file {
 	echo "${repo_path}/${filename}"
 }
 
-function logexec {
-	exec "$@" | true
-}
+#function logexec {
+#	exec "$@" | true
+#}
 
 function extract_archive {
 	local archive_path="$1"
