@@ -786,17 +786,31 @@ function i3wm {
 	logexec sudo gem install fusuma
 	logexec sudo usermod -aG input "${user}"
 	
-	add_apt_source_manual manuelschneid3r "deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_$(get_ubuntu_version .)/ /" https://build.opensuse.org/projects/home:manuelschneid3r/public_key manuelschneid3r.key
-	
+	add_apt_source_manual manuelschneid3r "deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_$(get_ubuntu_version .)/ /" "https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_$(get_ubuntu_version .)/Release.key"  manuelschneid3r.key
 	install_script files/i3exit '/usr/local/bin' root
 	
 	install_apt_packages pcmanfm units playerctl  # albert
 
+
+
 	
 #	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
 #	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb 
-		
-	
+
+  input_class_contents=$(cat <<EOF
+Section "InputClass"
+    Identifier "libinput touchpad catchall"
+    MatchIsTouchpad "on"
+    Driver "libinput"
+    Option "Tapping" "on"
+    Option "TappingButtonMap" "lrm"
+    Option "NaturalScrolling" "off"
+    Option "DisableWhileTyping" "0"
+EndSection
+EOF
+)
+  textfile "/etc/X11/xorg.conf.d/40-libinput.conf" "${input_class_contents}" root
+
 	#Dark theme
 	install_apt_packages gnome-themes-extra
 	if [ ! -f  "${home}/.config/gtk-3.0/settings.ini" ]; then

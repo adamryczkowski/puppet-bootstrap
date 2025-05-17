@@ -12,6 +12,7 @@
 ## dependency: libinstall.sh
 ## dependency: librust.sh
 ## dependency: libbashrc.sh
+## dependency: libpip.sh
 
 #!/bin/bash
 # shellcheck disable=SC2128
@@ -32,6 +33,7 @@ source "${adamlibpath}/liblxc.sh"
 source "${adamlibpath}/libinstall.sh"
 source "${adamlibpath}/librust.sh"
 source "${adamlibpath}/libbashrc.sh"
+source "${adamlibpath}/libpip.sh"
 
 #Gets ubuntu version in format e.g. 1804 or 1604
 function get_ubuntu_version {

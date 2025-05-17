@@ -142,7 +142,7 @@ loglogx='eval if [ -n "$log" ]; then myline=$(($LINENO+1)); trap "rlog 1" DEBUG;
 function logexec()
 {	
 	case $- in *x*) USE_X="-x";; *) USE_X=;; esac
-	set +x
+#	set +x
 	case $- in *e*) USE_E="-e";; *) USE_E=;; esac
 	set +e
 	if [ "$1" == "1" ]; then
@@ -218,7 +218,7 @@ function logexec()
         }
       ' "$tmpoutput2" | tee -a "$log"
     fi
-#		echo rm "$tmpoutput"
+		echo rm "$tmpoutput"
 		if [ "$exitstatus" -ne "0" ]; then
 			echo "## Exit status: $exitstatus" >>"$log"
 		fi
@@ -228,7 +228,7 @@ function logexec()
 		source "$tmpcmd"
 		exitstatus=$?
 	fi
-	rm "$tmpcmd"
+	echo rm "$tmpcmd"
 #	trap 'errorhdl' ERR
 	if [ "$exitstatus" -ne "0" ]; then
 		if [ -n "$USE_E" ]; then
@@ -395,7 +395,7 @@ source libs.sh
 
 mypath=${0%/*}
 mypath=$(dir_resolve "$mypath")
-if [ -n "${mypath}" ]; then
+if [ -n "${mypath}" ] && [ "${mypath}" != "/usr/bin" ]; then
 	cd "$mypath"
 fi
 

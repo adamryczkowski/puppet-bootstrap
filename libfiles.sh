@@ -71,7 +71,13 @@ function logmkdir {
 	  user="$2"
 	fi
 	if ! [ -d "$dir" ]; then
-		logexec sudo mkdir -p "$dir"
+    if [ -w "$(dirname "$dir")" ]; then
+#      set -x
+      logexec mkdir -p "$dir"
+#      set +x
+    else
+  		logexec sudo mkdir -p "$dir"
+    fi
 	fi
 	if [ -n "$user" ]; then
 		curuser=$(stat -c '%U' "${dir}")
@@ -96,6 +102,44 @@ function linetextfile {
 	fi
 	return 0
 }
+
+function multilinetextfile {
+  # Makes sure the paragraph passed indirectly as a Bash variable name,
+  # is present in the file.
+  local plik="$1"
+  local variablename="$2"
+
+  local contents="${!variablename}"
+
+  if [ -z "$contents" ]; then
+    errcho "Empty contents to multilinetextfile"
+    return 1
+  fi
+  if [ -z "$plik" ]; then
+    errcho "Empty file name to multilinetextfile"
+    return 1
+  fi
+
+  local joined=${contents//$'\n'/\\n}
+  joined=${joined//\$/\\\$}
+  joined=${joined//\[/\\\[}
+  joined=${joined//\]/\\\]}
+  joined=${joined//\)/\\\)}
+  joined=${joined//\(/\\\(}
+  joined=${joined//\*/\\\*}
+  joined=${joined//\?/\\\?}
+
+  if grep -Poz -- "$joined" "$plik" >/dev/null; then
+    return 0
+  fi
+  if [ -w "$plik" ]; then
+    echo "$contents" >> "$plik"
+  else
+    echo "$contents" | sudo tee -a "$plik" >/dev/null
+  fi
+  return 0
+}
+
 
 function textfile {
 	local plik=$1
@@ -331,6 +375,33 @@ function chown_dir {
 	logexec sudo find "$file" -not -user "$user" -or -not -group "$group" -exec chown "${user}:${group}" {} \;
 }
 
+function download_file {
+  # Downloads the file from the link, if the file does not exist
+  local filename="$1"
+  local download_link="$2"
+
+  if [ -z "$filename" ]; then
+    errcho "No filename provided"
+    return 1
+  fi
+  if [ -z "$download_link" ]; then
+    errcho "No download link provided"
+    return 1
+  fi
+  if [ ! -f "$filename" ]; then
+    if [ -w "$(dirname "$filename")" ]; then
+      logexec wget -c "$download_link" -O "$filename"
+    else
+      logexec sudo wget -c "$download_link" -O "$filename"
+    fi
+  fi
+  if [ ! -f "$filename" ]; then
+    errcho "Cannot download the file"
+    return 1
+  fi
+}
+
+
 # returns path
 function get_cached_file {
 	local filename="$1"
@@ -467,6 +538,7 @@ function extract_archive {
 
 # shellcheck disable=SC2120
 function make_sure_dtrx_exists {
+  # TODO: Re-implement this function using libpipx.sh.
 	local mute="$1"
 	if ! which dtrx >/dev/null; then
 		if [[ $mute == "" ]]; then

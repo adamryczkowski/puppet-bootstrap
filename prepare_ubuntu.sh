@@ -1,6 +1,6 @@
 #!/bin/bash
 ## dependency: prepare_ubuntu_user.sh
-cd `dirname $0`
+cd "$(dirname "$0")" || exit 1
 . ./common.sh
 
 usage="
@@ -13,7 +13,7 @@ The script must be run as a root.
 
 Usage:
 
-$(basename $0) <user-name> [--apt-proxy IP:PORT] [--wormhole] [--need-apt-update]
+$(basename "$0") <user-name> [--apt-proxy IP:PORT] [--wormhole] [--need-apt-update]
 
 where
 
@@ -34,13 +34,14 @@ where
  --ping                   - prettyping (ping),
  --gping						  - gping (https://github.com/orf/gping)
  --fzf                    - fzf (for bash ctr+r)
+ --gitutils               - Git utilities: k3diff, meld, difftastic, delta
  --htop                   - htop
+ --btop                   - btop
  --diff                   - diff-so-fancy (diff),
  --find                   - fd (replaces find)
  --du                     - ncdu (replaces du), 
  --bandwidth              - bandwidth (Terminal bandwidth utilization tool), 
  --tldr                   - tldr,
- --ag                     - ag (the silver searcher), 
  --rg                     - ripgrep,
  --entr                   - entr (watch), 
  --noti                   - noti (notification when something is done)
@@ -51,22 +52,22 @@ where
  --liquidprompt           - liquidprompt
  --byobu                  - byobu
  --hexyl                  - hexyl (a hex editor)
- --autojump               - autojump (cd replacement)
+ --zoxide                 - zoxide (cd replacement)
  --dtrx                   - Do The Right eXtraction (untar/unzip/unrar/etc. replacement)
 
 Example:
 
-$(basename $0) --apt-proxy 192.168.10.2:3142
+$(basename "$0") --apt-proxy 192.168.10.2:3142
 "
 
 dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
-	echo "`pwd -P`" # output full, link-resolved path
+	pwd -P # output full, link-resolved path
 }
 mypath=${0%/*}
-mypath=`dir_resolve $mypath`
-cd $mypath
+mypath=$(dir_resolve "$mypath")
+cd "$mypath" || exit 1
 
 users=()
 pattern='^--.*$'
@@ -88,23 +89,24 @@ install_find=0
 install_du=0
 install_bandwidth=0
 install_tldr=0
-install_ag=0
 install_rg=0
 install_entr=0
 install_noti=0
 install_dust=0
 install_aptitude=0
 install_mc=0
-install_git_extra=0
+#install_git_extra=0
 install_liquidprompt=0
 install_byobu=0
 install_hexyl=0
-install_autojump=0
 install_dtrx=0
+install_btop=0
+install_gitutils=0
+install_zoxide=0
 
 user_opts=""
 
-while [[ $# > 0 ]]
+while [[ $# -gt 0 ]]
 do
 key="$1"
 shift
@@ -122,6 +124,7 @@ case $key in
 	shift
 	;;
 	--repo-path)
+	# shellcheck disable=SC2034
 	repo_path="$1"
 	shift
 	;;
@@ -147,7 +150,9 @@ case $key in
 	shift
 	;;
 	--wormhole)
+	# shellcheck disable=SC2034
 	wormhole=1
+	user_opts="${user_opts} --wormhole"
 	;;
 	--need-apt-update)
 	flag_need_apt_update=1
@@ -155,6 +160,10 @@ case $key in
 	--cli-improved)
 	install_bat=1
 	user_opts="${user_opts} --bat"
+	install_btop=1
+	user_opts="${user_opts} --btop"
+	install_zoxide=1
+	user_opts="${user_opts} --zoxide"
 	install_ping=1
 	install_gping=1
 	user_opts="${user_opts} --ping"
@@ -169,7 +178,7 @@ case $key in
 	user_opts="${user_opts} --du"
 	install_tldr=1
 	install_rg=1
-   install_bandwidth=1
+  install_bandwidth=1
 	install_entr=1
 	install_noti=1
 	install_dust=1
@@ -180,12 +189,26 @@ case $key in
 	user_opts="${user_opts} --liquidprompt"
 	install_byobu=1
 	install_hexyl=1
-	install_autojump=1
-	user_opts="${user_opts} --autojump"
 	;;
 	--bat)
+	# shellcheck disable=SC2034
 	install_bat=1
 	user_opts="${user_opts} --bat"
+	;;
+  --btop)
+  # shellcheck disable=SC2034
+  install_btop=1
+  user_opts="${user_opts} --btop"
+  ;;
+  --gitutils)
+  # shellcheck disable=SC2034
+  install_gitutils=1
+  user_opts="${user_opts} --gitutils"
+  ;;
+  --zoxide)
+  # shellcheck disable=SC2034
+  install_zoxide=1
+  user_opts="${user_opts} --zoxide"
 	;;
 	--ping)
 	install_ping=1
@@ -219,9 +242,6 @@ case $key in
 	--tldr)
 	install_tldr=1
 	;;
-	--ag)
-	install_ag=1
-	;;
 	--rg)
 	install_rg=1
 	;;
@@ -239,10 +259,10 @@ case $key in
 	;;
 	--aptitude)
 	install_aptitude=1
-	;;
-	--git-extra)
-	install_git_extra=1
-	user_opts="${user_opts} --git-extra"
+#	;;
+#	--git-extra)
+#	install_git_extra=1
+#	user_opts="${user_opts} --git-extra"
 	;;
 	--liquidprompt)
 	install_liquidprompt=1
@@ -253,10 +273,6 @@ case $key in
 	;;
 	--hexyl)
 	install_hexyl=1
-	;;
-	--autojump)
-	install_autojump=1
-	user_opts="${user_opts} --autojump"
 	;;
 	--dtrx)
 	install_dtrx=1
@@ -287,6 +303,7 @@ install_apt_package jq jq
 if [ -n "$aptproxy" ]; then
 	$loglog
 	echo "Acquire::http::Proxy \"http://$aptproxy\";" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
+	# shellcheck disable=SC2034
 	flag_need_apt_update=1
 fi
 
@@ -306,12 +323,12 @@ do_upgrade
 install_apt_packages bash-completion curl
 #	install_byobu=1
 
-if [ "${install_bat}" == "1" ]; then
-	version=$(get_latest_github_release_name sharkdp/bat skip_v)
-	
-	link=$(get_latest_github_release_link sharkdp/bat bat_${version}_$(cpu_arch).deb bat_${version}_$(cpu_arch).deb )
-	install_apt_package_file bat_${version}_$(cpu_arch).deb bat $link
-fi
+#if [ "${install_bat}" == "1" ]; then
+#	version=$(get_latest_github_release_name sharkdp/bat skip_v)
+#
+#	link=$(get_latest_github_release_link sharkdp/bat bat_${version}_$(cpu_arch).deb bat_${version}_$(cpu_arch).deb )
+#	install_apt_package_file bat_${version}_$(cpu_arch).deb bat $link
+#fi
 
 if [ "${install_ping}" == "1" ]; then
 	plik=$(get_cached_file prettyping https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping)
@@ -334,11 +351,15 @@ if [ "${install_htop}" == "1" ]; then
 	install_apt_package htop
 fi
 
-if [ "${install_dtrx}" == "1" ]; then
-	if ! install_apt_package dtrx; then
-		install_pip3_packages dtrx
-	fi
+if [ "${install_btop}" == "1" ]; then
+	install_apt_package btop
 fi
+
+#if [ "${install_dtrx}" == "1" ]; then
+#	if ! install_apt_package dtrx; then
+#		install_pip3_packages dtrx
+#	fi
+#fi
 
 if [ "${install_diff}" == "1" ]; then
 	plik=$(get_cached_file diff-so-fancy https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy)
@@ -355,20 +376,20 @@ if [ "${install_find}" == "1" ]; then
 #	link=$(get_latest_github_release_link sharkdp/fd ${file} ${file})
 #	install_apt_package_file ${file} fd $link
 fi
-set -x
 if [ "${install_du}" == "1" ]; then
-	cached_file=$(get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz)
-	tmp=$(mktemp -d)
-	skip_timestamp=1
-	uncompress_cached_file ${cached_file} $tmp 
-	install_apt_packages build-essential libncurses5-dev
-	logexec pushd ${tmp}/ncdu
-	logexec ./configure
-	logexec make
-	logexec sudo make install
-	logexec popd
+  install_apt_package ncdu
+#	cached_file=$(get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz)
+#	tmp=$(mktemp -d)
+#	# shellcheck disable=SC2034
+#	skip_timestamp=1
+#	uncompress_cached_file ${cached_file} $tmp
+#	install_apt_packages build-essential libncurses5-dev
+#	logexec pushd ${tmp}/ncdu
+#	logexec ./configure
+#	logexec make
+#	logexec sudo make install
+#	logexec popd
 fi
-set +x
 if [ "${install_bandwidth}" == "1" ]; then
 	install_gh_binary imsnif/bandwhich /usr/local/share bandwhich
 
@@ -406,10 +427,6 @@ if [ "${install_tldr}" == "1" ]; then
 	install_pip3_packages tldr
 fi
 
-if [ "${install_ag}" == "1" ]; then
-	install_apt_packages silversearcher-ag
-fi
-
 if [ "${install_rg}" == "1" ]; then
 	install_apt_packages ripgrep
 #	install_gh_deb BurntSushi/ripgrep ripgrep
@@ -431,16 +448,17 @@ if [ "${install_rg}" == "1" ]; then
 fi
 
 if [ "${install_entr}" == "1" ]; then
-	get_cached_file entr-4.2.tar.gz http://entrproject.org/code/entr-4.2.tar.gz
-	tmp=$(mktemp -d)
-	pushd $tmp
-	uncompress_cached_file entr-4.2.tar.gz eradman
-	logexec cd eradman
-	install_apt_packages build-essential
-	logexec ./configure
-	logexec make
-	logexec sudo make install
-	logexec popd
+  install_apt_package entr
+#	get_cached_file entr-4.2.tar.gz http://entrproject.org/code/entr-4.2.tar.gz
+#	tmp=$(mktemp -d)
+#	pushd $tmp
+#	uncompress_cached_file entr-4.2.tar.gz eradman
+#	logexec cd eradman
+#	install_apt_packages build-essential
+#	logexec ./configure
+#	logexec make
+#	logexec sudo make install
+#	logexec popd
 fi
 
 if [ "${install_noti}" == "1" ]; then
@@ -456,9 +474,9 @@ if [ "${install_aptitude}" == "1" ]; then
 	install_apt_package aptitude
 fi
 
-if [ "${install_git_extra}" == "1" ]; then
-	get_git_repo https://github.com/unixorn/git-extra-commands.git /usr/local/lib git-extra-commands
-fi
+#if [ "${install_git_extra}" == "1" ]; then
+#	get_git_repo https://github.com/unixorn/git-extra-commands.git /usr/local/lib git-extra-commands
+#fi
 
 if [ "${install_liquidprompt}" == "1" ]; then
 	install_apt_packages liquidprompt
@@ -470,29 +488,22 @@ if [ "${install_byobu}" == "1" ]; then
 fi
 
 if [ "${install_hexyl}" == "1" ]; then
-	install_gh_deb sharkdp/hexyl hexyl
-#	file="hexyl_$(get_latest_github_release_name sharkdp/hexyl skip_v)_$(cpu_arch).deb"
-#	link=$(get_latest_github_release_link sharkdp/hexyl ${file} ${file})
-#	install_apt_package_file ${file} hexyl $link
-
-
-#	install_apt_package_file fd-musl_7.1.0_amd64.debhexyl_0.3.1_amd64.deb hexyl https://github.com/sharkdp/hexyl/releases/download/v0.3.1/hexyl_0.3.1_amd64.deb
+  install_apt_package hexyl
+#	install_gh_deb sharkdp/hexyl hexyl
 fi
 
-if [ "${install_autojump}" == "1" ]; then
-	install_apt_package autojump
-fi
+#if [ "${wormhole}" == "1" ]; then
+#  install_pipx_command magic-owormhole
+#	if ! which wormhole >/dev/null; then
+#		if install_apt_package python3-pip; then
+#			logexec sudo -H pip3 install --upgrade pip
+#		fi
+#		install_apt_packages build-essential python3-dev libffi-dev libssl-dev
+#		logexec sudo -H pip3 install magic-wormhole
+#	fi
+#fi
 
-if [ "${wormhole}" == "1" ]; then
-	if ! which wormhole >/dev/null; then
-		if install_apt_package python3-pip; then
-			logexec sudo -H pip3 install --upgrade pip
-		fi
-		install_apt_packages build-essential python3-dev libffi-dev libssl-dev
-		logexec sudo -H pip3 install magic-wormhole
-	fi
-fi
-
+# shellcheck disable=SC2128
 if [ -n "$users" ] ; then
 	if [ -n "$debug" ]; then
 		user_opts="--debug ${user_opts}"
@@ -500,11 +511,11 @@ if [ -n "$users" ] ; then
 	if [ -n "$log" ]; then
 		user_opts="--log ${log} ${user_opts}"
 	fi
-	pushd "$DIR"
+	pushd "$DIR" || exit 1
 #	set -x
-	bash -x ./prepare_ubuntu_user.sh ${users[0]} ${user_opts} ${private_key_path}
-	for user in ${users[@]:1}; do
-		sudo -H -u ${user} -- bash -x ./prepare_ubuntu_user.sh ${user} ${user_opts}
+	bash -x ./prepare_ubuntu_user.sh "${users[0]}" "${user_opts}" "${private_key_path}"
+	for user in "${users[@]:1}"; do
+		sudo -H -u "${user}" -- bash -x ./prepare_ubuntu_user.sh "${user}" "${user_opts}"
 	done
-	popd
+	popd || exit 1
 fi

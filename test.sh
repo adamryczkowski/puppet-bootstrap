@@ -50,10 +50,10 @@ case $key in
 	filename="$1"
 	shift
 	;;
-        -*)
-        echo "Error: Unknown option: $1" >&2
-        echo "$usage" >&2
-        ;;
+  -*)
+  echo "Error: Unknown option: $1" >&2
+  echo "$usage" >&2
+  ;;
 esac
 done
 if [ -n "$debug" ]; then

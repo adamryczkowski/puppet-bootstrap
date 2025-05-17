@@ -7,12 +7,14 @@ log="/dev/stdout"
 cd "$(dirname "$0")"
 . ./common.sh
 
-logexec bla
-
-#logexec true
+#logexec bla
 #
-#echo "Failure test"
+##logexec true
+##
+##echo "Failure test"
+##
+#logexec /bin/false
 #
-logexec /bin/false
+#echo "Failure failure"
 
-echo "Failure failure"
+logexec ./test_logexec2.sh argument
