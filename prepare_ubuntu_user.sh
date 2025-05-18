@@ -26,6 +26,7 @@ where
  --debug                  - Flag that sets debugging mode. 
  --log                    - Path to the log file that will log all meaningful commands
  --bat                    - cat replacement (bat)
+ --bashrcd                - Replace existing .bashrc with a new one. Old bashrc will be backed up.
  --wormhole               - Magic wormhole
  --dtrx                   - Do The Right Extraction
  --gitutils               - Git utilities: k3diff, meld, difftastic, delta
@@ -46,6 +47,7 @@ $(basename "$0") adam --private-key-path /tmp/id_rsa --external-key 'ssh-ed25519
 "
 
 install_bat=0
+install_bashrcd=0
 install_ping=0
 install_fzf=0
 #install_du=0
@@ -117,6 +119,9 @@ case $key in
 	--bat)
 	install_bat=1
 	;;
+  --bashrcd)
+  install_bashrcd=1
+  ;;
 	--ping)
 	install_ping=1
 	;;
@@ -220,8 +225,15 @@ if sudo [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
   fi
 fi
 
+if [ -n "$bashrcd" ]; then
+  replace_bashrc "$user"
+else
+  add_bashrcd_driver "$user"
+fi
+
 # shellcheck disable=SC2016
-add_bashrc_line 'mkcdir() { mkdir -p -- "$1" && cd -P -- "$1"; }' 30 "mkcdir function"
+add_bashrc_file files/bashrc.d/20_bash_aliases.sh "20_bash_aliases.sh" "$user"
+#add_bashrc_line 'mkcdir() { mkdir -p -- "$1" && cd -P -- "$1"; }' 30 "mkcdir function"
 #linetextfile "${sshhome}/.bashrc" 'mkcdir() { mkdir -p -- "$1" && cd -P -- "$1"; }'
 
 if [ "${install_bat}" == "1" ]; then
@@ -230,12 +242,12 @@ if [ "${install_bat}" == "1" ]; then
 #less --tabs 4 -RF \"$@\"" $USER
 #		install_script $tmp ${sshhome}/bin/less $user
   install_rust_app bat
-  add_bashrc_line 'alias cat="bat"' 30 "cat replacement"
+  add_bashrc_lines 'alias cat="bat"' "21_cat_replacement"
 #  linetextfile "${sshhome}/.bashrc" 'alias cat="bat"'
 fi
 
 if [ "${install_ping}" == "1" ]; then
-  add_bashrc_line 'alias ping="prettyping --nolegend"' 30 "Pretty-ping alias"
+  add_bashrc_lines 'alias ping="prettyping --nolegend"' "21_Pretty-ping_alias"
 #  linetextfile ${sshhome}/.bashrc 'alias ping="prettyping --nolegend"'
 fi
 
@@ -244,8 +256,8 @@ if [ "${install_fzf}" == "1" ]; then
     errcho "fzf cannot be installed with atuin. Please install fzf manually."
   fi
   install_rust_app fzf
-  add_bashrc_line "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\"" 30 "fzf preview"
-  add_bashrc_line "[ -f \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash ] && source \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash" 30 "fzf bash completion"
+  add_bashrc_lines "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\"" "21_fzf_preview"
+  add_bashrc_lines "[ -f \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash ] && source \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash" "31_fzf_bash_completion"
 #  linetextfile ${sshhome}/.bashrc "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\""
 #  linetextfile ${sshhome}/.bashrc "[ -f \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash ] && source \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash"
 fi
@@ -298,13 +310,8 @@ fi
 #set +x
 
 if [ "${install_git_extra}" == "1" ]; then
-  add_path_to_bashrc /usr/local/lib/git-extra-commands/bin "git-extra"
+  add_path_to_bashrc /usr/local/lib/git-extra-commands/bin
 #  linetextfile ${sshhome}/.bashrc 'export PATH="$PATH:/usr/local/lib/git-extra-commands/bin"'
-fi
-
-if [ "${install_ping}" == "1" ]; then
-  add_bashrc_line 'alias ping="prettyping"' "Pretty-ping alias"
-#  linetextfile ${sshhome}/.bashrc 'alias ping="prettyping"'
 fi
 
 if [ "$install_gping" == "1" ]; then
@@ -324,7 +331,7 @@ fi
 if [ "${install_zoxide}" == "1" ]; then
   install_rust_app zoxide
   # shellcheck disable=SC2016
-  add_bashrc_line 'eval "$(zoxide init bash --cmd cd)"' "Enables Zoxide as 'cd' replacement"
+  add_bashrc_lines 'eval "$(zoxide init bash --cmd cd)"' "22_zoxide"
 fi
 
 if [ "${install_liquidprompt}" == "1" ]; then
@@ -335,6 +342,6 @@ if [ "${install_liquidprompt}" == "1" ]; then
   fi
   install_bash_preexec
   # shellcheck disable=SC2016
-  add_bashrc_line 'eval "$(Liquidprompt)"' 91 "Enables Liquidprompt" "$user"
+  add_bashrc_lines 'eval "$(Liquidprompt)"' "80_liquidprompt"
 fi
 

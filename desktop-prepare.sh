@@ -308,6 +308,10 @@ MimeType=application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocum
 }
 
 function laptop {
+  install_pipx_command git+https://github.com/adamryczkowski/bright
+  install_file files/fix_permissions.sh /usr/local/lib/adam/scripts/ root 1
+  linetextfile /etc/pam.d/common-session "session optional    pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
+
 #	desktop
 #	gsettings_set_value org.gnome.desktop.peripherals.touchpad click-method "fingers"
 #	gsettings_set_value org.gnome.desktop.peripherals.touchpad edge-scrolling-enabled true
@@ -323,14 +327,16 @@ function laptop {
 #	linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
 #	install_file files/bright /usr/local/bin
 #	install_file files/bright /usr/local/lib/adam/scripts	
-	
+
+
+
 	# udev rules for charging
 	install_file files/60-onbattery.rules /etc/udev/rules.d
-	install_file files/ac_changed.sh /usr/local/bin
-	install_apt_packages acpitool ubuntu-touch-sounds
+	install_file files/ac_changed.sh /usr/local/bin 1
+	install_apt_packages acpitool ubuntu-touch-sounds sox
 	crontab -l -u $USER > /tmp/cron_tmp.cron
 	linetextfile /tmp/cron_tmp.cron "* * * * * [ -f /tmp/discharging ] && play /usr/share/sounds/ubuntu/notifications/Blip.ogg"
-	sudo sudo udevadm control --reload
+	sudo udevadm control --reload
 	crontab -u $USER /tmp/cron_tmp.cron
 }
 
@@ -853,8 +859,7 @@ gtk-xft-hintstyle=hintfull
 	install_apt_packages libinput-tools ruby
 	
 #	get_git_repo https://github.com/flumm/Themes.git ${home}/tmp/i3themes i3themes
-	
-	
+  install_pipx_command git+https://github.com/adamryczkowski/bright
 }
 
 

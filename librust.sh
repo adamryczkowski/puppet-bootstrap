@@ -33,7 +33,7 @@ function install_rust {
   fi
 
   export PATH="$PATH:$rustup_dir/bin"
-  add_bashrc_line '. "$HOME/.cargo/env"' rust
+  add_bashrc_line '. "$HOME/.cargo/env"' "40_rust"
 }
 
 function install_rust_app {

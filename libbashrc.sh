@@ -1,6 +1,44 @@
 #!/bin/bash
 
-# TODO: Add scripts that manage the bashrc file using .bashrc.d/ folder
+
+function replace_bashrc {
+  # Raplaces the bashrc file with the contents of the universal bashrc file
+  local bashrc_bak
+  local bashrc_src="files/bashrc"
+  if [[ -z ${1+x} ]]; then
+    user="$USER"
+  else
+    user="$1"
+  fi
+  bashrc_bak="$(get_home_dir "$user")/.bashrc.bak"
+  if [ ! -f "$bashrc_src" ]; then
+    errcho "Cannot find bashrc file $bashrc_src"
+    return 1
+  fi
+
+  # Compare existing bashrc with the universal bashrc. If they are the same, do nothing.
+  if [ -f "$bashrc" ]; then
+    if cmp -s "$bashrc" "$(get_home_dir "$user")/.bashrc"; then
+      return 0
+    fi
+  fi
+
+  if [ -f "$bashrc_bak" ]; then
+    errcho "Cannot backup .bashrc file to $bashrc_bak, it already exists"
+    return 1
+  fi
+  install_file "$bashrc_src" "$(get_home_dir "$user")/.bashrc" "$user"
+  add_bashrcd_driver
+  setup_bash_path_man "$user"
+  add_path_to_bashrc "$HOME/.local/bin" "$user"
+  add_bashrc_file files/bashrc.d/01_histcontrol.sh "01_histcontrol.sh" "$user"
+  add_bashrc_file files/bashrc.d/02_checkwinsize.sh "02_checkwinsize.sh" "$user"
+  add_bashrc_file files/bashrc.d/03_lesspipe.sh "03_lesspipe.sh" "$user"
+  add_bashrc_file files/bashrc.d/04_standard_prompt.sh "04_standard_prompt.sh" "$user"
+  add_bashrc_file files/bashrc.d/10_color_aliases.sh "10_color_aliases.sh" "$user"
+  add_bashrc_file files/bashrc.d/20_bash_aliases.sh "20_bash_aliases.sh" "$user"
+  add_bashrc_file files/bashrc.d/30_bash_completions.sh "30_bash_completions.sh" "$user"
+}
 
 function add_bashrcd_driver {
   local user

@@ -31,6 +31,7 @@ where
  --no-sudo-password       - If set, sudo will not ask for password
  --cli-improved           - Install all the following recommended command line tools:
  --bat                    - cat replacement (bat)
+ --bashrcd                - Replace existing .bashrc with a new one. Old bashrc will be backed up.
  --ping                   - prettyping (ping),
  --gping						  - gping (https://github.com/orf/gping)
  --fzf                    - fzf (for bash ctr+r)
@@ -80,6 +81,7 @@ debug=0
 wormhole=0
 repo_path=""
 install_bat=0
+install_bashrcd=0
 install_ping=0
 install_gping=0
 install_fzf=0
@@ -160,6 +162,8 @@ case $key in
 	--cli-improved)
 	install_bat=1
 	user_opts="${user_opts} --bat"
+	install_bashrcd=1
+	user_opts="${user_opts} --bashrcd"
 	install_btop=1
 	user_opts="${user_opts} --btop"
 	install_zoxide=1
@@ -195,6 +199,11 @@ case $key in
 	install_bat=1
 	user_opts="${user_opts} --bat"
 	;;
+  --bashrcd)
+  # shellcheck disable=SC2034
+  install_bashrcd=1
+  user_opts="${user_opts} --bashrcd"
+  ;;
   --btop)
   # shellcheck disable=SC2034
   install_btop=1
@@ -321,6 +330,7 @@ do_update
 do_upgrade
 
 install_apt_packages bash-completion curl
+
 #	install_byobu=1
 
 #if [ "${install_bat}" == "1" ]; then

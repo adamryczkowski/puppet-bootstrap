@@ -1,0 +1,26 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+
+export BASHCONFD="$HOME/.bashrc.d"
+
+# Source the configurations in .bashrc.d directory
+if [ -d "${BASHCONFD}" ]; then
+    CONFS=()
+    CONFS=$(ls "${BASHCONFD}"/*.sh 2> /dev/null)
+    if [ $? -eq 0 ]; then
+        for CONF in ${CONFS[@]}
+        do
+            source $CONF
+        done
+    fi
+    unset CONFS
+    unset CONF
+fi
