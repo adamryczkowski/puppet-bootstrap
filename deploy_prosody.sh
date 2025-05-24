@@ -11,18 +11,18 @@ Deploys the prosody XMPP IM server
 
 Usage:
 
-$(basename $0) <ssh addres of the server> -- [options forwarded to prepare_prosody] 
-             [--help] [--debug] [--log <output file>]  
+$(basename $0) <ssh addres of the server> -- [options forwarded to prepare_prosody]
+[--help] [--debug] [--log <output file>]
 
 
 where
- ssh addres of the server      - Address to the server, including username, e.g. root@134.234.3.63
- --debug                       - Flag that sets debugging mode. 
- --log                         - Path to the log file that will log all meaningful commands
- 
- prepare_radicale supports the following options:
-  <server_name>                - Name of the server. All clients should identify the server by its name otherwise the certificate wouldn't work
- --add-user <user>:<password>  - Adds user with on each run
+ssh addres of the server      - Address to the server, including username, e.g. root@134.234.3.63
+--debug                       - Flag that sets debugging mode.
+--log                         - Path to the log file that will log all meaningful commands
+
+prepare_radicale supports the following options:
+<server_name>                - Name of the server. All clients should identify the server by its name otherwise the certificate wouldn't work
+--add-user <user>:<password>  - Adds user with on each run
 
 
 

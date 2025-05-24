@@ -2,7 +2,7 @@
 #Rotates all JPGs according to their EXIF tag
 #Checks for and installs if needed the exiftran tool
 
-function install_apt_packages {
+function install_apt_packages() {
 	local ans=0
 	local to_install=""
 	local packages="$@"

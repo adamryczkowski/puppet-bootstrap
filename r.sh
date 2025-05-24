@@ -24,9 +24,9 @@ wormhole receive 7-voyager-ammo
 
 
 gen_geom_series<-function(n, start, end, steepness=0.7) {
-  offset<-(-1/steepness + 2)*start
-  s<-offset + exp(seq(from = log(start-offset), by = log((end-offset)/(start-offset))/(n-1), length.out = n))
-  return(s)
+	offset<-(-1/steepness + 2)*start
+	s<-offset + exp(seq(from = log(start-offset), by = log((end-offset)/(start-offset))/(n-1), length.out = n))
+	return(s)
 }
 aa<-readRDS('q/qr_ch1.rds')
 ps<-quantregGrowth::ps
@@ -37,9 +37,9 @@ saveRDS(m3, 'q/m3_ch1.rds', compress='xz')
 
 
 gen_geom_series<-function(n, start, end, steepness=0.7) {
-  offset<-(-1/steepness + 2)*start
-  s<-offset + exp(seq(from = log(start-offset), by = log((end-offset)/(start-offset))/(n-1), length.out = n))
-  return(s)
+	offset<-(-1/steepness + 2)*start
+	s<-offset + exp(seq(from = log(start-offset), by = log((end-offset)/(start-offset))/(n-1), length.out = n))
+	return(s)
 }
 aa<-readRDS('q/qr_dz1.rds')
 ps<-quantregGrowth::ps
@@ -50,9 +50,9 @@ saveRDS(m3, 'q/m3_dz1.rds', compress='xz')
 
 
 gen_geom_series<-function(n, start, end, steepness=0.7) {
-  offset<-(-1/steepness + 2)*start
-  s<-offset + exp(seq(from = log(start-offset), by = log((end-offset)/(start-offset))/(n-1), length.out = n))
-  return(s)
+	offset<-(-1/steepness + 2)*start
+	s<-offset + exp(seq(from = log(start-offset), by = log((end-offset)/(start-offset))/(n-1), length.out = n))
+	return(s)
 }
 aa<-readRDS('q/qr_ch2.rds')
 ps<-quantregGrowth::ps
@@ -63,14 +63,12 @@ saveRDS(m3, 'q/m3_ch2.rds', compress='xz')
 
 
 gen_geom_series<-function(n, start, end, steepness=0.7) {
-  offset<-(-1/steepness + 2)*start
-  s<-offset + exp(seq(from = log(start-offset), by = log((end-offset)/(start-offset))/(n-1), length.out = n))
-  return(s)
+	offset<-(-1/steepness + 2)*start
+	s<-offset + exp(seq(from = log(start-offset), by = log((end-offset)/(start-offset))/(n-1), length.out = n))
+	return(s)
 }
 aa<-readRDS('q/qr_dz2.rds')
 ps<-quantregGrowth::ps
 tauss<-c(.03, 0.1, 0.25, 0.50, 0.75, 0.90, 0.97)
 m3<-quantregGrowth::gcrq(preg_weight~ps(preg_weeks, lambda=gen_geom_series(80, 0.0001, 100)), tau=tauss, data=aa)
 saveRDS(m3, 'q/m3_dz2.rds', compress='xz')
-
-

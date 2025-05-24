@@ -10,15 +10,15 @@ Prepares celery server with rabbitmq and redis and optionally flower.
 Usage:
 
 $(basename $0)  [--use-flower] [--worker-password <password for worker>] [--worker-username <username for worker>]
-                [--help] [--debug] [--log <output file>] 
+[--help] [--debug] [--log <output file>]
 
 
 where
- --use-flower                 - Installs flower monitor
- --worker-username            - Username for celery workers. Defaults to 'worker'
- --worker-password            - Password for celery workers. Defaults to empty. Changes only on new worker name.
- --debug                      - Flag that sets debugging mode. 
- --log                        - Path to the log file that will log all meaningful commands
+--use-flower                 - Installs flower monitor
+--worker-username            - Username for celery workers. Defaults to 'worker'
+--worker-password            - Password for celery workers. Defaults to empty. Changes only on new worker name.
+--debug                      - Flag that sets debugging mode.
+--log                        - Path to the log file that will log all meaningful commands
 
 Example2:
 
@@ -87,11 +87,11 @@ install_apt_packages rabbitmq-server redis-server
 install_file files/redis.conf /etc/redis/redis.conf root
 
 if [[ "${worker_pasword}" == "" ]]; then
-   password_phrase1=""
-   password_phrase2=""
+	password_phrase1=""
+	password_phrase2=""
 else
-   password_phrase1="requirepass ${worker_pasword}"
-   password_phrase2=":${worker_pasword}"
+	password_phrase1="requirepass ${worker_pasword}"
+	password_phrase2=":${worker_pasword}"
 fi
 
 textfile /etc/redis/redis_custom.conf "protected-mode no
@@ -104,16 +104,16 @@ logexec sudo service redis-server restart
 myvhost=myvhost
 
 if ! sudo rabbitmqctl list_vhosts | grep -qE "^${myvhost}$"; then
-   sudo rabbitmqctl add_vhost ${myvhost}
+	sudo rabbitmqctl add_vhost ${myvhost}
 fi
 
 if ! sudo rabbitmqctl list_users | grep -qE "^${worker_username}[[:space:]]+\[.*\]$"; then
-   logexec sudo rabbitmqctl add_user ${worker_username} "${worker_password}"
-   logexec sudo rabbitmqctl set_permissions -p ${myvhost} ${worker_username} ".*" ".*" ".*"
+	logexec sudo rabbitmqctl add_user ${worker_username} "${worker_password}"
+	logexec sudo rabbitmqctl set_permissions -p ${myvhost} ${worker_username} ".*" ".*" ".*"
 fi
 
 if [[ $use_flower == 1 ]]; then
-   install_pip3_packages celery[redis] flower
+	install_pip3_packages celery[redis] flower
 fi
 
 textfile /tmp/tasks.py "from celery import Celery
@@ -124,12 +124,12 @@ app.conf.update(
 
 @app.task
 def add(x, y):
-    return x + y"
+return x + y"
 
 if !which celery >/dev/null; then
-   celery_path="/home/adam/.local/bin/celery"
+	celery_path="/home/adam/.local/bin/celery"
 else
-   celery_path=$(which celery)
+	celery_path=$(which celery)
 fi
 
 pushd /tmp

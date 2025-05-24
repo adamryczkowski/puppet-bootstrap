@@ -14,21 +14,21 @@ Deploys the N2N client on the given ssh address
 Usage:
 
 $(basename $0) <ssh addres of the server> <options passed to n2n-client>
-             [--help] [--debug] [--log <output file>] 
+[--help] [--debug] [--log <output file>]
 
 
 where
- ssh addres of the server - Address to the server, including username, e.g. root@134.234.3.63
- other options passed...  - Options passed to n2n-client. Be sure to include password 
-                            and check network-name
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+ssh addres of the server - Address to the server, including username, e.g. root@134.234.3.63
+other options passed...  - Options passed to n2n-client. Be sure to include password
+and check network-name
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 
 Example2:
 
-$(basename $0) root@178.79.188.145 172.104.148.166:5535 --password szakal --debug 
+$(basename $0) root@178.79.188.145 172.104.148.166:5535 --password szakal --debug
 
 "
 

@@ -1,5 +1,5 @@
 #!/bin/bash
- 
+
 # This script is a hack to remove SSL certificates from a puppet
 # client to prepare it for migration to a new puppet master server
 # after puppet has altered the puppet.conf file to point to the new
@@ -23,8 +23,8 @@
 # This script was inspired by this blog post by Ryan Uber:
 # http://www.ryanuber.com/puppet-self-management.html
 #
- 
- 
+
+
 # Begin waiting for the current puppet run to finish, then restart.
 /bin/sh -c "
     until [ ! -f /var/lib/puppet/state/puppetdlock ]
@@ -37,8 +37,8 @@
     rm -r /var/lib/puppet/ssl/crl.pem
     /sbin/service puppet start
 " &
-  
+
 # Always return true, since this script just forks another process.
 exit 0
-  
+
 # EOF

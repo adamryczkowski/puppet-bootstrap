@@ -5,7 +5,7 @@ cd `dirname $0`
 ## prepare_spack.sh
 
 usage="
-Prepares the machine for compilation of the IMGW PROPOZE code. If has sudo priviledges by default for elligible packages it prefers installation from apt, otherwise installs them from spack. 
+Prepares the machine for compilation of the IMGW PROPOZE code. If has sudo priviledges by default for elligible packages it prefers installation from apt, otherwise installs them from spack.
 
 TODO: Update packages as well
 
@@ -13,19 +13,19 @@ TODO: Update packages as well
 Usage:
 
 $(basename $0) [--spack-location <path> [--force-spack] ] --gcc <number>
-               [--help] [--debug] [--log <output file>]
+[--help] [--debug] [--log <output file>]
 
 
 where
- --spack-location         - Location of Spack installation. Defaults to $HOME/tmp/spack or /opt/spack (first found)
-                            If spack is found, the script assumes its packages will be used. New packages
-                            will be installed on spack only if --force-spack. 
-                            Script does not install spack.
- --gcc <version>          - Flag. If set, will prepare gcc in the specified version. 
-                            Valid numbers: 5, 6, 7, 8 and 9.
- --force-spack            - Flag. If set, installation will be done using spack.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+--spack-location         - Location of Spack installation. Defaults to $HOME/tmp/spack or /opt/spack (first found)
+If spack is found, the script assumes its packages will be used. New packages
+will be installed on spack only if --force-spack.
+Script does not install spack.
+--gcc <version>          - Flag. If set, will prepare gcc in the specified version.
+Valid numbers: 5, 6, 7, 8 and 9.
+--force-spack            - Flag. If set, installation will be done using spack.
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 Example2:
@@ -196,5 +196,3 @@ ssh-keyscan -H github.com | sudo -u ${USER} -- tee -a $home/.ssh/known_hosts
 
 #Adding gitlab to known hosts:
 ssh-keyscan -H git1.imgw.pl | sudo -u ${USER} -- tee -a $home/.ssh/known_hosts
-
-

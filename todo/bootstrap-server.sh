@@ -11,7 +11,7 @@ debug=0
 
 
 
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -29,50 +29,50 @@ fi
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
-case $key in
-	-d|--debug)
-	debug=1
-	;;
-	--fqdn)
-	fqdn=$1
+	key="$1"
 	shift
-	;;
-	--lxc-config)
-	lxcname="$1"
-	lxcusername="$2"
-	shift 2
-	;;
-	--other-lxc-opts)
-	otherlxcoptions="$1"
-	shift
-	;;
-	-s|--git-source)
-	gitsource="$1"
-	shift
-	;;
-	--conf-puppet-opts)
-	otherpuppetopts="$1"
-	shift
-	;;
-	-g|--git-user)
-	gituser="$1"
-	shift
-	;;
-	-h|--git-user-keypath)
-	gituserrsapath="$1"
-	shift
-	;;
-	--r10k-gems-cache)
-	gemcache="$1"
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		-d|--debug)
+			debug=1
+			;;
+		--fqdn)
+			fqdn=$1
+			shift
+			;;
+		--lxc-config)
+			lxcname="$1"
+			lxcusername="$2"
+			shift 2
+			;;
+		--other-lxc-opts)
+			otherlxcoptions="$1"
+			shift
+			;;
+		-s|--git-source)
+			gitsource="$1"
+			shift
+			;;
+		--conf-puppet-opts)
+			otherpuppetopts="$1"
+			shift
+			;;
+		-g|--git-user)
+			gituser="$1"
+			shift
+			;;
+		-h|--git-user-keypath)
+			gituserrsapath="$1"
+			shift
+			;;
+		--r10k-gems-cache)
+			gemcache="$1"
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 
@@ -99,8 +99,8 @@ if [ -n "$lxcname" ]; then
 		echo "When creating lxc containers you MUST provide --fqdn option"
 		exit 1
 	fi
-#	sudo lxc-stop -n $lxcname
-#	sudo lxc-destroy -n $lxcname
+	#	sudo lxc-stop -n $lxcname
+	#	sudo lxc-destroy -n $lxcname
 	if [ "$debug" -eq "1" ]; then
 		bash -x -- ./make-lxc-node.sh $lxcname --debug -h $fqdn -u $lxcusername $otherlxcoptions
 	else
@@ -186,5 +186,3 @@ else
 	fi
 	sudo adduser gitolite puppet
 fi
-
-

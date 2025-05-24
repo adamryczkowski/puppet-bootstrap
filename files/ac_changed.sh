@@ -22,5 +22,3 @@ if [ /tmp/now -nt /tmp/suppress_power_event  ]; then
 	fi
 	touch -d '+5 second' /tmp/suppress_power_event
 fi
-
-

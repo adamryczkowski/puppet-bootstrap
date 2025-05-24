@@ -2,14 +2,14 @@
 cd `dirname $0`
 . ./common.sh
 
-#To jest skrypt, który tworzy konter LXC z konfiguruje puppetmaster wewnątrz. 
+#To jest skrypt, który tworzy konter LXC z konfiguruje puppetmaster wewnątrz.
 #install-puppetmaster-on-lxc.sh [--fqdn <fqdn>] [--debug|-d] --lxc-name <lxc container name> [--lxc-username <lxc user name>] --other-lxc-opts <other options to make-lxc-node> ] [--conf-puppet-opts <other options to configure-puppetmaster>] [-g|--git-user <user name>] [-h|--git-user-keypath <keypath>] [--r10k-gems-path <path to the gem cache>] [--import-into-gitolite-server <ssh-compatible address of gitolite server>]
 #--fqdn - fqdn
 #--debug|-d
-#--lxc-name - lxc container name 
+#--lxc-name - lxc container name
 #--lxc-username - lxc user name
 #--other-lxc-opts - other options forwarded to make-lxc-node
-#--conf-puppet-opts - dodatkowe opcje do przekazania skryptowi configure-puppetmaster 
+#--conf-puppet-opts - dodatkowe opcje do przekazania skryptowi configure-puppetmaster
 #--r10k-gems-path - path to the gem cache. Useful if no or little internet is available
 
 
@@ -19,7 +19,7 @@ debug=0
 
 
 
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -39,48 +39,48 @@ fi
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
-case $key in
-	-d|--debug)
-	debug=1
-	;;
-	--usermode)
-	usermode=1
-	;;
-	--fqdn)
-	fqdn=$1
+	key="$1"
 	shift
-	;;
-	--lxc-name)
-	lxcname="$1"
-	shift
-	;;
-	--lxc-username)
-	lxcusername="$1"
-	shift 
-	;;
-	--other-lxc-opts|--)
-	otherlxcoptions="$*"
-	shift $#
-	;;
-	--conf-puppet-opts)
-	otherpuppetopts="$1"
-	shift
-	;;
-	--r10k-gems-cache)
-	gemcache="$1"
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		-d|--debug)
+			debug=1
+			;;
+		--usermode)
+			usermode=1
+			;;
+		--fqdn)
+			fqdn=$1
+			shift
+			;;
+		--lxc-name)
+			lxcname="$1"
+			shift
+			;;
+		--lxc-username)
+			lxcusername="$1"
+			shift
+			;;
+		--other-lxc-opts|--)
+			otherlxcoptions="$*"
+			shift $#
+			;;
+		--conf-puppet-opts)
+			otherpuppetopts="$1"
+			shift
+			;;
+		--r10k-gems-cache)
+			gemcache="$1"
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 
@@ -109,7 +109,7 @@ fi
 
 if [ -d "$gemcache" ]; then
 	logexec ssh $lxcusername@$fqdn "mkdir /tmp/gemcache"
-	logexec scp -r "$gemcache" $lxcusername@$fqdn:/tmp/gemcache 
+	logexec scp -r "$gemcache" $lxcusername@$fqdn:/tmp/gemcache
 	otherpuppetopts="$otherpuppetopts --r10k-gems-cache /tmp/gemcache/`basename $gemcache`"
 fi
 
@@ -134,4 +134,3 @@ exitstat=$?
 if [ $exitstat -ne 0 ]; then
 	exit $exitstat
 fi
-

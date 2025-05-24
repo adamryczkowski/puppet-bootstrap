@@ -10,60 +10,60 @@ cd `dirname $0`
 
 usage="
 Enhances creation of an empty LXC-2 container:
-  sets ssh keys, apt-cacher client, upgrades and more. See the options below.
+sets ssh keys, apt-cacher client, upgrades and more. See the options below.
 
 
 Usage:
 
-$(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <fqdn>] 
-						[-a|--autostart] [-u|--username <username>] 
-						[--ip <static ip-address>] 
-						[-s|--grant-ssh-access-to <existing username on host>] 
-						[-p|--apt-proxy <address of the existing apt-proxy>] 
-						[--bridgeif <name of the bridge interface on host>] 
-						[--private-key-path <path to the private key> [--public-key-path <path>] ]
-						[--map-host-user <username>]
-						[--authorized-key <public key>]
-						[--update-all 0|1]
-						[--bare]
-						[--forward-port tcp|udp:<ip_address>:<host_port>;<lxc_port>]
-						[--map-host-folder <host-path> <remote-path>]
-						[--help] [--debug] [--log <output file>]
+$(basename $0) <container-name> [-r|--release <ubuntu release>] [-h|--hostname <fqdn>]
+[-a|--autostart] [-u|--username <username>]
+[--ip <static ip-address>]
+[-s|--grant-ssh-access-to <existing username on host>]
+[-p|--apt-proxy <address of the existing apt-proxy>]
+[--bridgeif <name of the bridge interface on host>]
+[--private-key-path <path to the private key> [--public-key-path <path>] ]
+[--map-host-user <username>]
+[--authorized-key <public key>]
+[--update-all 0|1]
+[--bare]
+[--forward-port tcp|udp:<ip_address>:<host_port>;<lxc_port>]
+[--map-host-folder <host-path> <remote-path>]
+[--help] [--debug] [--log <output file>]
 
 where
 
- -r|--release             - Ubuntu release to be installed, e.g. trusty. 
-                            Defaults to currently used by host.
- -h|--hostname            - hostname, best if fqdn is given. Defaults to container name.
- -a|--autostart           - Flag if sets autostart for the container on host boot. Default: off.
- -u|--username            - Default username of the newly built container. Default: current user.
- --ip                     - If given, sets the static ip-address of the node. 
-                            Requires sudo privileges on host.
- -s|--grant-ssh-access-to - username which will get automatic login via ssh to that container.
-                            Defaults to `whoami`.
- -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
-                            Defaults to apt-cacher settings in the host.
- --bridgeif               - If set, name of the bridge interface the container will be connected to.
-                            Defaults to the first available bridge interface used by LXD deamon.
-                            It can be any bridge available to the host.
- --private-key-path       - Path to the file with the ssh private key. If set, installs private
-                            key on the user's account in the container.
- --public-key-path <path> - Path to the file with the ssh public key. If set, installs private
-                            key on the user's account in the container.
- --authorized-key         - Key of other user's. This option can be specified multiple times.
- --map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
- --map-host-folder <host-path> <remote-path>
-                          - After container's creation, map a single host folder into the guest file
-                            system. 
- --forward-port           - Name of the port to forward in format like tcp:0.0.0.0:8080;80. 
-                            It will create a listening socket on host accepting connections from all
-                            computers on port 8080, and forwarding it to the lxc container port 80.
- --storage                - Name of the storage to use for this container. Defaults to 'default'
- --repo-path              - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
- --update-all             - If set, it will install the update-all script as well (defaults to yes)
- --bare                   - If set, it will skip installing anything except of ssh keys and locale
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+-r|--release             - Ubuntu release to be installed, e.g. trusty.
+Defaults to currently used by host.
+-h|--hostname            - hostname, best if fqdn is given. Defaults to container name.
+-a|--autostart           - Flag if sets autostart for the container on host boot. Default: off.
+-u|--username            - Default username of the newly built container. Default: current user.
+--ip                     - If given, sets the static ip-address of the node.
+Requires sudo privileges on host.
+-s|--grant-ssh-access-to - username which will get automatic login via ssh to that container.
+Defaults to `whoami`.
+-p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
+Defaults to apt-cacher settings in the host.
+--bridgeif               - If set, name of the bridge interface the container will be connected to.
+Defaults to the first available bridge interface used by LXD deamon.
+It can be any bridge available to the host.
+--private-key-path       - Path to the file with the ssh private key. If set, installs private
+key on the user's account in the container.
+--public-key-path <path> - Path to the file with the ssh public key. If set, installs private
+key on the user's account in the container.
+--authorized-key         - Key of other user's. This option can be specified multiple times.
+--map-host-user          - Name of the host user whose uid and gid will be mapped to the lxc user.
+--map-host-folder <host-path> <remote-path>
+- After container's creation, map a single host folder into the guest file
+system.
+--forward-port           - Name of the port to forward in format like tcp:0.0.0.0:8080;80.
+It will create a listening socket on host accepting connections from all
+computers on port 8080, and forwarding it to the lxc container port 80.
+--storage                - Name of the storage to use for this container. Defaults to 'default'
+--repo-path              - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
+--update-all             - If set, it will install the update-all script as well (defaults to yes)
+--bare                   - If set, it will skip installing anything except of ssh keys and locale
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 Example:
@@ -284,7 +284,7 @@ fi
 
 if [ "$aptproxy" == "auto" ]; then
 
-	grep -hrE '^Acquire::http::Proxy "(.*)";$' /etc/apt/apt.conf.d | head -n 1 
+	grep -hrE '^Acquire::http::Proxy "(.*)";$' /etc/apt/apt.conf.d | head -n 1
 
 
 	if ! dpkg -s apt-cacher-ng>/dev/null 2>/dev/null; then
@@ -297,8 +297,8 @@ fi
 #echo "Setting fqdn and hostname for the container and the host..."
 echo "$lxcfqdn" | grep -Fq . 2>/dev/null
 if [ $? -eq 0 ]; then
-	lxcname=`echo $lxcfqdn | sed -En 's/^([^.]*)\.(.*)$/\1/p'` 
-	hostsline="$lxcfqdn $lxcname" 
+	lxcname=`echo $lxcfqdn | sed -En 's/^([^.]*)\.(.*)$/\1/p'`
+	hostsline="$lxcfqdn $lxcname"
 else
 	lxcname=$lxcfqdn
 	hostsline="$lxcname"
@@ -411,9 +411,9 @@ fi
 #            share_name=$(lxc config device show gitrunner8 | grep -E "type: disk" -B 3 | head -n 1 | grep -oE '^[^:]+')
 #		      disk_source=$(lxc config device show ${name} -v | grep "${share_name}:" -A 3 | grep "source:" | grep -oE "[^ ]+$")
 #		      disk_path=$(lxc config device show ${name} -v | grep "${share_name}:" -A 3 | grep "path:" | grep -oE "[^ ]+$")
-#            if [[  ]]		      
+#            if [[  ]]
 #         fi
-#			
+#
 
 
 
@@ -432,7 +432,7 @@ if [ "$lxcip" != "auto" ]; then
 			exit 1
 		fi
 	fi
-		
+
    current_ip=$(lxc config device show ${name} -v | grep "eth0:" -A 4 | grep "ipv4.address:" | grep -oE "[^ ]+$")
    if [[ "${current_ip}" !=  "${lxcip}" ]]; then
 		logexec lxc config device set ${name} eth0 ipv4.address ${lxcip}
@@ -446,7 +446,7 @@ fi
 
 if [[ "${restartcontainer}" == "1" ]]; then
    logexec lxc stop $name
-   sleep 5   
+   sleep 5
 fi
 
 #Upewniamy się, że kontener jest uruchomiony
@@ -482,7 +482,7 @@ echo "Got IP address ${actual_ip}"
 
 #Upewniamy się, że kontener ma prawidłwy hostname...
 if ! lxc exec ${name} -- grep -q ${lxcname} /etc/hostname ; then
-	$loglog 
+	$loglog
 	echo ${lxcname} | lxc exec $name -- tee /etc/hostname >/dev/null
 fi
 
@@ -490,7 +490,7 @@ fi
 if lxc exec $name -- grep -q "^127\.0\.1\.1" /etc/hosts; then
 	logexec lxc exec $name -- sed -i "s/^\(127\.0\.1\.1\s*\).*/\1$hostsline/" /etc/hosts
 else
-	$loglog 
+	$loglog
 	echo "127.0.1.1	$hostsline" | lxc exec $name -- tee -a /etc/hosts >/dev/null
 fi
 
@@ -501,15 +501,15 @@ if [ "$lxcip" != "auto" ]; then
 		errcho "Wrong IP address of $name. Restarting dnsmasq and emptying its cache, then restarting the container..."
 		logexec lxc stop $name
 
-		logexec sudo service lxd stop 
+		logexec sudo service lxd stop
 
 		tmpfile=$(mktemp)
 #		$loglog
 		logexec sudo grep -v ${lxcname} /var/lib/lxd/networks/${internalif}/dnsmasq.leases > ${tmpfile}
 #		$loglog
-		cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases 
+		cat ${tmpfile} | sudo tee /var/lib/lxd/networks/${internalif}/dnsmasq.leases
 
-		logexec sudo service lxd start 
+		logexec sudo service lxd start
 
 		logexec lxc start $name
 		sleep 5
@@ -585,17 +585,17 @@ if [ -f "$sshhome/.ssh/known_hosts" ]; then
 fi
 
 
-$loglog 
+$loglog
 ssh-keyscan -H $name >> $sshhome/.ssh/known_hosts 2>/dev/null
-$loglog 
+$loglog
 ssh-keyscan -H $lxcfqdn >> $sshhome/.ssh/known_hosts 2>/dev/null
 if [ -n "$actual_ip" ]; then
-	$loglog 
+	$loglog
 	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
 fi
 
 
-#set -x 
+#set -x
 #logexec lxc exec $name -- chown ${lxcuser}:${lxcuser} -R ${sshhome}
 
 if [ ! -f "$private_key_path" ]; then

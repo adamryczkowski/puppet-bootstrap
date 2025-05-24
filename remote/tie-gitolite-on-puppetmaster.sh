@@ -6,7 +6,7 @@ cd `dirname $0`
 
 #W szczególności, jeśli program jest uruchomiony w trybie lokalnym, to modyfikuje git hook tak, aby uruchamiane były przez użytkownika puppet.
 #Poza tym, modyfikuje /etc/passwd aby dać użytkownikowi puppet shell.
-#Poza tym, upewnia się, że ten użytkownik ma klucz i kopiuje część publiczną do tmp/puppet@puppetmaster.pub. 
+#Poza tym, upewnia się, że ten użytkownik ma klucz i kopiuje część publiczną do tmp/puppet@puppetmaster.pub.
 
 . ./common.sh
 
@@ -19,33 +19,33 @@ debug=0
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--puppetmaster-is-local-to-gitolite)
-	puppetislocal=1
-	;;
-	--puppet-local-repo)
-	puppetsource=$1
-	shift
-	;;
-	--puppetmaster-username)
-	puppetuser=$1
-	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--puppetmaster-is-local-to-gitolite)
+			puppetislocal=1
+			;;
+		--puppet-local-repo)
+			puppetsource=$1
+			shift
+			;;
+		--puppetmaster-username)
+			puppetuser=$1
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 #if [ "$puppetislocal" -eq 1 ] && [ -z "$gitoliteserver" ]; then
@@ -121,7 +121,7 @@ logexec sudo sed -i -e "/$puppetuser\:.*\/bin\/false/ s/\/bin\/false/\/bin\/bash
 ##Upewniamy się, że serwer gitolite nie będzie dla puppetmastera obcy
 #sshhome=`getent passwd $puppetuser | awk -F: '{ print $6 }'`
 #if [ -f "$sshhome/.ssh/known_hosts" ]; then
-#	logexec sudo -u $puppetuser ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $gitoliteserver 
+#	logexec sudo -u $puppetuser ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $gitoliteserver
 #	set -x
 #fi
 #$loglog
@@ -131,5 +131,3 @@ logexec sudo sed -i -e "/$puppetuser\:.*\/bin\/false/ s/\/bin\/false/\/bin\/bash
 
 # Bez tego nie będziemy mogli instalować modułów
 logexec sudo chown -R $puppetuser:puppet /etc/puppet
-
-

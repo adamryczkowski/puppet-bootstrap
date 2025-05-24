@@ -28,27 +28,27 @@ rsapath="$rsapath.pub"
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
-
-case $key in
-	-u|--other-user)
-	otheruser="$1"
-	otherrsapath="$2"
-	shift 2
-	;;
-	--log)
-	log=$1
+	key="$1"
 	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	*)
-	echo "Unknown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+
+	case $key in
+		-u|--other-user)
+			otheruser="$1"
+			otherrsapath="$2"
+			shift 2
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		*)
+			echo "Unknown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ ! -f "$rsapath" ]; then
@@ -75,25 +75,25 @@ hostname=`hostname`
 
 if [ -f "$sshhome/.ssh/known_hosts" ]; then
 	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R 127.0.0.1
-	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R localhost 
-	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $fqdn 
-	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $hostname 
+	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R localhost
+	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $fqdn
+	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $hostname
 fi
 
 loglog
-ssh-keyscan -H 127.0.0.1 >> $sshhome/.ssh/known_hosts 
+ssh-keyscan -H 127.0.0.1 >> $sshhome/.ssh/known_hosts
 loglog
-ssh-keyscan -H localhost >> $sshhome/.ssh/known_hosts 
+ssh-keyscan -H localhost >> $sshhome/.ssh/known_hosts
 $loglog
-ssh-keyscan -H $fqdn >> $sshhome/.ssh/known_hosts 
+ssh-keyscan -H $fqdn >> $sshhome/.ssh/known_hosts
 $loglog
-ssh-keyscan -H $hostname >> $sshhome/.ssh/known_hosts 
+ssh-keyscan -H $hostname >> $sshhome/.ssh/known_hosts
 
 tmpfolder=`mktemp -d --suffix .git`
 cd $tmpfolder
 logexec git clone gitolite@localhost:gitolite-admin
 if [ -n "$otheruser" ]; then
-	logexec cp $otherrsapath $tmpfolder/gitolite-admin/keydir/$otheruser.pub 
+	logexec cp $otherrsapath $tmpfolder/gitolite-admin/keydir/$otheruser.pub
 fi
 
 logheredoc EOT
@@ -106,7 +106,7 @@ repo gitolite-admin
 include "conf.d/*.conf"
 EOT
 
-logexec mkdir -p $tmpfolder/gitolite-admin/conf/conf.d 
+logexec mkdir -p $tmpfolder/gitolite-admin/conf/conf.d
 
 logheredoc EOT
 tee $tmpfolder/gitolite-admin/conf/conf.d/puppet-modules.conf <<'EOT' >/dev/null
@@ -137,4 +137,3 @@ git commit -m "gitolite initial config update by ./configure-gitolite.sh" || exi
 logexec git push
 cd ..
 rm -r $tmpfolder
-

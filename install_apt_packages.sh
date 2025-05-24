@@ -25,4 +25,3 @@ if [ "$1" == "--help" ]; then
 fi
 
 install_apt_packages $@
-

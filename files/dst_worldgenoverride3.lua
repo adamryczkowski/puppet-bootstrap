@@ -99,4 +99,3 @@ return {
 	fissure = "default", 			-- "never", "rare", "default", "often", "always"
 	worms = "default", 			-- "never", "rare", "default", "often", "always"
     },
-

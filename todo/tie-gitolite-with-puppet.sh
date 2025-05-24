@@ -7,10 +7,10 @@ cd `dirname $0`
 #Program wymaga, aby wcześniej zostały zaimportowane wszystkie kontrolowane przez nas repozytoria git z modułami (inaczej pierwsze deploy się nie uda) i głównym manifestem.
 #Program wykonuje większość pracy na serwerze gitolite. Jeśli serwer puppet jest ten sam co gitolite, to skrypt również dostosuje git hook w lokalnej instalacji puppet.
 
-#tie-gitolite-with-puppet 
-#	-g|--gitolite-server <[username]@severname> SSH URI do serwera gitolite. Obowiązkowy parametr> 
-#	--puppetmaster-is-local-to-gitolite 
-#	--puppetmaster-server <[username]@servername SSH URI do serwera, jeśli puppetmaster jest oddzielny. Podania tego parametru zakłada, że puppetmaster nie jest lokalny. Użytkownik wywołujący skrypt musi mieć uprawnienia sudo do tego serwera w celu ustawienia kluczy> 
+#tie-gitolite-with-puppet
+#	-g|--gitolite-server <[username]@severname> SSH URI do serwera gitolite. Obowiązkowy parametr>
+#	--puppetmaster-is-local-to-gitolite
+#	--puppetmaster-server <[username]@servername SSH URI do serwera, jeśli puppetmaster jest oddzielny. Podania tego parametru zakłada, że puppetmaster nie jest lokalny. Użytkownik wywołujący skrypt musi mieć uprawnienia sudo do tego serwera w celu ustawienia kluczy>
 #       --puppetmaster-puppet-user - nazwa użytkownika na puppetmasterze, który ma prawo do deploy. Domyślnie "puppet"
 #	-r|--main-manifest-repository <nazwa głównego repozytorium, domyślnie "puppet/manifest">
 #	--dont-merge-existing-manifest-git - jeśli podane, to manifest w gitolite nie będzie połączony z istniejącym manifestem szkieletowym stworzonym automatycznie przez skrypt configure-puppetmaser.sh. Wtedy szkieletowe repozytorium zostanie zastąpione naszym
@@ -27,11 +27,11 @@ cd `dirname $0`
 #   b) brak --dont-merge-existing-manifest-git oraz nie podano remote-manifest -> Cannot merge when there is nothing to merge. Skrypt wykona się tak, jakby podano --dont-merge-existing-manifest-git
 #   c) --dont-merge-existing-manifest-git oraz PODANO remote-manifest -> skrypt wstawi podane repozytorium do puppeta oraz wklei je do gitolite. Tryb "REPLACE"
 #   c) brak --dont-merge-existing-manifest-git oraz PODANO remote-manifest -> skrypt dokona rebase podanego repozytorium tak, aby zawierało ono nasze szkieletowe repozytorium jako bazę. Tryb "REBASE"
-#    
-#4. 
+#
+#4.
 
 alias errcho='>&2 echo'
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -51,65 +51,65 @@ puppetrsa=""
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--debug)
-	debug=1
-	;;
-	-g|--gitolite-server)
-	gitoliteserver=$1
-	shift
-	;;	
-	--puppetmaster-is-local-to-gitolite)
-	if [ -n "$puppetislocal" ]; then
-		errcho "Cannot give --puppetmaster-is-local-to-gitolite AND -g|--gitolite-server parameters together"
-		exit 1
-	fi
-	puppetislocal=1
-	;;
-	--puppetmaster-uri)
-	puppetsource=$1
-	shift
-	;;
-	--puppetmaster-server)
-	if [ -n "$puppetislocal" ]; then
-		errcho "Cannot give --puppetmaster-is-local-to-gitolite AND -g|--gitolite-server parameters together"
-		exit 1
-	fi
-	puppetislocal=0
-	puppetserver=$1
-	shift
-	;;
-	--puppetmaster-puppet-user)
-	puppetuser=$1
-	shift
-	;;
-	--puppetmaster-rsa-pub)
-	puppetrsa=$1
-	shift
-	;;
-	--dont-merge-existing-manifest-git)
-	domerge=0
-	;;
-	-r|--main-manifest-repository)
-	puppetrepo=$1
-	shift
-	;;
-	--remote-manifest)
-	remoterepo=$1
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--debug)
+			debug=1
+			;;
+		-g|--gitolite-server)
+			gitoliteserver=$1
+			shift
+			;;
+		--puppetmaster-is-local-to-gitolite)
+			if [ -n "$puppetislocal" ]; then
+				errcho "Cannot give --puppetmaster-is-local-to-gitolite AND -g|--gitolite-server parameters together"
+				exit 1
+			fi
+			puppetislocal=1
+			;;
+		--puppetmaster-uri)
+			puppetsource=$1
+			shift
+			;;
+		--puppetmaster-server)
+			if [ -n "$puppetislocal" ]; then
+				errcho "Cannot give --puppetmaster-is-local-to-gitolite AND -g|--gitolite-server parameters together"
+				exit 1
+			fi
+			puppetislocal=0
+			puppetserver=$1
+			shift
+			;;
+		--puppetmaster-puppet-user)
+			puppetuser=$1
+			shift
+			;;
+		--puppetmaster-rsa-pub)
+			puppetrsa=$1
+			shift
+			;;
+		--dont-merge-existing-manifest-git)
+			domerge=0
+			;;
+		-r|--main-manifest-repository)
+			puppetrepo=$1
+			shift
+			;;
+		--remote-manifest)
+			remoterepo=$1
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 mydir=`pwd`
@@ -192,7 +192,7 @@ fi
 
 
 #Przygotowywujemy repozytorium manifest.git dla puppeta.
-if [ -z "$remoterepo" ] || [ "$domerge" -eq "1" ]; then 
+if [ -z "$remoterepo" ] || [ "$domerge" -eq "1" ]; then
 	# Interesuje nas szkieletowe repozytorium zrobione przez skrypt configure-puppetmaster.sh. Należy więc te repozytorium jakoś dostać
 	barerepo=`mktemp -d --suffix .git`
 	logexec rsync -az $useronpuppet@$puppetserver:$puppetsource/. $barerepo
@@ -203,7 +203,7 @@ if [ -z "$remoterepo" ] || [ "$domerge" -eq "1" ]; then
 	exportlocal=1
 fi
 
-if [ -z "$remoterepo" ] && [ "$domerge" -eq "1" ]; then 
+if [ -z "$remoterepo" ] && [ "$domerge" -eq "1" ]; then
 	domerge=0 #Cannot merge when there is nothing to merge. Tryb "SKELETON"
 fi
 
@@ -239,10 +239,10 @@ if [[ "$exportlocal" -eq "1" ]]; then
 	$loglog
 	sudo chown -R `whoami` $exportrepo
 	logexec rsync -az $exportrepo/. $userongit@$gitoliteserver:$remotetmp
-	function finish1 {
+	function finish1() {
 		ssh $userongit@$gitoliteserver sudo rm -r $remotetmp
 	}
-	trap finish1 EXIT 
+	trap finish1 EXIT
 	if [ $? -ne 0 ]; then
 		errcho "Error when copying $exportrepo into $remoterepo."
 		exit 1
@@ -269,7 +269,7 @@ if [ "$debug" -eq "1" ]; then
 else
 	optx=""
 fi
-. ./execute-script-remotely.sh ./import-into-gitolite.sh $optx $opts2 -- $opts 
+. ./execute-script-remotely.sh ./import-into-gitolite.sh $optx $opts2 -- $opts
 exitstat=$?
 if [ $exitstat -ne 0 ]; then
 	exit $exitstat
@@ -292,7 +292,7 @@ opts="--server-access $useronpuppet@$puppetserver --server-target-account puppet
 opts="--puppet-local-repo $puppetsource"
 if [ "$puppetislocal" -eq "1" ]; then
 	opts="$opts --puppetmaster-is-local-to-gitolite"
-fi	
+fi
 opts2="--user $useronpuppet --host $puppetserver"
 if [ "$debug" -eq "1" ]; then
 	opts2="$opts2 --debug"
@@ -334,10 +334,10 @@ fi
 
 #Przygotowywujemy gitolite-admin do pracy
 gitoliteadminpath=`mktemp -d --suffix .git`
-function finish2 {
+function finish2() {
 	sudo rm -r $gitoliteadminpath
 }
-trap finish2 EXIT 
+trap finish2 EXIT
 
 logmsg "cd $gitoliteadminpath"
 cd $gitoliteadminpath
@@ -399,7 +399,7 @@ if [ "$puppetislocal" -eq "1" ]; then
 	opts="$opts --puppetmaster-is-local-to-gitolite"
 else
 	opts="$opts --puppetmaster-server $puppetserver"
-fi	
+fi
 opts2="--user $userongit --host $gitoliteserver"
 if [ "$debug" -eq "1" ]; then
 	opts2="$opts2 --debug"
@@ -409,7 +409,3 @@ if [ -n "$log" ]; then
 fi
 cd $mydir
 . ./execute-script-remotely.sh remote/tie-gitolite-on-gitolite.sh $opts2 -- $opts
-
-
-
-

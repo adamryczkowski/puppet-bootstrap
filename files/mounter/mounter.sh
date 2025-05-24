@@ -1,7 +1,7 @@
 #!/bin/bash
 /bin/sleep 1
 
-function try_mount {
+function try_mount() {
 	local device=$1
 	local klucz=$2
 	local mount_point=$3
@@ -23,7 +23,7 @@ function try_mount {
 			if ! /bin/umount -lf "${mount_point}"; then
 				return -1
 			fi
-		fi		
+		fi
 		if sudo dmsetup ls | grep $name; then
 			if ! /sbin/cryptsetup luksClose $name; then
 				return -1
@@ -38,4 +38,3 @@ for file in /usr/local/lib/adam/mounter/*.link; do
 done
 
 /bin/sync
-

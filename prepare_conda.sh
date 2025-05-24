@@ -12,24 +12,24 @@ Prepares conda with current Python and jupyter and no other packages, all for th
 Usage:
 
 $(basename $0)  [--conda-dir <conda dir>] [--pip-cacher <ip[:port]]
-                [--help] [--debug] [--log <output file>] 
+[--help] [--debug] [--log <output file>]
 
 
 where
 
- --repo-path                  - Alternative directory where to look for (and save) 
-                                downloaded files. Defaults to /media/adam-minipc/other/debs 
-                                if exists or /tmp/repo-path if it does not.
- --conda-dir                  - Directory where to install conda. Defaults to /opt/conda
- --pip-cacher                 - Host name and port to the pip cacher. If specified it will
-                                install appropriate ~/.pip/pip.conf so all pip operations will
-                                be cached
- --debug                      - Flag that sets debugging mode. 
- --log                        - Path to the log file that will log all meaningful commands
+--repo-path                  - Alternative directory where to look for (and save)
+downloaded files. Defaults to /media/adam-minipc/other/debs
+if exists or /tmp/repo-path if it does not.
+--conda-dir                  - Directory where to install conda. Defaults to /opt/conda
+--pip-cacher                 - Host name and port to the pip cacher. If specified it will
+install appropriate ~/.pip/pip.conf so all pip operations will
+be cached
+--debug                      - Flag that sets debugging mode.
+--log                        - Path to the log file that will log all meaningful commands
 
 Example2:
 
-$(basename $0) 
+$(basename $0)
 
 "
 
@@ -133,14 +133,14 @@ logexec conda install --yes python
 if [ -n "${pip_cacher}" ]; then
    logmkdir $HOME/.pip
    parse_URI "${pip_cacher}"
-   
-   textfile ~/.pip/pip.conf "[global]
+
+textfile ~/.pip/pip.conf "[global]
 index-url = http://${pip_cacher}/root/pypi/+simple/
 trusted-host=${ip}
 
 [search]
 index = http://${pip_cacher}/root/pypi/
-"  
+"
 fi
 
 # logexec pip install ipython jupyter jupyter_contrib_nbextensions jupyterthemes
@@ -149,7 +149,7 @@ fi
 node_key=$(get_cached_file nodesource.gpg.key https://deb.nodesource.com/gpgkey/nodesource.gpg.key)
 
 add_apt_source_manual nodesource "deb https://deb.nodesource.com/node_11.x $(get_ubuntu_codename) main
-deb-src https://deb.nodesource.com/node_11.x $(get_ubuntu_codename) main" https://deb.nodesource.com/gpgkey/nodesource.gpg.key nodesource.gpg.key 
+deb-src https://deb.nodesource.com/node_11.x $(get_ubuntu_codename) main" https://deb.nodesource.com/gpgkey/nodesource.gpg.key nodesource.gpg.key
 
 refresh_apt_redirections
 install_apt_packages nodejs
@@ -207,5 +207,3 @@ fi
 #pip install jupyterlab_latex
 #jupyter labextension install @jupyterlab/latex
 # <install latex>
-
-

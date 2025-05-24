@@ -31,41 +31,41 @@ trap 'exitfunction' EXIT
 
 
 usage="
-This script sends script to the remote machine either by lxc send or ssh. 
+This script sends script to the remote machine either by lxc send or ssh.
 
 
 Usage:
 
-$(basename $0) <script path> [--ssh-address <host_address>]  
-               [--lxc-name <lxcname>] [--user <user>] 
-               [--debug] [--step-debug] [--extra-executable] [--use-repo]
-               -- <arguments that will get send to the remote script>
-               
+$(basename $0) <script path> [--ssh-address <host_address>]
+[--lxc-name <lxcname>] [--user <user>]
+[--debug] [--step-debug] [--extra-executable] [--use-repo]
+-- <arguments that will get send to the remote script>
+
 where
 
- <script path>      - path to the script, to send. The script doesn't need to 
-                      have execution rights.
- --ssh-address      - ssh address in format [user@]host[:port] to the remote 
-                      system. Port defaults to 22, and user to the current user.
- --lxc-name         - name of the lxc container to send the command to. 
-                      The command will be transfered by and executed 
-                      by means of the lxc api.
- --user             - name of the user, on behalf of which the script 
-                      will be run. The username defaults to the connected 
-                      user in case of ssh, and root in case of lxc.
- --step-debug       - Will run the target script with bash -x, 
-                      the line debugging option.
- --repo-path        - Will use repo_path environment variable to use local file repository.
-                      Will temporarily mount the folder, when used with lxc,
-                      Do nothing when used locally
-                      And mount using sshfs when used remotely via ssh.
- --extra-executable - Extra file(s) that will be transfered to the remote host. 
-                      Each instantion of this parameter will add another file. 
+<script path>      - path to the script, to send. The script doesn't need to
+have execution rights.
+--ssh-address      - ssh address in format [user@]host[:port] to the remote
+system. Port defaults to 22, and user to the current user.
+--lxc-name         - name of the lxc container to send the command to.
+The command will be transfered by and executed
+by means of the lxc api.
+--user             - name of the user, on behalf of which the script
+will be run. The username defaults to the connected
+user in case of ssh, and root in case of lxc.
+			--step-debug       - Will run the target script with bash -x,
+			the line debugging option.
+			--repo-path        - Will use repo_path environment variable to use local file repository.
+			Will temporarily mount the folder, when used with lxc,
+			Do nothing when used locally
+			And mount using sshfs when used remotely via ssh.
+			--extra-executable - Extra file(s) that will be transfered to the remote host.
+			Each instantion of this parameter will add another file.
 
-Example:
+			Example:
 
-$(basename $0) test.sh --ssh-address testnode -- file tmp.flag
-"
+			$(basename $0) test.sh --ssh-address testnode -- file tmp.flag
+			"
 
 
 function errcho()
@@ -232,7 +232,7 @@ if [ -z "$exec_user" ]; then
         if [ "$exec_mode" == "2" ]; then
                 exec_user=$sshuser
         fi
-        if [ "$exec_mode" == "3" ]; then 
+        if [ "$exec_mode" == "3" ]; then
                 exec_user=root
         fi
 fi
@@ -293,7 +293,7 @@ case $exec_mode in
 	if [ "${sshuser}" != "${exec_user}" ]; then
 		ssh ${exec_portarg1} ${sshuser}@${exec_host} -- chown -R ${exec_user} ${remote_dir}
 	fi
-	
+
 	if [ "$use_repo" == "1" ]; then
 		errcho "--use-repo not supported when calling via ssh."
 #		if !ssh ${sshuser}@${exec_host} ${exec_portarg1} -- dpkg -s "$package">/dev/null  2> /dev/null; then
@@ -314,7 +314,7 @@ case $exec_mode in
 	if [ "root" != "${exec_user}" ]; then
 		${exec_prefix} chown -R ${exec_user} ${remote_dir}
 	fi
-	
+
 	if [ ! "$repo_path" == "" ]; then
 		if ! lxc config device list ${exec_lxcname} | grep tmprepo; then
 			lxc exec ${exec_lxcname} --mode=non-interactive -- mkdir -p ${repo_path}
@@ -383,5 +383,3 @@ appendlog
 if [ $exec_err -ne 0 ]; then
 	exit $exec_err
 fi
-
-

@@ -1,5 +1,5 @@
 return {
- 
+
        override_enabled = true,
        misc = {
                start_location = "plus",
@@ -16,4 +16,3 @@ return {
                meteorspawner = "rare"
        },
 }
-

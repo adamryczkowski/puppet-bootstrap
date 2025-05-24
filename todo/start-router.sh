@@ -9,7 +9,7 @@ debug=0
 
 
 
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -29,37 +29,37 @@ fi
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
-case $key in
-	-d|--debug)
-	debug=1
-	;;
-	--ext-if)
-	EXTIF="$1"
+	key="$1"
 	shift
-	;;
-	--int-if)
-	INTIF="$1"
-	shift
-	;;
-	--host-ip)
-	lxchostip="$1"
-	shift
-	;;
-	--log)
-	log="$1"
-	shift
-	;;
-	--network)
-	network="$1"
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		-d|--debug)
+			debug=1
+			;;
+		--ext-if)
+			EXTIF="$1"
+			shift
+			;;
+		--int-if)
+			INTIF="$1"
+			shift
+			;;
+		--host-ip)
+			lxchostip="$1"
+			shift
+			;;
+		--log)
+			log="$1"
+			shift
+			;;
+		--network)
+			network="$1"
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$EXTIF" ]; then
@@ -103,18 +103,18 @@ MODPROBE="sudo /sbin/modprobe"
 #echo "   Internal Interface:  $INTIF"
 
 #======================================================================
-#== No editing beyond this line is required for initial MASQ testing == 
+#== No editing beyond this line is required for initial MASQ testing ==
 #echo -en "   loading modules: "
 #echo "  - Verifying that all kernel modules are ok"
 logexec sudo $DEPMOD -a
 #echo "----------------------------------------------------------------------"
 echo -en "ip_tables, "
 logexec $MODPROBE ip_tables
-echo -en "nf_conntrack, " 
+echo -en "nf_conntrack, "
 logexec $MODPROBE nf_conntrack
-echo -en "nf_conntrack_ftp, " 
+echo -en "nf_conntrack_ftp, "
 logexec $MODPROBE nf_conntrack_ftp
-echo -en "nf_conntrack_irc, " 
+echo -en "nf_conntrack_irc, "
 logexec $MODPROBE nf_conntrack_irc
 echo -en "iptable_nat, "
 logexec $MODPROBE iptable_nat
@@ -127,7 +127,7 @@ $loglog
 echo "1" | sudo tee /proc/sys/net/ipv4/ip_forward
 #echo "   Enabling DynamicAddr.."
 $loglog
-echo "1" | sudo tee /proc/sys/net/ipv4/ip_dynaddr 
+echo "1" | sudo tee /proc/sys/net/ipv4/ip_dynaddr
 #echo "   Clearing any existing rules and setting default policy.."
 
 logheredoc EOF
@@ -139,7 +139,7 @@ COMMIT
 :INPUT ACCEPT [0:0]
 :FORWARD DROP [0:0]
 :OUTPUT ACCEPT [0:0]
--A FORWARD -i "$EXTIF" -o "$INTIF" -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT 
+-A FORWARD -i "$EXTIF" -o "$INTIF" -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 -A FORWARD -i "$INTIF" -o "$EXTIF" -j ACCEPT
 -A FORWARD -j LOG
 COMMIT

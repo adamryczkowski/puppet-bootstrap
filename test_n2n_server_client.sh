@@ -1,4 +1,4 @@
-reset; bash -x ./make-lxd-node.sh n2nserver --bare --release bionic 
+reset; bash -x ./make-lxd-node.sh n2nserver --bare --release bionic
 reset; bash -x ./make-lxd-node.sh n2nclient --bare --release bionic
 reset; bash -x ./make-lxd-node.sh klient
 reset; bash -x ./make-lxd-node.sh customer
@@ -30,4 +30,3 @@ on commit {
 	log(concat("Commit: IP: ", ClientIP, " Mac: ", ClientMac));
 	execute("/usr/bin/dhcp-event", "commit", ClientIP, ClientMac, ClientName);
 }
-

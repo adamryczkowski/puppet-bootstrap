@@ -6,20 +6,20 @@ USAGE="Usage: `basename $0` -c k|s +|-|<number>"
 co=s
 # Parse command line options.
 while getopts ":c:" OPT; do
-    case "$OPT" in
-        c)
-            co=$OPTARG
-            ;;
-        \?)
-            # getopts issues an error message
-            echo "`basename $0` version 0.1"
-            echo $USAGE >&2
-            echo "-c    k (jak Keyboard) lub s (jak Screen). Informuje co ma być podświetlane"
-	    echo "+|-   Jaśniej/ciemniej"
-            echo "number - konkretny poziom jasności"
-            exit 1
-            ;;
-    esac
+	case "$OPT" in
+		c)
+			co=$OPTARG
+			;;
+		\?)
+			# getopts issues an error message
+			echo "`basename $0` version 0.1"
+			echo $USAGE >&2
+			echo "-c    k (jak Keyboard) lub s (jak Screen). Informuje co ma być podświetlane"
+			echo "+|-   Jaśniej/ciemniej"
+			echo "number - konkretny poziom jasności"
+			exit 1
+			;;
+	esac
 done
 # Remove the switches we parsed above.
 
@@ -30,7 +30,7 @@ if [ "$co" == "k" ]; then
 else
 	sciezka1="/sys/class/backlight/amdgpu_bl1"
 	sciezka2="/sys/class/backlight/nvidia_wmi_ec_backlight"
-#	sciezka="/sys/class/backlight/intel_backlight"
+	#	sciezka="/sys/class/backlight/intel_backlight"
 fi
 
 
@@ -47,32 +47,31 @@ if [ "$1" == "+" ]; then
 	maxbright2=`cat $sciezka2/max_brightness`
 	bright2=`echo "print(int(min($maxbright2,$bright2 + max($bright2 * 0.5, 1))))" | python3`
 else
-   if [ "$1" == "-" ]; then
-	bright1=`echo "print(int(max(0,$bright1 - max($bright1 * 0.33, 1))))" | python3`
-	bright2=`echo "print(int(max(0,$bright2 - max($bright2 * 0.33, 1))))" | python3`
-   else
-	if [ "$1" == "max" ]; then
-		maxbright1=`cat $sciezka1/max_brightness`
-		bright1=$maxbright1
-		maxbright2=`cat $sciezka2/max_brightness`
-		bright2=$maxbright2
+	if [ "$1" == "-" ]; then
+		bright1=`echo "print(int(max(0,$bright1 - max($bright1 * 0.33, 1))))" | python3`
+		bright2=`echo "print(int(max(0,$bright2 - max($bright2 * 0.33, 1))))" | python3`
 	else
-		if ! [[ "$1" =~ ^[0-9]+$ ]] ; then
-		    echo "`basename $0` version 0.1"
-		    echo $USAGE >&2
-		    echo "-c    k (jak Keyboard) lub s (jak Screen). Informuje co ma być podświetlane"
-		    echo "+|-   Jaśniej/ciemniej"
-		    echo "number - konkretny poziom jasności"
-		    exit 1
+		if [ "$1" == "max" ]; then
+			maxbright1=`cat $sciezka1/max_brightness`
+			bright1=$maxbright1
+			maxbright2=`cat $sciezka2/max_brightness`
+			bright2=$maxbright2
 		else
-		    bright1=$1
-		    bright2=$1
+			if ! [[ "$1" =~ ^[0-9]+$ ]] ; then
+				echo "`basename $0` version 0.1"
+				echo $USAGE >&2
+				echo "-c    k (jak Keyboard) lub s (jak Screen). Informuje co ma być podświetlane"
+				echo "+|-   Jaśniej/ciemniej"
+				echo "number - konkretny poziom jasności"
+				exit 1
+			else
+				bright1=$1
+				bright2=$1
+			fi
 		fi
 	fi
-   fi
 fi
 
 
 bash -c "echo $bright1 > $sciezka1/brightness"
 bash -c "echo $bright2 > $sciezka2/brightness"
-

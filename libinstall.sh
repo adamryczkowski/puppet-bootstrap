@@ -1,6 +1,6 @@
-#!/bin/bash 
+#!/bin/bash
 
-function errcho {
+function errcho() {
 	echo "ERROR: $*"
 }
 
@@ -8,7 +8,7 @@ function errcho {
 # "$*"
 #}
 
-function get_app_version {
+function get_app_version() {
 	local app="$1" # name/path to the app
 	if [ "$2" == "" ]; then
 		local app_arg="--version"
@@ -26,18 +26,18 @@ function get_app_version {
 	pattern='([[:digit:]]+\.[[:digit:]]+\.[[:digit:]]+)'
 	if [[ "$ans" =~ $pattern ]]; then
 		echo "${BASH_REMATCH[1]}"
-	else 
+	else
 		echo ""
-	fi 
+	fi
 }
 
 
-function get_github_releases {
+function get_github_releases() {
 	local name="$1" # e.g. "BurntSushi/ripgrep"
 	curl -s "https://api.github.com/repos/$name/releases/latest" | jq -r ".assets[] | select(.name | contains(\"\")) | .browser_download_url"
 }
 
-function install_update_hook {
+function install_update_hook() {
 	local gh_name="$1"
 	local asset_path="$2"
 	local asset_type="$3" # 'source' or 'deb' or 'binary' or 'git'
@@ -47,9 +47,9 @@ function install_update_hook {
 	local timestamp
 	local script_filename
 	timestamp=$(date)
-	
+
 	local updater_path=/usr/local/lib/adam/updater/records
-	
+
 	if [[ "$gh_name" != "" ]]; then
 		pattern="([^/]+)/([^/]+)"
 		if [[ "$gh_name" =~ $pattern ]]; then
@@ -60,7 +60,7 @@ function install_update_hook {
 			return 1
 		fi
 	fi
-	
+
 	if [[ "$asset_path" == "" ]]; then
 		errcho "Asset_path cannot be empty"
 		return 1
@@ -71,14 +71,14 @@ function install_update_hook {
 		errcho "Asset_type must be 'source', 'deb', 'binary' or 'git'"
 		return 1
 	fi
-	
+
 	if [[ "$version" == "" ]]; then
 		errcho "Version must not be empty"
 		return 1
 	fi
 
 	logmkdir ${updater_path}
-	
+
 	if [[ "$update_script_text" == "" ]]; then
 		sudo rm "${updater_path}/${script_filename}"
 		update_script_path="none"
@@ -94,7 +94,7 @@ function install_update_hook {
 	echo "$record" | sudo tee -a "${updater_path}/${filename}" >/dev/null
 }
 
-function read_update_hook {
+function read_update_hook() {
 	local gh_name="$1"
 
 	local updater_path=/usr/local/lib/adam/updater/records
@@ -120,12 +120,12 @@ function read_update_hook {
 		cache_filename="${recs[5]}"
 		timestamp="${recs[6]}"
 		if [ "$(dirname "$update_script_path")" == "" ]; then
-			 update_script_path="${updater_path}/${update_script_path}"
+			update_script_path="${updater_path}/${update_script_path}"
 		fi
 	fi
 }
 
-function install_gh_source {
+function install_gh_source() {
 	#Installs source tarball from the github in the dest_dir, setting
 	#update hooks
 	local gh_name="$1"
@@ -149,7 +149,7 @@ function install_gh_source {
 			return 1
 		fi
 	fi
-	
+
 	if [[ "$override_name" != "" ]]; then
 		app_name="$override_name"
 	fi
@@ -159,28 +159,28 @@ function install_gh_source {
 	else
 		usergr=$(get_usergr_owner_of_file "${dest_dir}")
 	fi
-	
+
 	filename="updater/${app_name}-${version}.zip"
-	
-	
+
+
 	filepath="$(get_cached_file "$filename" "$link")"
 	uncompress_cached_file "$filepath" "$dest_dir" "$usergr" "$app_name" skip_timestamps
 
 	install_update_hook "$gh_name" "${dest_dir}/${app_name}" source "$version" local "$update_script_text" "$filename"
 }
 
-function get_gh_download_link {
-  #Returns the download link for the github app
-  local gh_name="$1"
-  local file_pattern="$2" # e.g. "tar\.gz" or "deb"
-  local link
+function get_gh_download_link() {
+	#Returns the download link for the github app
+	local gh_name="$1"
+	local file_pattern="$2" # e.g. "tar\.gz" or "deb"
+	local link
 
-  install_apt_package jq curl
+	install_apt_package jq curl
 
-  curl -s "https://api.github.com/repos/${gh_name}/releases/latest" | jq -r ".assets[] | select(.name | contains (\"${file_pattern}\")) | .browser_download_url"
+	curl -s "https://api.github.com/repos/${gh_name}/releases/latest" | jq -r ".assets[] | select(.name | contains (\"${file_pattern}\")) | .browser_download_url"
 }
 
-function install_gh_binary {
+function install_gh_binary() {
 	#Installs tarball with binary from the github in the dest_dir, setting
 	#update hooks
 	set -x
@@ -213,11 +213,11 @@ function install_gh_binary {
 			return 1
 		fi
 	fi
-	
+
 	if [[ "$bindir" == "" ]]; then
 		bindir=/usr/local/bin
 	fi
-	
+
 	if [[ "$override_name" != "" ]]; then
 		app_name="$override_name"
 	fi
@@ -231,8 +231,8 @@ function install_gh_binary {
 	if [[ "$override_exe_name" == "" ]]; then
 		override_exe_name="${app_name}"
 	fi
-	
-	filename="updater/$(basename "$link")"	
+
+	filename="updater/$(basename "$link")"
 
 	filepath="$(get_cached_file "$filename" "$link")"
 	if [ ! -f "${dest_dir}/${app_name}/${binary_relpath}" ]; then
@@ -246,7 +246,7 @@ function install_gh_binary {
 	set +x
 }
 
-function install_gh_deb {
+function install_gh_deb() {
 	#Installs deb from the github
 	set -x
 	local gh_name="$1"
@@ -272,30 +272,30 @@ function install_gh_deb {
 			return 1
 		fi
 	fi
-	
-	filename="updater/$(basename "$link")"	
+
+	filename="updater/$(basename "$link")"
 
 	filepath="$(get_cached_file "$filename" "$link")"
-	
+
 	install_apt_package_file "${filepath}" "$package_name"
 
 	install_update_hook "$gh_name" "${dest_dir}/${app_name}" deb "$version"  "" "$filename"
 	set +x
 }
 
-function get_github_source_zipball {
+function get_github_source_zipball() {
 	# Attention! You need to rename the file returned by the link
 	local name="$1" # e.g. "BurntSushi/ripgrep"
 	curl -s "https://api.github.com/repos/$name/releases/latest" | jq -r ".zipball_url"
 }
 
-function is_arch_supported {
-  local releases
-  local regexp
+function is_arch_supported() {
+	local releases
+	local regexp
 	releases="$1"
 	regexp="$2"
 	ans="$(echo "$releases" | grep -E "[_\-]$regexp")"
-	
+
 	echo "$ans"
 	if [[ "$ans" == "" ]]; then
 		return 0
@@ -305,7 +305,7 @@ function is_arch_supported {
 }
 
 
-function install_app_tar_gz {
+function install_app_tar_gz() {
 	local name="$1"
 	local download_link="$2"
 	local filename="$3"
@@ -319,7 +319,7 @@ function install_app_tar_gz {
 	fi
 	local dest_folder=/usr/local/share
 	filepath=$(get_cached_file "$filename" "$download_link")
-	get_from_cache_and_uncompress_file "$filepath" "${dest_folder}" "$user" "${name}" 
+	get_from_cache_and_uncompress_file "$filepath" "${dest_folder}" "$user" "${name}"
 	if [ ! -d "${dest_folder}/${name}" ]; then
 		pattern='(.*)\.tar.*$'
 		if [[ "$filename" =~ $pattern ]]; then
@@ -327,7 +327,7 @@ function install_app_tar_gz {
 			if [ -d "${dest_folder}/${dirname}" ]; then
 				sudo mv "${dest_folder}/${dirname}" "${dest_folder}/${name}"
 			fi
-		fi 
+		fi
 	fi
 
 	if [ -f "${dest_folder}/${name}/${exe_name}" ]; then
@@ -337,13 +337,13 @@ function install_app_tar_gz {
 	fi
 }
 
-function github_install_app {
+function github_install_app() {
 	local gh_name="$1"
 	local app_name="$2"
 	local exe_name="$3"
 	local force="$4"
 	local user="$5"
-	
+
 	if [[ "$user" == "" ]]; then
 		user=root
 	fi
@@ -357,18 +357,18 @@ function github_install_app {
 			return 1
 		fi
 	fi
-	
+
 	if [[ "$exe_name" == "" ]]; then
 		exe_name="$app_name"
 	fi
-	
+
 	if [[ "$force" == "" ]]; then
 		if which "$exe_name" >/dev/null; then
 			return 0 #Already installed
 		fi
-	fi 
+	fi
 
-	
+
 	download_link=$(get_app_link_gh "${gh_name}")
 	local filename
 	pattern='.*/([^/]+)$'
@@ -379,8 +379,8 @@ function github_install_app {
 		return 1
 	fi
 	pattern1='\.tar\.gz$'
-#	pattern2='\.deb$'
-	
+	#	pattern2='\.deb$'
+
 	if [[ "$download_link" =~ $pattern1 ]]; then
 		install_app_tar_gz "$app_name" "$download_link" "$filename" "$exe_name" "$user"
 	else
@@ -388,7 +388,7 @@ function github_install_app {
 	fi
 }
 
-function github_update_app {
+function github_update_app() {
 	set -x
 	local gh_name="$1"
 	local app_name="$2"
@@ -404,21 +404,21 @@ function github_update_app {
 			return 1
 		fi
 	fi
-	
+
 	if [[ "$exe_name" == "" ]]; then
 		exe_name="$app_name"
 	fi
-	
+
 	if [[ "$force" == "" ]]; then
 		if ! which "$exe_name" >/dev/null; then
 			set +x
 			return 0 #Not installed
 		fi
-	fi 
+	fi
 
 	gh_version=$(get_latest_github_release_name "$gh_name" skip_v)
 	local_version=$(get_app_version "$exe_name")
-	
+
 	if [[ "$gh_version" != "$local_version" ]]; then
 		github_install_app "$gh_name" "$app_name" "$exe_name" force
 	fi

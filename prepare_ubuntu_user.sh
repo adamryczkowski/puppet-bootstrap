@@ -12,18 +12,18 @@ The script must be run as a root.
 Usage:
 
 $(basename "$0") <user-name> [--private-key-path <path to the private key>] [--external-key <cipher> <key> <name>]
-                        [--help] [--debug] [--log <output file>
+[--help] [--debug] [--log <output file>
 
 where
 
- --private_key_path       - Path to the file with the ssh private key. 
-                            If set, installs private key on the user's 
+ --private_key_path       - Path to the file with the ssh private key.
+                            If set, installs private key on the user's
                             account in the container.
  --no-sudo-password       - If set, sudo will not ask for password
  --external-key           - Sets external public key to access the account. It
     <cipher> <key> <name>   populates authorized_keys
  --repo-path              - Path to the common repository
- --debug                  - Flag that sets debugging mode. 
+ --debug                  - Flag that sets debugging mode.
  --log                    - Path to the log file that will log all meaningful commands
  --bat                    - cat replacement (bat)
  --bashrcd                - Replace existing .bashrc with a new one. Old bashrc will be backed up.
@@ -35,7 +35,7 @@ where
  --fzf                    - fzf (for bash ctr+r)
  --difft                  - difftastic (diff replacement),
  --find                   - fd (replaces find)
- --du                     - ncdu (replaces du), 
+ --du                     - ncdu (replaces du),
  --liquidprompt           - liquidprompt
  --git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
  --byobu                  - byobu
@@ -367,4 +367,3 @@ if [ "${install_liquidprompt}" == "1" ]; then
   # shellcheck disable=SC2016
   add_bashrc_lines 'echo $- | grep -q i 2>/dev/null && . /usr/share/liquidprompt/liquidprompt' "81_liquidprompt"
 fi
-

@@ -4,7 +4,7 @@ cd `dirname $0`
 
 
 usage="
-Script that simply creates a empty file. 
+Script that simply creates a empty file.
 
 Usage:
 
@@ -12,9 +12,9 @@ $(basename $0) --file <filename>
 
 where
 
- --touch <filename>  - Name of the file to create
- --debug            - Flag that sets debugging mode. 
- --log              - Path to the log file that will log all meaningful commands
+--touch <filename>  - Name of the file to create
+--debug            - Flag that sets debugging mode.
+--log              - Path to the log file that will log all meaningful commands
 
 
 Example:
@@ -73,4 +73,3 @@ fi
 if [ ! -f "${filename}" ]; then
         logexec touch "${filename}"
 fi
-

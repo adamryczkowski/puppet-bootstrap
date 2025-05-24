@@ -9,15 +9,15 @@ Installs locally the IMGW VPN
 
 Usage:
 
-$(basename $0)  <username>@<host> --password <password> 
-		[--help] [--debug] [--log <output file>]
+$(basename $0)  <username>@<host> --password <password>
+[--help] [--debug] [--log <output file>]
 
 
 where
- <username>@<host>        - Username and the address of the VPN gateway
- --password               - Password for the VPN (in open text)
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+<username>@<host>        - Username and the address of the VPN gateway
+--password               - Password for the VPN (in open text)
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 Example2:
@@ -99,4 +99,3 @@ prg="#!/bin/bash
 textfile /etc/openconnect/imgw "${prg}"
 
 simple_systemd_service IMGW_VPN "VPN of IMGW on ${vpnip}" "/etc/openconnect/imgw"
-

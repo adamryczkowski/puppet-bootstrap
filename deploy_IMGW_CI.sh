@@ -14,55 +14,55 @@ usage="
 Prepares container that can do CI of the PROPOZE project
 
 
-Usage:
+	Usage:
 
-$(basename $0) <container_name> --gitlab-token <string> [--softether-password <vpn-password>]
-		[--grant-sudo] [--make-lxd-node-opts \"opts\"] [--max-threads <N>] [--max-mem <MB>]
-		[--ssh-key-path <path>] [--host-repo-path <path>] [--guest-repo-path <path>]
-		[--release <release_name>] [--apt-proxy <proxy_address>] [--preinstall-spack <package> ...]
-		[--preinstall-apt <package>...]
-		[--help] [--debug] [--log <output file>]
-
-
-where
- <container_name>              - Name of the (LXC) container that will hold the CI runner
- --gitlab-token <string>       - Token that will allow access to the server. Required.
- --softether-password          - Softether password. Username is fixed to the container_name. 
-                                 Hub is fixed to IMGW. If skept, no softether is installed.
- --grant-sudo                  - Flag that gives passwordless sudo priviledge to the gitlab-runner.
- --make-lxd-node-opts \"<opts>\"  - Options that will be forwarded to the make-lxd-node script.
- --max-mem <MB>                - Maximum number of MB allowed for build in this runner. This limit will be
-                                 enforced using hard memory limit on the container and 
-                                 this value will get written to the configuration file to be
-                                 used during CI run. Default to auto, which is
-                                 90% of (total mem - 1GB). 
- --max-threads <N>             - Max number of build threads allowed. Defaults to all
-                                 CPU threads available (\"auto\"). This is a hard limit enforced on the container.
- --ssh-key-path <path>         - Path to the ssh private key that allows pulling the source code.
-                                 Most likely the deploy key. Otherwise it will install a new keypair,
-                                 and you will need to add this keypair to GitLab & GitHub.
- --guest-repo-path <path>      - Build path in the container. It will be owned by the gitlab-runner user.
-                                 Defaults to /opt/CI
- --host-repo-path <path>       - Location of the build path in the host. If not specified, the build path
-                                 will be visible only to the guest OS.
- --release <release_name>      - What Ubuntu flavour to test? Defaults to the current distro.
- --apt-proxy <proxy_address>   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142. Defaults to the
-                                 already existing caching on the host.
- --force-spack                 - If set the dependencies will be installed using spack rather apt.
- --preinstall-spack            - Name of the package to pre-install using spack
-                                 (e.g. --preinstall-spack cmake --preinstall-spack gcc@6.4.0)
- --spack_mirror                - Location of local spack mirror. Mirror will be shared with the container.
-                                 Needed only, when --preinstall-spack any package.
- --repo-path                   - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
- --preinstall-apt              - Name of the packages to pre-install using package manager
- --debug                       - Flag that sets debugging mode. 
- --log                         - Path to the log file that will log all meaningful commands
+	$(basename $0) <container_name> --gitlab-token <string> [--softether-password <vpn-password>]
+	[--grant-sudo] [--make-lxd-node-opts \"opts\"] [--max-threads <N>] [--max-mem <MB>]
+	[--ssh-key-path <path>] [--host-repo-path <path>] [--guest-repo-path <path>]
+	[--release <release_name>] [--apt-proxy <proxy_address>] [--preinstall-spack <package> ...]
+	[--preinstall-apt <package>...]
+	[--help] [--debug] [--log <output file>]
 
 
-Example2:
+	where
+	<container_name>              - Name of the (LXC) container that will hold the CI runner
+	--gitlab-token <string>       - Token that will allow access to the server. Required.
+	--softether-password          - Softether password. Username is fixed to the container_name.
+	Hub is fixed to IMGW. If skept, no softether is installed.
+	--grant-sudo                  - Flag that gives passwordless sudo priviledge to the gitlab-runner.
+	--make-lxd-node-opts \"<opts>\"  - Options that will be forwarded to the make-lxd-node script.
+	--max-mem <MB>                - Maximum number of MB allowed for build in this runner. This limit will be
+	enforced using hard memory limit on the container and
+	this value will get written to the configuration file to be
+	used during CI run. Default to auto, which is
+	90% of (total mem - 1GB).
+	--max-threads <N>             - Max number of build threads allowed. Defaults to all
+	CPU threads available (\"auto\"). This is a hard limit enforced on the container.
+	--ssh-key-path <path>         - Path to the ssh private key that allows pulling the source code.
+	Most likely the deploy key. Otherwise it will install a new keypair,
+	and you will need to add this keypair to GitLab & GitHub.
+	--guest-repo-path <path>      - Build path in the container. It will be owned by the gitlab-runner user.
+	Defaults to /opt/CI
+	--host-repo-path <path>       - Location of the build path in the host. If not specified, the build path
+	will be visible only to the guest OS.
+	--release <release_name>      - What Ubuntu flavour to test? Defaults to the current distro.
+	--apt-proxy <proxy_address>   - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142. Defaults to the
+	already existing caching on the host.
+	--force-spack                 - If set the dependencies will be installed using spack rather apt.
+	--preinstall-spack            - Name of the package to pre-install using spack
+	(e.g. --preinstall-spack cmake --preinstall-spack gcc@6.4.0)
+	--spack_mirror                - Location of local spack mirror. Mirror will be shared with the container.
+	Needed only, when --preinstall-spack any package.
+	--repo-path                   - Path to the local repository of files, e.g. /media/adam-minipc/other/debs
+	--preinstall-apt              - Name of the packages to pre-install using package manager
+	--debug                       - Flag that sets debugging mode.
+	--log                         - Path to the log file that will log all meaningful commands
 
-$(basename $0) gitrunner8 --softether-password 1WTh3yAjAkXaQmiOz105 --ssh-key-path secrets/gitlab_ssh_key --host-repo-path /home/Adama-docs/Lib/CI --preinstall-spack cmake --preinstall-apt gcc-8 --preinstall-apt g++-8 --preinstall-apt gfortran-8 --gitlab-token ENMnScUBNMFDJqjQ8N9z
-"
+
+	Example2:
+
+	$(basename $0) gitrunner8 --softether-password 1WTh3yAjAkXaQmiOz105 --ssh-key-path secrets/gitlab_ssh_key --host-repo-path /home/Adama-docs/Lib/CI --preinstall-spack cmake --preinstall-apt gcc-8 --preinstall-apt g++-8 --preinstall-apt gfortran-8 --gitlab-token ENMnScUBNMFDJqjQ8N9z
+	"
 
 if [[ -z "$1" ]] ||  [[ "$1" == "--help" ]] ; then
 	echo "$usage"
@@ -255,7 +255,7 @@ fi
 
 ./execute-script-remotely.sh prepare_GitLab_CI_runner.sh --extra-executable secrets/gitlab_ssh_key --extra-executable secrets/gitlab_ssh_key.pub --ssh-address ${container_ip} $external_opts -- --gitlab-token ${gitlab_token} --ssh-identity gitlab_ssh_key gitlab_ssh_key.pub --build-dir ${build_dir}
 
-./execute-script-remotely.sh prepare_ubuntu.sh --ssh-address ${container_ip} $external_opts -- 
+./execute-script-remotely.sh prepare_ubuntu.sh --ssh-address ${container_ip} $external_opts --
 
 
 lxc file push secrets/deploy_git.key ${container_name}/home/gitlab-runner/.ssh/id_ed25519
@@ -281,4 +281,3 @@ fi
 if [ "$apt_opts" != "" ]; then
 	./execute-script-remotely.sh install_apt_packages.sh --ssh-address ${container_ip} $external_opts --step-debug --  ${apt_opts}
 fi
-

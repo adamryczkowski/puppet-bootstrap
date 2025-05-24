@@ -1,19 +1,19 @@
 #!/bin/bash
 
 # Function tries to mount the local cache
-function mount_network_cache {
-   local mountpoint=$1
-   local smb_server=$2
-   if [[ "$mountpoint" == "" ]]; then
-      mountpoint=/media/adam-minipc/other
-   fi
-   if [[ "$smb_server" == "" ]]; then
-      smb_server=adam-minipc
-   fi
-   mount_smb_share "$mountpoint" "$smb_server"
+function mount_network_cache() {
+	local mountpoint=$1
+	local smb_server=$2
+	if [[ "$mountpoint" == "" ]]; then
+		mountpoint=/media/adam-minipc/other
+	fi
+	if [[ "$smb_server" == "" ]]; then
+		smb_server=adam-minipc
+	fi
+	mount_smb_share "$mountpoint" "$smb_server"
 }
 
-function smb_share_client {
+function smb_share_client() {
 	local server=$1
 	local remote_name=$2
 	local local_path=$3
@@ -28,24 +28,24 @@ function smb_share_client {
 	fstab_entry "//${server}/${remote_name}" "${local_path}" "cifs users,credentials=${credentials_file},noexec,noauto${extra_opt}" 0 0
 }
 
-function mount_smb_share {
+function mount_smb_share() {
 	local mountpoint
 	local smbserver
 	mountpoint=$1
 	smbserver=$2
 	if is_host_up "$smbserver"; then
-	   mount_dir "$mountpoint"
-	   return $?
+		mount_dir "$mountpoint"
+		return $?
 	fi
 	return 1
 }
 
-function mount_dir {
+function mount_dir() {
 	local mountpoint=$1
 	if [ ! -d "$mountpoint" ]; then
-	   if is_mounted "" "$mountpoint"; then
-	      return 0
-	   fi
+		if is_mounted "" "$mountpoint"; then
+			return 0
+		fi
 		while [ ! -d "$mountpoint" ]; do
 			mountpoint=$(dirname "$mountpoint")
 		done
@@ -54,7 +54,7 @@ function mount_dir {
 	return 1
 }
 
-function fstab_entry {
+function fstab_entry() {
 	local spec=$1
 	local file=$2
 	local vfstype=$3
@@ -110,11 +110,11 @@ EOT
 	echo "set \$entry/dump \"${dump}\"">>/tmp/fstab.augeas
 	echo "set \$entry/passno \"${passno}\"">>/tmp/fstab.augeas
 	logexec sudo /usr/bin/augtool -Asf /tmp/fstab.augeas
-	
+
 }
 
 #Iterates over all devices managed by dmsetup and returns true, if found the device with the given path
-function find_device_in_dmapper {
+function find_device_in_dmapper() {
 	local target="$1"
 	local pattern1='^([^ ]+ +)'
 	local pattern2='device: *()[^ ]+)$'
@@ -139,7 +139,7 @@ function find_device_in_dmapper {
 	return 254 #not found
 }
 
-function is_mounted {
+function is_mounted() {
 	local device=$1
 	local mountpoint=$2
 	if [ -n "$device" ] && [ -n "$mountpoint" ]; then
@@ -159,7 +159,7 @@ function is_mounted {
 	fi
 }
 
-function find_device_from_mountpoint {
+function find_device_from_mountpoint() {
 	local mountpoint="$1"
 	local pattern="^(.*) on (${mountpoint}) type "
 	local ans
@@ -172,7 +172,7 @@ function find_device_from_mountpoint {
 }
 
 #Gets the backing device from the dm device if it uses cryptsetup
-function device_from_crypt_dmapper {
+function device_from_crypt_dmapper() {
 	local dmdevice=$1
 	local pattern='device: *([^ ]+)$'
 	local backend_line
@@ -186,7 +186,7 @@ function device_from_crypt_dmapper {
 	fi
 }
 
-function backing_luks_device_from_mount_point {
+function backing_luks_device_from_mount_point() {
 	local mountpoint="$1"
 	local pattern='^/dev/mapper/(.*)$'
 	local actual_dmdevice

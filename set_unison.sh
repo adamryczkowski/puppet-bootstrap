@@ -10,27 +10,27 @@ Installs synchronization with the given server. It assumes the server is already
 
 Usage:
 
-$(basename $0) --server <ip/dns_name of the server> --server-doc-root <root of the documents in server> 
-               --local-doc-root <root of the local documents> [--unison-settings <relative path of the unison settings>]
-               [--server-history-root <path of the history snapshots in the server>] [--user <username>]
+$(basename $0) --server <ip/dns_name of the server> --server-doc-root <root of the documents in server>
+--local-doc-root <root of the local documents> [--unison-settings <relative path of the unison settings>]
+[--server-history-root <path of the history snapshots in the server>] [--user <username>]
 
 where
 
- --server                 - Address of the server. Can be IP or DNS name.
- --server-doc-root        - Full path of the copy of the documents in the server. 
- --local-doc-root         - Full path of the local copy of the documents. Synchronization
-                            strives to keep contents of this folder the same as --server-doc-root.
- --unison-settings        - Folder with the unison settings. This folder will be synchronized first.
-                            Defaults to Unison
- --server-history-root    - Full path to the folder with history snapshots in the server. If not
-                            specified, synchronization will not make history snapshot.
- --user <username>        - Name of the user for which context the synchronization will be run.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+--server                 - Address of the server. Can be IP or DNS name.
+--server-doc-root        - Full path of the copy of the documents in the server.
+--local-doc-root         - Full path of the local copy of the documents. Synchronization
+strives to keep contents of this folder the same as --server-doc-root.
+--unison-settings        - Folder with the unison settings. This folder will be synchronized first.
+Defaults to Unison
+--server-history-root    - Full path to the folder with history snapshots in the server. If not
+specified, synchronization will not make history snapshot.
+--user <username>        - Name of the user for which context the synchronization will be run.
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 Example:
 
-$(basename $0) --server szesciodysk --server-doc-root /nas_zfs/adam --local-doc-root /home/Adama-docs/Adam 
+$(basename $0) --server szesciodysk --server-doc-root /nas_zfs/adam --local-doc-root /home/Adama-docs/Adam
 "
 
 dir_resolve()
@@ -128,11 +128,11 @@ textfile ${homedir}/.unison/roots.prf "root = ${local_doc_root}
 root = ssh://${server}/${server_doc_root}" $user
 make_symlink ${homedir}/.unison/roots.prf ${local_doc_root}/${unison_settings_relpath}/roots/roots.prf
 
-	
+
 # 4. Upload standard unison bootstrap files
 install_file ${DIR}/files/unison/unison.prf "${local_doc_root}/${unison_settings_relpath}" $user
 install_file ${DIR}/files/unison/do/do-unison.prf "${local_doc_root}/${unison_settings_relpath}/do" $user
 
 # 5. Upload synchronization script
 install_script files/sync-local "/usr/local/bin/sync-local" root
-#TODO: dokończ skrypt sync-local. 
+#TODO: dokończ skrypt sync-local.

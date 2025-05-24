@@ -15,12 +15,12 @@ $(basename $0) <ifname> --dhcp-range <ip-ip> [--ip <ip>]
 
 where
 
- --dhcp-range             - Range of the addresses to use in the network. 
-                            Defaults to 'auto', which will randomly take 10.x.x.0/24 IP domain.
- --ip                     - IP Address to set.
- --ifname                 - Name of the network device that dhcp will listen to.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+--dhcp-range             - Range of the addresses to use in the network.
+Defaults to 'auto', which will randomly take 10.x.x.0/24 IP domain.
+--ip                     - IP Address to set.
+--ifname                 - Name of the network device that dhcp will listen to.
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 Example2:
@@ -135,15 +135,15 @@ if install_apt_package isc-dhcp-server; then
 	restart_dhcp=1
 	logexec sudo ln -s /etc/apparmor.d/usr.sbin.dhcpd /etc/apparmor.d/disable
 	logexec sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.dhcpd
-fi 
+fi
 set -x
 linetextfile /etc/dhcp/dhcpd.conf "include \"/etc/dhcp/dhcpd_lease_to_slack.conf\";"
 contents="on commit {
-set ClientIP = binary-to-ascii(10, 8, \".\", leased-address);
-set ClientMac = binary-to-ascii(16, 8, \":\", substring(hardware, 1, 6));
-set ClientName = pick-first-value ( option fqdn.hostname, option host-name );
-log(concat(\"Commit: IP: \", ClientIP, \" Mac: \", ClientMac));
-execute(\"/etc/dhcp/dhcpd_lease_to_slack.sh\", \"commit\", ClientIP, ClientMac, ClientName);
+	set ClientIP = binary-to-ascii(10, 8, \".\", leased-address);
+	set ClientMac = binary-to-ascii(16, 8, \":\", substring(hardware, 1, 6));
+	set ClientName = pick-first-value ( option fqdn.hostname, option host-name );
+	log(concat(\"Commit: IP: \", ClientIP, \" Mac: \", ClientMac));
+	execute(\"/etc/dhcp/dhcpd_lease_to_slack.sh\", \"commit\", ClientIP, ClientMac, ClientName);
 }"
 textfile /etc/dhcp/dhcpd_lease_to_slack.conf "$contents" root
 install_script ${DIR}/files/dhcpd_lease_to_slack.sh /etc/dhcp/dhcpd_lease_to_slack.sh root
@@ -157,12 +157,12 @@ if edit_dhcpd authoritative "<ON>"; then
 fi
 
 if [ "$restart_dhcp" == "1" ]; then
-   logexec sudo ifconfig ${ifname} up
+	logexec sudo ifconfig ${ifname} up
 	logexec sudo service isc-dhcp-server restart #Make sure the dhcp starts AFTER supernode and its client
 fi
 
 actual_server_ip=$(get_iface_ip $ifname)
 
 if [ "${actual_server_ip}" != "${server_ip}" ]; then
-   logexec sudo ifconfig ${ifname} ${server_ip}
+	logexec sudo ifconfig ${ifname} ${server_ip}
 fi

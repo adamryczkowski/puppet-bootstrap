@@ -39,7 +39,7 @@ mount | while read line ; do
 		paths+=("${path}")
 		devices+=("${device}")
 		items+=("${path}" "${device}")
-	fi 
+	fi
 done
 
 paths_count=${#paths[@]}
@@ -84,19 +84,19 @@ unison unison $@
 case $? in
     0)
     	echo "successful sync."
-        ;; 
+        ;;
     1)
     	echo "all file transfers were successful; some files were skipped."
-        ;; 
+        ;;
     2)
     	echo "non-fatal failures during file transfer."
         ;;
     3)
     	echo "fatal error occurred; execution was interrupted."
-        ;; 
+        ;;
     *)
     	echo "unknown exit code."
-        ;;  
+        ;;
 esac
 
 
@@ -106,4 +106,3 @@ $unis sett $@
 sudo ${path}/SnapBtr.py --path ${path}/historia --target-freespace 100G --keep-backups 20 --verbose --snap ${path}/dokumenty
 
 #unison "$HOSTNAME-niezbednik" $@
-

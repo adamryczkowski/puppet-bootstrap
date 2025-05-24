@@ -60,11 +60,10 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-install_apt_packages apt-transport-https ca-certificates 
+install_apt_packages apt-transport-https ca-certificates
 
 release=$(get_ubuntu_codename)
 
 add_apt_source_manual qbittorrent-cli "deb https://dl.bintray.com/fedarovich/qbittorrent-cli-debian ${release} main" https://bintray.com/user/downloadSubjectPublicKey?username=fedarovich qbittorrent-cli_Release.key
 
 install_apt_package qbittorrent-cli
-

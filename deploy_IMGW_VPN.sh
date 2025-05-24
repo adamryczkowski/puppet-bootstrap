@@ -11,21 +11,21 @@ Prepares connection with the IMGW VPN
 
 Usage:
 
-$(basename $0)  <username>@<host> --password <password> 
-		[--ssh <sshuser>@<sshhost>] [--lxc <container_name>]
-		[--help] [--debug] [--log <output file>]
+$(basename $0)  <username>@<host> --password <password>
+[--ssh <sshuser>@<sshhost>] [--lxc <container_name>]
+[--help] [--debug] [--log <output file>]
 
 
 where
- <username>@<host>        - Username and the address of the VPN gateway
- --password               - Password for the VPN (in open text)
- --ssh-address            - ssh address in format [user@]host[:port] to the remote 
-                            system. Port defaults to 22, and user to the current user.
- --lxc-name               - name of the lxc container to send the command to. 
-                            The command will be transfered by and executed 
-                            by means of the lxc api.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+<username>@<host>        - Username and the address of the VPN gateway
+--password               - Password for the VPN (in open text)
+--ssh-address            - ssh address in format [user@]host[:port] to the remote
+system. Port defaults to 22, and user to the current user.
+--lxc-name               - name of the lxc container to send the command to.
+The command will be transfered by and executed
+by means of the lxc api.
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 Example2:
@@ -100,5 +100,3 @@ else
 fi
 
 ./execute-script-remotely.sh IMGW-VPN.sh ${exec_prefix} $external_opts -- ${vpn_address} --password ${password}
-
-

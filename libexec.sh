@@ -1,7 +1,7 @@
-#!/bin/bash 
+#!/bin/bash
 
 # reads dependencies from the given file into an array "dependencies"
-function read_file_header {
+function read_file_header() {
 	local input_file="$1"
 	local pattern1='^ *## *dependency: *(.*)$'
 	local pattern2='^[^ ^#].*$'
@@ -20,7 +20,7 @@ function read_file_header {
 	fi
 }
 
-function add_dependency {
+function add_dependency() {
 	local new_entry="$1"
 	local ee
 	for ee in "${dependencies[@]}"; do
@@ -31,15 +31,15 @@ function add_dependency {
 	dependencies+=("$new_entry")
 }
 
-function collect_dependencies {
+function collect_dependencies() {
 	local input_file="$1"
 	dependencies=("$input_file")
 	read_file_header $input_file
 	local dep_len=${#dependencies[@]}
 	local old_dep_len=0
-	
+
 	while true; do
-		
+
 		if [[ "${dep_len}" != "${old_dep_len}" ]]; then
 			for ee in "${dependencies[@]}"; do
 				read_file_header $ee

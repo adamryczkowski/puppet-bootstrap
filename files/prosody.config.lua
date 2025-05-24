@@ -154,7 +154,7 @@ certificates = "certs"
 -- Settings under each VirtualHost entry apply *only* to that host.
 
 VirtualHost "${server_name}"
-      enabled = true  
+      enabled = true
       ssl = {
           key = "/var/lib/prosody/${server_name}.key";
           certificate = "/var/lib/prosody/${server_name}.crt"; }
@@ -181,4 +181,3 @@ VirtualHost "${server_name}"
 --Component "gateway.example.com"
 --	component_secret = "password"
 consider_bosh_secure = true;
-

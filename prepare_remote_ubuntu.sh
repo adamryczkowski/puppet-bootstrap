@@ -14,31 +14,31 @@ Launches 'prepare_ubuntu.sh' on remote node, using SSH root access.
 Usage:
 
 $(basename $0) [<username>@]ip address[:port]> [--username <username>]
-                     [--private-key-path <path to the private key>] 
-                     [--external-key <string with external public key to access the account>]
-                     [--help] [--debug] [--log <output file>] [--apt-proxy IP:PORT]
+[--private-key-path <path to the private key>]
+[--external-key <string with external public key to access the account>]
+[--help] [--debug] [--log <output file>] [--apt-proxy IP:PORT]
 
 
 where
 
- <ip address[:port]>      - User name, IP Address (and port) of the external node. 
-                            E.g. root@192.168.10.2:2022. 
-                            Port defaults to 22, but username to current user. 
- --username               - Name of the new username to set up. The new user will have sudo 
-                            privillege without password, which should be revoked later. 
-                            Defaults to the username used to connect to the server.
- --private_key_path       - Path to the file with the ssh private key. If set, installs private
-                            key on the user's (--username) account in the container.
- --external-key <string>  - Sets external public key to access the account, 
-                            both for the account used for ssh access and
-                            (--username). 'auto' means 
-                            public key of the calling user.
- --wormhole               - Install magic-wormhole on the remote host 
- -p|--apt-proxy           - Address of the existing apt-cacher together with the port, e.g. 
-                            192.168.1.1:3142
- --cli-improved           - Install all default command line tools.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+<ip address[:port]>      - User name, IP Address (and port) of the external node.
+E.g. root@192.168.10.2:2022.
+Port defaults to 22, but username to current user.
+--username               - Name of the new username to set up. The new user will have sudo
+privillege without password, which should be revoked later.
+Defaults to the username used to connect to the server.
+--private_key_path       - Path to the file with the ssh private key. If set, installs private
+key on the user's (--username) account in the container.
+--external-key <string>  - Sets external public key to access the account,
+both for the account used for ssh access and
+(--username). 'auto' means
+public key of the calling user.
+--wormhole               - Install magic-wormhole on the remote host
+-p|--apt-proxy           - Address of the existing apt-cacher together with the port, e.g.
+192.168.1.1:3142
+--cli-improved           - Install all default command line tools.
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 Example:
@@ -150,18 +150,18 @@ fi
 
 if ! ssh -o PasswordAuthentication=no ${sshuser}@${sshhost} -p ${sshport} exit 2>/dev/null; then
         logexec ssh-copy-id ${sshuser}@${sshhost} -p ${sshport}
-        
+
         if ! ssh -o PasswordAuthentication=no ${sshuser}@${sshhost} -p ${sshport} exit 2>/dev/null; then
-                errcho "Still cannot login to the remote host!" 
+                errcho "Still cannot login to the remote host!"
                 exit 1
-        fi  
+        fi
 fi
 
 if [ -n "$private_key_path" ]; then
         if [ ! -f "$private_key_path" ]; then
                 errcho "Cannot find key in $private_key_path"
                 exit 1
-        fi 
+        fi
 fi
 
 
@@ -178,7 +178,7 @@ if [ "${install_cli_improved}" == "1" ]; then
 	external_opts2="$external_opts2 --cli-improved"
 fi
 
-./execute-script-remotely.sh prepare_ubuntu.sh ${external_opts} --ssh-address $ssh_address -- ${user} ${external_opts2} 
+./execute-script-remotely.sh prepare_ubuntu.sh ${external_opts} --ssh-address $ssh_address -- ${user} ${external_opts2}
 
 external_opts2=""
 if [ -n "$external_key" ]; then

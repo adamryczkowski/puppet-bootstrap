@@ -23,12 +23,12 @@ echo "DSDSD"
 
 
 #Makes sure basic scripts are installed
-function tweak_base  {
+function tweak_base() {
 	install_script files/discover_session_bus_address.sh
 	install_apt_packages git
 }
 
-function desktop {
+function desktop() {
 	install_apt_packages meld
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
 	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
@@ -36,14 +36,14 @@ function desktop {
 	#touchpad prawy margines
 }
 
-function cli {
+function cli() {
 	tweak_base
 	install_apt_packages git htop liquidprompt nethogs iftop iotop mc byobu openssh-server
 	logexec liquidprompt_activate
 	logexec sudo liquidprompt_activate
 }
 
-function nemo {
+function nemo() {
 	add_ppa webupd8team/nemo3
 	do_update
 	install_apt_package nemo nemo
@@ -55,11 +55,11 @@ function nemo {
 	#pokaż ukryte pliki
 }
 
-function smb {
+function smb() {
 	install_apt_package cifs-utils
 	textfile /etc/samba/user "username=adam
-password=Zero tolerancji"
-	
+	password=Zero tolerancji"
+
 	declare -a folders=("wielodysk/filmy" "wielodysk/niezbednik" "wielodysk/docs" "wielodysk/public" "wielodysk/zdjecia")
 	declare -a shares=("rozne" "smiecie" "docs" "public" "zdjecia")
 	host=adam-990fx
@@ -76,7 +76,7 @@ password=Zero tolerancji"
 	declare -a folders=("adam-minipc/download" "adam-minipc/other" "adam-minipc/unfinished" "adam-minipc/videos")
 	declare -a shares=("download" "other" "partial" "videos")
 	host=adam-minipc
-	
+
 	local i=1
 	arraylength=${#folders[@]}
 	for (( i=1; i<${arraylength}+1; i++ )); do
@@ -99,4 +99,3 @@ for tweak in $tweaks; do
 	export IFS=","
 done
 export IFS=${oldifs}
-

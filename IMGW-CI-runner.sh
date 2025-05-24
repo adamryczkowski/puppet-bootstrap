@@ -7,32 +7,32 @@ Deploys installs all necessary requirements, clones, compiles and tests code, al
 
 syntax:
 $(basename $0) [--slack-username <name> --slack-token <string>]
-		--git-address <path> --git-branch <branch> --repo-path <path> [--compile-using <compiler>]
-		[--debug] [--log <log path>] [--help]
+--git-address <path> --git-branch <branch> --repo-path <path> [--compile-using <compiler>]
+[--debug] [--log <log path>] [--help]
 
 
 where
 
- --slack-enable             - Enables the slack integration with the default settings
- --slack-username           - Username for the slack client. Defaults to the hostname
- --slack-token              - Token for the communication with the slack server. Defaults to the slack
-                              token created by Adam for the IMGWCH slack team.
- --git-address <path>       - Remote (read only) path to repository, which will be tested.
-                              Defaults to «git@git.imgw.ad:aryczkowski/propoze.git»
- --git-branch <branch>      - Name of the branch to pull. Defaults to «develop».
- --repo-path <path>         - Place where the repository will be cloned
- --spack-location           - Name of the directory to install spack into. Defaults to ~/tmp/spack
- --spack-load <module>      - Package to preload with spack. If more than one module is needed,
-                              put this option multiple times.
- --source-dir <path>        - Relative path to the source directory. Script will build this source in
-                              created subdirectory \"build\". Defaults to the root of the repository.
- --debug                    - Flag. If set, all commands that change state of the container or
-                              host machine will be displayed together with their output.
- --log                      - Redirects output from --debug into the log file.
- 
+--slack-enable             - Enables the slack integration with the default settings
+--slack-username           - Username for the slack client. Defaults to the hostname
+--slack-token              - Token for the communication with the slack server. Defaults to the slack
+token created by Adam for the IMGWCH slack team.
+--git-address <path>       - Remote (read only) path to repository, which will be tested.
+Defaults to «git@git.imgw.ad:aryczkowski/propoze.git»
+--git-branch <branch>      - Name of the branch to pull. Defaults to «develop».
+--repo-path <path>         - Place where the repository will be cloned
+--spack-location           - Name of the directory to install spack into. Defaults to ~/tmp/spack
+--spack-load <module>      - Package to preload with spack. If more than one module is needed,
+put this option multiple times.
+--source-dir <path>        - Relative path to the source directory. Script will build this source in
+created subdirectory \"build\". Defaults to the root of the repository.
+--debug                    - Flag. If set, all commands that change state of the container or
+host machine will be displayed together with their output.
+--log                      - Redirects output from --debug into the log file.
+
 Example:
 
-$(basename $0) 
+$(basename $0)
 "
 
 spack_load=()
@@ -243,7 +243,7 @@ if [ ! -f "${build_dir}/apt_dependencies.txt" ]; then
 fi
 
 #xargs to trim the white spaces
-app_deps=$(cat "${build_dir}/apt_dependencies.txt" | xargs) 
+app_deps=$(cat "${build_dir}/apt_dependencies.txt" | xargs)
 pip_deps=$(cat "${build_dir}/pip_dependencies.txt" | xargs)
 spack_deps=$(cat "${build_dir}/spack_dependencies.txt" | xargs)
 
@@ -278,4 +278,3 @@ cpu_cures=$(grep -c ^processor /proc/cpuinfo)
 #cmake .. ${cmake_args} && make -j ${cpu_cures} && make test
 
 byobu-tmux new-session -d -s ${build_dir} -n code "${invocation} cmake .. ${cmake_args} && make -j ${cpu_cures} && make test; bash"
-

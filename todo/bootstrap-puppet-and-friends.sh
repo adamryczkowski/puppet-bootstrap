@@ -6,10 +6,10 @@ eval "lxc-stop -n gitolite >/dev/null 2>/dev/null || true; lxc-destroy -n gitoli
 eval "lxc-stop -n puppetmaster 2>/dev/null >/dev/null || true; lxc-destroy -n puppetmaster 2>/dev/null >/dev/null" &
 
 wait
- 
+
 . ./common.sh
 
-#This script installs whole puppet system. 
+#This script installs whole puppet system.
 #It manages installation of the puppet itself (puppetdb, r10k and other), gitolite repository that serves the configurations and it glues everything together.
 
 #If you give argument --gitolite-lxc-name or --gitolite-lxc-name, skrypt will take case of creation of the lxc container with gitolite. Otherwise script will attempt to configure existing contenners accessing them with ssh and sudo. It is user's responisibility to provide the ssh access and sudo rights (preferably non-interactive, otherwise script will require sudo passwords to be typed in).
@@ -19,10 +19,10 @@ wait
 #--gitolite-lxc-name - If set, it will create gitolite lxc container named <lxc name> with gitolite.
 #--gitolite-lxc-ip - Relevant only with  --gitolite-lxc-name. Sets static ip address for lxc gitolite
 #--gitolite-name - Mandatory argument. Name of the computer with gitolite. It can be localhost.
-#--user-on-gitolite - Mandatory argument. Sets user name, under which script will log in on the gitolite system. 
+#--user-on-gitolite - Mandatory argument. Sets user name, under which script will log in on the gitolite system.
 #--lxc-host-ip - Needed if we want to configure lxc network. Sets ip address of the host.
-#--lxc-network - e.g. 10.0.17.0/24. Needed if we want to configure the lxc network. 
-#--lxc-dhcprange - e.g. 10.0.17.200,10.0.17.254. Needed if we want to configure the lxc network. 
+#--lxc-network - e.g. 10.0.17.0/24. Needed if we want to configure the lxc network.
+#--lxc-dhcprange - e.g. 10.0.17.200,10.0.17.254. Needed if we want to configure the lxc network.
 #--lxc-user - Name of the user that hosts all the lxc containers. All containers will be in usermode.
 #--apt-proxy - none, auto or address to the existing apt-cache-ng.
 #--import-puppet-manifest - Jeśli podane, to główne repozytorium puppeta zostanie zaimportowane z tego adresu git. Domyślnie na początek historii git z zadanego repozytorium, chyba że podano --dont-merge-manifest-with-template.
@@ -33,7 +33,7 @@ wait
 
 
 alias errcho='>&2 echo'
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -51,96 +51,96 @@ uselxc=0
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--debug)
-	debug=1
-	;;
-	--gitolite-lxc-name)
-	gitolite_lxcname=$1
-	gitolite_lxc=1
-	uselxc=1
-	shift
-	;;
-	--gitolite-lxc-ip)
-	gitolite_ip=$1
-	gitolite_lxc=1
-	uselxc=1
-	shift
-	;;
-	--puppetmaster-lxc-name)
-	puppetmaster_lxcname=$1
-	puppetmaster_lxc=1
-	uselxc=1
-	shift
-	;;
-	--puppetmaster-lxc-ip)
-	puppetmaster_ip=$1
-	puppetmaster_lxc=1
-	uselxc=1
-	shift
-	;;
-	--gitolite-name)
-	gitolite_name=$1
-	shift
-	;;
-	--puppetmaster-name)
-	puppetmaster_name=$1
-	shift
-	;;
-	--user-on-gitolite)
-	gitolite_user=$1
-	shift
-	;;
-	--user-on-puppetmaster)
-	puppetmaster_user=$1
-	shift
-	;;
-	--lxc-host-ip)
-	lxc_hostip=$1
-	uselxc=1
-	shift
-	;;
-	--lxc-network)
-	lxc_network=$1
-	uselxc=1
-	shift
-	;;
-	--lxc-dhcprange)
-	lxc_dhcprange=$1
-	uselxc=1
-	shift
-	;;
-	--lxc-usermode)
-	lxc_usermode=1
-	uselxc=1
-	;;
-	--apt-proxy)
-	aptproxy=$1
-	shift
-	;;
-	--import-puppet-manifest)
-	manifest_address=$1
-	shift
-	;;
-	--dont-merge-manifest-with-template)
-	dontmerge=1
-	;;
-	--import-git)
-	import="$import $1"
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--debug)
+			debug=1
+			;;
+		--gitolite-lxc-name)
+			gitolite_lxcname=$1
+			gitolite_lxc=1
+			uselxc=1
+			shift
+			;;
+		--gitolite-lxc-ip)
+			gitolite_ip=$1
+			gitolite_lxc=1
+			uselxc=1
+			shift
+			;;
+		--puppetmaster-lxc-name)
+			puppetmaster_lxcname=$1
+			puppetmaster_lxc=1
+			uselxc=1
+			shift
+			;;
+		--puppetmaster-lxc-ip)
+			puppetmaster_ip=$1
+			puppetmaster_lxc=1
+			uselxc=1
+			shift
+			;;
+		--gitolite-name)
+			gitolite_name=$1
+			shift
+			;;
+		--puppetmaster-name)
+			puppetmaster_name=$1
+			shift
+			;;
+		--user-on-gitolite)
+			gitolite_user=$1
+			shift
+			;;
+		--user-on-puppetmaster)
+			puppetmaster_user=$1
+			shift
+			;;
+		--lxc-host-ip)
+			lxc_hostip=$1
+			uselxc=1
+			shift
+			;;
+		--lxc-network)
+			lxc_network=$1
+			uselxc=1
+			shift
+			;;
+		--lxc-dhcprange)
+			lxc_dhcprange=$1
+			uselxc=1
+			shift
+			;;
+		--lxc-usermode)
+			lxc_usermode=1
+			uselxc=1
+			;;
+		--apt-proxy)
+			aptproxy=$1
+			shift
+			;;
+		--import-puppet-manifest)
+			manifest_address=$1
+			shift
+			;;
+		--dont-merge-manifest-with-template)
+			dontmerge=1
+			;;
+		--import-git)
+			import="$import $1"
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -n "$log" ]; then
@@ -162,7 +162,7 @@ if [ -n "$aptproxy" ]; then
 	else
 		optx=""
 	fi
-	. ./execute-script-remotely.sh ./apt-cacher-ng-client.sh $optx $opts2 -- $opts 
+	. ./execute-script-remotely.sh ./apt-cacher-ng-client.sh $optx $opts2 -- $opts
 fi
 exitstat=$?
 if [ $exitstat -ne 0 ]; then
@@ -196,7 +196,7 @@ if [ "$uselxc" -eq "1" ]; then
 	else
 		optx=""
 	fi
-	. ./execute-script-remotely.sh ./configure-lxc.sh $optx $opts2 -- $opts 
+	. ./execute-script-remotely.sh ./configure-lxc.sh $optx $opts2 -- $opts
 	exitstat=$?
 	if [ $exitstat -ne 0 ]; then
 		exit 1
@@ -237,9 +237,9 @@ if [ "$puppetmaster_lxc" -eq "1" ]; then
 		optx=""
 	fi
 	if [ -n "$opts2" ]; then
-		. ./execute-script-remotely.sh ./install-puppetmaster-on-lxc.sh $optx $opts3 -- $opts --other-lxc-opts "$opts2"  
+		. ./execute-script-remotely.sh ./install-puppetmaster-on-lxc.sh $optx $opts3 -- $opts --other-lxc-opts "$opts2"
 	else
-		. ./execute-script-remotely.sh ./install-puppetmaster-on-lxc.sh $optx $opts3 -- $opts 
+		. ./execute-script-remotely.sh ./install-puppetmaster-on-lxc.sh $optx $opts3 -- $opts
 	fi
 	exitstat=$?
 	if [ $exitstat -ne 0 ]; then
@@ -304,7 +304,7 @@ for entry in $import; do
 	else
 		optx=""
 	fi
-	. ./execute-script-remotely.sh ./import-into-gitolite.sh $optx $opts2 -- $opts 
+	. ./execute-script-remotely.sh ./import-into-gitolite.sh $optx $opts2 -- $opts
 	exitstat=$?
 	if [ $exitstat -ne 0 ]; then
 		exit 1
@@ -322,7 +322,7 @@ if [ -n "$manifest_address" ]; then
 fi
 if [ -n "$log" ]; then
 	opts="$opts --log $log"
-	logheading ./tie-gitolite-with-puppet.sh $opts 
+	logheading ./tie-gitolite-with-puppet.sh $opts
 fi
 opts2="--host localhost --extra-executable execute-script-remotely.sh --extra-executable insert-repo-as-base-of-another.sh --extra-executable add-gitolite-user.sh --extra-executable remote/get-public-key.sh --extra-executable import-into-gitolite.sh --extra-executable remote/add-existing-repo.sh --extra-executable remote/tie-gitolite-on-puppetmaster.sh --extra-executable remote/tie-gitolite-on-gitolite.sh --extra-executable ensure-ssh-access-setup-by-proxies.sh --extra-executable remote/ensure-ssh-access-on-client.sh --extra-executable remote/ensure-ssh-access-on-server.sh"
 if [ -n "$log" ]; then
@@ -333,7 +333,7 @@ if [ "$debug" -eq "1" ]; then
 else
 	optx=""
 fi
-. ./execute-script-remotely.sh ./tie-gitolite-with-puppet.sh $optx $opts2 -- $opts 
+. ./execute-script-remotely.sh ./tie-gitolite-with-puppet.sh $optx $opts2 -- $opts
 exitstat=$?
 if [ $exitstat -ne 0 ]; then
 	exit 1
@@ -352,7 +352,7 @@ if [ "$debug" -eq "1" ]; then
 else
 	optx=""
 fi
-. ./execute-script-remotely.sh remote/configure-puppetclient.sh $optx $opts2 -- $opts 
+. ./execute-script-remotely.sh remote/configure-puppetclient.sh $optx $opts2 -- $opts
 exitstat=$?
 if [ $exitstat -ne 0 ]; then
 	exit 1
@@ -372,7 +372,7 @@ if [ "$debug" -eq "1" ]; then
 else
 	optx=""
 fi
-. ./execute-script-remotely.sh remote/configure-puppetclient.sh $optx $opts2 -- $opts 
+. ./execute-script-remotely.sh remote/configure-puppetclient.sh $optx $opts2 -- $opts
 exitstat=$?
 if [ $exitstat -ne 0 ]; then
 	exit 1
@@ -389,7 +389,7 @@ if [ "$debug" -eq "1" ]; then
 else
 	optx=""
 fi
-. ./execute-script-remotely.sh remote/configure-puppetclient.sh $optx $opts2 -- $opts 
+. ./execute-script-remotely.sh remote/configure-puppetclient.sh $optx $opts2 -- $opts
 exitstat=$?
 if [ $exitstat -ne 0 ]; then
 	exit 1
@@ -405,5 +405,3 @@ logexec ssh $gitolite_user@$gitolite_name sudo puppet agent --test
 logexec sudo puppet agent --test
 
 lxc-attach -n $puppetmaster_lxcname -- puppet agent --test
-
-

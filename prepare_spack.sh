@@ -10,16 +10,16 @@ Prepares spack repository. Does not require root priviledges if git is present.
 Usage:
 
 $(basename $0) [--user <username>]  [--spack-location <spack_path>] [--spack-mirror <spack_mirror>] [--pre-install <spack_package_name1>] [--pre-install <spack_package_name2>]...
-                [--help] [--debug] [--log <output file>] 
+[--help] [--debug] [--log <output file>]
 
 
 where
- --user                       - Username to install the spack to. Defaults to the current user.
- --spack-location             - Name of the directory to install spack into. Defaults to ~/tmp/spack
- --spack_mirror               - Location of local spack mirror
- --pre-install                - Name of the spack packages that will be installed in sequence
- --debug                      - Flag that sets debugging mode. 
- --log                        - Path to the log file that will log all meaningful commands
+--user                       - Username to install the spack to. Defaults to the current user.
+--spack-location             - Name of the directory to install spack into. Defaults to ~/tmp/spack
+--spack_mirror               - Location of local spack mirror
+--pre-install                - Name of the spack packages that will be installed in sequence
+--debug                      - Flag that sets debugging mode.
+--log                        - Path to the log file that will log all meaningful commands
 
 Example2:
 

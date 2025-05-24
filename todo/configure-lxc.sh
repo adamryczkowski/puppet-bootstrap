@@ -10,7 +10,7 @@ cd `dirname $0`
 # -i|--internalif - internal if name, e.g. lxcbr0
 # -h|--hostip - host ip, e.g. 10.0.14.1
 # -n|--network network domain e.g. 10.0.14.0/24
-# --dhcprange - dhcp range, e.g. '10.0.14.3,10.0.14.254' 
+# --dhcprange - dhcp range, e.g. '10.0.14.3,10.0.14.254'
 # --usermode-user - if provided, usermode containers will be setup for this user and the user will get all necessary privileges granted
 internalif=auto
 lxchostip=auto
@@ -23,43 +23,43 @@ user=`whoami`
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--usermode-user)
-	user=$1
-	usermode=1
-	shift
-	;;
-	-i|--internalif)
-	internalif="$1"
-	shift
-	;;
-	-h|--hostip)
-	lxchostip="$1"
-	shift
-	;;
-	-n|--network)
-	lxcnetwork="$1"
-	shift
-	;;
-	--dhcprange)
-	lxcdhcprange="$1"
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--usermode-user)
+			user=$1
+			usermode=1
+			shift
+			;;
+		-i|--internalif)
+			internalif="$1"
+			shift
+			;;
+		-h|--hostip)
+			lxchostip="$1"
+			shift
+			;;
+		-n|--network)
+			lxcnetwork="$1"
+			shift
+			;;
+		--dhcprange)
+			lxcdhcprange="$1"
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 . ./common.sh
@@ -107,11 +107,11 @@ if grep '#LXC_DOMAIN' /etc/default/lxc-net >/dev/null; then
 fi
 
 if [ "$usermode" -eq 1 ]; then
-#Ekstra rzeczy, jakie trzeba ustawić, aby to były kontenery user-space
+	#Ekstra rzeczy, jakie trzeba ustawić, aby to były kontenery user-space
 
 	sshhome=`getent passwd $user | awk -F: '{ print $6 }'`
 	if [ -z "$sshhome" ]; then
-		logexec sudo adduser --disabled-password --add_extra_groups --quiet --gecos "" ${user} 
+		logexec sudo adduser --disabled-password --add_extra_groups --quiet --gecos "" ${user}
 		sshhome=`getent passwd $user | awk -F: '{ print $6 }'`
 	fi
 
@@ -129,7 +129,7 @@ if [ "$usermode" -eq 1 ]; then
 	fi
 
 	if ! groups $user | grep &>/dev/null '\bsudo\b'; then
-		 logexec sudo adduser $user sudo
+		logexec sudo adduser $user sudo
 	fi
 
 	if [ "$user" != "`whoami`" ]; then

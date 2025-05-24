@@ -35,7 +35,7 @@ fi
 
 #folder=/var/lib/radicale/collections/collection-root/${user}
 
-text="${user} modified calendar: 
+text="${user} modified calendar:
 ${text}"
 
 escapedText=$(echo $text | sed 's/"/\"/g' | sed "s/'/\'/g" )

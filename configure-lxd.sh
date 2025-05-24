@@ -6,27 +6,27 @@ cd `dirname $0`
 
 usage="
 Prepares the system for the LXC-2 containers:
-  adds the lxc ppa repository, and configures network bridge.
+adds the lxc ppa repository, and configures network bridge.
 
 
 Usage:
-$(basename $0) setup <internal if name, e.g. lxcbr0> 
-                 [-n|--network <network domain, e.g. 10.0.14.1/24>] 
-                 [--dhcprange] <dhcp range>
-                 [--debug] [--log <path to logfile>]
+$(basename $0) setup <internal if name, e.g. lxcbr0>
+[-n|--network <network domain, e.g. 10.0.14.1/24>]
+[--dhcprange] <dhcp range>
+[--debug] [--log <path to logfile>]
 or
 $(basename $0) show|help
 
 where
 
 internal if name - Network interface name used by the host. Defaults to lxcbr0.
-                   Defaults to lxc defaults.
- -n|--network    - Network domain e.g. 10.0.14.1/24. 
-                   Defaults to whatever lxc assigns.
- --dhcprange     - Dhcp range, e.g. '10.0.14.100-10.0.14.199'. 
-                   Defaults to whatever lxc assigns.
- --debug         - Flag that sets debugging mode. 
- --log           - Path to the log file that will log all meaningful commands
+Defaults to lxc defaults.
+-n|--network    - Network domain e.g. 10.0.14.1/24.
+Defaults to whatever lxc assigns.
+--dhcprange     - Dhcp range, e.g. '10.0.14.100-10.0.14.199'.
+Defaults to whatever lxc assigns.
+--debug         - Flag that sets debugging mode.
+--log           - Path to the log file that will log all meaningful commands
 
 
 Example:
@@ -57,13 +57,13 @@ fi
 if [ "$command" == "show" ]; then
 	if dpkg -s lxc2 >/dev/null 2>/dev/null; then
 		printf "lxc version $(lxc --version) installed."
-		
+
 		printf "\n networks list "
 		lxc network list | head -n 3
 		lxc network list | grep -E '(YES)' -A 1
 
 		allnetworks=$(lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o)
-		lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o | while read x; do 
+		lxc network list | grep -E '(YES)' | grep -E '^\| ([^ ]+) +\|' -o | grep -E '[^ ^\|]+' -o | while read x; do
 			printf "Details of $x";lxc network show $x
 			echo ""
 		done
@@ -153,7 +153,7 @@ fi
 #if ! grep -q "^deb .*$the_ppa" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
 
 #	if ! which add-apt-repository; then
-#		logexec sudo apt install --yes software-properties-common 
+#		logexec sudo apt install --yes software-properties-common
 #	fi
 
 #	logexec sudo add-apt-repository -y ppa:ubuntu-lxc/lxd-stable
@@ -193,7 +193,7 @@ if [ "$lxcnetwork" == "auto" ]; then
 	lxcnetworkarg=""
 else
 	#Pattern for full CIDR notation. It extracts hostip.
-	pattern='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/(3[0-2]|[12][0-9]|0?[1-9])$' 
+	pattern='^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\/(3[0-2]|[12][0-9]|0?[1-9])$'
 	if [[ $lxcnetwork =~ $pattern ]]; then
 		lxcnetworkarg=" ipv4.address=$lxcnetwork"
 	else
@@ -222,7 +222,7 @@ if lxc network list | grep -q "$internalif" 2>/dev/null; then
 		fi
 	fi
 	if [ -n "${lxcdhcprange}" ]; then
-		#todo check dhcp range	
+		#todo check dhcp range
 		actual_dhcp_ranges=$(lxc network get ${internalif} ipv4.dhcp.ranges)
 		if [ -z "${actual_dhcp_ranges}" ]; then
 			logexec lxc network set ${internalif} ${lxcdhcprange}
@@ -232,10 +232,7 @@ if lxc network list | grep -q "$internalif" 2>/dev/null; then
 				exit 1
 			fi
 		fi
-	fi	
+	fi
 else
 	logexec lxc network create $internalif $lxcnetworkarg ipv4.nat=true $lxcdhcprange
 fi
-
-
-

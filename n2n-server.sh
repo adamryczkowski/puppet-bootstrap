@@ -16,42 +16,42 @@ $(basename $0) [--port <portnr>] [--no-dhcp] [--dhcp-range <ip-ip>] -- <options 
 
 where
 
- --port                   - UDP port to listen to. Defaults to 55355
-                            E.g. 139.162.181.142:5000. Port must be the same as the supernode. 
- --no-dhcp                - Flag. If given, no DHCP server will be installed on the network. 
- --dhcp-range             - Range of the addresses to use in the network. 
-                            Defaults to 'auto', which will randomly take 10.x.x.0/24 IP domain.
- --network-name           - Name of the n2n community. All edges within the same community 
-                            appear on the same LAN (layer 2 network segment). 
-                            Community name is 16 bytes in length. 
-                            Defaults to 'My_n2n_network'
- --ifname                 - Name of the virtual network device. Defaults to 'edge0'.
- --mac                    - Sets the MAC address of the node. 
-                            Without this, edge command will randomly generate a MAC address. 
-                            In fact, hardcoding a static MAC address for a VPN interface is 
-                            highly recommended. Otherwise, in case you restart edge 
-                            daemon on a node, ARP cache of other peers will be polluted 
-                            due to a newly generated MAC addess, and they will not send 
-                            traffic to the node until the polluted ARP entry is evicted. 
-                            Default 'auto', which will randomize MAC address.
- --client-service-name    - Name of the client service, needed if you intent to install more than one.
-                            Defaults to edge.
- --server-service-name    - Name of the server service, needed if you intent to install more than one.
-                            Defaults to supernode. THIS OPTION IS DISABLED. SERVICE IS ALWAYS \"supernode\".
- --password               - Password needed to join the network.  
- --ip                     - IP address in the private network of the node. Defaults to 
-                            the first address in the dhcp range.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
- <options to n2n_client>  - You must provide password. Server address will be put automatically. 
-                            You can override --ip address of the dhcp server. 
+--port                   - UDP port to listen to. Defaults to 55355
+E.g. 139.162.181.142:5000. Port must be the same as the supernode.
+--no-dhcp                - Flag. If given, no DHCP server will be installed on the network.
+--dhcp-range             - Range of the addresses to use in the network.
+Defaults to 'auto', which will randomly take 10.x.x.0/24 IP domain.
+--network-name           - Name of the n2n community. All edges within the same community
+appear on the same LAN (layer 2 network segment).
+Community name is 16 bytes in length.
+Defaults to 'My_n2n_network'
+--ifname                 - Name of the virtual network device. Defaults to 'edge0'.
+--mac                    - Sets the MAC address of the node.
+Without this, edge command will randomly generate a MAC address.
+In fact, hardcoding a static MAC address for a VPN interface is
+highly recommended. Otherwise, in case you restart edge
+		daemon on a node, ARP cache of other peers will be polluted
+		due to a newly generated MAC addess, and they will not send
+		traffic to the node until the polluted ARP entry is evicted.
+		Default 'auto', which will randomize MAC address.
+		--client-service-name    - Name of the client service, needed if you intent to install more than one.
+		Defaults to edge.
+		--server-service-name    - Name of the server service, needed if you intent to install more than one.
+		Defaults to supernode. THIS OPTION IS DISABLED. SERVICE IS ALWAYS \"supernode\".
+		--password               - Password needed to join the network.
+		--ip                     - IP address in the private network of the node. Defaults to
+		the first address in the dhcp range.
+		--debug                  - Flag that sets debugging mode.
+		--log                    - Path to the log file that will log all meaningful commands
+		<options to n2n_client>  - You must provide password. Server address will be put automatically.
+		You can override --ip address of the dhcp server.
 
 
-Example2:
+		Example2:
 
-./$(basename $0) --password szakal --port 5536 --network-name SiecAdama
+		./$(basename $0) --password szakal --port 5536 --network-name SiecAdama
 
-"
+		"
 server_service_name="supernode"
 our_ip="dhcp"
 port=5535
@@ -199,7 +199,7 @@ if [ -z "$no_dhcp" ]; then
 	if [ -z "${ip}" ]; then
 		ip=${server_ip}
 	fi
-	
+
 	if [ "$?" != "0" ] ; then
 		errcho "Problems when installing n2n client. Exiting"
 		exit 1
@@ -215,30 +215,30 @@ if [ -z "$no_dhcp" ]; then
 		restart_dhcp=1
 		logexec sudo ln -s /etc/apparmor.d/usr.sbin.dhcpd /etc/apparmor.d/disable
 		logexec sudo apparmor_parser -R /etc/apparmor.d/usr.sbin.dhcpd
-	fi 
+	fi
 	set -x
 	linetextfile /etc/dhcp/dhcpd.conf "include \"/etc/dhcp/dhcpd_lease_to_slack.conf\";"
-contents="on commit {
-	set ClientIP = binary-to-ascii(10, 8, \".\", leased-address);
-	set ClientMac = binary-to-ascii(16, 8, \":\", substring(hardware, 1, 6));
-	set ClientName = pick-first-value ( option fqdn.hostname, option host-name );
-	log(concat(\"Commit: IP: \", ClientIP, \" Mac: \", ClientMac));
-	execute(\"/etc/dhcp/dhcpd_lease_to_slack.sh\", \"commit\", ClientIP, ClientMac, ClientName);
-}"
-	textfile /etc/dhcp/dhcpd_lease_to_slack.conf "$contents" root
-	install_script ${DIR}/files/dhcpd_lease_to_slack.sh /etc/dhcp/dhcpd_lease_to_slack.sh root
+		contents="on commit {
+			set ClientIP = binary-to-ascii(10, 8, \".\", leased-address);
+			set ClientMac = binary-to-ascii(16, 8, \":\", substring(hardware, 1, 6));
+			set ClientName = pick-first-value ( option fqdn.hostname, option host-name );
+			log(concat(\"Commit: IP: \", ClientIP, \" Mac: \", ClientMac));
+			execute(\"/etc/dhcp/dhcpd_lease_to_slack.sh\", \"commit\", ClientIP, ClientMac, ClientName);
+		}"
+		textfile /etc/dhcp/dhcpd_lease_to_slack.conf "$contents" root
+		install_script ${DIR}/files/dhcpd_lease_to_slack.sh /etc/dhcp/dhcpd_lease_to_slack.sh root
 
-	if add_dhcpd_entry "${ip_prefix}.0" 255.255.255.0 $dhcp_range; then
-		restart_dhcp=1
+		if add_dhcpd_entry "${ip_prefix}.0" 255.255.255.0 $dhcp_range; then
+			restart_dhcp=1
+		fi
+		if add_dhcpd_entry "${ip_prefix}.0" 255.255.255.0 $dhcp_range; then
+			restart_dhcp=1
+		fi
+		if edit_dhcpd authoritative "<ON>"; then
+			restart_dhcp=1
+		fi
+
+		if [ "$restart_dhcp" == "1" ]; then
+			logexec sudo service isc-dhcp-server restart #Make sure the dhcp starts AFTER supernode and its client
+		fi
 	fi
-	if add_dhcpd_entry "${ip_prefix}.0" 255.255.255.0 $dhcp_range; then
-		restart_dhcp=1
-	fi
-	if edit_dhcpd authoritative "<ON>"; then
-		restart_dhcp=1
-	fi
-	
-	if [ "$restart_dhcp" == "1" ]; then
-		logexec sudo service isc-dhcp-server restart #Make sure the dhcp starts AFTER supernode and its client
-	fi
-fi

@@ -2,7 +2,7 @@
 cd `dirname $0`
 . ./common.sh
 
-#Ten skrypt upewnia się, że dany użytkownik jest w grace period ssh. 
+#Ten skrypt upewnia się, że dany użytkownik jest w grace period ssh.
 
 #syntax:
 #force-sudo.sh <container-name> -l|--lxcusername <username> [--lxcowner <username>]
@@ -19,36 +19,36 @@ shift
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	-l|--lxcusername)
-	lxcuser="$1"
-	shift
-	;;
-	--lxcowner)
-	lxcowner="$1"
-	shift
-	;;
-	--grant-nopasswd-sudo)
-	fixsudo=1
-	;;
-	--revoke-nopasswd-sudo)
-	fixsudo=0
-	;;
-	--usermode)
-	usermode=1
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		-l|--lxcusername)
+			lxcuser="$1"
+			shift
+			;;
+		--lxcowner)
+			lxcowner="$1"
+			shift
+			;;
+		--grant-nopasswd-sudo)
+			fixsudo=1
+			;;
+		--revoke-nopasswd-sudo)
+			fixsudo=0
+			;;
+		--usermode)
+			usermode=1
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ "$lxcuser" == "" ]; then
@@ -144,4 +144,3 @@ else
 		fi
 	fi
 fi
-

@@ -11,7 +11,7 @@ cd `dirname $0`
 #--ssh-address - Adres SSH do serwera gitolite; konieczny, gdyż musimy wykonać pracę na serwerze. Gitolite nie obsługuje dodawania repozytoriów w inny sposób
 #--reponame - Docelowa nazwa repozytorium BEZ sufiksu git
 #--git-repo-uri-not-accessible-from-gitolite - jeśli ustawione, to repozytorium zostanie najpierw sklonowane na hoście wywołującym skrypt, następnie przeniesione do gitolite używając ssh, a dopiero stamtąd włożone na właściwe miejsce. Origin zostanie ustawiony na puste, chyba że ustawimy je ręcznie poprzez.
-#--local - jeśli ustawione, oznacza że repozytorium jest 
+#--local - jeśli ustawione, oznacza że repozytorium jest
 #--remote-origin - adres repozytorium.
 
 
@@ -22,48 +22,48 @@ copybyrsync=0
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--git-repo-uri-not-accessible-from-gitolite)
-	copybyrsync=1
-	;;
-	--ssh-address)
-	server=$1
-	shift
-	;;
-	--git-repo-uri)
-	gitaddress=$1
-	shift
-	;;
-	--reponame)
-	gitname=$1
-	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	-c|--creator)
-	creatorname="$1"
-	shift 1
-	;;
-	-l|--locally)
-	locally=1
-	;;
-	--remote-origin)
-	remoteorigin=$1
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unknown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--git-repo-uri-not-accessible-from-gitolite)
+			copybyrsync=1
+			;;
+		--ssh-address)
+			server=$1
+			shift
+			;;
+		--git-repo-uri)
+			gitaddress=$1
+			shift
+			;;
+		--reponame)
+			gitname=$1
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		-c|--creator)
+			creatorname="$1"
+			shift 1
+			;;
+		-l|--locally)
+			locally=1
+			;;
+		--remote-origin)
+			remoteorigin=$1
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unknown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$server" ]; then
@@ -95,7 +95,7 @@ if ! dpkg -s git>/dev/null 2>/dev/null; then
 fi
 
 
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -109,7 +109,7 @@ if [[ "$mypath" != "" ]]; then
 fi
 
 if [ "$copybyrsync" -eq "1" ]; then
-#Musimy skopiować repozytorium na lokalny serwer. Nie zakładamy, że serwer gitolite ma dostęp do naszego repozytorium - może być za firewallem.
+	#Musimy skopiować repozytorium na lokalny serwer. Nie zakładamy, że serwer gitolite ma dostęp do naszego repozytorium - może być za firewallem.
 	tmprepo=`mktemp -d --suffix .git`
 	logexec git clone --bare "$gitaddress" $tmprepo
 	if [ "$debug" -eq "1" ]; then
@@ -162,5 +162,3 @@ fi
 #else
 #	ssh $server /tmp/add-existing-repo.sh $opts
 #fi
-
-

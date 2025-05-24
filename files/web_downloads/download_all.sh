@@ -5,7 +5,7 @@ export sourcedir="${basedir}/to_download"
 
 mkdir -p "${basedir}/to_download"
 
-function download_item {
+function download_item() {
 	local item="$1"
 	local string=$(cat "${item}")
 	local pattern='^([^:]+):(.*)$'
@@ -18,9 +18,9 @@ function download_item {
 	fi
 	pushd "${basedir}/${folder}"
 	local path="${basedir}/${folder}"
-	
+
 	youtube-dl -c -o '%(upload_date)s %(title)s' -c -f 'bestvideo[ext=mp4&height<=1080]+bestaudio/mp4' --write-thumbnail "$link"
-	
+
 	if [ $? -eq 0 ]; then
 		pattern='^([^.]+)\.([^.]+)$'
 		if [[ "$item" =~ $pattern ]]; then
@@ -38,7 +38,7 @@ export -f download_item
 
 cd $basedir
 
-#set -x 
+#set -x
 #download_folder "Kurzgesagt"
 #exit 0
 
@@ -50,7 +50,7 @@ if (( $seconds_today > 28800 )); then
 	target_epoch=$(date -d "$(date -d "$(date '+%Y-%m-%d') + 1 day" '+%Y-%m-%d') 00:02" '+%s')
 	sleep_seconds=$(( $target_epoch - $current_epoch ))
 	echo "Waiting ${sleep_seconds} for the midnight..."
-	sleep ${sleep_seconds} 
+	sleep ${sleep_seconds}
 fi
 
 current_epoch=$(date +%s)

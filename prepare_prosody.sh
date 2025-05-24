@@ -9,15 +9,15 @@ Prepares the prosody XMPP IM server
 
 Usage:
 
-$(basename $0) <server_name> [--add-user <user>:<password>] 
-                [--help] [--debug] [--log <output file>] 
+$(basename $0) <server_name> [--add-user <user>:<password>]
+[--help] [--debug] [--log <output file>]
 
 
 where
- <server_name>                - Name of the server. All clients should identify the server by its name otherwise the certificate wouldn't work
- --add-user <user>:<password>  - Adds user with on each run
- --debug                      - Flag that sets debugging mode. 
- --log                        - Path to the log file that will log all meaningful commands
+<server_name>                - Name of the server. All clients should identify the server by its name otherwise the certificate wouldn't work
+--add-user <user>:<password>  - Adds user with on each run
+--debug                      - Flag that sets debugging mode.
+--log                        - Path to the log file that will log all meaningful commands
 
 Example2:
 
@@ -74,7 +74,7 @@ textfile /etc/prosody/prosody.cfg.lua "$prosody_config" root
 luac -p /etc/prosody/prosody.cfg.lua
 
 if sudo [ ! -f /var/lib/prosody/${server_name}.crt ]; then
-	echo "
+echo "
 PL
 
 ${server_name}
@@ -85,15 +85,15 @@ ${server_name}
 fi
 
 if [ -n "$add_user_txt" ]; then
-	pattern='^([^:]+):(.*)$'
-	if [[ "$add_user_txt" =~ $pattern ]]; then
-		add_user=${BASH_REMATCH[1]}
-		add_password=${BASH_REMATCH[2]}
-	else
-		errcho "Wrong format of --add_user argument. Please use \"user:pa\$\$word\"."
-		exit 1
-	fi
-	echo "$add_password
+pattern='^([^:]+):(.*)$'
+if [[ "$add_user_txt" =~ $pattern ]]; then
+	add_user=${BASH_REMATCH[1]}
+	add_password=${BASH_REMATCH[2]}
+else
+	errcho "Wrong format of --add_user argument. Please use \"user:pa\$\$word\"."
+	exit 1
+fi
+echo "$add_password
 $add_password" | sudo prosodyctl adduser "${add_user}@${server_name}"
 # sudo prosodyctl passwd "${add_user}@${server_name}"
 fi

@@ -15,15 +15,15 @@ Prepares Don't Starve Together dedicated server.
 Usage:
 
 $(basename $0)  [--cluster-token <token>] [--cluster-name <name>] [--server-mod-collection <nr>]
-                [--help] [--debug] [--log <output file>] 
+[--help] [--debug] [--log <output file>]
 
 
 where
- --cluster-token <token>      - Cluster token (defaults to 'gpMrs7hckCBAnHn2lAdcgEQFcbTigcxv')
- --cluster-name <name>        - Name of the clustre (defaults to WAM)
- --server-mod-collection <nr> - Steam number of the mod collection to install on server
- --debug                      - Flag that sets debugging mode. 
- --log                        - Path to the log file that will log all meaningful commands
+--cluster-token <token>      - Cluster token (defaults to 'gpMrs7hckCBAnHn2lAdcgEQFcbTigcxv')
+--cluster-name <name>        - Name of the clustre (defaults to WAM)
+--server-mod-collection <nr> - Steam number of the mod collection to install on server
+--debug                      - Flag that sets debugging mode.
+--log                        - Path to the log file that will log all meaningful commands
 
 Example2:
 
@@ -87,7 +87,7 @@ if ! dpkg -s "steamcmd">/dev/null  2> /dev/null; then
 	sudo debconf-set-selections <<< 'steamcmd steam/license boolean true'
 	sudo debconf-set-selections <<< 'steamcmd steam/question string I AGREE'
 
-	add_apt_source_manual partner "deb http://archive.canonical.com/ubuntu $(get_ubuntu_codename) partner" 
+	add_apt_source_manual partner "deb http://archive.canonical.com/ubuntu $(get_ubuntu_codename) partner"
 
 	install_apt_packages steamcmd
 fi
@@ -116,7 +116,7 @@ linetextfile ${home}/.klei/DoNotStarveTogether/${cluster_name}/dedicated_server_
 
 install_file files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini ${USER}
 install_file files/dst_modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${USER}
-#textfile files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini 
+#textfile files/dst_cluster.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/cluster.ini
 install_file files/dst_server1.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/server.ini ${USER}
 install_file files/dst_server2.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/server.ini ${USER}
 install_file files/dst_server3.ini ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/server.ini ${USER}
@@ -130,4 +130,3 @@ install_file files/dst_worldgenoverride4.lua ${home}/.klei/DoNotStarveTogether/$
 make_symlink ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/11/modoverrides.lua
 make_symlink ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/12/modoverrides.lua
 make_symlink ${home}/.klei/DoNotStarveTogether/${cluster_name}/Main/modoverrides.lua ${home}/.klei/DoNotStarveTogether/${cluster_name}/13/modoverrides.lua
-

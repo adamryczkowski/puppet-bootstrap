@@ -1,6 +1,6 @@
-#!/bin/bash 
+#!/bin/bash
 
-function gsettings_set_value {
+function gsettings_set_value() {
 	local schema=$1
 	local name=$2
 	local value=$3
@@ -11,7 +11,7 @@ function gsettings_set_value {
 	fi
 }
 
-function set_mime_default {
+function set_mime_default() {
 	local filetype=$1
 	local value=$2
 	get_ui_context
@@ -21,7 +21,7 @@ function set_mime_default {
 	fi
 }
 
-function load_gsettings_array {
+function load_gsettings_array() {
 	local schema=$1
 	local name=$2
 	local existing_values
@@ -43,7 +43,7 @@ function load_gsettings_array {
 	declare -p new_array | sed -e 's/^declare -a new_array=//'
 }
 
-function remove_item_from_array {
+function remove_item_from_array() {
 	get_ui_context
 	eval "local -a input_array=$1"
 	# shellcheck disable=SC2154
@@ -59,7 +59,7 @@ function remove_item_from_array {
 	declare -p output_array | sed -e 's/^declare -a output_array=//'
 }
 
-function find_item_in_array {
+function find_item_in_array() {
 	get_ui_context
 	eval "local -a array=$1"
 	(>&2 echo "Number of elements of array: ${#array[@]}")
@@ -75,15 +75,15 @@ function find_item_in_array {
 	return 0
 }
 
-function add_item_to_array {
+function add_item_to_array() {
 	get_ui_context
 	eval "local -a array=$1"
 	(>&2 echo "Number of elements of array: ${#array[@]}")
 	local target=$2
 	local position=$3
-	
+
 	index=$(find_item_in_array "$1" "$2")
-	
+
 	if [ "$index" != "0" ]; then
 		if [ -n "${position}" ]; then
 			if [ "$position" == "$index" ]; then
@@ -107,7 +107,7 @@ function add_item_to_array {
 	fi
 }
 
-function set_gsettings_array {
+function set_gsettings_array() {
 	get_ui_context
 	local schema=$1
 	local name=$2
@@ -126,14 +126,14 @@ function set_gsettings_array {
 			ans="${ans}${value}"
 		else
 			ans="${ans}', '${value}"
-		fi 
+		fi
 		((i++))
 	done
 	ans="${ans}']"
 	gsettings set "${schema}" "${name}" "${ans}"
 }
 
-function set_gsettings_array2 {
+function set_gsettings_array2() {
 	get_ui_context
 	local schema=$1
 	local name=$2
@@ -153,7 +153,7 @@ function set_gsettings_array2 {
 			ans="${ans}${value}"
 		else
 			ans="${ans}', '${value}"
-		fi 
+		fi
 		((i++))
 	done
 	ans="${ans}]"
@@ -161,18 +161,18 @@ function set_gsettings_array2 {
 	gsettings set "${schema}" "${name}" "${ans[*]}"
 }
 
-function gsettings_add_to_array {
+function gsettings_add_to_array() {
 	local schema=$1
 	local key=$2
 	local value=$3
 	local status
-#	local position=$4
+	#	local position=$4
 	status=$(gsettings get "${schema}" "${key}")
-	
+
 	# Optional proof, whether value to add already exsists
 	if [[ ! $status == *"'to.add.value'"* ]]; then
-		 gsettings set "${schema}" "${key}" "${status%]*}, '${value}']"
-#		 echo "Added to.add.value to the list."
+		gsettings set "${schema}" "${key}" "${status%]*}, '${value}']"
+		#		 echo "Added to.add.value to the list."
 	fi
 }
 
@@ -181,14 +181,14 @@ function gsettings_add_to_array {
 #	local name=$2
 #	local value=$3
 #	local position=$4
-#	
+#
 #	local existing_values_str=$(load_gsettings_array ${schema} ${name})
-#	
+#
 #	local ans_str=$(add_item_to_array "${existing_values_str}" ${value} ${position})
 #	set_gsettings_array ${schema} ${name} "${ans_str}"
 #}
 
-function gsettings_remove_from_array {
+function gsettings_remove_from_array() {
 	local schema=$1
 	local name=$2
 	local value=$3
@@ -196,12 +196,12 @@ function gsettings_remove_from_array {
 	local ans_str
 
 	existing_values_str=$(load_gsettings_array "${schema}" "${name}")
-	
+
 	ans_str=$(remove_item_from_array "${existing_values_str}" "${value}")
 	set_gsettings_array "${schema}" "${name}" "${ans_str}"
 }
 
-function gsettings_remove_from_array2 {
+function gsettings_remove_from_array2() {
 	local schema=$1
 	local name=$2
 	local value=$3
@@ -237,7 +237,7 @@ function gsettings_remove_from_array2 {
 	fi
 }
 
-function install_gnome_extension {
+function install_gnome_extension() {
 	local ext_path="$1"
 	local ext_id
 	if [ -r "$ext_path" ]; then
@@ -254,12 +254,12 @@ function install_gnome_extension {
 	fi
 }
 
-function gsettings_set_global_value {
+function gsettings_set_global_value() {
 	#TODO
 	logmkdir /etc/dconf/profile
 	textfile /etc/dconf/profile/user "user-db:user
-system-db:local" root
-#TODO: 1. Read the old value and see if it has to be changed
-			
+	system-db:local" root
+	#TODO: 1. Read the old value and see if it has to be changed
+
 	textfile /etc/dconf/db/local.d/00-extensions:
 }

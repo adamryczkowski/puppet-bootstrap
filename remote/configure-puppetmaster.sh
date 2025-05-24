@@ -31,38 +31,38 @@ gitfolder=$sshhome/puppet
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	-d|--domainname)
-	domainname="$1"
-	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	-u|--puppetuser)
-	puppetuser="$1"
-	shift
-	;;
-	-g|--git-folder)
-	gitfolder="$1"
-	shift
-	;;
-	--r10k-gems-cache)
-	gemcache="$1"
-	shift
-	;;
-	--log)
-	log="$1"
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		-d|--domainname)
+			domainname="$1"
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		-u|--puppetuser)
+			puppetuser="$1"
+			shift
+			;;
+		-g|--git-folder)
+			gitfolder="$1"
+			shift
+			;;
+		--r10k-gems-cache)
+			gemcache="$1"
+			shift
+			;;
+		--log)
+			log="$1"
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ "$domainname" == "NONE" ]; then
@@ -113,7 +113,7 @@ if ! dpkg -s puppetserver >/dev/null  2>/dev/null; then
 fi
 
 if [ ! -f /etc/profile.d/puppetserver.sh ]; then
-logheredoc EOT
+	logheredoc EOT
 	sudo tee /etc/profile.d/puppetserver.sh >/dev/null <<'EOT'
 # Add /opt/puppetlabs/puppet/bin to the path for sh compatible users
 if ! echo $PATH | grep -q /opt/puppetlabs/puppet/bin ; then
@@ -222,15 +222,15 @@ fi
 
 logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/main/environment" production
 logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/main/confdir" /etc/puppet
-logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/main/server" $fqdn 
-logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" rm "/files/etc/puppet/puppet.conf/main/templatedir" 
+logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/main/server" $fqdn
+logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" rm "/files/etc/puppet/puppet.conf/main/templatedir"
 
-logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/agent/environment" production 
-logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/agent/report" true 
-logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/agent/show_diff" true 
+logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/agent/environment" production
+logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/agent/report" true
+logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/agent/show_diff" true
 
-logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/master/environment" production 
-logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/master/environmentpath" '$confdir/environments' 
+logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/master/environment" production
+logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/master/environmentpath" '$confdir/environments'
 
 
 logheredoc EOT
@@ -303,7 +303,7 @@ if [ ! -d /srv/puppet.git ]; then
 	logexec sudo git init --bare --shared=group /srv/puppet.git
 	logexec sudo chgrp -R puppet /srv/puppet.git
 	logexec cd /srv/puppet.git
-	logexec sudo -u $puppetuser git symbolic-ref HEAD refs/heads/production	
+	logexec sudo -u $puppetuser git symbolic-ref HEAD refs/heads/production
 fi
 
 ##Trick poniższy spowoduje, że reszta tego skryptu zostania wykonana jako NOWY użytkownik $puppetuser - tj. ten, który jest członkiem grupy puppet (i ma prawa zapisu do /srv/puppet.git)
@@ -351,14 +351,14 @@ logexec sudo -u $puppetuser chmod 0775 /srv/puppet.git/hooks/post-receive
 
 
 if [ ! -d $gitfolder/.git ]; then
-	logexec mkdir -p `dirname $gitfolder` 
+	logexec mkdir -p `dirname $gitfolder`
 	logexec git clone /srv/puppet.git $gitfolder
 fi
 logexec cd $gitfolder
 
-logexec mkdir -p hieradata/nodes manifests site 
+logexec mkdir -p hieradata/nodes manifests site
 
-loglog 
+loglog
 echo "modulepath = modules:site" >$gitfolder/environment.conf
 
 logheredoc EOT
@@ -444,7 +444,7 @@ logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set
 logexec sudo augtool -L -A --transform "Puppet incl /etc/puppet/puppet.conf" set "/files/etc/puppet/puppet.conf/master/storeconfigs_backend" puppetdb
 
 
-logexec sudo mkdir -p /etc/facter/facts.d 
+logexec sudo mkdir -p /etc/facter/facts.d
 logheredoc EOT
 sudo tee /etc/facter/facts.d/userlocation.json <<EOT >/dev/null
 {
@@ -456,7 +456,7 @@ EOT
 if ! grep "export LANG=pl_PL.UTF-8" /etc/default/puppetmaster >/dev/null; then
 	$loglog
 	echo "export LANG=pl_PL.UTF-8" | sudo tee -a /etc/default/puppetmaster >/dev/null
-	logexec sudo service puppetmaster restart 
+	logexec sudo service puppetmaster restart
 fi
 
 # kill $pingsudopid

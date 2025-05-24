@@ -12,26 +12,26 @@ alias errcho='>&2 echo'
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	-p|--apt-proxy)
-	aptproxy="$1"
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		-p|--apt-proxy)
+			aptproxy="$1"
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$aptproxy" ]; then
@@ -64,4 +64,3 @@ if [ "$aptproxy" != "auto" ]; then
 		logexec sudo apt-get update
 	fi
 fi
-

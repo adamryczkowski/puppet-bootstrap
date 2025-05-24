@@ -2,10 +2,10 @@
 
 
 
-function calcshasum {
+function calcshasum() {
 	file="$1"
 	local shasum
-	if [ -f "$file" ]; then 
+	if [ -f "$file" ]; then
 		shasum=$(shasum "$file")
 		local pattern='^([^ ]+) '
 		if [[ "$shasum" =~ $pattern ]]; then
@@ -19,7 +19,7 @@ function calcshasum {
 	echo "$shasum"
 }
 
-function apply_patch {
+function apply_patch() {
 	local file="$1"
 	local hash_orig="$2"
 	local hash_dest="$3"
@@ -50,7 +50,7 @@ function apply_patch {
 	fi
 }
 
-function edit_bash_augeas {
+function edit_bash_augeas() {
 	local file=$1
 	local var=$2
 	local value=$3
@@ -62,22 +62,22 @@ function edit_bash_augeas {
 	fi
 }
 
-function logmkdir {
+function logmkdir() {
 	local dir=$1
 	local user
 	if [ -z ${2+x} ]; then
-	  user=""
+		user=""
 	else
-	  user="$2"
+		user="$2"
 	fi
 	if ! [ -d "$dir" ]; then
-    if [ -w "$(dirname "$dir")" ]; then
-#      set -x
-      logexec mkdir -p "$dir"
-#      set +x
-    else
-  		logexec sudo mkdir -p "$dir"
-    fi
+		if [ -w "$(dirname "$dir")" ]; then
+			#      set -x
+			logexec mkdir -p "$dir"
+			#      set +x
+		else
+			logexec sudo mkdir -p "$dir"
+		fi
 	fi
 	if [ -n "$user" ]; then
 		curuser=$(stat -c '%U' "${dir}")
@@ -87,15 +87,15 @@ function logmkdir {
 	fi
 }
 
-function linetextfile {
+function linetextfile() {
 	local plik="$1"
 	local line="$2"
 	if ! grep -qF -- "$line" "$plik"; then
 		if [ -w "$plik" ]; then
-#			$loglog
+			#			$loglog
 			echo "$line" >> "$plik"
 		else
-#			$loglog
+			#			$loglog
 			echo "$line" | sudo tee -a "$plik"
 		fi
 		return 0
@@ -103,53 +103,53 @@ function linetextfile {
 	return 0
 }
 
-function multilinetextfile {
-  # Makes sure the paragraph passed indirectly as a Bash variable name,
-  # is present in the file.
-  local plik="$1"
-  local variablename="$2"
+function multilinetextfile() {
+	# Makes sure the paragraph passed indirectly as a Bash variable name,
+	# is present in the file.
+	local plik="$1"
+	local variablename="$2"
 
-  local contents="${!variablename}"
+	local contents="${!variablename}"
 
-  if [ -z "$contents" ]; then
-    errcho "Empty contents to multilinetextfile"
-    return 1
-  fi
-  if [ -z "$plik" ]; then
-    errcho "Empty file name to multilinetextfile"
-    return 1
-  fi
+	if [ -z "$contents" ]; then
+		errcho "Empty contents to multilinetextfile"
+		return 1
+	fi
+	if [ -z "$plik" ]; then
+		errcho "Empty file name to multilinetextfile"
+		return 1
+	fi
 
-  local joined=${contents//$'\n'/\\n}
-  joined=${joined//\$/\\\$}
-  joined=${joined//\[/\\\[}
-  joined=${joined//\]/\\\]}
-  joined=${joined//\)/\\\)}
-  joined=${joined//\(/\\\(}
-  joined=${joined//\*/\\\*}
-  joined=${joined//\?/\\\?}
+	local joined=${contents//$'\n'/\\n}
+	joined=${joined//\$/\\\$}
+	joined=${joined//\[/\\\[}
+	joined=${joined//\]/\\\]}
+	joined=${joined//\)/\\\)}
+	joined=${joined//\(/\\\(}
+	joined=${joined//\*/\\\*}
+	joined=${joined//\?/\\\?}
 
-  if grep -Poz -- "$joined" "$plik" >/dev/null; then
-    return 0
-  fi
-  if [ -w "$plik" ]; then
-    echo "$contents" >> "$plik"
-  else
-    echo "$contents" | sudo tee -a "$plik" >/dev/null
-  fi
-  return 0
+	if grep -Poz -- "$joined" "$plik" >/dev/null; then
+		return 0
+	fi
+	if [ -w "$plik" ]; then
+		echo "$contents" >> "$plik"
+	else
+		echo "$contents" | sudo tee -a "$plik" >/dev/null
+	fi
+	return 0
 }
 
 
-function textfile {
+function textfile() {
 	local plik=$1
 	local contents=$2
 	local user=$3
-	
+
 	if [ -z "$user" ]; then
 		user="$USER"
 	fi
-	
+
 	local flag=0
 	logmkdir "$(dirname "${plik}")" "$user"
 	if [ ! -f "${plik}" ]; then
@@ -175,24 +175,24 @@ function textfile {
 }
 
 
-function install_file {
+function install_file() {
 	local input_file="$1"
 	local dest="$2"
 	local user=$3
 	local set_executable
 
 	if [ -z ${4+x} ]; then
-	  set_executable=0
+		set_executable=0
 	else
-	  set_executable="$4"
-  fi
-	
+		set_executable="$4"
+	fi
+
 	if [ -z "${user}" ]; then
 		user=auto
 	fi
 	if [ ! -f "${input_file}" ]; then
 		errcho "Cannot find ${input_file}"
-#		return 1
+		#		return 1
 	fi
 	if [ -z "$dest" ]; then
 		dest=/usr/local/bin
@@ -218,7 +218,7 @@ function install_file {
 	fi
 	if [ ! -f "$dest" ]; then
 		errcho "Error when copying ${input_file} into ${dest}"
-#		return 1
+		#		return 1
 	fi
 	if [ "$user" != "auto" ]; then
 		cur_owner="$(stat --format '%U' "$dest")"
@@ -233,70 +233,70 @@ function install_file {
 	if [ -n "$set_executable" ]; then
 		if [ "$user" != "$cur_owner" ]; then
 			if [ -w "$dest" ]; then
-        logexec chmod +x "$dest"
+				logexec chmod +x "$dest"
 			else
-    	  logexec sudo chmod +x "$dest"
+				logexec sudo chmod +x "$dest"
 			fi
 		fi
-  fi
+	fi
 }
 
-function set_executable {
+function set_executable() {
 	local input_file="$1"
 
 	if [ -f "$input_file" ]; then
-	   if [[ ! -x "$input_file" ]]; then
-		   if [ -w "$input_file" ]; then
-			   logexec chmod +x "$input_file"
-		   else
-			   logexec sudo chmod +x "$input_file"
-		   fi
-	   fi
-	   if [[ ! -x "$input_file" ]]; then
-		   errcho "Cannot set executable permission to $input_file"
-		   return 1
-	   fi
+		if [[ ! -x "$input_file" ]]; then
+			if [ -w "$input_file" ]; then
+				logexec chmod +x "$input_file"
+			else
+				logexec sudo chmod +x "$input_file"
+			fi
+		fi
+		if [[ ! -x "$input_file" ]]; then
+			errcho "Cannot set executable permission to $input_file"
+			return 1
+		fi
 	else
-	   errcho "File $input_file is not found"
-	   return 1
+		errcho "File $input_file is not found"
+		return 1
 	fi
 }
 
-function set_non_executable {
+function set_non_executable() {
 	local input_file="$1"
 	if [ -f "$dest" ]; then
-	   if [[ ! -x "$dest" ]]; then
-		   if [ -w "$dest" ]; then
-			   logexec chmod -x "$dest"
-		   else
-			   logexec sudo chmod -x "$dest"
-		   fi
-	   fi
-	   if [[ -x "$dest" ]]; then
-		   errcho "Cannot unset executable permission to $dest"
-		   return 1
-	   fi
+		if [[ ! -x "$dest" ]]; then
+			if [ -w "$dest" ]; then
+				logexec chmod -x "$dest"
+			else
+				logexec sudo chmod -x "$dest"
+			fi
+		fi
+		if [[ -x "$dest" ]]; then
+			errcho "Cannot unset executable permission to $dest"
+			return 1
+		fi
 	else
-	   errcho "File $dest is not found"
-	   return 1
+		errcho "File $dest is not found"
+		return 1
 	fi
 }
 
-function install_script {
+function install_script() {
 	local input_file="$1"
 	local dest_folder="$2"
 	local set_executable="$3"
 	local user
 	if [ -z ${4+x} ]; then
 		user="$USER"
-	else 
+	else
 		user="${4}"
 	fi
 	logmkdir "$dest_folder" "$user"
 	install_file "$input_file" "$dest_folder" "$user" "$set_executable"
 }
 
-function install_data_file {
+function install_data_file() {
 	local input_file="$1"
 	local dest="$2"
 	local user=$3
@@ -304,7 +304,7 @@ function install_data_file {
 	set_non_executable "$dest"
 }
 
-function chmod_file {
+function chmod_file() {
 	local file="$1"
 	local desired_mode="$2"
 	local pattern='^[[:digit:]]+$'
@@ -323,7 +323,7 @@ function chmod_file {
 	fi
 }
 
-function chmod_dir {
+function chmod_dir() {
 	local file=$1
 	local desired_mode_dir=$2
 	local desired_mode_file=$3
@@ -351,15 +351,15 @@ function chmod_dir {
 	fi
 }
 
-function chown_dir {
+function chown_dir() {
 	local file=$1
 	local user=$2
 	local group=$3
-	
+
 	if [ -z "$group" ]; then
 		group="$user"
 	fi
-	
+
 	if [ -z "$user" ]; then
 		errcho "No user name exitting"
 		return 1
@@ -375,35 +375,35 @@ function chown_dir {
 	logexec sudo find "$file" -not -user "$user" -or -not -group "$group" -exec chown "${user}:${group}" {} \;
 }
 
-function download_file {
-  # Downloads the file from the link, if the file does not exist
-  local filename="$1"
-  local download_link="$2"
+function download_file() {
+	# Downloads the file from the link, if the file does not exist
+	local filename="$1"
+	local download_link="$2"
 
-  if [ -z "$filename" ]; then
-    errcho "No filename provided"
-    return 1
-  fi
-  if [ -z "$download_link" ]; then
-    errcho "No download link provided"
-    return 1
-  fi
-  if [ ! -f "$filename" ]; then
-    if [ -w "$(dirname "$filename")" ]; then
-      logexec wget -c "$download_link" -O "$filename"
-    else
-      logexec sudo wget -c "$download_link" -O "$filename"
-    fi
-  fi
-  if [ ! -f "$filename" ]; then
-    errcho "Cannot download the file"
-    return 1
-  fi
+	if [ -z "$filename" ]; then
+		errcho "No filename provided"
+		return 1
+	fi
+	if [ -z "$download_link" ]; then
+		errcho "No download link provided"
+		return 1
+	fi
+	if [ ! -f "$filename" ]; then
+		if [ -w "$(dirname "$filename")" ]; then
+			logexec wget -c "$download_link" -O "$filename"
+		else
+			logexec sudo wget -c "$download_link" -O "$filename"
+		fi
+	fi
+	if [ ! -f "$filename" ]; then
+		errcho "Cannot download the file"
+		return 1
+	fi
 }
 
 
 # returns path
-function get_cached_file {
+function get_cached_file() {
 	local filename="$1"
 	local download_link="$2"
 	if [ ! -d "${repo_path}" ]; then
@@ -436,7 +436,7 @@ function get_cached_file {
 #	exec "$@" | true
 #}
 
-function extract_archive {
+function extract_archive() {
 	local archive_path="$1"
 	local destination_parent="$2"
 	local act_as_user="$3"
@@ -444,19 +444,19 @@ function extract_archive {
 	#'original' - (default) the archive with single folder will be extracted directly to destination_parent, ignoring extracted_name. Similarily, if archive with a single file - that file will be extracted in the destination_parent under its original name.
 	#'onedir' - if archive with single folder - acts exactly as 'rename' policy. If archive with a single file - that file will be put in the subfolder extracted_name with the name extracted_name.
 	local extracted_name="$5" #Defaults to the archive name minus extensions
-	
+
 	if [[ "$single_item_policy" == "" ]]; then
 		single_item_policy=original
 	fi
 
 	if [[ "$extracted_name" == "" ]]; then
-#		local extension="${archive_path##*.}"
+		#		local extension="${archive_path##*.}"
 		extracted_name="${archive_path%.*}"
 	fi
 	make_sure_dtrx_exists
 
 	local dest_path="${destination_parent}/${extracted_name}"
-  logmkdir "${dest_path}" "$act_as_user"
+	logmkdir "${dest_path}" "$act_as_user"
 	if is_folder_writable "$(dirname "$destination_parent")" "$act_as_user"; then
 		if [ "$act_as_user" == "$USER" ]; then
 			mode=1
@@ -469,24 +469,24 @@ function extract_archive {
 		mode=2
 		(cd "${dest_path}" || exit 1; sudo -u "$act_as_user" "$(which dtrx)" --one here "$archive_path")
 	fi
-	
+
 	filecount="$(find "${dest_path}" -mindepth 1 -maxdepth 1 | wc -l)"
 	if [[ $filecount == 1 ]]; then
 		filename1=$(find "${dest_path}" -mindepth 1 -maxdepth 1 | head -n 1)
 		filename1=$(get_relative_path "${dest_path}" "${filename1}")
 		if [ -d "${dest_path}/${filename1}" ]; then
-		
-		
+
+
 			if [[ $single_item_policy == original ]]; then
 				if [[ $mode == 1 ]]; then
-					mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
+					mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}"
 					rmdir "${dest_path}"
 				else
-					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
+					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}"
 					sudo -u "$act_as_user" rmdir "${dest_path}"
 				fi
-				
-				
+
+
 			elif [[ $single_item_policy == rename || $single_item_policy == onedir ]]; then
 				if [[ $mode == 1 ]]; then
 					find "${dest_path}/${filename1}/" -mindepth 1 -maxdepth 1 -exec mv -t "${dest_path}" -- {} +
@@ -504,7 +504,7 @@ function extract_archive {
 					mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}"
 					rmdir "${dest_path}"
 				else
-					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
+					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}"
 					sudo -u "$act_as_user" rmdir "${dest_path}"
 				fi
 
@@ -531,13 +531,13 @@ function extract_archive {
 				fi
 			fi
 		fi
-	fi 
+	fi
 }
 
 
 # shellcheck disable=SC2120
-function make_sure_dtrx_exists {
-  # TODO: Re-implement this function using libpipx.sh.
+function make_sure_dtrx_exists() {
+	# TODO: Re-implement this function using libpipx.sh.
 	local mute="$1"
 	if ! which dtrx >/dev/null; then
 		if [[ $mute == "" ]]; then
@@ -554,7 +554,7 @@ function make_sure_dtrx_exists {
 				install_pipx_command dtrx >/dev/null 2>/dev/null
 			fi
 			add_path_to_bashrc "$(get_home_dir)/.local/bin"
-#			make_sure_dir_is_in_a_path "$(get_home_dir)/.local/bin"
+			#			make_sure_dir_is_in_a_path "$(get_home_dir)/.local/bin"
 		fi
 	fi
 	which dtrx >/dev/null
@@ -582,7 +582,7 @@ function make_sure_dtrx_exists {
 #			user=$usergr
 #		fi
 #	fi
-#	
+#
 #	if [ ! -f "$filename" ]; then
 #		path_filename=$(get_cached_file "$filename" "${download_link}")
 #	else
@@ -605,7 +605,7 @@ function make_sure_dtrx_exists {
 #			fi
 #		fi
 #	fi
-#	
+#
 #	extract_archive "$path_filename" "$destination_parent" "$folder_name" "$user"
 #	local timestamp_path="${destination_parent}/${folder_name}.timestamp"
 
@@ -616,7 +616,7 @@ function make_sure_dtrx_exists {
 #	fi
 #}
 
-function uncompress_cached_file {
+function uncompress_cached_file() {
 	local filename="$1"
 	local destination_parent="$2"
 	local group
@@ -626,7 +626,7 @@ function uncompress_cached_file {
 	if [ -n "$3" ]; then
 		usergr="$3"
 	fi
-		
+
 	if [ -n "$4" ]; then
 		local extracted_name="$4"
 	fi
@@ -651,7 +651,7 @@ function uncompress_cached_file {
 	if [ -z "$extracted_name" ]; then
 		basename_extension "$filename"
 		extracted_name=$(basename "$base")
-#		errcho "Empty extracted_name argument to uncompress_cached_file"
+		#		errcho "Empty extracted_name argument to uncompress_cached_file"
 	fi
 
 	if [ ! -f "$filename" ]; then
@@ -678,7 +678,7 @@ function uncompress_cached_file {
 				fi
 			fi
 		fi
-	fi	
+	fi
 	extract_archive "$path_filename" "$destination_parent" "$user" onedir "$extracted_name"
 
 
@@ -691,7 +691,7 @@ function uncompress_cached_file {
 	fi
 }
 
-function cp_file {
+function cp_file() {
 	local source="$1"
 	local dest="$2"
 	local user="$3"
@@ -724,11 +724,11 @@ function cp_file {
 	fi
 }
 
-function is_folder_writable {
+function is_folder_writable() {
 	local folder="$1"
 	local user="$2"
-	
-	
+
+
 	#source: https://stackoverflow.com/questions/14103806/bash-test-if-a-directory-is-writable-by-a-given-uid
 	# Use -L to get information about the target of a symlink,
 	# not the link itself, as pointed out in the comments
@@ -763,38 +763,38 @@ function is_folder_writable {
 	fi
 }
 
-function get_usergr_owner_of_file {
+function get_usergr_owner_of_file() {
 	local path="$1"
 	stat -c '%U:%G' "${path}"
 }
 
-function get_files_matching_regex {
+function get_files_matching_regex() {
 	local path="$1"
 	local regex="$2"
 	local recurse="$3"
-	
+
 	if [ -z "$recurse" ]; then
-		grep -HiRE "$regex" "$path" #H for file printing, i for case-insensitive, R for recursive search, E for regex 
+		grep -HiRE "$regex" "$path" #H for file printing, i for case-insensitive, R for recursive search, E for regex
 	else
-		grep -HiE "$regex" "$path" #H for file printing, i for case-insensitive, R for recursive search, E for regex 
+		grep -HiE "$regex" "$path" #H for file printing, i for case-insensitive, R for recursive search, E for regex
 	fi
 }
 
-function get_relative_path {
+function get_relative_path() {
 	local base_path="$1"
 	local target_path="$2"
 	install_apt_package python3
 	python3 -c "import os.path; print(os.path.relpath('$target_path', '$base_path'))"
 }
 
-function guess_repo_path {
+function guess_repo_path() {
 	local guess="$1"
 	if [ -f "${guess}/repo_path" ]; then
 		export repo_path="$guess"
 	fi
 }
 
-function basename_extension {
+function basename_extension() {
 	#from https://stackoverflow.com/a/1403489/1261153
 	local filename="$1"
 	base="${filename%.[^.]*}"                       # Strip shortest match of . plus at least one non-dot char from end
@@ -809,10 +809,10 @@ function basename_extension {
 	if [[ "$ext2" == "tar" ]]; then
 		ext="tar.${ext}"
 		base="$base2"
-	fi    
+	fi
 }
 
-function make_symlink {
+function make_symlink() {
 	local source="$1"
 	local dest="$2"
 	if [ ! -f "$source" ] && [ ! -d "$source" ]; then

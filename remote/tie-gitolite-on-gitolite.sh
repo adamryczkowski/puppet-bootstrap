@@ -4,7 +4,7 @@ cd `dirname $0`
 #Program jest częścią zdalną tie-gitolite-with-puppet.sh.
 #Program służy do konfiguracji gitolite tak, aby było połączone z puppetem
 
-#tie-gitolite-on-gitolite.sh --puppetmaster-uri <kompatybilna z GIT ścieżka do repozytorium puppet.git w puppetmaster. Domyślnie /srv/puppet.git> --puppetmaster-username <nazwa użytkownika puppetmaster, domyślnie puppet> --gitolite-puppet-manifest-repo <nazwa repozytorium z gitolite. Domyślnie puppet/manifest> [--puppetmaster-is-local-to-gitolite] [--dont-push] 
+#tie-gitolite-on-gitolite.sh --puppetmaster-uri <kompatybilna z GIT ścieżka do repozytorium puppet.git w puppetmaster. Domyślnie /srv/puppet.git> --puppetmaster-username <nazwa użytkownika puppetmaster, domyślnie puppet> --gitolite-puppet-manifest-repo <nazwa repozytorium z gitolite. Domyślnie puppet/manifest> [--puppetmaster-is-local-to-gitolite] [--dont-push]
 
 . ./common.sh
 
@@ -23,44 +23,44 @@ dopush=1
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--dont-push)
-	dopush=0
-	;;
-	--puppetmaster-is-local-to-gitolite)
-	puppetislocal=1
-	;;	
-	--puppetmaster-uri)
-	puppetsource=$1
-	shift
-	;;
-	--puppetmaster-server)
-	puppetserver=$1
-	shift
-	;;
-	--puppetmaster-username)
-	puppetuser=$1
-	shift
-	;;
-	--gitolite-puppet-manifest-repo)
-	gitoliterepo=$1
-	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--dont-push)
+			dopush=0
+			;;
+		--puppetmaster-is-local-to-gitolite)
+			puppetislocal=1
+			;;
+		--puppetmaster-uri)
+			puppetsource=$1
+			shift
+			;;
+		--puppetmaster-server)
+			puppetserver=$1
+			shift
+			;;
+		--puppetmaster-username)
+			puppetuser=$1
+			shift
+			;;
+		--gitolite-puppet-manifest-repo)
+			gitoliterepo=$1
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ "$puppetislocal" -eq 1 ]; then
@@ -90,4 +90,3 @@ logexec sudo su -l $gitoliteuser -c "gitolite setup"
 #sshhome=`getent passwd $gitoliteuser | awk -F: '{ print $6 }'`
 #sudo -u $gitoliteuser ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $puppetserver >/dev/null 2>/dev/null
 #sudo -u $gitoliteuser ssh-keyscan -H $puppetserver | sudo -u $gitoliteuser tee -a $sshhome/.ssh/known_hosts 2>/dev/null
-

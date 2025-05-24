@@ -1,7 +1,7 @@
 #!/bin/bash
 cd `dirname $0`
 
-#Ten skrypt wykonuje się z poziomu serwera ssh, ale nie koniecznie z konta, które ma klient dostać dostęp. 
+#Ten skrypt wykonuje się z poziomu serwera ssh, ale nie koniecznie z konta, które ma klient dostać dostęp.
 
 #Skrypt instaluje część serwerową połączenia, tj. upewnia się, że ssh serwer jest zainstalowany, oraz dodaje certyfikat klienta do authorized_keys.
 
@@ -13,7 +13,7 @@ cd `dirname $0`
 . ./common.sh
 
 alias errcho='>&2 echo'
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -31,30 +31,30 @@ server_account="$(whoami)"
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--debug)
-	debug=1
-	;;
-	--ssh-key-file)
-	pubkeyfile=$1
-	shift
-	;;
-	--server-target-account)
-	server_account=$1
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--debug)
+			debug=1
+			;;
+		--ssh-key-file)
+			pubkeyfile=$1
+			shift
+			;;
+		--server-target-account)
+			server_account=$1
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$pubkeyfile" ]; then
@@ -63,7 +63,7 @@ if [ -z "$pubkeyfile" ]; then
 fi
 
 if ! dpkg -s openssh-server>/dev/null  2> /dev/null; then
-    logexec sudo apt-get --yes install openssh-server
+	logexec sudo apt-get --yes install openssh-server
 fi
 
 sshhome=`getent passwd $server_account | awk -F: '{ print $6 }'`
@@ -82,4 +82,3 @@ else
 		echo $pubkey | sudo -u $server_account tee -a $sshhome/.ssh/authorized_keys
 	fi
 fi
-

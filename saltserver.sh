@@ -14,20 +14,20 @@ Prepares salt server with the clone of my repository
 Usage:
 
 $(basename $0) [--develop]
-		[--help] [--debug] [--log <output file>]
+[--help] [--debug] [--log <output file>]
 
 
 where
 
- --develop                  - Flat that indicates to download a development version from git
- --debug                    - Flag that sets debugging mode. 
- --log                      - Path to the log file that will log all meaningful commands
+--develop                  - Flat that indicates to download a development version from git
+--debug                    - Flag that sets debugging mode.
+--log                      - Path to the log file that will log all meaningful commands
 
 
 Example2:
 
 Will use existing DHCP server on the n2n network
-$(basename $0)  
+$(basename $0)
 "
 
 

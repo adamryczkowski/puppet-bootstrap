@@ -22,46 +22,46 @@ useridcnt=
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--user)
-	user="$1"
-	shift
-	;;
-	--baseid)
-	userbaseid="$1"
-	shift
-	;;
-	--idcnt)
-	useridcnt="$1"
-	shift
-	;;
-	--subuid)
-	mode=subuid
-	;;
-	--subgid)
-	mode=subgid
-	;;
-	--add)
-	action=add
-	;;
-	--check)
-	action=check
-	;;
-	--show)
-	action=show
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--user)
+			user="$1"
+			shift
+			;;
+		--baseid)
+			userbaseid="$1"
+			shift
+			;;
+		--idcnt)
+			useridcnt="$1"
+			shift
+			;;
+		--subuid)
+			mode=subuid
+			;;
+		--subgid)
+			mode=subgid
+			;;
+		--add)
+			action=add
+			;;
+		--check)
+			action=check
+			;;
+		--show)
+			action=show
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 #if [ -n "$userbaseid" ] && [ -z "$useridcnt" ]; then
-	#	useridcnt=65536
+#	useridcnt=65536
 #fi
 
 if [ -z "$user" ]; then
@@ -74,15 +74,15 @@ if [ -z "$mode" ]; then
 	exit 1
 fi
 
-function findmaxid
-#Funkcja zwraca max. wolny i dostępny numer id. 
+function findmaxid()
+#Funkcja zwraca max. wolny i dostępny numer id.
 #Funkcja używa parametrów: $mode
 #Zwracane globalne zmienne: maxid
 {
 	#Stąd zaczynamy szukać
 	local curuser=0
 	local curbaseid=0
-	local maxid=100000 
+	local maxid=100000
 	foundbaseid=
 	while read line || [[ -n $line ]]; do
 		regex1="^\s*$"
@@ -102,13 +102,13 @@ function findmaxid
 	done </etc/$mode
 }
 
-function finduserid
+function finduserid()
 #Funkcja wyszukuje wpisy dla danego użytkownika i zwraca ostatni z nich razem z krotnością
 #Funkcja używa parametrów: $mode, $user, $userbaseid, $useridcnt
 #Zwracane globalne zmienne: foundbaseid, foundcnt, foundidcnt, fullmatch
 {
 	#Stąd zaczynamy szukać
-	local maxid=100000 
+	local maxid=100000
 	foundbaseid=
 	foundcnt=0
 	foundidcnt=
@@ -142,89 +142,86 @@ function finduserid
 
 case $action in
 	add)
-	removeall=0
-	finduserid
-	if [ "$foundcnt" -gt "0" ]; then
-		#Znaleziono już wpis dla tego użytkownika.
-		if [ "$foundcnt" -gt "1" ]; then
-			removeall=1
+		removeall=0
+		finduserid
+		if [ "$foundcnt" -gt "0" ]; then
+			#Znaleziono już wpis dla tego użytkownika.
+			if [ "$foundcnt" -gt "1" ]; then
+				removeall=1
+			else
+				if [ -z "$useridcnt" ]; then
+					useridcnt=$foundidcnt
+				fi
+				if [ -z "$userbaseid" ]; then
+					userbaseid=$foundbaseid
+				fi
+				if [ "$useridcnt" -ne "$foundidcnt" ] || [ "$userbaseid" != "$foundbaseid" ]; then
+					#Należy najpierw usunąć istniejący rekord, bo się nie zgadza
+					removeall=1
+				fi
+			fi
 		else
+			#rekordu nie ma
+			findmaxid
 			if [ -z "$useridcnt" ]; then
-				useridcnt=$foundidcnt
+				useridcnt=65536
 			fi
 			if [ -z "$userbaseid" ]; then
-				userbaseid=$foundbaseid
-			fi
-			if [ "$useridcnt" -ne "$foundidcnt" ] || [ "$userbaseid" != "$foundbaseid" ]; then
-				#Należy najpierw usunąć istniejący rekord, bo się nie zgadza
-				removeall=1
+				userbaseid=$maxid
 			fi
 		fi
-	else
-		#rekordu nie ma
-		findmaxid
-		if [ -z "$useridcnt" ]; then
-			useridcnt=65536
+
+		if [ "$removeall" == "1" ]; then
+			slot2="[[:digit:]]{1,9}"
+			regex1="^($user):($slot2):($slot2)\s*$"
+			sudo sed -i -r "/$regex1/d" /etc/$mode
+		else
+			#Rekord już istniał i nie trzeba niczego zmieniać
+			exit 0
 		fi
-		if [ -z "$userbaseid" ]; then
-			userbaseid=$maxid
-		fi
-	fi
-				
-	if [ "$removeall" == "1" ]; then
-		slot2="[[:digit:]]{1,9}"
-		regex1="^($user):($slot2):($slot2)\s*$"
-		sudo sed -i -r "/$regex1/d" /etc/$mode
-	else
-		#Rekord już istniał i nie trzeba niczego zmieniać
-		exit 0
-	fi
-		
-	line="$user:$userbaseid:$useridcnt"
-	echo "$line" | sudo tee -a /etc/$mode
-	sudo usermod --add-subuids $userbaseid-$((useridcnt+userbaseid)) $user
-	;;
+
+		line="$user:$userbaseid:$useridcnt"
+		echo "$line" | sudo tee -a /etc/$mode
+		sudo usermod --add-subuids $userbaseid-$((useridcnt+userbaseid)) $user
+		;;
 	show)
-	removeall=0
-	finduserid
-	if [ "$foundcnt" -gt 0 ]; then
-		#Znaleziono już wpis dla tego użytkownika. Wypisujemy ostanti.
-		echo "$user:$foundbaseid:$foundidcnt"
-		exit 0
-	else
-		#rekordu nie ma, trzeba stworzyć nowy
-		findmaxid
-		if [ -z "$useridcnt" ]; then
-			useridcnt=65536
-		fi
-		if [ -z "$userbaseid" ]; then
-			userbaseid=$maxid
-		fi
-		echo "$user:$userbaseid:$useridcnt"
-		exit 1
-	fi
-	;;
-	check)
-	finduserid
-	if [ "$foundcnt" -gt 0 ]; then
-		#Znaleziono już wpis dla tego użytkownika.
-		#Jest więcej niż jeden, ale zakładamy że ok.
-		if [ "$fullmatch" == "1" ]; then
+		removeall=0
+		finduserid
+		if [ "$foundcnt" -gt 0 ]; then
+			#Znaleziono już wpis dla tego użytkownika. Wypisujemy ostanti.
+			echo "$user:$foundbaseid:$foundidcnt"
 			exit 0
 		else
-			#multiple records exists, but no one is good.
-			exit 2 
+			#rekordu nie ma, trzeba stworzyć nowy
+			findmaxid
+			if [ -z "$useridcnt" ]; then
+				useridcnt=65536
+			fi
+			if [ -z "$userbaseid" ]; then
+				userbaseid=$maxid
+			fi
+			echo "$user:$userbaseid:$useridcnt"
+			exit 1
 		fi
-	else
-		#Nic nie znaleziono
-		exit 1
-	fi
-	;;
+		;;
+	check)
+		finduserid
+		if [ "$foundcnt" -gt 0 ]; then
+			#Znaleziono już wpis dla tego użytkownika.
+			#Jest więcej niż jeden, ale zakładamy że ok.
+			if [ "$fullmatch" == "1" ]; then
+				exit 0
+			else
+				#multiple records exists, but no one is good.
+				exit 2
+			fi
+		else
+			#Nic nie znaleziono
+			exit 1
+		fi
+		;;
 	*)
-	echo "INTERNAL ERROR." >/dev/stderr
-	exit 2
-	;;
+		echo "INTERNAL ERROR." >/dev/stderr
+		exit 2
+		;;
 esac
-
-
-

@@ -3,7 +3,7 @@ cd `dirname $0`
 
 #Adds user to the existing gitolite installation. Needs to be called as a user that has rights to modify gitolite's master repository.
 
-#add-gitolite-user.sh --gitolite-host <gitolite address> --client-access <admin@client.host> [--client-target-account <target-user-name-on-client-host>] [--username-for-gitolite <username>] 
+#add-gitolite-user.sh --gitolite-host <gitolite address> --client-access <admin@client.host> [--client-target-account <target-user-name-on-client-host>] [--username-for-gitolite <username>]
 # -g|--gitolite-host - nazwa serwera gitolite
 # --client-access - [admin@]server - host na którym żyje użytkownik.
 # --client-target-account - nazwa użytkownika, jaką użytkownik loguje się na hoście klienckim. Jeśli nie podana, to używana jest ta sama nazwa co --client-access
@@ -13,7 +13,7 @@ cd `dirname $0`
 . ./common.sh
 
 alias errcho='>&2 echo'
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -30,38 +30,38 @@ log=""
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--debug)
-	debug=1
-	;;
-	--server-host)
-	server_host=$1
-	shift
-	;;
-	--username-for-gitolite)
-	account_name_for_gitolite=$1
-	shift
-	;;
-	--client-access)
-	client_access=$1
-	shift
-	;;
-	--client-target-account)
-	client_account=$1
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--debug)
+			debug=1
+			;;
+		--server-host)
+			server_host=$1
+			shift
+			;;
+		--username-for-gitolite)
+			account_name_for_gitolite=$1
+			shift
+			;;
+		--client-access)
+			client_access=$1
+			shift
+			;;
+		--client-target-account)
+			client_account=$1
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$server_host" ]; then
@@ -92,7 +92,7 @@ fi
 
 
 
-#Krok 1 - zbieramy certyfikat klienta, aby go zainstalować na serwerze oraz rejestrujemy host serwera na kliencie. 
+#Krok 1 - zbieramy certyfikat klienta, aby go zainstalować na serwerze oraz rejestrujemy host serwera na kliencie.
 if [ "$client_host" != "localhost" ]; then
 	pubkeyplaceremote=`ssh $client_proxyuser@$client_host mktemp --dry-run --suffix=.pub`
 else
@@ -121,7 +121,7 @@ fi
 
 #Krok 3 - instalujemy pobrany certyfikat klienta na repozytorium gitolite-admin
 if ! dpkg -s git>/dev/null  2> /dev/null; then
-    logexec sudo apt-get --yes install git
+	logexec sudo apt-get --yes install git
 fi
 
 gitoliteadminpath=`mktemp -d`
@@ -169,5 +169,3 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 popd >/dev/null
 sudo rm -r `dirname $gitoliteadminpath`
-
-

@@ -14,21 +14,21 @@ Prepares salt server with the clone of my repository
 Usage:
 
 $(basename $0) <server_address> [--server-key <server key>]
-		[--help] [--debug] [--log <output file>]
+[--help] [--debug] [--log <output file>]
 
 
 where
 
- <server_address>           - Where the minion should find the server
- <server key>               - Public key of the server. 
- --debug                    - Flag that sets debugging mode. 
- --log                      - Path to the log file that will log all meaningful commands
+<server_address>           - Where the minion should find the server
+<server key>               - Public key of the server.
+--debug                    - Flag that sets debugging mode.
+--log                      - Path to the log file that will log all meaningful commands
 
 
 Example2:
 
 Will use existing DHCP server on the n2n network
-$(basename $0) localhost  
+$(basename $0) localhost
 "
 
 server_key=""
@@ -85,7 +85,7 @@ fi
 linetextfile /etc/salt/minion.d/server.conf "master: ${server_address}"
 
 if [ "${server_key}" != "" ]; then
-   linetextfile /etc/salt/minion.d/server.conf "master_finger: '${server_key}'"   
+   linetextfile /etc/salt/minion.d/server.conf "master_finger: '${server_key}'"
 fi
 sudo service salt-minion restart
 

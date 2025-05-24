@@ -68,10 +68,10 @@ Extensions=dir
 # Separator to use (if any) - add a string to insert between path/url entries
 # in the exec line.  Optional - if you leave this out, a space is inserted.
 # Note you can have trailing spaces here.
-#Separator=, 
+#Separator=,
 
 # Quote type to use (if any) - enclose paths/urls with quotes.  Optional - defaults
-# to no quotes.  
+# to no quotes.
 # Can be:  single, double, backtick
 Quote=double
 

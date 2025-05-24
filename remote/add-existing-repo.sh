@@ -13,43 +13,43 @@ alias errcho='>&2 echo'
 #--creator-name - jeśli wklejamy do bare-repo, to to jest nazwa użytkownika, który ma być właścicielem
 #--repo-name - nazwa repozytorium w gitolite BEZ .git
 
- . ./common.sh
+. ./common.sh
 
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--repo-path)
-	repopath=$1
-	shift
-	;;
-	--repo-name)
-	reponame=$1
-	shift
-	;;	
-	--creator-name)
-	repocreator=$1
-	shift
-	;;
-	--remote-origin)
-	remoteorigin=$1
-	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--repo-path)
+			repopath=$1
+			shift
+			;;
+		--repo-name)
+			reponame=$1
+			shift
+			;;
+		--creator-name)
+			repocreator=$1
+			shift
+			;;
+		--remote-origin)
+			remoteorigin=$1
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$repopath" ]; then
@@ -83,4 +83,3 @@ if [ -n "$repocreator" ]; then
 	$loglog
 	echo "$repocreator" | sudo su --login gitolite --command "tee /var/lib/gitolite/repositories/$reponame.git/gl-creator"
 fi
-

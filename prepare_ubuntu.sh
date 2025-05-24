@@ -4,7 +4,7 @@ cd "$(dirname "$0")" || exit 1
 . ./common.sh
 
 usage="
-Enhances bare-bones Ubuntu installation with several tricks. 
+Enhances bare-bones Ubuntu installation with several tricks.
 It adds a new user,
 fixes locale,
 installs byobu, htop and mcedit
@@ -17,47 +17,47 @@ $(basename "$0") <user-name> [--apt-proxy IP:PORT] [--wormhole] [--need-apt-upda
 
 where
 
- --wormhole               - Install magic wormhole (app for easy sending files)
- -p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
- --need-apt-update        - If the flag is set the script will assume the apt cache needs apdate. 
- --private_key_path       - This argument gets handled to 'prepare_ubuntu_user' for the first given user.
- --external-key           - Sets external public key to access the account. It
-    <cipher> <key> <name>   populates authorized_keys
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
- --repo-path              - Path to the common repository
- --user <username>        - Additional user to install the tricks to. Can be specified
-                            multiple times, each time adding another user.
- --no-sudo-password       - If set, sudo will not ask for password
- --rust                   - Use Rust's cargo to install all the rust packages
- --pipx                   - Use pipx to install all the python packages
- --cli-improved           - Install all the following recommended command line tools:
- --bat                    - cat replacement (bat)
- --bashrcd                - Replace existing .bashrc with a new one. Old bashrc will be backed up.
- --ping                   - prettyping (ping),
- --eza                    - eza (ls replacement),
- --gping						      - gping (https://github.com/orf/gping)
- --fzf                    - fzf (for bash ctr+r)
- --atuin                  - atuin (command history replacement)
- --gitutils               - Git utilities: k3diff, meld, difftastic, delta
- --htop                   - htop
- --btop                   - btop
- --difft                  - difftastic (diff replacement)
- --find                   - fd (replaces find)
- --du                     - ncdu (replaces du), 
- --bandwidth              - bandwidth (Terminal bandwidth utilization tool), 
- --tldr                   - tldr
- --rg                     - ripgrep,
- --entr                   - entr (watch), 
- --dust                   - non-interactive replacement to du
- --aptitude               - aptitude
- --mc                     - mc (Midnight Commander)
- --git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
- --liquidprompt           - liquidprompt
- --byobu                  - byobu
- --hexyl                  - hexyl (a hex editor)
- --zoxide                 - zoxide (cd replacement)
- --dtrx                   - Do The Right eXtraction (untar/unzip/unrar/etc. replacement)
+--wormhole               - Install magic wormhole (app for easy sending files)
+-p|--apt-proxy           - Address of the existing apt-cacher with port, e.g. 192.168.1.0:3142.
+--need-apt-update        - If the flag is set the script will assume the apt cache needs apdate.
+--private_key_path       - This argument gets handled to 'prepare_ubuntu_user' for the first given user.
+--external-key           - Sets external public key to access the account. It
+<cipher> <key> <name>   populates authorized_keys
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
+--repo-path              - Path to the common repository
+--user <username>        - Additional user to install the tricks to. Can be specified
+multiple times, each time adding another user.
+--no-sudo-password       - If set, sudo will not ask for password
+--rust                   - Use Rust's cargo to install all the rust packages
+--pipx                   - Use pipx to install all the python packages
+--cli-improved           - Install all the following recommended command line tools:
+--bat                    - cat replacement (bat)
+--bashrcd                - Replace existing .bashrc with a new one. Old bashrc will be backed up.
+--ping                   - prettyping (ping),
+--eza                    - eza (ls replacement),
+--gping						      - gping (https://github.com/orf/gping)
+--fzf                    - fzf (for bash ctr+r)
+--atuin                  - atuin (command history replacement)
+--gitutils               - Git utilities: k3diff, meld, difftastic, delta
+--htop                   - htop
+--btop                   - btop
+--difft                  - difftastic (diff replacement)
+--find                   - fd (replaces find)
+--du                     - ncdu (replaces du),
+--bandwidth              - bandwidth (Terminal bandwidth utilization tool),
+--tldr                   - tldr
+--rg                     - ripgrep,
+--entr                   - entr (watch),
+--dust                   - non-interactive replacement to du
+--aptitude               - aptitude
+--mc                     - mc (Midnight Commander)
+--git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
+--liquidprompt           - liquidprompt
+--byobu                  - byobu
+--hexyl                  - hexyl (a hex editor)
+--zoxide                 - zoxide (cd replacement)
+--dtrx                   - Do The Right eXtraction (untar/unzip/unrar/etc. replacement)
 
 Example:
 
@@ -295,7 +295,7 @@ if check_for_root; then
 	return 1
 fi
 
-install_apt_package wget wget 
+install_apt_package wget wget
 install_apt_package jq jq
 
 if [ -n "$aptproxy" ]; then
@@ -467,7 +467,7 @@ if [ "${install_bandwidth}" == "1" ]; then
     user_opts="${user_opts} --bandwidth"
   fi
 
-#	
+#
 
 #	_arch=$(cpu_arch)
 #	if [ "${_arch}" == "amd64" ]; then
@@ -477,7 +477,7 @@ if [ "${install_bandwidth}" == "1" ]; then
 #   file="bandwhich-v${version}-${_arch}.tar.gz"
 #	link="https://github.com/imsnif/bandwhich/releases/download/${version}/${file}"
 #	filepath=$(get_cached_file ${file} ${link})
-#   get_from_cache_and_uncompress_file ${filepath} bandwhich ${link} "/usr/local/bin/bandwhich" root   
+#   get_from_cache_and_uncompress_file ${filepath} bandwhich ${link} "/usr/local/bin/bandwhich" root
 fi
 
 if [ "${install_dust}" == "1" ]; then

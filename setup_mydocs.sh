@@ -13,17 +13,17 @@ $(basename $0) <mount_point> <device_path> [--keyfile <path>] [--user <username>
 
 where
 
- mount_point              - Path where the documents will be mounted.
-                            e.g. /home/Adama-docs
- device_path              - Path to the block device backing the encrypted storage of 
-                            the documents. E.g. /dev/disk/by-uuid/e327a906-6c6d-4447-bae1-73dc0d2da2e7
-                            
- --keyfile <path>         - Path to where the keyfile is stored. Make sure it is 
-                            encrypted while you are not logged in. Best place is to put it
-                            in an encypted home. Defaults to ~/klucz.bin
- --user <username>        - Username on whos behalf you want to act. Defaults to current user.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+mount_point              - Path where the documents will be mounted.
+e.g. /home/Adama-docs
+device_path              - Path to the block device backing the encrypted storage of
+the documents. E.g. /dev/disk/by-uuid/e327a906-6c6d-4447-bae1-73dc0d2da2e7
+
+--keyfile <path>         - Path to where the keyfile is stored. Make sure it is
+encrypted while you are not logged in. Best place is to put it
+in an encypted home. Defaults to ~/klucz.bin
+--user <username>        - Username on whos behalf you want to act. Defaults to current user.
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 Example:
@@ -89,5 +89,3 @@ fi
 
 
 # 1. Make sure mounter is installed and properly configured
-
-

@@ -18,4 +18,3 @@ reset; puppet agent --test --debug >puppet-lxc.log 2>&1; cat puppet-lxc.log
 
 #Poniższą komendę mogę używać do deploy puppet manifest:
 #git add . --all ; git commit -m "x"; git push --all; ssh root@sam.statystyka.net  "cd bootstrap; ./force-sudo.sh puppetmaster --lxcowner pupecik --lxcusername adam"; ssh adam@puppetmaster.statystyka.net -p 1222 "sudo service puppetmaster restart"
-

@@ -11,24 +11,24 @@ stand_alone=1
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--signal-pipe)
-	pipe=$1
-	stand_alone=0
-	shift
-	;;
-	-r|--repository-base-path)
-	puppetrepo=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--signal-pipe)
+			pipe=$1
+			stand_alone=0
+			shift
+			;;
+		-r|--repository-base-path)
+			puppetrepo=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ ! -d "$puppetrepo" ]; then
@@ -37,7 +37,7 @@ if [ ! -d "$puppetrepo" ]; then
 fi
 
 
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -61,7 +61,7 @@ else
 	sudo apt-get --yes install rsync
 fi
 
-git daemon --verbose --base-path="$puppetrepo" --export-all --informative-errors --enable=receive-pack 
+git daemon --verbose --base-path="$puppetrepo" --export-all --informative-errors --enable=receive-pack
 #exitstat=$?
 #if [ $exitstat -ne 0 ]; then
 #	echo $exitstat >$pipe
@@ -72,7 +72,7 @@ git daemon --verbose --base-path="$puppetrepo" --export-all --informative-errors
 
 #function catch_exit() {
 #	kill $childpid
-#} 
+#}
 #trap catch_exit EXIT SIGINT
 
 #if [ $stand_alone -eq 0 ]; then

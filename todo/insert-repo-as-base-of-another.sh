@@ -14,34 +14,34 @@ clonebase=1
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--base|-b)
-	base=$1
-	shift
-	;;
-	-c|--child)
-	child=$1
-	shift
-	;;	
-	--inplace)
-	clonebase=0
-	;;
-	-o|--output-path)
-	output=$1
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--base|-b)
+			base=$1
+			shift
+			;;
+		-c|--child)
+			child=$1
+			shift
+			;;
+		--inplace)
+			clonebase=0
+			;;
+		-o|--output-path)
+			output=$1
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$output" ]; then
@@ -77,7 +77,7 @@ if [ $? -ne 0 ]; then
 	exit 1
 fi
 logexec git remote add new $child
-logexec git remote update 
+logexec git remote update
 if [ $? -ne 0 ]; then
 	errcho "Cannot pull history from $child. Aborting."
 	exit 1
@@ -105,4 +105,3 @@ logexec git remote remove new
 logexec git symbolic-ref HEAD refs/heads/$FIRSTBRANCH
 
 echo "$base">$output
-

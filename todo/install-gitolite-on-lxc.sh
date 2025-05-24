@@ -3,12 +3,12 @@ cd `dirname $0`
 . ./common.sh
 
 #To jest skrypt, który tworzy konter LXC z gitolite wewnątrz. Skrypt zakłada, że przynajmniej istnieje użytkownik puppet.
-#install-gitolite-on-lxc.sh --fqdn <fqdn> --lxc-name <container name> [--lxc-username <lxc user name>] [---s|--git-source <URI to git repository with manifests]  [-g|--git-user <user name>] [-h|--git-user-keypath <keypath>] [--other-lxc-opts <other options to make-lxc-node>] 
+#install-gitolite-on-lxc.sh --fqdn <fqdn> --lxc-name <container name> [--lxc-username <lxc user name>] [---s|--git-source <URI to git repository with manifests]  [-g|--git-user <user name>] [-h|--git-user-keypath <keypath>] [--other-lxc-opts <other options to make-lxc-node>]
 
 #--other-lxc-opts - other options forwarded to make-lxc-node. Can be e.g. --ip <ip address>, --username <username> --usermode, --release <release name>, --autostart, --apt-proxy. The script will always set the following options: "--hostname $fqdn --username $lxcusername"
 #--fqdn - fqdn
 #--debug|-d
-#--lxc-name - lxc container name 
+#--lxc-name - lxc container name
 #--lxc-username - lxc user name
 #-g|--git-user - user name of the external user that will be given rights to access to container. By default it is the user that invokes this script
 #-h|--git-user-keypath - sciezka do pliku z kluczem publicznym dla tego użytkownika. By default it is the public ssh key of the user that invokes this script
@@ -18,7 +18,7 @@ debug=0
 alias errcho='>&2 echo'
 
 
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -37,48 +37,48 @@ fi
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
-case $key in
-	-d|--debug)
-	debug=1
-	;;
-	--fqdn)
-	fqdn=$1
+	key="$1"
 	shift
-	;;
-	--lxc-name)
-	lxcname="$1"
-	shift
-	;;
-	--lxc-username)
-	lxcusername="$1"
-	shift
-	;;
-	-g|--git-user)
-	gituser="$1"
-	shift
-	;;
-	--usermode)
-	usermode=1
-	;;
-	-h|--git-user-keypath)
-	gituserrsapath="$1"
-	shift
-	;;
-	--other-lxc-opts|--)
-	otherlxcoptions="$*"
-	shift $#
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		-d|--debug)
+			debug=1
+			;;
+		--fqdn)
+			fqdn=$1
+			shift
+			;;
+		--lxc-name)
+			lxcname="$1"
+			shift
+			;;
+		--lxc-username)
+			lxcusername="$1"
+			shift
+			;;
+		-g|--git-user)
+			gituser="$1"
+			shift
+			;;
+		--usermode)
+			usermode=1
+			;;
+		-h|--git-user-keypath)
+			gituserrsapath="$1"
+			shift
+			;;
+		--other-lxc-opts|--)
+			otherlxcoptions="$*"
+			shift $#
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$lxcname" ]; then
@@ -144,7 +144,7 @@ fi
 
 if [ -n "$gituser" ]; then
 	remotekeypath=/tmp/$gituser.pub
-	logexec scp $gituserrsapath $lxcusername@$fqdn:$remotekeypath 
+	logexec scp $gituserrsapath $lxcusername@$fqdn:$remotekeypath
 	gitoliteopts="--other-user $gituser $remotekeypath"
 fi
 opts2="--user $lxcusername --host $fqdn"
@@ -174,4 +174,3 @@ fi
 #if [ $exitstat -ne 0 ]; then
 #	exit $exitstat
 #fi
-

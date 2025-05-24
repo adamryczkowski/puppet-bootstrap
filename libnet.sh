@@ -1,6 +1,6 @@
 #!/bin/bash
 
-function add_dhcpd_entry {
+function add_dhcpd_entry() {
 	local subnet=$1
 	local netmask=$2
 	local range_from=$3
@@ -26,7 +26,7 @@ EOT
 		logexec sudo augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" set "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/netmask" "${netmask}" >/dev/null
 		dirty=1
 	fi
-	
+
 	oldvalue1=$(augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/range/from" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
 	oldvalue2=$(augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" get "/files/etc/dhcp/dhcpd.conf/subnet[network='$subnet']/range/to" | sed -En 's/\/.* = \"?([^\"]*)\"?$/\1/p')
 	if [ "$range_from" != "$oldvalue1" ] || [ "$range_to" != "$oldvalue2" ]; then
@@ -38,14 +38,14 @@ save
 EOT
 		dirty=1
 	fi
-	
+
 	if [ "$dirty" == "1" ]; then
 		return 0
 	fi
 	return 1
 }
 
-function edit_dhcpd {
+function edit_dhcpd() {
 	local key=$1
 	local value=$2
 	if [ "${value}" == "<ON>" ]; then
@@ -68,7 +68,7 @@ function edit_dhcpd {
 	return 1
 }
 
-function random_mac {
+function random_mac() {
 	local prefix=$1
 	local len=${#prefix}
 	local infix
@@ -78,22 +78,22 @@ function random_mac {
 		infix=":"
 	else
 		infix=${prefix:2:1}
-#		echo "infix=$infix"
+		#		echo "infix=$infix"
 	fi
 	if [[ ${prefix:$((len-1)):1} == ${infix} ]]; then
 		prefix="${prefix:0:$((len-1))}"
-#		echo "prefix=$prefix"
+		#		echo "prefix=$prefix"
 	fi
 	let "nwords = (${len}+3-1)/3"
-#	echo "nwords=$nwords"
+	#	echo "nwords=$nwords"
 	let "n = 12-2*nwords"
-#	echo "n=$n"
+	#	echo "n=$n"
 	hexchars="0123456789ABCDEF"
 	end=$( for i in $(seq ${n}); do echo -n ${hexchars:$(( $RANDOM % 16 )):1} ; done | sed -e "s/\(..\)/${infix}\1/g" )
 	echo ${prefix}${end}
 }
 
-function parse_URI {
+function parse_URI() {
 	local URI="$1"
 	local pattern='^(([[:alnum:]]+)://)?(([[:alnum:]]+)@)?([^:^@]+)(:([[:digit:]]+))?$'
 	if [[ "$URI" =~ $pattern ]]; then
@@ -108,7 +108,7 @@ function parse_URI {
 	fi
 }
 
-function add_host {
+function add_host() {
 	local host=$1
 	local ip=$2
 	local fqdn=$3
@@ -130,50 +130,50 @@ function add_host {
 	fi
 }
 
-function enable_host {
+function enable_host() {
 	local host=$1
 	local ip=$2
 	local HOSTS_LINE="${ip} ${host}"
 	local pattern=" *#? *${ip} +${host}"
 	pattern=${pattern//./\\.} #replace . into \.
 	if grep  -E "$pattern" /etc/hosts;  then #element is already added
-	   on_pattern=" *# *${ip} +${host}"
-   	if grep  -E "$on_pattern" /etc/hosts; then #element is not already turned on
-   	   sudo sed -i -r "s/${pattern}/${ip} ${host}/g" /etc/hosts
-   	fi
+		on_pattern=" *# *${ip} +${host}"
+		if grep  -E "$on_pattern" /etc/hosts; then #element is not already turned on
+			sudo sed -i -r "s/${pattern}/${ip} ${host}/g" /etc/hosts
+		fi
 	else
-	   add_host "$1" "$2"
+		add_host "$1" "$2"
 	fi
 }
 
-function disable_host {
+function disable_host() {
 	local host=$1
 	local ip=$2
 	local HOSTS_LINE="${ip} ${host}"
 	local pattern=" *#? *${ip} +${host}"
 	pattern=${pattern//./\\.} #replace . into \.
 	if ! grep  -E "$pattern" /etc/hosts;  then #element is already added
-	   add_host "$1" "$2"
+		add_host "$1" "$2"
 	fi
-   on_pattern=" *# *${ip} +${host}"
+	on_pattern=" *# *${ip} +${host}"
 	if ! grep  -E "$on_pattern" /etc/hosts; then #element is not already turned on
-	   sudo sed -i -r "s/${pattern}/# ${ip} ${host}/g" /etc/hosts
+		sudo sed -i -r "s/${pattern}/# ${ip} ${host}/g" /etc/hosts
 	fi
 }
 
-function add_host_ssh_certificate {
-   local host=$1
+function add_host_ssh_certificate() {
+	local host=$1
 	local line=$(echo -n | openssl s_client -connect ${host}:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p')
 	textfile /usr/share/ca-certificates/extra/${host}.crt "${line}" root
 	already_done1=$?
 	linetextfile /etc/ca-certificates.conf extra/${host}.crt
 	already_done2=$?
 	if [[ "${already_done1}" == "0" || "${already_done2}" == "0" ]]; then
-	   logexec sudo update-ca-certificates
-   fi
+		logexec sudo update-ca-certificates
+	fi
 }
 
-function get_iface_ip {
+function get_iface_ip() {
 	local iface=$1
 	if ifconfig $local_n2n_iface 2>/dev/null >/dev/null; then
 		ip addr show $1 | awk '$1 == "inet" {gsub(/\/.*$/, "", $2); print $2}'
@@ -183,21 +183,21 @@ function get_iface_ip {
 	fi
 }
 
-function get_bridge_ifaces {
-	brctl show | awk 'NF>1 && NR>1 {print $1}' 
+function get_bridge_ifaces() {
+	brctl show | awk 'NF>1 && NR>1 {print $1}'
 }
 
-function is_host_up {
+function is_host_up() {
 	ping -c 1 -w 1  $1 >/dev/null
 }
 
-function is_host_tcp_port_up {
-   local host=$1
-   local port=$2
-   nc -zw3 $1 $2
+function is_host_tcp_port_up() {
+	local host=$1
+	local port=$2
+	nc -zw3 $1 $2
 }
 
-function get_local_ip {
+function get_local_ip() {
 	local line=$(ip route get 1)
 	local pattern='^.* src (.*) uid'
 	if [[ $line =~ $pattern ]]; then

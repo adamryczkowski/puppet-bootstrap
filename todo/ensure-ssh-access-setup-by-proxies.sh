@@ -1,11 +1,11 @@
 #!/bin/bash
 cd `dirname $0`
 
-#Ten skrypt upewnia się, że możliwy będzie dostęp z zadanego adresu ssh A do drugiego adresu ssh B (serwer) bez podawania haseł. 
+#Ten skrypt upewnia się, że możliwy będzie dostęp z zadanego adresu ssh A do drugiego adresu ssh B (serwer) bez podawania haseł.
 #Skrypt wykonuje pracę z poziomu innego hosta i konta C, który ma dostęp ssh do obu kont.
 
 #syntax:
-#ensure-ssh-access-setup-by-proxies --server-access <adres ssh do serwera, który jest dostępny dla nas i - jeśli konto jest inne - ma uprawnienia sudo > --server-target-account <konto klienta na serwerze. Jeśli nie podane, to przyjmuje się to samo co server-access> --client-access <working ssh address on client> --client-target-account <jeśli inne niż client-access, nazwa konta klienta> 
+#ensure-ssh-access-setup-by-proxies --server-access <adres ssh do serwera, który jest dostępny dla nas i - jeśli konto jest inne - ma uprawnienia sudo > --server-target-account <konto klienta na serwerze. Jeśli nie podane, to przyjmuje się to samo co server-access> --client-access <working ssh address on client> --client-target-account <jeśli inne niż client-access, nazwa konta klienta>
 # --server-access - adres ssh do serwera, który jest dostępny dla nas i - jeśli konto jest inne - ma uprawnienia sudo. Można podać port w formie ssh://[user@]server[:port]
 # --server-target-account - opcjonalny parametr. Konto klienta na serwerze. Jeśli nie podane, to przyjmuje się to samo co server-access
 # --client-access - adres ssh do klienta, który jest dostępny dla nas i - jeśli konto jest inne - ma uprawnienia sudo ssh://[user@]server[:port]
@@ -15,7 +15,7 @@ cd `dirname $0`
 . ./common.sh
 
 alias errcho='>&2 echo'
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -34,41 +34,41 @@ hostkey_only=0
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--debug)
-	debug=1
-	;;
-	--server-access)
-	server_access=$1
-	shift
-	;;
-	--server-target-account)
-	server_account=$1
-	shift
-	;;
-	--client-access)
-	client_access=$1
-	shift
-	;;
-	--client-target-account)
-	client_account=$1
-	shift
-	;;
-	--only-host-key)
-	hostkey_only=1
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--debug)
+			debug=1
+			;;
+		--server-access)
+			server_access=$1
+			shift
+			;;
+		--server-target-account)
+			server_account=$1
+			shift
+			;;
+		--client-access)
+			client_access=$1
+			shift
+			;;
+		--client-target-account)
+			client_account=$1
+			shift
+			;;
+		--only-host-key)
+			hostkey_only=1
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 uri_regex="((git)|(ssh)\:\/?\/?)?([[:alnum:]]+)@([[:alnum:]\.]+)(\:([[:digit:]]+))?"
@@ -133,7 +133,7 @@ if [ -z "$client_account" ]; then
 fi
 
 
-#Krok 1 - zbieramy certyfikat klienta, aby go zainstalować na serwerze oraz rejestrujemy host serwera na kliencie. 
+#Krok 1 - zbieramy certyfikat klienta, aby go zainstalować na serwerze oraz rejestrujemy host serwera na kliencie.
 opts="--server-host $server_host --client-target-account $client_account"
 if [ "$hostkey_only" -eq "0" ]; then
 	if [ "$client_host" != "localhost" ]; then
@@ -192,4 +192,3 @@ if [ "$server_host" != "localhost" ]; then
 else
 	logexec sudo rm $pubkeysrv
 fi
-

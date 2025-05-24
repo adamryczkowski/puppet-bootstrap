@@ -1,0 +1,95 @@
+---
+# List of all hooks: https://pre-commit.com/hooks.html
+repos:
+  # General hooks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
+      - id: check-toml
+      - id: check-json
+      - id: debug-statements
+      - id: destroyed-symlinks
+      - id: detect-private-key
+      - id: end-of-file-fixer
+#        exclude: (\.dat)|(\.vcxproj(\.filters)?)|(\.targets)$
+      - id: fix-byte-order-marker
+      - id: mixed-line-ending
+#      - id: no-commit-to-branch
+#        args: [--branch, master]
+      - id: trailing-whitespace
+  - repo: https://github.com/syntaqx/git-hooks
+    rev: v0.0.18
+    hooks:
+      - id: forbid-binary
+        exclude: ^data/audio/.*\.mp3$
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: text-unicode-replacement-char
+  - repo: https://github.com/sirwart/ripsecrets  # Secrets scanner
+    rev: v0.1.9
+    hooks:
+      - id: ripsecrets
+        exclude: \.secrets\.baseline
+      # uncomment to check additional patterns
+      # args:
+      # - --additional-pattern 'mytoken*'
+      # - --additional-pattern 'mykey*'
+  - repo: https://github.com/codespell-project/codespell  # Common misspellings
+    rev: v2.4.1
+    hooks:
+      - id: codespell
+        files: \.(md|rst|adoc)$
+        args:
+          - -L
+          - thirdparty
+          - --write-changes
+          - --ignore-words=codespell_exceptions.txt
+  - repo: https://github.com/crate-ci/typos
+    rev: v1
+    hooks:
+      - id: typos
+        verbose: true
+        files: \.(md|rst|adoc)$
+        args: [--verbose]
+      - id: typos
+        verbose: true
+        files: \.(md|rst|adoc)$
+        args: [--write-changes]
+
+  # YAML
+  - repo: https://github.com/lyz-code/yamlfix  # Formatter
+    rev: 1.17.0
+    hooks:
+      - id: yamlfix
+  - repo: https://github.com/adrienverge/yamllint  # Linter
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+
+  # BASH
+  - repo: https://github.com/adamryczkowski/beautysh  # Formatter
+    rev: v6.2.3
+    hooks:
+      - id: beautysh
+        args: [--indent-size=4, --tab, --force-function-style=fnpar]
+  - repo: https://github.com/detailyang/pre-commit-shell
+    # Linter. Requires shellcheck
+    rev: 1.0.5
+    hooks:
+      - id: shell-lint
+
+    # .gitignore
+  - repo: https://github.com/lorenzwalthert/gitignore-tidy  # Formatter
+    rev: 0.1.2
+    hooks:
+      - id: tidy-gitignore
+        args: [--allow-leading-whitespace]
+        exclude: ^\.gitignore$  # Ignoring the main .gitignore file for now.
+        # Without comments this will re-shuffle the order of all the entries.

@@ -9,12 +9,12 @@ logexec echo "Próba $a"
 
 fn="blu"
 
-function bla {
+function bla() {
 	cd .
 	echo "bla"
 }
 
-function blu {
+function blu() {
 	error syntax
 }
 
@@ -25,5 +25,3 @@ for tweak in $tweaks; do
 	echo "Current tweak: ${tweak}"
 	logexec $(${tweak})
 done
-
-

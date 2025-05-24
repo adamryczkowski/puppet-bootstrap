@@ -16,17 +16,17 @@ $(basename $0) --user <username> [--help] [--install-dir <install dir>] [--debug
 
 where
 
- --install-dir <install dir> - Place to install the repository
- --user <username>           - Username to install update to its ~/tmp/update-all. Defaults to the
-                               current user.
- --puppet-bootstrap          - Clone also puppet-bootstrap
- --debug                     - Flag that sets debugging mode. 
- --log                       - Path to the log file that will log all meaningful commands
+--install-dir <install dir> - Place to install the repository
+--user <username>           - Username to install update to its ~/tmp/update-all. Defaults to the
+current user.
+--puppet-bootstrap          - Clone also puppet-bootstrap
+--debug                     - Flag that sets debugging mode.
+--log                       - Path to the log file that will log all meaningful commands
 
 
 Example:
 
-$(basename $0) 
+$(basename $0)
 "
 
 dir_resolve()
@@ -94,7 +94,7 @@ fi
 
 logmkdir "${install_dir}" ${user}
 
-if [ ! -w ${install_dir} ] ; then 
+if [ ! -w ${install_dir} ] ; then
 	errcho "${install_dir} is not writable for ${user}"
 	exit 1
 fi
@@ -120,4 +120,3 @@ if [ "${puppet_bootstrap}" == "1" ]; then
 fi
 
 logexec popd
-

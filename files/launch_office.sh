@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#This script calls either Excel, Word or PowerPoint with arguments that get 
+#This script calls either Excel, Word or PowerPoint with arguments that get
 #translated into paths visible to Wine.
 #
 #It does this by reading through the $WINEPREFIX/dosdevices directory and looking
@@ -25,29 +25,29 @@ fi
 
 case $1 in
 	excel)
-	prg="EXCEL.EXE"
-	;;
+		prg="EXCEL.EXE"
+		;;
 	word)
-	prg="WINWORD.EXE"
-	;;
+		prg="WINWORD.EXE"
+		;;
 	powerpoint)
-	prg="POWERPNT.EXE"
-	;;
+		prg="POWERPNT.EXE"
+		;;
 	*)
-	echo "Error: Unknown option: $1" >&2
-	exit 1
-	;;
+		echo "Error: Unknown option: $1" >&2
+		exit 1
+		;;
 esac
 shift
 
-function get_home_dir {
+function get_home_dir() {
 	if [ -n "$1" ]; then
 		local USER=$1
 	fi
 	echo $( getent passwd "$USER" | cut -d: -f6 )
 }
 
-function get_special_dir {
+function get_special_dir() {
 	local dirtype=$1
 	local user=$2
 	local ans=""
@@ -70,7 +70,7 @@ function get_special_dir {
 }
 
 
-function get_best_wine_path {
+function get_best_wine_path() {
 	local docpath="$1"
 	local answer
 	local best_answer
@@ -106,7 +106,7 @@ for var in "$@"
 do
 	var=$(urlencode -d "${var}" | sed "s/^file:\/\///g")
 	arg=$(readlink -f "$var")
-#	openin=`dirname "${arg}"`
+	#	openin=`dirname "${arg}"`
 	#echo "arg: ${arg}" >/tmp/kiki
 	if [ -n "$arg" ]; then
 		docpath=$(get_best_wine_path "${arg}")
@@ -116,5 +116,4 @@ do
 	fi
 done
 
-wine "${WINEPREFIX}/drive_c/Program Files/Microsoft Office/Office12/${prg}" "${args[@]}" 
-
+wine "${WINEPREFIX}/drive_c/Program Files/Microsoft Office/Office12/${prg}" "${args[@]}"

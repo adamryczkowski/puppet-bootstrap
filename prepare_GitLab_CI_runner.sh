@@ -7,40 +7,40 @@ cd `dirname $0`
 . ./common.sh
 
 usage="
-Prepares GitLab CI runner. Gitlab runner runs as 'gitlab-runner' user. 
+Prepares GitLab CI runner. Gitlab runner runs as 'gitlab-runner' user.
 
 syntax:
 $(basename $0) [--runner-name <name>]
-		[--gitlab-server <uri>] --gitlab-token <string>
-		[--ssh-identity <path_private> <path_public>] 
-		[--use-spack] [--spack-options \"opts\"]
-		[--build-dir <path>] [--max-threads <N>] [--max-mem <MB>]
-		[--debug] [--log <log path>] [--help]
+[--gitlab-server <uri>] --gitlab-token <string>
+[--ssh-identity <path_private> <path_public>]
+[--use-spack] [--spack-options \"opts\"]
+[--build-dir <path>] [--max-threads <N>] [--max-mem <MB>]
+[--debug] [--log <log path>] [--help]
 
 
 where
 
- --gitlab-server <uri>      - Path to the gitlab server. Defaults to https://git1.imgw.pl
- --gitlab-token <string>    - Token that will allow access to the server. Required.
- --ssh-identity             - Path to the ssh identity files to be used by the gitlab-runner. 
-     <path_prv> <path_pub>    Otherwise uses already present.
- --use-spack                - If given, the script will also prepare spack.
- --spack-options            - Options forwarded to the prepare_spack.sh script.
- --build-dir <path>         - Path to the build dir. Relative to the home of gitlab-runnet. Defaults to 'build'.
- --runner-name              - Name of the runner. Defaults to hostname.
- --max-mem <MB>             - Maximum number of MB allowed for build in this runner. 
-                              This value will get written to the configuration file, and
-                              used during CI run. Default to auto, which is
-                              90% of (total mem - 1GB). 
- --max-threads <N>          - Max number of build threads allowed. Defaults to all
-                              CPU threads available (\"auto\")
- --debug                    - Flag. If set, all commands that change state of the container or
-                              host machine will be displayed together with their output.
- --log                      - Redirects output from --debug into the log file.
+--gitlab-server <uri>      - Path to the gitlab server. Defaults to https://git1.imgw.pl
+--gitlab-token <string>    - Token that will allow access to the server. Required.
+--ssh-identity             - Path to the ssh identity files to be used by the gitlab-runner.
+<path_prv> <path_pub>    Otherwise uses already present.
+--use-spack                - If given, the script will also prepare spack.
+--spack-options            - Options forwarded to the prepare_spack.sh script.
+--build-dir <path>         - Path to the build dir. Relative to the home of gitlab-runnet. Defaults to 'build'.
+--runner-name              - Name of the runner. Defaults to hostname.
+--max-mem <MB>             - Maximum number of MB allowed for build in this runner.
+This value will get written to the configuration file, and
+used during CI run. Default to auto, which is
+90% of (total mem - 1GB).
+--max-threads <N>          - Max number of build threads allowed. Defaults to all
+CPU threads available (\"auto\")
+--debug                    - Flag. If set, all commands that change state of the container or
+host machine will be displayed together with their output.
+--log                      - Redirects output from --debug into the log file.
 
 Example:
 
-$(basename $0) 
+$(basename $0)
 "
 
 if [ -z "$1" ]; then
@@ -174,7 +174,7 @@ if [ ! -f /usr/share/ca-certificates/extra/imgwpl.crt ]; then
 #	$loglog
    add_host_ssh_certificate git1.imgw.pl
    add_host_ssh_certificate github.com
-   
+
 #	echo -n | openssl s_client -connect git1.imgw.pl:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee /usr/share/ca-certificates/extra/imgwpl.crt
 #	linetextfile /etc/ca-certificates.conf extra/imgwpl.crt
 #	logexec sudo update-ca-certificates

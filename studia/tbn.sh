@@ -14,7 +14,7 @@ function doskip()
 	fi
 	echo "$line" > /tmp/tmp2.txt
 	mymsg=`msg2`
-	exec 3>&1 4>&2 >>/tmp/tmp.txt 2>&1 
+	exec 3>&1 4>&2 >>/tmp/tmp.txt 2>&1
 	set -x
 	source /tmp/tmp2.txt
 	exitstatus=$?
@@ -35,5 +35,3 @@ echo 6
 echo 7
 
 exit
-
-

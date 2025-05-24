@@ -16,28 +16,28 @@ $(basename $0) [--port <portnr>] [--https] [--dns] [--telnets] [--icmp] [--dhcp-
 
 where
 
- --port <portnr>          - TCP port to listen to. Defaults to 5555
- --https                  - Flag. If given, port 443 will also be opened and used.
- --telnets                - Flag. If given, port 992 will also be opened and used. 
- --dns                    - Flag. If given, traffic over DNS will be used, and port 53 opened.
- --icmp                   - Flag. If given, traffic over ping will be used.
- --dhcp-server            - Flag. If given, internal dhcp server will be used
- --dhcp-range             - Range of the addresses to use in the network. 
-                            Defaults to 'auto', which will randomly take 10.x.x.0/24 IP domain.
-                            Relevant only whith --dhcp-server option.
- --ifname                 - Name of the virtual network device. Defaults to 'se'.
- --service-name           - Name of the server service, needed if you intent to install more than one.
-                            Defaults to softether-server.
- --password               - Password for the management
- --user                   - Adds user with this name
- --userpassword           - Password for the user.
- --debug                  - Flag that sets debugging mode. 
- --log                    - Path to the log file that will log all meaningful commands
+--port <portnr>          - TCP port to listen to. Defaults to 5555
+--https                  - Flag. If given, port 443 will also be opened and used.
+--telnets                - Flag. If given, port 992 will also be opened and used.
+--dns                    - Flag. If given, traffic over DNS will be used, and port 53 opened.
+--icmp                   - Flag. If given, traffic over ping will be used.
+--dhcp-server            - Flag. If given, internal dhcp server will be used
+--dhcp-range             - Range of the addresses to use in the network.
+Defaults to 'auto', which will randomly take 10.x.x.0/24 IP domain.
+Relevant only whith --dhcp-server option.
+--ifname                 - Name of the virtual network device. Defaults to 'se'.
+--service-name           - Name of the server service, needed if you intent to install more than one.
+Defaults to softether-server.
+--password               - Password for the management
+--user                   - Adds user with this name
+--userpassword           - Password for the user.
+--debug                  - Flag that sets debugging mode.
+--log                    - Path to the log file that will log all meaningful commands
 
 
 Example:
 
-./$(basename $0) --https --dns --telnets --icmp --password szakal --dhcp-server 
+./$(basename $0) --https --dns --telnets --icmp --password szakal --dhcp-server
 
 "
 server_service_name="softether-server"
@@ -183,4 +183,3 @@ logexec vpncmd /SERVER localhost /HUB:VPN /CMD UserPasswordSet adam /PASSWORD sz
 #fi
 
 exit 1
-

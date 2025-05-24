@@ -12,25 +12,25 @@ Prepares julia
 Usage:
 
 $(basename $0) [--juno|--atom] [--pycall <path_to_python>|auto] [--dev]
-               [--deb-folder <deb_folder>] [--install-dir <path>]
-                [--help] [--debug] [--log <output file>]
+[--deb-folder <deb_folder>] [--install-dir <path>]
+[--help] [--debug] [--log <output file>]
 
 
 where
 
- --juno                       - Flag to specify whether to install juno if atom exists. --atom implies --juno.
- --atom                       - Flag to specify whether to install atom (in order to install juno)
- --dev                        - Include development packages: Revise, Rebugger, Debugger, OhMyREPL
- --user								- Username for whom install extra bits, like startup.jl. Defaults to the $USER
- --preload-spack-python-from  - Path with the spack installation directory from which python will be preloaded.
-                                Implies --pycall <path to python>
- --pycall <path to python>    - Installs PyCall in julia and sets the python interpreter. Auto sets the interpreter
-                                to \`which python\` or installs the python itself if python not found.
- --install-dir <path>         - Place to install julia to. Defaults to /opt/julia
- --debug                      - Flag that sets debugging mode.
- --log                        - Path to the log file that will log all meaningful commands
- --deb-folder <path>          - Path where the source files for julia will be downloaded.
-                                Preferably some sort of shared folder for whole institution.
+--juno                       - Flag to specify whether to install juno if atom exists. --atom implies --juno.
+--atom                       - Flag to specify whether to install atom (in order to install juno)
+--dev                        - Include development packages: Revise, Rebugger, Debugger, OhMyREPL
+--user								- Username for whom install extra bits, like startup.jl. Defaults to the $USER
+--preload-spack-python-from  - Path with the spack installation directory from which python will be preloaded.
+Implies --pycall <path to python>
+--pycall <path to python>    - Installs PyCall in julia and sets the python interpreter. Auto sets the interpreter
+to \`which python\` or installs the python itself if python not found.
+--install-dir <path>         - Place to install julia to. Defaults to /opt/julia
+--debug                      - Flag that sets debugging mode.
+--log                        - Path to the log file that will log all meaningful commands
+--deb-folder <path>          - Path where the source files for julia will be downloaded.
+Preferably some sort of shared folder for whole institution.
 
 Example2:
 
@@ -183,4 +183,3 @@ if [[ ! "${which_python}" == "" ]]; then
 fi
 
 #$(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "Knet", "Plots", "StatsPlots" , "DataFrames", "JLD", "Flux", "Debugger", "Weave"]);ENV["PYTHON"]=""; Pkg.build(); using Revise; using IJulia; using Rebugger; using RCall; using Knet; using Plots; using StatsPlots; using DataFrames; using JLD; using Flux; using Debugger'
-

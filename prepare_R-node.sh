@@ -11,26 +11,26 @@ Prepares R in the server it is run on
 
 Usage:
 
-$(basename $0) [--rstudio] [--rstudio-server] [--repo-server <repo-address>] 
-               [--deb-folder <deb_folder>] [--install-lib <path>]
-               [--rstudio] [--rstudio-server] [--user <username>]
-                [--help] [--debug] [--log <output file>] 
+$(basename $0) [--rstudio] [--rstudio-server] [--repo-server <repo-address>]
+[--deb-folder <deb_folder>] [--install-lib <path>]
+[--rstudio] [--rstudio-server] [--user <username>]
+[--help] [--debug] [--log <output file>]
 
 
 where
 
- --ip                         - IP address in the private network of the node. 
- --debug                      - Flag that sets debugging mode. 
- --log                        - Path to the log file that will log all meaningful commands
- --user <username>            - Name of the user to install the fira font. Defaults to the current user.
- --deb-folder <path>          - Path where the .deb files for rstudio and rstudio-server will
-                                be downloaded. Preferably some sort of shared folder for whole
-                                institution. 
- --repo-server <repo-address> - Alternative CRAN address. Defaults to http://cran.us.r-project.org
- --install-lib <path>         - Path to the source directory of the library to install.
-                                This library purpose is to install its dependencies. Defaults to the
-                                rdep repository boundled with the script.
-  --rstudio, --rstudio-server - Whether to install this component
+--ip                         - IP address in the private network of the node.
+--debug                      - Flag that sets debugging mode.
+--log                        - Path to the log file that will log all meaningful commands
+--user <username>            - Name of the user to install the fira font. Defaults to the current user.
+--deb-folder <path>          - Path where the .deb files for rstudio and rstudio-server will
+be downloaded. Preferably some sort of shared folder for whole
+institution.
+--repo-server <repo-address> - Alternative CRAN address. Defaults to http://cran.us.r-project.org
+--install-lib <path>         - Path to the source directory of the library to install.
+This library purpose is to install its dependencies. Defaults to the
+rdep repository boundled with the script.
+--rstudio, --rstudio-server - Whether to install this component
 
 Example2:
 
@@ -153,8 +153,8 @@ if [ "$rstudio" == "1" ]; then
 		if [[ "$codename" == "focal" ]]; then
 			codename="bionic"
 		fi
-#		RSTUDIO_URI="https://download1.rstudio.org/desktop/${codename}/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"		
-		RSTUDIO_URI="https://download1.rstudio.org/electron/bionic/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"		
+#		RSTUDIO_URI="https://download1.rstudio.org/desktop/${codename}/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"
+		RSTUDIO_URI="https://download1.rstudio.org/electron/bionic/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"
 
 		wget -c "$RSTUDIO_URI" -O ${deb_folder}/rstudio_${latest_version}_$(cpu_arch).deb
 		logexec sudo gdebi --n ${deb_folder}/rstudio_${latest_version}_$(cpu_arch).deb
@@ -202,7 +202,7 @@ if [ "$rstudio_server" == "1" ]; then
 	if ! dpkg -s rstudio-server>/dev/null  2> /dev/null; then
 		netversion=$(wget --no-check-certificate -qO- https://s3.amazonaws.com/rstudio-server/current.ver)
 		pattern='^(([0-9]+)\.([0-9]+)\.([0-9]+)).*'
-		if  [[ $netversion =~ $pattern ]]; then 
+		if  [[ $netversion =~ $pattern ]]; then
 			netversion=${BASH_REMATCH[1]}
 		fi
 		codename=$(get_ubuntu_codename)
@@ -230,5 +230,3 @@ if [ -n "${install_lib}" ]; then
 	logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);if(!require('devtools')) {install.packages('devtools', ask=FALSE, lib = Sys.getenv('R_LIBS_USER'));devtools::install_github('hadley/devtools', lib = Sys.getenv('R_LIBS_USER'))}"
 	logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install('${install_lib}', dependencies=TRUE, lib = Sys.getenv('R_LIBS_USER'))"
 fi
-
-

@@ -17,34 +17,34 @@ puppetuser=$USER
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	-u|--puppetuser)
-	puppetuser="$1"
-	shift
-	;;
-	-s|--puppetmaster)
-	puppetmaster=$1
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	--myfqdn)
-	myfqdn=$1
-	shift
-	;;
-	--debug)
-	debug=1
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		-u|--puppetuser)
+			puppetuser="$1"
+			shift
+			;;
+		-s|--puppetmaster)
+			puppetmaster=$1
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		--myfqdn)
+			myfqdn=$1
+			shift
+			;;
+		--debug)
+			debug=1
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$myfqdn" ]; then
@@ -135,8 +135,7 @@ logexec sudo rm -f /etc/puppetlabs/puppet/ssl/certs/*
 logexec sudo rm -f /etc/puppetlabs/puppet/ssl/certificate_requests/*
 logexec sudo rm -f /etc/puppetlabs/puppet/ssl/certificate_requests/*
 logexec sudo rm -f /etc/puppetlabs/puppet/ssl/certificate_requests/*
-logexec 	
+logexec
 logexec sudo service puppet start
 
 logexec sudo /opt/puppetlabs/puppet/bin/puppet agent --test
-

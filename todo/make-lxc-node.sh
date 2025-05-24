@@ -16,7 +16,7 @@ cd `dirname $0`
 # -p|--apt-proxy - address of the existing apt-proxy
 # --usermode - if set, the resulting container will be a user mode container.
 
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -41,52 +41,52 @@ internalif=`augtool -L -A --transform "Shellvars incl /etc/default/lxc-net" get 
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--debug)
-	debug=1
-	;;
-	--usermode)
-	usermode=1
-	;;
-	-h|--hostname)
-	lxcfqdn="$1"
-	shift
-	;;
-	-a|--autostart)
-	autostart=YES
-	;;
-	-u|--username)
-	lxcuser="$1"
-	shift
-	;;
-	--ip)
-	lxcip="$1"
-	shift
-	;;
-	-r|--release)
-	release="$1"
-	shift
-	;;
-	-s|--grant-ssh-access-to)
-	sshuser="$1"
-	shift
-	;;
-	-p|--apt-proxy)
-	aptproxy="$1"
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	errcho "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--debug)
+			debug=1
+			;;
+		--usermode)
+			usermode=1
+			;;
+		-h|--hostname)
+			lxcfqdn="$1"
+			shift
+			;;
+		-a|--autostart)
+			autostart=YES
+			;;
+		-u|--username)
+			lxcuser="$1"
+			shift
+			;;
+		--ip)
+			lxcip="$1"
+			shift
+			;;
+		-r|--release)
+			release="$1"
+			shift
+			;;
+		-s|--grant-ssh-access-to)
+			sshuser="$1"
+			shift
+			;;
+		-p|--apt-proxy)
+			aptproxy="$1"
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			errcho "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ "$sshuser" == "auto" ]; then
@@ -167,15 +167,15 @@ if [ "$lxcip" != "auto" ]; then
 	#Upewniamy się, że rzeczywiście jest sens modyfikować /etc/lxc/dnsmasq.conf...
 	logexec sudo sed -i -e "/\#\s*LXC_DHCP_CONFILE=\/etc\/lxc\/dnsmasq.conf/ s/\#\s//" /etc/default/lxc-net
 	#Dokonujemy teraz zmian...
-#	echo "Restarting dnsmasq..."
+	#	echo "Restarting dnsmasq..."
 	logexec sudo service lxc-dnsmasq stop || true >/dev/null
-#	if [ -d /sys/class/net/$internalif ]; then
-#		sudo brctl delbr lxcbr0 >/dev/null
-#	fi
-#	if [ -f /run/lxc/dnsmasq.pid ]; then
-#		sudo kill -HUP `cat /run/lxc/dnsmasq.pid`
-#	fi
-	
+	#	if [ -d /sys/class/net/$internalif ]; then
+	#		sudo brctl delbr lxcbr0 >/dev/null
+	#	fi
+	#	if [ -f /run/lxc/dnsmasq.pid ]; then
+	#		sudo kill -HUP `cat /run/lxc/dnsmasq.pid`
+	#	fi
+
 	if [ -f /var/lib/misc/dnsmasq.$internalif.leases ]; then
 		logexec sudo rm /var/lib/misc/dnsmasq.$internalif.leases 2>/dev/null
 	fi
@@ -200,8 +200,8 @@ fi
 #echo "Setting fqdn and hostname for the container and the host..."
 echo $lxcfqdn | grep -Fq . >/dev/null
 if [ $? -eq 0 ]; then
-	lxcname=`echo $lxcfqdn | sed -En 's/^([^.]*)\.(.*)$/\1/p'` 
-	hostsline="$lxcfqdn $lxcname" 
+	lxcname=`echo $lxcfqdn | sed -En 's/^([^.]*)\.(.*)$/\1/p'`
+	hostsline="$lxcfqdn $lxcname"
 else
 	lxcname=$lxcfqdn
 	hostsline="$lxcname"
@@ -220,7 +220,7 @@ fi
 
 #Upewniamy się, że kontener ma prawidłwy hostname...
 if ! $sudoprefix grep -q $lxcname "$lxcpath/rootfs/etc/hostname" 2>/dev/null >/dev/null; then
-	$loglog 
+	$loglog
 	echo $lxcname | $sudoprefix tee $lxcpath/rootfs/etc/hostname >/dev/null
 fi
 
@@ -229,7 +229,7 @@ fi
 if sudo grep "^127\.0\.1\.1" $lxcpath/rootfs/etc/hosts 2>/dev/null >/dev/null; then
 	logexec sudo sed -i "s/^\(127\.0\.1\.1\s*\).*/\1$hostsline/" $lxcpath/rootfs/etc/hosts
 else
-	$loglog 
+	$loglog
 	echo "127.0.1.1	$hostsline" | $sudoprefix tee -a $lxcpath/rootfs/etc/hosts >/dev/null
 fi
 
@@ -238,20 +238,20 @@ fi
 
 #Upewniamy się, że kontener jest uruchomiony
 if $sudoprefix lxc-info -n $name | grep "STOPPED" >/dev/null; then
-#	echo "Starting the container..."
+	#	echo "Starting the container..."
 	logexec $sudoprefix lxc-start -d -n $name
 	if [ $? -ne 0 ] && [ "$usermode" -eq "1" ]; then
 		errcho "Należy zrestartować host - inaczej kreacja kontenera usermode nie uda się" >&2
 		exit 1
 	fi
 	sleep 5
-	
+
 	if $sudoprefix lxc-info -n $name | grep "STOPPED" >/dev/null; then
 		errcho "Failed to start lxc container $name!"
 		exit 1
 	fi
-	if [ "$usermode" -eq 1 ]; then	
-		logexec lxc-attach -n ${name} -- adduser --disabled-password --add_extra_groups --quiet --gecos "" ${lxcuser} 
+	if [ "$usermode" -eq 1 ]; then
+		logexec lxc-attach -n ${name} -- adduser --disabled-password --add_extra_groups --quiet --gecos "" ${lxcuser}
 	fi
 fi
 myip=`$sudoprefix lxc-info -n $name -i | grep -oE "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"`
@@ -261,18 +261,18 @@ if [ "$lxcip" != "auto" ]; then
 	if [ "$myip" != "$lxcip" ]; then
 		errcho "Wrong IP address of $name. Restarting dnsmasq and emptying its cache, then restarting the container..."
 		logexec $sudoprefix lxc-stop -n $name
-		logexec sudo service lxc-dnsmasq stop 
-#		if [ -d /sys/class/net/$internalif ]; then
-#			sudo brctl delbr lxcbr0 >/dev/null
-#		fi
-#		if [ -f /run/lxc/dnsmasq.pid ]; then
-#			sudo kill -HUP `cat /run/lxc/dnsmasq.pid`
-#		fi
-#		sleep 2
+		logexec sudo service lxc-dnsmasq stop
+		#		if [ -d /sys/class/net/$internalif ]; then
+		#			sudo brctl delbr lxcbr0 >/dev/null
+		#		fi
+		#		if [ -f /run/lxc/dnsmasq.pid ]; then
+		#			sudo kill -HUP `cat /run/lxc/dnsmasq.pid`
+		#		fi
+		#		sleep 2
 
 		logexec sudo rm /var/lib/misc/dnsmasq.$internalif.leases
-		logexec sudo service lxc-dnsmasq start 
-		logexec $sudoprefix lxc-start -d -n $name 
+		logexec sudo service lxc-dnsmasq start
+		logexec $sudoprefix lxc-start -d -n $name
 		sleep 5
 		myip=`$sudoprefix lxc-info -n $name -i | grep -oE "[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}"`
 		if [ "$myip" != "$lxcip" ]; then
@@ -289,7 +289,7 @@ if [ "$autostart" == "YES" ]; then
 	logexec $sudoprefix augtool -L -A --transform "PHP incl $lxcpath/config" set "/files/$lxcpath/config/.anon/lxc.start.auto" 1
 else
 	if [ "$autostart" == "NO" ]; then
-		logexec $sudoprefix augtool -L -A --transform "PHP incl $lxcpath/config" set "/files/$lxcpath/config/.anon/lxc.start.auto" 0 
+		logexec $sudoprefix augtool -L -A --transform "PHP incl $lxcpath/config" set "/files/$lxcpath/config/.anon/lxc.start.auto" 0
 	fi
 fi
 
@@ -310,10 +310,10 @@ else
 fi
 
 
-function pingsudo
+function pingsudo()
 {
 
-cat >/tmp/pingsudo.sh <<EOT
+	cat >/tmp/pingsudo.sh <<EOT
 #!/bin/bash
 sudo mkdir /var/lib/sudo/$1 2>/dev/null
 while [[ 0 ]]
@@ -323,11 +323,11 @@ sudo touch /var/lib/sudo/$1/0
 done
 EOT
 
-sudo cp /tmp/pingsudo.sh $lxcpath/rootfs/pingsudo.sh
-sudo chmod +x $lxcpath/rootfs/pingsudo.sh
-ssh $lxcuser@$lxcfqdn "/pingsudo.sh $puppetuser" &
+	sudo cp /tmp/pingsudo.sh $lxcpath/rootfs/pingsudo.sh
+	sudo chmod +x $lxcpath/rootfs/pingsudo.sh
+	ssh $lxcuser@$lxcfqdn "/pingsudo.sh $puppetuser" &
 
-pingsudopid=`jobs -p 1`
+	pingsudopid=`jobs -p 1`
 }
 
 if [ -n "$aptproxy" ]; then
@@ -357,19 +357,19 @@ fi
 
 #echo "Adding the container to the hosts known_hosts file..."
 if [ -f "$sshhome/.ssh/known_hosts" ]; then
-	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $name 
-	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $lxcfqdn 
-	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $myip 
+	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $name
+	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $lxcfqdn
+	logexec ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $myip
 fi
 
 if [ ! -d $sshhome/.ssh ]; then
 	logexec mkdir $sshhome/.ssh
 fi
-$loglog 
+$loglog
 ssh-keyscan -H $name >> $sshhome/.ssh/known_hosts 2>/dev/null
-$loglog 
+$loglog
 ssh-keyscan -H $lxcfqdn >> $sshhome/.ssh/known_hosts 2>/dev/null
-$loglog 
+$loglog
 ssh-keyscan -H $myip >> $sshhome/.ssh/known_hosts 2>/dev/null
 
 
@@ -383,4 +383,3 @@ fi
 if [ -f "$lxcpath/rootfs/pingsudo.sh" ]; then
 	logexec sudo rm $lxcpath/rootfs/pingsudo.sh
 fi
-

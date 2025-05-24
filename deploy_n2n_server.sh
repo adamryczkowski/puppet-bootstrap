@@ -9,9 +9,9 @@ cd `dirname $0`
 
 usage="
 Deploys the n2n server on the given ssh address. It might install the N2N client on the server
-as well, depending on the options. 
+as well, depending on the options.
 
-It will install a client if you want to deploy a DHCP server. 
+It will install a client if you want to deploy a DHCP server.
 
 
 Usage:
@@ -20,13 +20,13 @@ $(basename $0) <ssh addres of the server> <further options passed to n2n-server.
 
 
 where
- ssh addres of the server - Address to the server, including username, e.g. root@134.234.3.63
- <further options ...>    - Options passed to n2n-server.sh 
+ssh addres of the server - Address to the server, including username, e.g. root@134.234.3.63
+<further options ...>    - Options passed to n2n-server.sh
 
 
 Example2:
 
-$(basename $0) root@172.104.148.166 --debug -- --password 'secret_password' 
+$(basename $0) root@172.104.148.166 --debug -- --password 'secret_password'
 
 "
 

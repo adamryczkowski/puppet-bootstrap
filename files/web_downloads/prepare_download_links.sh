@@ -3,17 +3,17 @@
 basedir=/home/adam/Videos
 
 folders=(Computerphile PBS_Eons OddlySatisfying
-3b1b "Think Twice" LeiosOS Numberphile GlebAlexandrov Kurzgesagt MarkRober 
-MinuteEarth MinutePhysics Sexplanations SixtySymbols Stats Wendover
+	3b1b "Think Twice" LeiosOS Numberphile GlebAlexandrov Kurzgesagt MarkRober
+	MinuteEarth MinutePhysics Sexplanations SixtySymbols Stats Wendover
 )
 
 mkdir -p "${basedir}/to_download"
 
-function regexp_quote {
+function regexp_quote() {
 	sed 's/[]\.|$(){}?+*^]/\\&/g' <<< "$*"
 }
 
-function download_folder {
+function download_folder() {
 	local folder="$1"
 	local path="${basedir}/${folder}"
 	if [ ! -f "${path}/download.link" ]; then
@@ -30,7 +30,7 @@ function download_folder {
 	local last_item=${titles[0]}
 	local first_missing_index=-1
 	rm -f "${path}/to_download.list"
-#	touch "${path}/to_download.list"
+	#	touch "${path}/to_download.list"
 	for ((i=0; i < ${#titles[@]}; i++)); do
 		local title="${titles[$i]}"
 		local escaped_title=$(regexp_quote $title)
@@ -56,11 +56,10 @@ function download_folder {
 
 cd $basedir
 
-#set -x 
+#set -x
 #download_folder "Kurzgesagt"
 #exit 0
 
 for folder in "${folders[@]}"; do
 	download_folder "$folder"
 done
-

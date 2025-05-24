@@ -1,7 +1,7 @@
 #!/bin/bash
 cd `dirname $0`
 
-#Ten skrypt wykonuje się z poziomu klienta ssh, ale nie koniecznie z konta, które ma dostać dostęp. 
+#Ten skrypt wykonuje się z poziomu klienta ssh, ale nie koniecznie z konta, które ma dostać dostęp.
 
 #Skrypt instaluje część kliencką połączenia, tj. akceptuje host servera ssh, upewnia się, że klient ma certyfikat i pobiera go aby przekazać serwerowi.
 
@@ -14,7 +14,7 @@ cd `dirname $0`
 . ./common.sh
 
 alias errcho='>&2 echo'
-dir_resolve()
+function dir_resolve()
 {
 	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
 	echo "`pwd -P`" # output full, link-resolved path
@@ -33,34 +33,34 @@ pubkeycopy=""
 
 while [[ $# > 0 ]]
 do
-key="$1"
-shift
+	key="$1"
+	shift
 
-case $key in
-	--debug)
-	debug=1
-	;;
-	--server-host)
-	server_host=$1
-	shift
-	;;
-	--client-target-account)
-	client_account=$1
-	shift
-	;;
-	--place-to-hold-ssh-pubkey)
-	pubkeycopy=$1
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	*)
-	echo "Unkown parameter '$key'. Aborting."
-	exit 1
-	;;
-esac
+	case $key in
+		--debug)
+			debug=1
+			;;
+		--server-host)
+			server_host=$1
+			shift
+			;;
+		--client-target-account)
+			client_account=$1
+			shift
+			;;
+		--place-to-hold-ssh-pubkey)
+			pubkeycopy=$1
+			shift
+			;;
+		--log)
+			log=$1
+			shift
+			;;
+		*)
+			echo "Unkown parameter '$key'. Aborting."
+			exit 1
+			;;
+	esac
 done
 
 if [ -z "$client_account" ]; then
@@ -79,7 +79,7 @@ sshhome=`getent passwd $client_account | awk -F: '{ print $6 }'`
 echo "Adding the server to the client's known_hosts file..."
 if sudo -u $client_account [ -f "$sshhome/.ssh/known_hosts" ]; then
 	$loglog
-	sudo -u $client_account ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $server_host 
+	sudo -u $client_account ssh-keygen -f "$sshhome/.ssh/known_hosts" -R $server_host
 else
 	if ! sudo -u $client_account [ -d "$sshhome/.ssh" ]; then
 		logexec sudo -u $client_account mkdir "$sshhome/.ssh"
@@ -103,5 +103,3 @@ if sudo -u $client_account [ ! -f "$sshhome/.ssh/id_rsa" ]; then
 fi
 logexec sudo -u $client_account cp $sshhome/.ssh/id_rsa.pub $pubkeycopy
 logexec sudo chown $(whoami) $pubkeycopy
-
-

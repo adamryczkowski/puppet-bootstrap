@@ -9,15 +9,15 @@ Prepares the radicale calendar server
 
 Usage:
 
-$(basename $0)  [--cal-user <user>:<password>] 
-                [--help] [--debug] [--log <output file>] 
+$(basename $0)  [--cal-user <user>:<password>]
+[--help] [--debug] [--log <output file>]
 
 
 where
 
- --cal-user <user>:<password> - Username and password of first calendar user
- --debug                      - Flag that sets debugging mode. 
- --log                        - Path to the log file that will log all meaningful commands
+--cal-user <user>:<password> - Username and password of first calendar user
+--debug                      - Flag that sets debugging mode.
+--log                        - Path to the log file that will log all meaningful commands
 
 Example2:
 
@@ -110,13 +110,13 @@ if [ -n "$cal_user" ]; then
 		errcho "Wrong format of --cal_user argument. Please use \"user:pa\$\$word\"."
 		exit 1
 	fi
-	
+
 	if [ ! -f /etc/radicale/users ]; then
 		infix=" -c "
 	else
 		infix=""
-	fi 
-	
+	fi
+
 	if ! grep -Exq "^${cal_user}:}" /etc/radicale/users; then
 		logexec sudo htpasswd -B $infix -b /etc/radicale/users $cal_user $cal_password
 	fi
@@ -124,7 +124,7 @@ fi
 
 textfile /etc/gitconfig "[user]
 	email = radicale@localhost
-	name = Radicale server" root
+name = Radicale server" root
 
 
 custom_systemd_service radicale "[Unit]
@@ -152,4 +152,3 @@ ReadWritePaths=/var/lib/radicale/collections
 [Install]
 WantedBy=multi-user.target
 "
-

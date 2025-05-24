@@ -1,4 +1,4 @@
-#!/bin/bash 
+#!/bin/bash
 
 ## dependency: libapt.sh
 ## dependency: libfiles.sh
@@ -36,7 +36,7 @@ source "${adamlibpath}/libbashrc.sh"
 source "${adamlibpath}/libpip.sh"
 
 #Gets ubuntu version in format e.g. 1804 or 1604
-function get_ubuntu_version {
+function get_ubuntu_version() {
 	local infix="$1"
 	local tmp
 
@@ -55,7 +55,7 @@ function get_ubuntu_version {
 	return 1
 }
 
-function get_ubuntu_codename {
+function get_ubuntu_codename() {
 	local tmp
 	local pattern='^Codename:\s*([^ ]+)$'
 	tmp=$(lsb_release --codename 2>/dev/null | grep Codename)
@@ -65,15 +65,15 @@ function get_ubuntu_codename {
 	local codename=${BASH_REMATCH[1]}
 	if [[ "${codename}" == "tina" ]]; then
 		codename=bionic
-	fi 
+	fi
 	if [[ "${codename}" == "tara" ]]; then
 		codename=bionic
-	fi 
+	fi
 	echo "${codename}"
 	return 0
 }
 
-function get_distribution {
+function get_distribution() {
 	local tmp
 	local pattern='^Distributor ID:\s*([^ ]+)$'
 	tmp=$(lsb_release --id 2>/dev/null)
@@ -85,22 +85,22 @@ function get_distribution {
 }
 
 
-function simple_systemd_service {
+function simple_systemd_service() {
 	local name=$1
 	local description="$2"
 	local program=$3
 	shift;shift;shift;shift
 	local args="$*"
 	local is_active
-	
+
 	if [ ! -f "$program" ]; then
 		if which "$program" >/dev/null; then
 			program=$(which "${program}")
 		fi
 	fi
 	logexec sudo chmod +x "${program}"
-	
-cat > /tmp/tmp_service <<EOT
+
+	cat > /tmp/tmp_service <<EOT
 [Unit]
 Description=$description
 
@@ -112,8 +112,8 @@ Restart=on-failure
 WantedBy=multi-user.target
 EOT
 	if ! cmp --silent "/tmp/${name}.service" "/lib/systemd/system/${name}.service"; then
-logheredoc EOT
-sudo tee "/lib/systemd/system/${name}.service">/dev/null <<EOT
+		logheredoc EOT
+		sudo tee "/lib/systemd/system/${name}.service">/dev/null <<EOT
 [Unit]
 Description=$description
 
@@ -129,7 +129,7 @@ EOT
 		if [ ! "$is_active" == "active" ]; then
 			logexec sudo systemctl enable "$name"
 		fi
-	fi 
+	fi
 
 	if ! systemctl status "$name" | grep -q running; then
 		logexec sudo service "$name" start
@@ -139,11 +139,11 @@ EOT
 }
 
 
-function custom_systemd_service {
+function custom_systemd_service() {
 	local name=$1
 	local contents="$2"
 	local is_active
-	
+
 	textfile "/lib/systemd/system/${name}.service" "${contents}" root
 	logexec sudo systemctl daemon-reload
 	is_active=$(systemctl is-active "$name")
@@ -158,11 +158,11 @@ function custom_systemd_service {
 	return 1
 }
 
-function check_for_root {
+function check_for_root() {
 	if which sudo >/dev/null; then
 		if ! sudo -n true 2>/dev/null; then
-			 errcho "User $USER doesn't have admin rights"
-			 return 1
+			errcho "User $USER doesn't have admin rights"
+			return 1
 		fi
 	else
 		if [[ "$UID" != 0 ]]; then
@@ -175,55 +175,55 @@ function check_for_root {
 	return 0
 }
 
-function get_home_dir {
+function get_home_dir() {
 	if [ -n "$1" ]; then
 		local USER=$1
 	fi
 	getent passwd "$USER" | cut -d: -f6
 }
 
-function get_special_dir {
+function get_special_dir() {
 	local dirtype=$1
 	local user=$2
-#	local ans=""
+	#	local ans=""
 	local HOME
 	local pattern
-#	local folder
+	#	local folder
 	HOME=$(get_home_dir "$user")
 	if [ -f "${HOME}/.config/user-dirs.dirs" ]; then
 		source "${HOME}/.config/user-dirs.dirs"
 		varname="XDG_${dirtype}_DIR"
 		echo "${!varname}"
 		return
-#		line=$(grep "^[^#].*${dirtype}" "${HOME}/.config/user-dirs.dirs")
-#		pattern="^.*${dirtype}.*=\"?([^\"]+)\"?$"
-#		if [[ "$line" =~ $pattern ]]; then
-#			folder=${BASH_REMATCH[1]}
-#			ans=$(echo $folder | envsubst )
-#			if [ "$ans" == "$HOME" ]; then
-#				ans=""
-#			fi
-#		fi
+		#		line=$(grep "^[^#].*${dirtype}" "${HOME}/.config/user-dirs.dirs")
+		#		pattern="^.*${dirtype}.*=\"?([^\"]+)\"?$"
+		#		if [[ "$line" =~ $pattern ]]; then
+		#			folder=${BASH_REMATCH[1]}
+		#			ans=$(echo $folder | envsubst )
+		#			if [ "$ans" == "$HOME" ]; then
+		#				ans=""
+		#			fi
+		#		fi
 	fi
 	echo ""
 }
 
 
-function make_sure_dir_is_in_a_path {
+function make_sure_dir_is_in_a_path() {
 	local newpath="$1"
-	
+
 	if ! echo "$PATH" | tr ':' '\n' | grep '^\\one\\two$' >/dev/null; then
 		export PATH=${PATH}:${newpath}
 	fi
 }
 
-function get_ui_context {
+function get_ui_context() {
 	local user
 	if [[ -z ${1+x} ]]; then
-    user="$USER"
-  else
-    user="$1"
-  fi
+		user="$USER"
+	else
+		user="$1"
+	fi
 
 	if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ]; then
 		compatiblePrograms=( nemo unity nautilus kdeinit kded4 pulseaudio trackerd )
@@ -262,33 +262,33 @@ function get_ui_context {
 }
 
 
-function make_desktop_non_script {
+function make_desktop_non_script() {
 	local execpath="$1"
 	local title="$2"
 	local description="$3"
 	local icon="$4"
-	
+
 	if [ -f "$icon" ]; then
 		icon_dir="/usr/share/icons/myicon"
 		cp_file "$icon" "${icon_dir}/" root
 		icon="$(basename "$icon")"
 	fi
-	
+
 	contents="
-[Desktop Entry]
-Version=1.0
-Name=${title}
-Comment=${description}
-Exec=${execpath}
-Icon=${icon}
-Terminal=false
-Type=Application
-Categories=Application;"
+	[Desktop Entry]
+	Version=1.0
+	Name=${title}
+	Comment=${description}
+	Exec=${execpath}
+	Icon=${icon}
+	Terminal=false
+	Type=Application
+	Categories=Application;"
 	filename=$(echo "$execpath" | awk '{print $1;}')
 	textfile "/usr/share/applications/${filename}.desktop" "$contents"
 }
 
-function make_service_user {
+function make_service_user() {
 	local username=$1
 	local homedir=$2
 	if [ -n "$homedir" ]; then
@@ -300,14 +300,14 @@ function make_service_user {
 }
 
 
-function add_group {
+function add_group() {
 	local groupname=$1
 	if ! grep -q "^$groupname:" /etc/group; then
 		logexec sudo groupadd "$groupname"
 	fi
 }
 
-function add_usergroup {
+function add_usergroup() {
 	local username=$1
 	local groupname=$1
 	if ! groups "$username" | grep -q "\b${groupname}\b" ;then
@@ -315,6 +315,6 @@ function add_usergroup {
 	fi
 }
 
-function get_total_mem_MB {
-   echo "$(grep MemTotal /proc/meminfo | awk '{print $2}')/1024" | bc
+function get_total_mem_MB() {
+	echo "$(grep MemTotal /proc/meminfo | awk '{print $2}')/1024" | bc
 }
