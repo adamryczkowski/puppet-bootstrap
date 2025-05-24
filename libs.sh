@@ -218,10 +218,13 @@ function make_sure_dir_is_in_a_path {
 }
 
 function get_ui_context {
-	local user=$1
-	if [ -z "$user" ]; then
-		user=$USER
-	fi
+	local user
+	if [[ -z ${1+x} ]]; then
+    user="$USER"
+  else
+    user="$1"
+  fi
+
 	if [ -z "${DBUS_SESSION_BUS_ADDRESS}" ]; then
 		compatiblePrograms=( nemo unity nautilus kdeinit kded4 pulseaudio trackerd )
 		for index in "${compatiblePrograms[@]}"; do

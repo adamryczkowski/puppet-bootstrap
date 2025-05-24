@@ -22,13 +22,16 @@ function replace_bashrc {
       return 0
     fi
   fi
-
-  if [ -f "$bashrc_bak" ]; then
-    errcho "Cannot backup .bashrc file to $bashrc_bak, it already exists"
-    return 1
+  if ! [ -f "$(get_home_dir "$user")/.bashrc" ]; then
+    install_file "$bashrc_src" "$(get_home_dir "$user")/.bashrc" "$user"
+  elif ! cmp -s "$bashrc_src" "$(get_home_dir "$user")/.bashrc"; then
+    if [ -f "$bashrc_bak" ]; then
+      errcho "Cannot backup .bashrc file to $bashrc_bak, it already exists"
+      return 1
+    fi
+    logexec mv "$(get_home_dir "$user")/.bashrc" "$bashrc_bak"
+    install_file "$bashrc_src" "$(get_home_dir "$user")/.bashrc" "$user"
   fi
-  install_file "$bashrc_src" "$(get_home_dir "$user")/.bashrc" "$user"
-  add_bashrcd_driver
   setup_bash_path_man "$user"
   add_path_to_bashrc "$HOME/.local/bin" "$user"
   add_bashrc_file files/bashrc.d/01_histcontrol.sh "01_histcontrol.sh" "$user"
@@ -64,7 +67,7 @@ export BASHCONFD="$HOME/.bashrc.d"
 # Source the configurations in .bashrc.d directory
 if [ -d "${BASHCONFD}" ]; then
     CONFS=()
-    CONFS=$(ls "${BASHCONFD}"/*.conf 2> /dev/null)
+    CONFS=$(ls "${BASHCONFD}"/*.sh 2> /dev/null)
     if [ $? -eq 0 ]; then
         for CONF in ${CONFS[@]}
         do
@@ -123,7 +126,7 @@ function add_bashrc_lines {
     filename="${filename}.sh"
   fi
 
-  textfile "$bashrcd/$filename.sh" "$lines" "$user"
+  textfile "$bashrcd/$filename" "$lines" "$user"
 }
 
 function setup_bash_path_man {
@@ -165,5 +168,5 @@ function install_bash_preexec {
   local homedir
   homedir="$(get_home_dir "$user")"
   download_file "$homedir/.bash-preexec.sh" https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
-  add_bashrc_line '[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh' 90 "bash-preexec" "$user"
+  add_bashrc_line '[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh' 80 "bash-preexec" "$user"
 }

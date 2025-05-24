@@ -28,11 +28,12 @@ where
  --bat                    - cat replacement (bat)
  --bashrcd                - Replace existing .bashrc with a new one. Old bashrc will be backed up.
  --wormhole               - Magic wormhole
+ --eza                    - eza (ls replacement)
  --dtrx                   - Do The Right Extraction
  --gitutils               - Git utilities: k3diff, meld, difftastic, delta
  --zoxide                 - zoxide (cd replacement)
  --fzf                    - fzf (for bash ctr+r)
- --diff                   - diff-so-fancy (diff),
+ --difft                  - difftastic (diff replacement),
  --find                   - fd (replaces find)
  --du                     - ncdu (replaces du), 
  --liquidprompt           - liquidprompt
@@ -52,7 +53,9 @@ install_ping=0
 install_fzf=0
 #install_du=0
 install_git_extra=0
+install_atuin=0
 install_liquidprompt=0
+install_eza=0
 install_wormhole=0
 install_dtrx=0
 install_gitutils=0
@@ -125,6 +128,12 @@ case $key in
 	--ping)
 	install_ping=1
 	;;
+	--atuin)
+  install_atuin=1
+  ;;
+  --eza)
+  install_eza=1
+  ;;
 	--gping)
 	install_gping=1
 	;;
@@ -169,8 +178,10 @@ if [ -z "$user" ]; then
   exit 1
 fi
 
+set -x
+
 if ! grep -q "${user}:" /etc/passwd; then
-  sudo adduser --quiet "$user" --disabled-password --add_extra_groups --gecos ''
+  logexec sudo adduser --quiet "$user" --disabled-password --add_extra_groups --gecos ''
 fi
 sshhome=$(getent passwd "$user" | awk -F: '{ print $6 }')
 
@@ -207,7 +218,7 @@ fi
    fi
  fi
 
-if sudo [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
+if [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
   if [ -f "$sshhome/.ssh/id_ed25519" ]; then
     errcho "Abnormal condition: private key is installed without the corresponding public key. Please make sure both files are present, or neither of them. Exiting."
     exit 1
@@ -225,7 +236,7 @@ if sudo [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
   fi
 fi
 
-if [ -n "$bashrcd" ]; then
+if [ -n "$install_bashrcd" ]; then
   replace_bashrc "$user"
 else
   add_bashrcd_driver "$user"
@@ -309,9 +320,21 @@ fi
 #fi
 #set +x
 
+if [ "${install_eza}" == "1" ]; then
+  install_rust_app eza
+  add_bashrc_lines 'alias ls="eza --icons --group-directories-first"' "21_ls_replacement"
+  add_bashrc_lines 'alias ll="eza --long --group-directories-first"' "21_ll_replacement"
+fi
 if [ "${install_git_extra}" == "1" ]; then
   add_path_to_bashrc /usr/local/lib/git-extra-commands/bin
 #  linetextfile ${sshhome}/.bashrc 'export PATH="$PATH:/usr/local/lib/git-extra-commands/bin"'
+fi
+
+if [ "${install_atuin}" == "1" ]; then
+  install_rust_app atuin
+  # shellcheck disable=SC2016
+  install_bash_preexec
+  add_bashrc_lines 'eval "$(atuin init bash --disable-up-arrow)"' "81_atuin"
 fi
 
 if [ "$install_gping" == "1" ]; then
@@ -342,6 +365,6 @@ if [ "${install_liquidprompt}" == "1" ]; then
   fi
   install_bash_preexec
   # shellcheck disable=SC2016
-  add_bashrc_lines 'eval "$(Liquidprompt)"' "80_liquidprompt"
+  add_bashrc_lines 'echo $- | grep -q i 2>/dev/null && . /usr/share/liquidprompt/liquidprompt' "81_liquidprompt"
 fi
 

@@ -45,6 +45,7 @@ function install_update_hook {
 	local update_script_text="$5"
 	local cache_filename="$6"
 	local timestamp
+	local script_filename
 	timestamp=$(date)
 	
 	local updater_path=/usr/local/lib/adam/updater/records
@@ -64,7 +65,8 @@ function install_update_hook {
 		errcho "Asset_path cannot be empty"
 		return 1
 	fi
-	
+	script_filename="${app_name}.${user_name}.sh"
+
 	if [[ "$asset_type" != "source" && "$asset_type" != "deb" && "$asset_type" != "binary" && "$asset_type" != "git" ]]; then
 		errcho "Asset_type must be 'source', 'deb', 'binary' or 'git'"
 		return 1
@@ -87,8 +89,7 @@ function install_update_hook {
 
 	record="${gh_name} \"${asset_path}\" ${asset_type} ${version} \"${update_script_path}\" \"${cache_filename}\" \"${timestamp}\""
 	filename="${app_name}.${user_name}.rec"
-	script_filename="${app_name}.${user_name}.sh"
-	
+
 	echo "#github_name	asset_path	asset_type(source,deb,binary,git)	version	update_script_name	filename_in_cache timestamp" | sudo tee "${updater_path}/${filename}" >/dev/null
 	echo "$record" | sudo tee -a "${updater_path}/${filename}" >/dev/null
 }
@@ -168,7 +169,16 @@ function install_gh_source {
 	install_update_hook "$gh_name" "${dest_dir}/${app_name}" source "$version" local "$update_script_text" "$filename"
 }
 
+function get_gh_download_link {
+  #Returns the download link for the github app
+  local gh_name="$1"
+  local file_pattern="$2" # e.g. "tar\.gz" or "deb"
+  local link
 
+  install_apt_package jq curl
+
+  curl -s "https://api.github.com/repos/${gh_name}/releases/latest" | jq -r ".assets[] | select(.name | contains (\"${file_pattern}\")) | .browser_download_url"
+}
 
 function install_gh_binary {
 	#Installs tarball with binary from the github in the dest_dir, setting

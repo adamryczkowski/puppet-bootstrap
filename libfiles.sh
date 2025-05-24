@@ -37,7 +37,7 @@ function apply_patch {
 			else
 				errcho "Error while applying the patch"
 			fi
-		elif [[ "$(shasum "$file")" == "$hash_dest" ]]; then
+		elif [[ "$shasum" == "$hash_dest" ]]; then
 			#Do nothing. Work is already done
 			return 0
 		else
@@ -210,7 +210,7 @@ function install_file {
 		fi
 	fi
 	if [ ! -f "$dest" ]; then
-		if [ -w "$dest" ]; then
+		if [ -w "$(dirname $dest)" ]; then
 			logexec cp "$input_file" "$dest"
 		else
 			logexec sudo cp "$input_file" "$dest"
@@ -454,11 +454,9 @@ function extract_archive {
 		extracted_name="${archive_path%.*}"
 	fi
 	make_sure_dtrx_exists
-	
-	
-	
+
 	local dest_path="${destination_parent}/${extracted_name}"
-	logmkdir "${dest_path}" "$act_as_user"
+  logmkdir "${dest_path}" "$act_as_user"
 	if is_folder_writable "$(dirname "$destination_parent")" "$act_as_user"; then
 		if [ "$act_as_user" == "$USER" ]; then
 			mode=1
@@ -475,6 +473,7 @@ function extract_archive {
 	filecount="$(find "${dest_path}" -mindepth 1 -maxdepth 1 | wc -l)"
 	if [[ $filecount == 1 ]]; then
 		filename1=$(find "${dest_path}" -mindepth 1 -maxdepth 1 | head -n 1)
+		filename1=$(get_relative_path "${dest_path}" "${filename1}")
 		if [ -d "${dest_path}/${filename1}" ]; then
 		
 		
@@ -502,7 +501,7 @@ function extract_archive {
 
 			if [[ $single_item_policy == original ]]; then
 				if [[ $mode == 1 ]]; then
-					mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
+					mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}"
 					rmdir "${dest_path}"
 				else
 					sudo -u "$act_as_user" mv "${dest_path}/${filename1}" "${destination_parent}/${filename1}" 
@@ -550,11 +549,12 @@ function make_sure_dtrx_exists {
 		if [[ "$?" != "0" ]]; then
 			install_apt_package pipx pipx
 			if [[ $mute == "" ]]; then
-				pipx install dtrx
+				install_pipx_command dtrx
 			else
-				pipx install dtrx >/dev/null 2>/dev/null
+				install_pipx_command dtrx >/dev/null 2>/dev/null
 			fi
-			make_sure_dir_is_in_a_path "$(get_home_dir)/.local/bin"
+			add_path_to_bashrc "$(get_home_dir)/.local/bin"
+#			make_sure_dir_is_in_a_path "$(get_home_dir)/.local/bin"
 		fi
 	fi
 	which dtrx >/dev/null
@@ -783,7 +783,8 @@ function get_files_matching_regex {
 function get_relative_path {
 	local base_path="$1"
 	local target_path="$2"
-	python -c "import os.path; print os.path.relpath('$base_path', '$target_path')"
+	install_apt_package python3
+	python3 -c "import os.path; print(os.path.relpath('$target_path', '$base_path'))"
 }
 
 function guess_repo_path {

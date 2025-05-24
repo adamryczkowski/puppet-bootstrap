@@ -29,23 +29,26 @@ where
  --user <username>        - Additional user to install the tricks to. Can be specified
                             multiple times, each time adding another user.
  --no-sudo-password       - If set, sudo will not ask for password
+ --rust                   - Use Rust's cargo to install all the rust packages
+ --pipx                   - Use pipx to install all the python packages
  --cli-improved           - Install all the following recommended command line tools:
  --bat                    - cat replacement (bat)
  --bashrcd                - Replace existing .bashrc with a new one. Old bashrc will be backed up.
  --ping                   - prettyping (ping),
- --gping						  - gping (https://github.com/orf/gping)
+ --eza                    - eza (ls replacement),
+ --gping						      - gping (https://github.com/orf/gping)
  --fzf                    - fzf (for bash ctr+r)
+ --atuin                  - atuin (command history replacement)
  --gitutils               - Git utilities: k3diff, meld, difftastic, delta
  --htop                   - htop
  --btop                   - btop
- --diff                   - diff-so-fancy (diff),
+ --difft                  - difftastic (diff replacement)
  --find                   - fd (replaces find)
  --du                     - ncdu (replaces du), 
  --bandwidth              - bandwidth (Terminal bandwidth utilization tool), 
- --tldr                   - tldr,
+ --tldr                   - tldr
  --rg                     - ripgrep,
  --entr                   - entr (watch), 
- --noti                   - noti (notification when something is done)
  --dust                   - non-interactive replacement to du
  --aptitude               - aptitude
  --mc                     - mc (Midnight Commander)
@@ -78,22 +81,25 @@ if [[ ! "$1" =~ $pattern ]]; then
 fi
 
 debug=0
-wormhole=0
 repo_path=""
+install_rust=0
+install_wormhole=0
+install_pipx=0
 install_bat=0
 install_bashrcd=0
 install_ping=0
 install_gping=0
 install_fzf=0
+install_atuin=0
 install_htop=0
-install_diff=0
+install_difft=0
 install_find=0
+install_eza=0
 install_du=0
 install_bandwidth=0
 install_tldr=0
 install_rg=0
 install_entr=0
-install_noti=0
 install_dust=0
 install_aptitude=0
 install_mc=0
@@ -153,97 +159,85 @@ case $key in
 	;;
 	--wormhole)
 	# shellcheck disable=SC2034
-	wormhole=1
-	user_opts="${user_opts} --wormhole"
+	install_wormhole=1
 	;;
+	--rust)
+	install_rust=1
+	shift
+	;;
+	--pipx)
+  install_pipx=1
+  shift
+  ;;
 	--need-apt-update)
 	flag_need_apt_update=1
 	;;
 	--cli-improved)
 	install_bat=1
-	user_opts="${user_opts} --bat"
 	install_bashrcd=1
-	user_opts="${user_opts} --bashrcd"
 	install_btop=1
-	user_opts="${user_opts} --btop"
 	install_zoxide=1
-	user_opts="${user_opts} --zoxide"
 	install_ping=1
 	install_gping=1
-	user_opts="${user_opts} --ping"
-	user_opts="${user_opts} --gping"
-	install_fzf=1
-	user_opts="${user_opts} --fzf"
 	install_htop=1
-	install_diff=1
-	user_opts="${user_opts} --diff"
+	install_atuin=1
+	install_eza=1
+	install_difft=1
 	install_find=1
 	install_du=1
-	user_opts="${user_opts} --du"
 	install_tldr=1
 	install_rg=1
   install_bandwidth=1
 	install_entr=1
-	install_noti=1
 	install_dust=1
 	install_mc=1
 	install_dtrx=1
 	install_aptitude=1
+	install_wormhole=1
 	install_liquidprompt=1
-	user_opts="${user_opts} --liquidprompt"
 	install_byobu=1
 	install_hexyl=1
 	;;
 	--bat)
 	# shellcheck disable=SC2034
 	install_bat=1
-	user_opts="${user_opts} --bat"
 	;;
   --bashrcd)
   # shellcheck disable=SC2034
   install_bashrcd=1
-  user_opts="${user_opts} --bashrcd"
   ;;
   --btop)
   # shellcheck disable=SC2034
   install_btop=1
-  user_opts="${user_opts} --btop"
   ;;
   --gitutils)
   # shellcheck disable=SC2034
   install_gitutils=1
-  user_opts="${user_opts} --gitutils"
   ;;
   --zoxide)
   # shellcheck disable=SC2034
   install_zoxide=1
-  user_opts="${user_opts} --zoxide"
 	;;
 	--ping)
 	install_ping=1
-	user_opts="${user_opts} --ping"
 	;;
 	--gping)
 	install_gping=1
-	user_opts="${user_opts} --gping"
 	;;
 	--fzf)
 	install_fzf=1
-	user_opts="${user_opts} --fzf"
 	;;
 	--htop)
 	install_htop=1
 	;;
-	--diff)
-	install_diff=1
-	user_opts="${user_opts} --diff"
+	--difft)
+	install_difft=1
 	;;
 	--find)
 	install_find=1
 	;;
 	--du)
 	install_du=1
-	user_opts="${user_opts} --du"
 	;;
 	--bandwidth)
 	install_bandwidth=1
@@ -256,9 +250,6 @@ case $key in
 	;;
 	--entr)
 	install_entr=1
-	;;
-	--noti)
-	install_noti=1
 	;;
 	--dust)
 	install_dust=1
@@ -275,7 +266,6 @@ case $key in
 	;;
 	--liquidprompt)
 	install_liquidprompt=1
-	user_opts="${user_opts} --liquidprompt"
 	;;
 	--byobu)
 	install_byobu=1
@@ -285,7 +275,6 @@ case $key in
 	;;
 	--dtrx)
 	install_dtrx=1
-	user_opts="${user_opts} --dtrx"
 	;;
     -*)
     echo "Error: Unknown option: $1" >&2
@@ -310,6 +299,7 @@ install_apt_package wget wget
 install_apt_package jq jq
 
 if [ -n "$aptproxy" ]; then
+	# shellcheck disable=SC2090
 	$loglog
 	echo "Acquire::http::Proxy \"http://$aptproxy\";" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
 	# shellcheck disable=SC2034
@@ -340,21 +330,61 @@ install_apt_packages bash-completion curl
 #	install_apt_package_file bat_${version}_$(cpu_arch).deb bat $link
 #fi
 
+if [ "${install_bashrcd}" == "1" ]; then
+  user_opts="${user_opts} --bashrcd"
+fi
+
+if [ "${install_gitutils}" == "1" ]; then
+  install_rust=1
+  install_difft=1
+  user_opts="${user_opts} --gitutils"
+fi
+
+if [ "${install_bat}" == "1" ]; then
+  install_rust=1
+	user_opts="${user_opts} --bat"
+fi
+
+if [ "${install_zoxide}" == "1"  ]; then
+  install_rust=1
+	user_opts="${user_opts} --zoxide"
+fi
+
+if [ "${install_atuin}" == "1"  ]; then
+  install_rust=1
+  user_opts="${user_opts} --atuin"
+fi
+
+if [ "${install_rust}" == "1" ]; then
+  install_rust
+fi
+
+if [ "${install_pipx}" == "1" ]; then
+  install_pipx
+fi
+
+
 if [ "${install_ping}" == "1" ]; then
-	plik=$(get_cached_file prettyping https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping)
-	install_script "${plik}" /usr/local/bin/prettyping root
+  install_apt_package prettyping
+  user_opts="${user_opts} --ping"
+
+#	plik=$(get_cached_file prettyping https://raw.githubusercontent.com/denilsonsa/prettyping/master/prettyping)
+#	install_script "${plik}" /usr/local/bin/prettyping root
 fi
 
 if [ "${install_gping}" == "1" ]; then
 	add_apt_source_manual gping "deb http://packages.azlux.fr/debian/ buster main" https://azlux.fr/repo.gpg.key gping.gpg.key
 	install_apt_packages gping
+  user_opts="${user_opts} --gping"
 fi
 
 if [ "${install_fzf}" == "1" ]; then
-	if ! install_apt_package fzf; then
-		get_git_repo https://github.com/junegunn/fzf.git /usr/local/lib 
-		logexec sudo /usr/local/lib/fzf/install --all --xdg
+  user_opts="${user_opts} --fzf"
+  if [ "${install_pipx}" == "0" ]; then
+	  install_apt_package fzf
 	fi
+#		get_git_repo https://github.com/junegunn/fzf.git /usr/local/lib
+#		logexec sudo /usr/local/lib/fzf/install --all --xdg
 fi
 
 if [ "${install_htop}" == "1" ]; then
@@ -363,21 +393,49 @@ fi
 
 if [ "${install_btop}" == "1" ]; then
 	install_apt_package btop
+  user_opts="${user_opts} --btop"
 fi
 
-#if [ "${install_dtrx}" == "1" ]; then
+if [ "${install_dtrx}" == "1" ]; then
+  if [ "${install_pipx}" == "0" ]; then
+    install_apt_package dtrx
+  else
+    user_opts="${user_opts} --dtrx"
+  fi
 #	if ! install_apt_package dtrx; then
 #		install_pip3_packages dtrx
 #	fi
-#fi
+fi
 
-if [ "${install_diff}" == "1" ]; then
-	plik=$(get_cached_file diff-so-fancy https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy)
-	install_script "${plik}" /usr/local/bin/diff-so-fancy
+if [ "${install_difft}" == "1" ]; then
+  if [ "${install_rust}" == "0" ]; then
+    install_gh_binary Wilfred/difftastic /usr/local/share difft
+  else
+    user_opts="${user_opts} --difft"
+  fi
+#    install_rust # The only way to install difftastic is via Rust, which will be handled by the script
+#	plik=$(get_cached_file diff-so-fancy https://raw.githubusercontent.com/so-fancy/diff-so-fancy/master/third_party/build_fatpack/diff-so-fancy)
+#	install_script "${plik}" /usr/local/bin/diff-so-fancy
+fi
+
+if [ "${install_eza}" == "1" ]; then
+  if [ "${install_rust}" == "0" ]; then
+    install_apt_package eza
+  fi
+  user_opts="${user_opts} --eza"
+  if ! fc-list | grep -Fq "FiraCode Nerd Font Med"; then
+    download_file "/tmp/FiraCode.tar.xz" "$(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")"
+    extract_archive "/tmp/FiraCode.tar.xz" "/usr/local/share/fonts" "root" "rename" "FiraCode"
+    logexec sudo fc-cache -f
+  fi
 fi
 
 if [ "${install_find}" == "1" ]; then
-	install_gh_deb sharkdp/fd fd
+  if [ "${install_rust}" == "0" ]; then
+    install_apt_package fd-find
+  else
+    user_opts="${user_opts} --find"
+  fi
 #	fd_arch=$(cpu_arch)
 #	if [ "${fd_arch}" == "arm64" ]; then
 #		fd_arch="armhf"
@@ -388,6 +446,8 @@ if [ "${install_find}" == "1" ]; then
 fi
 if [ "${install_du}" == "1" ]; then
   install_apt_package ncdu
+	user_opts="${user_opts} --du"
+
 #	cached_file=$(get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz)
 #	tmp=$(mktemp -d)
 #	# shellcheck disable=SC2034
@@ -401,7 +461,11 @@ if [ "${install_du}" == "1" ]; then
 #	logexec popd
 fi
 if [ "${install_bandwidth}" == "1" ]; then
-	install_gh_binary imsnif/bandwhich /usr/local/share bandwhich
+  if [ "${install_rust}" == "0" ]; then
+    install_gh_binary imsnif/bandwhich /usr/local/share bandwhich
+  else
+    user_opts="${user_opts} --bandwidth"
+  fi
 
 #	
 
@@ -417,7 +481,11 @@ if [ "${install_bandwidth}" == "1" ]; then
 fi
 
 if [ "${install_dust}" == "1" ]; then
-	install_gh_binary bootandy/dust /usr/local/share dust
+  if [ "${install_rust}" == "0" ]; then
+  	install_gh_binary bootandy/dust /usr/local/share dust
+  else
+    user_opts="${user_opts} --dust"
+  fi
 #	_arch=$(cpu_arch)
 #	if [ "${_arch}" == "amd64" ]; then
 #		_arch="x86_64-unknown-linux-gnu"
@@ -433,16 +501,22 @@ if [ "${install_dust}" == "1" ]; then
 fi
 
 if [ "${install_tldr}" == "1" ]; then
-	install_apt_packages python3-pip
-	install_pip3_packages tldr
+  if [ "${install_pipx}" == "0" ]; then
+  	install_apt_packages tldr-py
+  else
+    user_opts="${user_opts} --tldr"
+  fi
 fi
 
 if [ "${install_rg}" == "1" ]; then
-	install_apt_packages ripgrep
+  if [ "${install_rust}" == "0" ]; then
+    if ! install_apt_packages ripgrep; then
+       install_gh_binary BurntSushi/ripgrep /usr/local/share rg "" "" "" "" rg
+    fi
+  else
+    user_opts="${user_opts} --ripgrep"
+  fi
 #	install_gh_deb BurntSushi/ripgrep ripgrep
-	if $?; then
-		 install_gh_binary BurntSushi/ripgrep /usr/local/share rg "" "" "" "" rg
-	fi
 #	_arch=$(cpu_arch)
 #	if [ "${_arch}" == "arm64" ]; then
 #		_arch="arm-unknown-linux-gnueabihf"
@@ -471,10 +545,6 @@ if [ "${install_entr}" == "1" ]; then
 #	logexec popd
 fi
 
-if [ "${install_noti}" == "1" ]; then
-	install_apt_packages golang-go
-	go get -u github.com/variadico/noti/cmd/noti
-fi
 
 if [ "${install_mc}" == "1" ]; then
 	install_apt_package mc
@@ -491,6 +561,7 @@ fi
 if [ "${install_liquidprompt}" == "1" ]; then
 	install_apt_packages liquidprompt
 	logexec sudo -H liquidprompt_activate
+	user_opts="${user_opts} --liquidprompt"
 fi
 
 if [ "${install_byobu}" == "1" ]; then
@@ -498,20 +569,21 @@ if [ "${install_byobu}" == "1" ]; then
 fi
 
 if [ "${install_hexyl}" == "1" ]; then
-  install_apt_package hexyl
+  if [ "${install_rust}" == "0" ]; then
+    install_apt_package hexyl
+  else
+    user_opts="${user_opts} --hexyl"
+  fi
 #	install_gh_deb sharkdp/hexyl hexyl
 fi
 
-#if [ "${wormhole}" == "1" ]; then
-#  install_pipx_command magic-owormhole
-#	if ! which wormhole >/dev/null; then
-#		if install_apt_package python3-pip; then
-#			logexec sudo -H pip3 install --upgrade pip
-#		fi
-#		install_apt_packages build-essential python3-dev libffi-dev libssl-dev
-#		logexec sudo -H pip3 install magic-wormhole
-#	fi
-#fi
+if [ "${install_wormhole}" == "1" ]; then
+  if [ "${install_pipx}" == "0" ]; then
+    install_apt_package magic-wormhole
+  else
+    user_opts="${user_opts} --wormhole"
+  fi
+fi
 
 # shellcheck disable=SC2128
 if [ -n "$users" ] ; then

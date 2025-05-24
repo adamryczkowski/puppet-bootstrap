@@ -2,6 +2,10 @@
 
 # This script contains functions to manage pip packages and virtual environments.
 
+function is_pipx_installed {
+  command -v pipx &> /dev/null
+}
+
 function install_pipx {
   install_apt_package pipx
 }

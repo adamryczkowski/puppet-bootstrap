@@ -1,5 +1,13 @@
 #!/bin/bash
 
+function is_rust_installed {
+  if command -v rustc &> /dev/null && command -v cargo &> /dev/null; then
+    return 0 # Rust is installed
+  else
+    return 1 # Rust is not installed
+  fi
+}
+
 # shellcheck disable=SC2120
 function install_rust {
   if [[ -z ${1+x} ]]; then
@@ -33,7 +41,7 @@ function install_rust {
   fi
 
   export PATH="$PATH:$rustup_dir/bin"
-  add_bashrc_line '. "$HOME/.cargo/env"' "40_rust"
+  add_bashrc_lines '. "$HOME/.cargo/env"' "05_rust"
 }
 
 function install_rust_app {
@@ -49,7 +57,7 @@ function install_rust_app {
     install_rust
   fi
 
-  if cargo info "$appname" &> /dev/null; then
+  if cargo install --l | grep -q "^$appname "; then
     return 0 # Already installed
   fi
 

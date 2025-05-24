@@ -5,9 +5,9 @@ function gsettings_set_value {
 	local name=$2
 	local value=$3
 	get_ui_context
-	existing_value=$(gsettings get ${schema} ${name})
+	existing_value=$(gsettings get "${schema}" "${name}")
 	if [ "$existing_value" != "$value" ]; then
-		logexec gsettings set ${schema} ${name} ${value}
+		logexec gsettings set "${schema}" "${name}" "${value}"
 	fi
 }
 
@@ -15,17 +15,18 @@ function set_mime_default {
 	local filetype=$1
 	local value=$2
 	get_ui_context
-	existing_value=$(xdg-mime query default ${filetype})
+	existing_value=$(xdg-mime query default "${filetype}")
 	if [ "$existing_value" != "$value" ]; then
-		logexec xdg-mime default ${value} ${filetype}
+		logexec xdg-mime default "${value}" "${filetype}"
 	fi
 }
 
 function load_gsettings_array {
 	local schema=$1
 	local name=$2
+	local existing_values
 	get_ui_context
-	local existing_values=$(gsettings get ${schema} ${name})
+	existing_values=$(gsettings get "${schema}" "${name}")
 	if [ -n "${existing_values}" ]; then
 		local new_array=()
 		local flag=0
@@ -33,7 +34,7 @@ function load_gsettings_array {
 		export IFS="', '"
 		for item in $existing_values; do
 			if [[ "$item" != "" && "$item" != "[" && "$item" != "]" ]]; then
-				new_array+=($item)
+				new_array+=("$item")
 			fi
 		done
 		export IFS=${oldifs}
@@ -45,12 +46,13 @@ function load_gsettings_array {
 function remove_item_from_array {
 	get_ui_context
 	eval "local -a input_array=$1"
+	# shellcheck disable=SC2154
 	(>&2 echo "Number of elements of array: ${#input_array[@]}")
 	local target=$2
 	local -a output_array=()
 	for value in "${input_array[@]}"; do
-		if [[ $value != $target ]]; then
-			output_array+=($value)
+		if [[ $value != "$target" ]]; then
+			output_array+=("$value")
 		fi
 	done
 	(>&2 echo "Number of elements of output_array: ${#output_array[@]}")
@@ -99,7 +101,7 @@ function add_item_to_array {
 		local new_array=( "${array[@]:0:${position}}" "${target}" "${array[@]:${position}}" )
 		declare -p new_array | sed -e 's/^declare -a new_array=//'
 	else
-		array+=($target)
+		array+=("$target")
 		declare -p array | sed -e 's/^declare -a array=//'
 		(>&2 echo "Number of elements of array: ${#array[@]}")
 	fi
@@ -110,11 +112,13 @@ function set_gsettings_array {
 	local schema=$1
 	local name=$2
 	local value_arr_str="$3"
+	local old_value_str
 	local i=1
-	local old_value_str="$(load_gsettings_array ${schema} ${name})"
+	old_value_str="$(load_gsettings_array "${schema}" "${name}")"
 	if [ "$old_value_str" == "$value_arr_str" ]; then
 		return 0 #nothing to do
 	fi
+	# shellcheck disable=SC2154
 	(>&2 echo "Number of elements of value_array: ${#value_array[@]}")
 	local ans="['"
 	for value in "${value_array[@]}"; do
@@ -126,7 +130,7 @@ function set_gsettings_array {
 		((i++))
 	done
 	ans="${ans}']"
-	gsettings set ${schema} ${name} "${ans}"
+	gsettings set "${schema}" "${name}" "${ans}"
 }
 
 function set_gsettings_array2 {
@@ -134,14 +138,15 @@ function set_gsettings_array2 {
 	local schema=$1
 	local name=$2
 	local value_arr_str="$3"
+	local old_value_str
 	local i=1
-	local old_value_str="$(load_gsettings_array ${schema} ${name})"
+	old_value_str="$(load_gsettings_array "${schema}" "${name}")"
 	if [ "$old_value_str" == "$value_arr_str" ]; then
 		return 0 #nothing to do
 	fi
 	eval "local -a value_array=\"$3\""
-	(>&2 echo "Number of elements of value_array: ${#value_array[@]}")
-	echo "value_array: ${value_array[@]}"
+	(>&2 echo "Number of elements of value_array: ${#value_array[*]}")
+	echo "value_array: ${value_array[*]}"
 	local ans="["
 	for value in "${value_array[@]}"; do
 		if [ "$i" == "1" ]; then
@@ -153,19 +158,20 @@ function set_gsettings_array2 {
 	done
 	ans="${ans}]"
 	echo "gsettings set ${schema} ${name} ${ans[*]}"
-	gsettings set ${schema} ${name} "${ans[*]}"
+	gsettings set "${schema}" "${name}" "${ans[*]}"
 }
 
 function gsettings_add_to_array {
 	local schema=$1
 	local key=$2
 	local value=$3
+	local status
 #	local position=$4
-	local status=$(gsettings get ${schema} ${key})
+	status=$(gsettings get "${schema}" "${key}")
 	
 	# Optional proof, whether value to add already exsists
 	if [[ ! $status == *"'to.add.value'"* ]]; then
-		 gsettings set ${schema} ${key} "${status%]*}, '${value}']"
+		 gsettings set "${schema}" "${key}" "${status%]*}, '${value}']"
 #		 echo "Added to.add.value to the list."
 	fi
 }
@@ -186,19 +192,22 @@ function gsettings_remove_from_array {
 	local schema=$1
 	local name=$2
 	local value=$3
+	local existing_values_str
+	local ans_str
+
+	existing_values_str=$(load_gsettings_array "${schema}" "${name}")
 	
-	local existing_values_str=$(load_gsettings_array ${schema} ${name})
-	
-	local ans_str=$(remove_item_from_array "${existing_values_str}" "${value}")
-	set_gsettings_array ${schema} ${name} "${ans_str}"
+	ans_str=$(remove_item_from_array "${existing_values_str}" "${value}")
+	set_gsettings_array "${schema}" "${name}" "${ans_str}"
 }
 
 function gsettings_remove_from_array2 {
 	local schema=$1
 	local name=$2
 	local value=$3
+	local existing_values
 	get_ui_context
-	local existing_values=$(gsettings get ${schema} ${name})
+	existing_values=$(gsettings get "${schema}" "${name}")
 	local change=0
 	if [ -n "${existing_values}" ]; then
 		local newvalue="['"
@@ -224,14 +233,15 @@ function gsettings_remove_from_array2 {
 	fi
 	if [ "$change" == "1" ]; then
 		echo "gsettings set ${schema} ${name} ${newvalue}"
-		gsettings set ${schema} ${name} "${newvalue}"
+		gsettings set "${schema}" "${name}" "${newvalue}"
 	fi
 }
 
 function install_gnome_extension {
 	local ext_path="$1"
+	local ext_id
 	if [ -r "$ext_path" ]; then
-		local ext_id=$(unzip -c "$ext_path" metadata.json | grep uuid | cut -d \" -f4)
+		ext_id=$(unzip -c "$ext_path" metadata.json | grep uuid | cut -d \" -f4)
 		if [ -n "$ext_id" ]; then
 			local ext_target_path="/usr/share/gnome-shell/extensions/${ext_id}"
 			if [ ! -d "$ext_target_path" ]; then
