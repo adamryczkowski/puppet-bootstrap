@@ -57,7 +57,7 @@ function install_rust_app() {
 		install_rust
 	fi
 
-	if cargo install --l | grep -q "^$appname "; then
+	if cargo install --list | grep -q "^$appname "; then
 		return 0 # Already installed
 	fi
 

@@ -64,10 +64,9 @@ Example:
 $(basename "$0") --apt-proxy 192.168.10.2:3142
 "
 
-dir_resolve()
-{
-	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
-	pwd -P # output full, link-resolved path
+dir_resolve() {
+  cd "$1" 2>/dev/null || return $? # cd to desired directory; if fail, quell any error messages but return exit status
+  pwd -P                           # output full, link-resolved path
 }
 mypath=${0%/*}
 mypath=$(dir_resolve "$mypath")
@@ -76,8 +75,8 @@ cd "$mypath" || exit 1
 users=()
 pattern='^--.*$'
 if [[ ! "$1" =~ $pattern ]]; then
-	users+=("$1")
-	shift
+  users+=("$1")
+  shift
 fi
 
 debug=0
@@ -114,206 +113,205 @@ install_zoxide=0
 
 user_opts=""
 
-while [[ $# -gt 0 ]]
-do
-key="$1"
-shift
-
-case $key in
-	--debug)
-	debug=1
-	;;
-	--help)
-        echo "$usage"
-        exit 0
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	--repo-path)
-	# shellcheck disable=SC2034
-	repo_path="$1"
-	shift
-	;;
-	--apt-proxy)
-	aptproxy=$1
-	shift
-	;;
-	--no-sudo-password)
-	user_opts="${user_opts} --no-sudo-password $1"
-	;;
-	--external-key)
-	user_opts="${user_opts} --external-key $1 $2 $3"
-	shift
-	shift
-	shift
-	;;
-	--private-key-path)
-	private_key_path="--private-key-path $1"
-	shift
-	;;
-	--users)
-	users+=("$1")
-	shift
-	;;
-	--wormhole)
-	# shellcheck disable=SC2034
-	install_wormhole=1
-	;;
-	--rust)
-	install_rust=1
-	shift
-	;;
-	--pipx)
-  install_pipx=1
+while [[ $# -gt 0 ]]; do
+  key="$1"
   shift
-  ;;
-	--need-apt-update)
-	flag_need_apt_update=1
-	;;
-	--cli-improved)
-	install_bat=1
-	install_bashrcd=1
-	install_btop=1
-	install_zoxide=1
-	install_ping=1
-	install_gping=1
-	install_htop=1
-	install_atuin=1
-	install_eza=1
-	install_difft=1
-	install_find=1
-	install_du=1
-	install_tldr=1
-	install_rg=1
-  install_bandwidth=1
-	install_entr=1
-	install_dust=1
-	install_mc=1
-	install_dtrx=1
-	install_aptitude=1
-	install_wormhole=1
-	install_liquidprompt=1
-	install_byobu=1
-	install_hexyl=1
-	;;
-	--bat)
-	# shellcheck disable=SC2034
-	install_bat=1
-	;;
+
+  case $key in
+  --debug)
+    debug=1
+    ;;
+  --help)
+    echo "$usage"
+    exit 0
+    ;;
+  --log)
+    log=$1
+    shift
+    ;;
+  --repo-path)
+    # shellcheck disable=SC2034
+    repo_path="$1"
+    shift
+    ;;
+  --apt-proxy)
+    aptproxy=$1
+    shift
+    ;;
+  --no-sudo-password)
+    user_opts="${user_opts} --no-sudo-password $1"
+    ;;
+  --external-key)
+    user_opts="${user_opts} --external-key $1 $2 $3"
+    shift
+    shift
+    shift
+    ;;
+  --private-key-path)
+    private_key_path="--private-key-path $1"
+    shift
+    ;;
+  --users)
+    users+=("$1")
+    shift
+    ;;
+  --wormhole)
+    # shellcheck disable=SC2034
+    install_wormhole=1
+    ;;
+  --rust)
+    install_rust=1
+    ;;
+  --pipx)
+    install_pipx=1
+    ;;
+  --need-apt-update)
+    flag_need_apt_update=1
+    ;;
+  --cli-improved)
+    install_bat=1
+    install_bashrcd=1
+    install_btop=1
+    install_zoxide=1
+    install_ping=1
+    install_gping=1
+    install_htop=1
+    install_atuin=1
+    install_eza=1
+    install_difft=1
+    install_find=1
+    install_du=1
+    install_tldr=1
+    install_rg=1
+    install_bandwidth=1
+    install_entr=1
+    install_dust=1
+    install_mc=1
+    install_dtrx=1
+    install_aptitude=1
+    install_wormhole=1
+    install_liquidprompt=1
+    install_byobu=1
+    install_hexyl=1
+    ;;
+  --bat)
+    # shellcheck disable=SC2034
+    install_bat=1
+    ;;
   --bashrcd)
-  # shellcheck disable=SC2034
-  install_bashrcd=1
-  ;;
+    # shellcheck disable=SC2034
+    install_bashrcd=1
+    ;;
   --btop)
-  # shellcheck disable=SC2034
-  install_btop=1
-  ;;
+    # shellcheck disable=SC2034
+    install_btop=1
+    ;;
   --gitutils)
-  # shellcheck disable=SC2034
-  install_gitutils=1
-  ;;
+    # shellcheck disable=SC2034
+    install_gitutils=1
+    ;;
+  --eza)
+    install_eza=1
+    ;;
   --zoxide)
-  # shellcheck disable=SC2034
-  install_zoxide=1
-	;;
-	--ping)
-	install_ping=1
-	;;
-	--gping)
-	install_gping=1
-	;;
-	--fzf)
-	install_fzf=1
-	;;
-	--htop)
-	install_htop=1
-	;;
-	--difft)
-	install_difft=1
-	;;
-	--find)
-	install_find=1
-	;;
-	--du)
-	install_du=1
-	;;
-	--bandwidth)
-	install_bandwidth=1
-	;;
-	--tldr)
-	install_tldr=1
-	;;
-	--rg)
-	install_rg=1
-	;;
-	--entr)
-	install_entr=1
-	;;
-	--dust)
-	install_dust=1
-	;;
-	--mc)
-	install_mc=1
-	;;
-	--aptitude)
-	install_aptitude=1
-#	;;
-#	--git-extra)
-#	install_git_extra=1
-#	user_opts="${user_opts} --git-extra"
-	;;
-	--liquidprompt)
-	install_liquidprompt=1
-	;;
-	--byobu)
-	install_byobu=1
-	;;
-	--hexyl)
-	install_hexyl=1
-	;;
-	--dtrx)
-	install_dtrx=1
-	;;
-    -*)
+    # shellcheck disable=SC2034
+    install_zoxide=1
+    ;;
+  --ping)
+    install_ping=1
+    ;;
+  --gping)
+    install_gping=1
+    ;;
+  --fzf)
+    install_fzf=1
+    ;;
+  --htop)
+    install_htop=1
+    ;;
+  --difft)
+    install_difft=1
+    ;;
+  --find)
+    install_find=1
+    ;;
+  --du)
+    install_du=1
+    ;;
+  --bandwidth)
+    install_bandwidth=1
+    ;;
+  --tldr)
+    install_tldr=1
+    ;;
+  --rg)
+    install_rg=1
+    ;;
+  --entr)
+    install_entr=1
+    ;;
+  --dust)
+    install_dust=1
+    ;;
+  --mc)
+    install_mc=1
+    ;;
+  --aptitude)
+    install_aptitude=1
+    #	;;
+    #	--git-extra)
+    #	install_git_extra=1
+    #	user_opts="${user_opts} --git-extra"
+    ;;
+  --liquidprompt)
+    install_liquidprompt=1
+    ;;
+  --byobu)
+    install_byobu=1
+    ;;
+  --hexyl)
+    install_hexyl=1
+    ;;
+  --dtrx)
+    install_dtrx=1
+    ;;
+  -*)
     echo "Error: Unknown option: $1" >&2
     echo "$usage" >&2
     ;;
-esac
+  esac
 done
 
 users+=("$USER")
 
 if [ -n "$debug" ]; then
-	if [ -z "$log" ]; then
-		log=/dev/stdout
-	fi
+  if [ -z "$log" ]; then
+    log=/dev/stdout
+  fi
 fi
 
 if check_for_root; then
-	return 1
+  return 1
 fi
 
 install_apt_package wget wget
 install_apt_package jq jq
 
 if [ -n "$aptproxy" ]; then
-	# shellcheck disable=SC2090
-	$loglog
-	echo "Acquire::http::Proxy \"http://$aptproxy\";" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
-	# shellcheck disable=SC2034
-	flag_need_apt_update=1
+  # shellcheck disable=SC2090
+  $loglog
+  echo "Acquire::http::Proxy \"http://$aptproxy\";" | sudo tee /etc/apt/apt.conf.d/90apt-cacher-ng >/dev/null
+  # shellcheck disable=SC2034
+  flag_need_apt_update=1
 fi
 
-
 if ! grep -q LC_ALL /etc/default/locale 2>/dev/null; then
-sudo tee /etc/default/locale <<EOF
+  sudo tee /etc/default/locale <<EOF
 LANG="en_US.UTF-8"
 LC_ALL="en_US.UTF-8"
 EOF
-	logexec sudo locale-gen en_US.UTF-8
-	logexec sudo locale-gen pl_PL.UTF-8
+  logexec sudo locale-gen en_US.UTF-8
+  logexec sudo locale-gen pl_PL.UTF-8
 fi
 
 do_update
@@ -342,15 +340,15 @@ fi
 
 if [ "${install_bat}" == "1" ]; then
   install_rust=1
-	user_opts="${user_opts} --bat"
+  user_opts="${user_opts} --bat"
 fi
 
-if [ "${install_zoxide}" == "1"  ]; then
+if [ "${install_zoxide}" == "1" ]; then
   install_rust=1
-	user_opts="${user_opts} --zoxide"
+  user_opts="${user_opts} --zoxide"
 fi
 
-if [ "${install_atuin}" == "1"  ]; then
+if [ "${install_atuin}" == "1" ]; then
   install_rust=1
   user_opts="${user_opts} --atuin"
 fi
@@ -363,7 +361,6 @@ if [ "${install_pipx}" == "1" ]; then
   install_pipx
 fi
 
-
 if [ "${install_ping}" == "1" ]; then
   install_apt_package prettyping
   user_opts="${user_opts} --ping"
@@ -373,26 +370,26 @@ if [ "${install_ping}" == "1" ]; then
 fi
 
 if [ "${install_gping}" == "1" ]; then
-	add_apt_source_manual gping "deb http://packages.azlux.fr/debian/ buster main" https://azlux.fr/repo.gpg.key gping.gpg.key
-	install_apt_packages gping
+  add_apt_source_manual gping "deb http://packages.azlux.fr/debian/ buster main" https://azlux.fr/repo.gpg.key gping.gpg.key
+  install_apt_packages gping
   user_opts="${user_opts} --gping"
 fi
 
 if [ "${install_fzf}" == "1" ]; then
   user_opts="${user_opts} --fzf"
   if [ "${install_pipx}" == "0" ]; then
-	  install_apt_package fzf
-	fi
+    install_apt_package fzf
+  fi
 #		get_git_repo https://github.com/junegunn/fzf.git /usr/local/lib
 #		logexec sudo /usr/local/lib/fzf/install --all --xdg
 fi
 
 if [ "${install_htop}" == "1" ]; then
-	install_apt_package htop
+  install_apt_package htop
 fi
 
 if [ "${install_btop}" == "1" ]; then
-	install_apt_package btop
+  install_apt_package btop
   user_opts="${user_opts} --btop"
 fi
 
@@ -446,7 +443,7 @@ if [ "${install_find}" == "1" ]; then
 fi
 if [ "${install_du}" == "1" ]; then
   install_apt_package ncdu
-	user_opts="${user_opts} --du"
+  user_opts="${user_opts} --du"
 
 #	cached_file=$(get_cached_file ncdu.tar.gz https://dev.yorhel.nl/download/ncdu-1.14.tar.gz)
 #	tmp=$(mktemp -d)
@@ -482,7 +479,7 @@ fi
 
 if [ "${install_dust}" == "1" ]; then
   if [ "${install_rust}" == "0" ]; then
-  	install_gh_binary bootandy/dust /usr/local/share dust
+    install_gh_binary bootandy/dust /usr/local/share dust
   else
     user_opts="${user_opts} --dust"
   fi
@@ -502,7 +499,7 @@ fi
 
 if [ "${install_tldr}" == "1" ]; then
   if [ "${install_pipx}" == "0" ]; then
-  	install_apt_packages tldr-py
+    install_apt_packages tldr-py
   else
     user_opts="${user_opts} --tldr"
   fi
@@ -511,7 +508,7 @@ fi
 if [ "${install_rg}" == "1" ]; then
   if [ "${install_rust}" == "0" ]; then
     if ! install_apt_packages ripgrep; then
-       install_gh_binary BurntSushi/ripgrep /usr/local/share rg "" "" "" "" rg
+      install_gh_binary BurntSushi/ripgrep /usr/local/share rg "" "" "" "" rg
     fi
   else
     user_opts="${user_opts} --ripgrep"
@@ -545,13 +542,12 @@ if [ "${install_entr}" == "1" ]; then
 #	logexec popd
 fi
 
-
 if [ "${install_mc}" == "1" ]; then
-	install_apt_package mc
+  install_apt_package mc
 fi
 
 if [ "${install_aptitude}" == "1" ]; then
-	install_apt_package aptitude
+  install_apt_package aptitude
 fi
 
 #if [ "${install_git_extra}" == "1" ]; then
@@ -559,13 +555,13 @@ fi
 #fi
 
 if [ "${install_liquidprompt}" == "1" ]; then
-	install_apt_packages liquidprompt
-	logexec sudo -H liquidprompt_activate
-	user_opts="${user_opts} --liquidprompt"
+  install_apt_packages liquidprompt
+  logexec sudo -H liquidprompt_activate
+  user_opts="${user_opts} --liquidprompt"
 fi
 
 if [ "${install_byobu}" == "1" ]; then
-	install_apt_package byobu
+  install_apt_package byobu
 fi
 
 if [ "${install_hexyl}" == "1" ]; then
@@ -586,18 +582,18 @@ if [ "${install_wormhole}" == "1" ]; then
 fi
 
 # shellcheck disable=SC2128
-if [ -n "$users" ] ; then
-	if [ -n "$debug" ]; then
-		user_opts="--debug ${user_opts}"
-	fi
-	if [ -n "$log" ]; then
-		user_opts="--log ${log} ${user_opts}"
-	fi
-	pushd "$DIR" || exit 1
-#	set -x
-	bash -x ./prepare_ubuntu_user.sh "${users[0]}" "${user_opts}" "${private_key_path}"
-	for user in "${users[@]:1}"; do
-		sudo -H -u "${user}" -- bash -x ./prepare_ubuntu_user.sh "${user}" "${user_opts}"
-	done
-	popd || exit 1
+if [ -n "$users" ]; then
+  if [ -n "$debug" ]; then
+    user_opts="--debug ${user_opts}"
+  fi
+  if [ -n "$log" ]; then
+    user_opts="--log ${log} ${user_opts}"
+  fi
+  pushd "$DIR" || exit 1
+  #	set -x
+  bash -x ./prepare_ubuntu_user.sh "${users[0]}" "${user_opts}" "${private_key_path}"
+  for user in "${users[@]:1}"; do
+    sudo -H -u "${user}" -- bash -x ./prepare_ubuntu_user.sh "${user}" "${user_opts}"
+  done
+  popd || exit 1
 fi

@@ -178,13 +178,11 @@ if [ -z "$user" ]; then
   exit 1
 fi
 
-set -x
-
 if ! grep -q "${user}:" /etc/passwd; then
   logexec sudo adduser --quiet "$user" --disabled-password --add_extra_groups --gecos ''
 fi
-sshhome=$(getent passwd "$user" | awk -F: '{ print $6 }')
-
+#sshhome=$(getent passwd "$user" | awk -F: '{ print $6 }')
+sshhome=$(get_home_dir "$user")
 if ! groups "$user" | grep -q "sudo" ; then
   logexec sudo usermod -a -G sudo "$user"
 fi
@@ -236,7 +234,7 @@ if [ ! -f "$sshhome/.ssh/id_ed25519.pub" ]; then
   fi
 fi
 
-if [ -n "$install_bashrcd" ]; then
+if [[ "$install_bashrcd" == "1" ]]; then
   replace_bashrc "$user"
 else
   add_bashrcd_driver "$user"
@@ -335,6 +333,11 @@ if [ "${install_atuin}" == "1" ]; then
   # shellcheck disable=SC2016
   install_bash_preexec
   add_bashrc_lines 'eval "$(atuin init bash --disable-up-arrow)"' "81_atuin"
+  if [ -d "$sshhome/.config/i3-config/atuin" ]; then
+
+    rmdir "$sshhome/.config/atuin" 2>/dev/null
+    make_symlink "$sshhome/.config/i3-config/atuin" "$sshhome/.config/atuin"
+  fi
 fi
 
 if [ "$install_gping" == "1" ]; then
