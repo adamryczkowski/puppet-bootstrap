@@ -82,6 +82,7 @@ function logmkdir() {
 	if [ -n "$user" ]; then
 		curuser=$(stat -c '%U' "${dir}")
 		if [[ "$curuser" != "$user" ]]; then
+			# Check the owner of the directory
 			logexec sudo chown -R "${user}:${user}" "$dir"
 		fi
 	fi

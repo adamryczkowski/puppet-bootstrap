@@ -320,6 +320,8 @@ fi
 
 if [ "${install_eza}" == "1" ]; then
   install_rust_app eza
+  # https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/FiraCode.zip
+  download_file  $(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")
   add_bashrc_lines 'alias ls="eza --icons --group-directories-first"' "21_ls_replacement"
   add_bashrc_lines 'alias ll="eza --long --group-directories-first"' "21_ll_replacement"
 fi

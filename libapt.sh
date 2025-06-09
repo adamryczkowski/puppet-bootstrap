@@ -52,7 +52,7 @@ function install_apt_package() {
 function install_apt_packages() {
 	#	local ans=0
 	local to_install=""
-	local packages="$*"
+	local packages=("$@")
 	for package in "${packages[@]}"; do
 		if ! dpkg -s "$package">/dev/null  2> /dev/null; then
 			to_install="${to_install} ${package}"
@@ -123,7 +123,7 @@ function do_update() {
 		flag_need_apt_update=0
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 function do_upgrade() {

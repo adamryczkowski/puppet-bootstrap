@@ -12,6 +12,7 @@ function install_pipx() {
 
 function install_pipx_command() {
 	local library=$1
+	local name=$1
 	if [ -z "$library" ]; then
 		echo "No library name provided."
 		return 1
@@ -22,7 +23,13 @@ function install_pipx_command() {
 		install_pipx
 	fi
 
-	if pipx list | grep -q "$library"; then
+	# Prepare pattern that matches prefix "^git+https" and capturing the last folder as a package name, example: git+https://github.com/adamryczkowski/bright
+	pattern='^git\+https:\/\/[^\/]+\/[^\/]+\/([^\/]+)$'
+	if [[ "$library" =~ $pattern ]]; then
+		name="${BASH_REMATCH[1]}" # Extract the package name from the URL
+	fi
+
+	if pipx list | grep -q "\^    - $name\$"; then
 		return 0 # Already installed
 	fi
 

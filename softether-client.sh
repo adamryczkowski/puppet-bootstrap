@@ -54,7 +54,7 @@ vpn_hub=VPN
 port=992
 connection_name=""
 
-while [[ $# > 0 ]]
+while [[ $# -gt 0 ]]
 do
 key="$1"
 shift
@@ -140,7 +140,7 @@ fi
 #install_apt_package softether-vpnclient
 
 get_git_repo https://github.com/SoftEtherVPN/SoftEtherVPN /usr/local/lib
-install_apt_packages cmake gcc g++ make pkgconf libncurses5-dev libssl-dev libsodium-dev libreadline-dev zlib1g-dev
+install_apt_packages cmake gcc g++ make pkgconf libncurses5-dev libssl-dev libsodium-dev libreadline-dev zlib1g-dev isc-dhcp-common
 cd /usr/local/lib/SoftEtherVPN
 logexec ./configure
 logexec make -C build -j 4

@@ -52,10 +52,9 @@ Example:
 ./$(basename "$0") --tweaks cli,nemo,smb,mod3,kodi,office2007,bumblebee,desktop,blender,laptop,zulip,owncloud,gedit,keepass,unity,firefox,i3wm,virtualbox,kitty,julia
 "
 
-dir_resolve()
-{
-	cd "$1" 2>/dev/null || return $?  # cd to desired directory; if fail, quell any error messages but return exit status
-	pwd -P # output full, link-resolved path
+dir_resolve() {
+  cd "$1" 2>/dev/null || return $? # cd to desired directory; if fail, quell any error messages but return exit status
+  pwd -P                           # output full, link-resolved path
 }
 mypath=${0%/*}
 mypath=$(dir_resolve "$mypath")
@@ -68,199 +67,195 @@ common_debug=0
 tweaks=""
 log=""
 
-while [[ $# -gt 0 ]]
-do
-key="$1"
-shift
+while [[ $# -gt 0 ]]; do
+  key="$1"
+  shift
 
-case $key in
-	--tweaks)
-	if [ -z "$tweaks" ]; then
-		tweaks=$1
-	else
-		tweaks=${tweaks},$1
-	fi
-	shift
-	;;
-	--repo-path)
-	repo_path="$1"
-	shift
-	;;
-	--user)
-	user="$1"
-	shift
-	;;
-	-r|--release)
-	release=$1
-	shift
-	;;
-	--log)
-	log=$1
-	shift
-	;;
-	--debug)
-	common_debug=1
-	;;
-	--help)
-	echo "$usage"
-	exit 0
-	;;
-	-*)
-	echo "Error: Unknown option: $1" >&2
-	echo "$usage" >&2
-	;;
-esac
+  case $key in
+  --tweaks)
+    if [ -z "$tweaks" ]; then
+      tweaks=$1
+    else
+      tweaks=${tweaks},$1
+    fi
+    shift
+    ;;
+  --repo-path)
+    repo_path="$1"
+    shift
+    ;;
+  --user)
+    user="$1"
+    shift
+    ;;
+  -r | --release)
+    release=$1
+    shift
+    ;;
+  --log)
+    log=$1
+    shift
+    ;;
+  --debug)
+    common_debug=1
+    ;;
+  --help)
+    echo "$usage"
+    exit 0
+    ;;
+  -*)
+    echo "Error: Unknown option: $1" >&2
+    echo "$usage" >&2
+    ;;
+  esac
 done
 
 if [ -z "$tweaks" ]; then
-	echo "$usage"
-	exit 0
+  echo "$usage"
+  exit 0
 else
-	tweaks="tweak_base,${tweaks}"
+  tweaks="tweak_base,${tweaks}"
 fi
 
 home=$(get_home_dir "${user}")
 
 if [ -n "$common_debug" ]; then
-	if [ -z "$log" ]; then
-		log=/dev/stdout
-	fi
+  if [ -z "$log" ]; then
+    log=/dev/stdout
+  fi
 fi
 
 #Makes sure basic scripts are installed
-function tweak_base  {
-set -x
-	logmkdir /usr/local/lib/adam/scripts root
-	install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scripts 0
-	install_apt_packages git gdebi-core
-	mount_dir "$repo_path" || true
-set +x
+function tweak_base {
+  logmkdir /usr/local/lib/adam/scripts $user
+  install_script files/discover_session_bus_address.sh /usr/local/lib/adam/scripts 0
+  install_apt_packages git gdebi-core
+  mount_dir "$repo_path" || true
 }
 
 function unity {
-	if [ "$release" == "bionic" ]; then
-		ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
-		install_gnome_extension "${ext_path}"
+  if [ "$release" == "bionic" ]; then
+    ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
+    install_gnome_extension "${ext_path}"
 
-		gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
-		gsettings_set_value org.gnome.mutter dynamic-workspaces false
-		gsettings_set_value org.gnome.shell.extensions.dash-to-dock dock-fixed false
+    gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
+    gsettings_set_value org.gnome.mutter dynamic-workspaces false
+    gsettings_set_value org.gnome.shell.extensions.dash-to-dock dock-fixed false
 
-		add_ppa unity7maintainers/unity7-desktop
-		install_apt_package gnome-tweak-tool
-	fi
-	install_apt_package ubuntu-unity-desktop
+    add_ppa unity7maintainers/unity7-desktop
+    install_apt_package gnome-tweak-tool
+  fi
+  install_apt_package ubuntu-unity-desktop
 }
 
 function desktop {
-	add_ppa yktooo/ppa
-	install_apt_packages meld chromium-browser gparted  indicator-sound-switcher
-	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
-	gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
-	gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1
-	gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method edge-scrolling
-	gsettings_set_value org.gnome.desktop.screensaver lock-enabled false
-	gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
-	gsettings_set_value com.canonical.Unity integrated-menus true
-	gsettings_set_value org.gnome.desktop.input-sources show-all-sources true
-#	set_gsettings_array org.gnome.desktop.input-sources sources "[('xkb', 'pl+intl')]"
-	gsettings set org.gnome.desktop.input-sources sources "[('xkb,', 'pl+intl')]"
+  add_ppa yktooo/ppa
+  install_apt_packages meld chromium-browser gparted indicator-sound-switcher
+  gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://org.gnome.Software.desktop'
+  gsettings_remove_from_array com.canonical.Unity.Launcher favorites 'application://ubuntu-amazon-default.desktop'
+  gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/unityshell/ launcher-hide-mode 1
+  gsettings_set_value org.gnome.desktop.peripherals.touchpad scroll-method edge-scrolling
+  gsettings_set_value org.gnome.desktop.screensaver lock-enabled false
+  gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
+  gsettings_set_value com.canonical.Unity integrated-menus true
+  gsettings_set_value org.gnome.desktop.input-sources show-all-sources true
+  #	set_gsettings_array org.gnome.desktop.input-sources sources "[('xkb', 'pl+intl')]"
+  gsettings set org.gnome.desktop.input-sources sources "[('xkb,', 'pl+intl')]"
 
-	if [ "$release" == "bionic" ]; then
-		install_apt_package gnome-tweak-tool
-		ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
-		install_gnome_extension "${ext_path}"
+  if [ "$release" == "bionic" ]; then
+    install_apt_package gnome-tweak-tool
+    ext_path=$(get_cached_file "gnome_extensions/workspace-grid-for-3.16-to-3.26.zip" "https://github.com/zakkak/workspace-grid/releases/download/v1.4.1/workspace-grid-for-3.16-to-3.26.zip")
+    install_gnome_extension "${ext_path}"
 
-		gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
-		gsettings_set_value org.gnome.mutter dynamic-workspaces false
-		gsettings_set_value org.gnome.shell.extensions.dash-to-dock dock-fixed false
-		gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/core/ hsize 3
-		gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/core/ vsize 3
+    gsettings_set_value org.gnome.shell.extensions.workspace-grid num-rows 3
+    gsettings_set_value org.gnome.mutter dynamic-workspaces false
+    gsettings_set_value org.gnome.shell.extensions.dash-to-dock dock-fixed false
+    gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/core/ hsize 3
+    gsettings_set_value org.compiz.unityshell:/org/compiz/profiles/unity/plugins/core/ vsize 3
 
-		add_ppa unity7maintainers/unity7-desktop
-	fi
+    add_ppa unity7maintainers/unity7-desktop
+  fi
 
-	if dpkg -s ubuntu-unity-desktop >/dev/null 2>/dev/null; then
-		install_apt_packages unity tweak
-	fi
+  if dpkg -s ubuntu-unity-desktop >/dev/null 2>/dev/null; then
+    install_apt_packages unity tweak
+  fi
 
-	gsettings_set_value org.gnome.desktop.wm.preferences num-workspaces 9
-	install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
-	sudo apt-key export Skype | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/skype.gpg
+  gsettings_set_value org.gnome.desktop.wm.preferences num-workspaces 9
+  install_apt_package_file skypeforlinux-64.deb skypeforlinux "https://go.skype.com/skypeforlinux-64.deb"
+  sudo apt-key export Skype | sudo gpg --dearmour -o /etc/apt/trusted.gpg.d/skype.gpg
 
-	install_apt_packages redshift-gtk dconf-editor ibus-table-translit
-	redshift-gtk &
+  install_apt_packages redshift-gtk dconf-editor ibus-table-translit
+  redshift-gtk &
 }
 
 function signal {
-#TODO
-sudo apt install curl
-curl -s https://updates.signal.org/desktop/apt/keys.asc | sudo apt-key add -
-echo "deb [arch=amd64] https://updates.signal.org/desktop/apt xenial main" | sudo tee -a /etc/apt/sources.list.d/signal-xenial.list
-sudo apt update && sudo apt install signal-desktop
+  #TODO
+  sudo apt install curl
+  curl -s https://updates.signal.org/desktop/apt/keys.asc | sudo apt-key add -
+  echo "deb [arch=amd64] https://updates.signal.org/desktop/apt xenial main" | sudo tee -a /etc/apt/sources.list.d/signal-xenial.list
+  sudo apt update && sudo apt install signal-desktop
 }
 
 function blender {
-	install_dir="/opt/blender"
-	if [ ! -f "${install_dir}/blender" ]; then
-		if [ ! -d /opt/blender/blender_fracture_modifier ]; then
-			file="BlenderFracture-2.79a-linux64-glibc219.tar.xz"
-			file_path=$(get_cached_file "${file}" http://blenderphysics.com/?ddownload=4225)
-			install_apt_packages xz-utils
-			logmkdir /opt/blender
-			logexec sudo tar xf ${file_path} -C ${install_dir}
-		fi
-		if [ -d /opt/blender/blender_fracture_modifier ]; then
-			logexec sudo mv /opt/blender/blender_fracture_modifier/* /opt/blender
-			logexec sudo rmdir /opt/blender/blender_fracture_modifier
-		fi
-	fi
-	if [ ! -f "/opt/blender/blender.desktop" ]; then
-		errcho "Something wrong with the Blender installation process. blender.desktop is missing."
-	fi
-	cp_file "/opt/blender/blender.desktop" /usr/share/applications/ root
-	cp_file "/opt/blender/blender.svg" /usr/share/icons/hicolor/scalable/apps/ root
+  install_dir="/opt/blender"
+  if [ ! -f "${install_dir}/blender" ]; then
+    if [ ! -d /opt/blender/blender_fracture_modifier ]; then
+      file="BlenderFracture-2.79a-linux64-glibc219.tar.xz"
+      file_path=$(get_cached_file "${file}" http://blenderphysics.com/?ddownload=4225)
+      install_apt_packages xz-utils
+      logmkdir /opt/blender
+      logexec sudo tar xf ${file_path} -C ${install_dir}
+    fi
+    if [ -d /opt/blender/blender_fracture_modifier ]; then
+      logexec sudo mv /opt/blender/blender_fracture_modifier/* /opt/blender
+      logexec sudo rmdir /opt/blender/blender_fracture_modifier
+    fi
+  fi
+  if [ ! -f "/opt/blender/blender.desktop" ]; then
+    errcho "Something wrong with the Blender installation process. blender.desktop is missing."
+  fi
+  cp_file "/opt/blender/blender.desktop" /usr/share/applications/ root
+  cp_file "/opt/blender/blender.svg" /usr/share/icons/hicolor/scalable/apps/ root
 }
 
 function office2007 {
-	set -x
-	echo "#TODO"
-	logexec sudo dpkg --add-architecture i386
-	release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/winehq.key)
-	if [[ $(get_distribution) == "LinuxMint" ]]; then
-		release=bionic
-	else
-	   release=$(get_ubuntu_codename)
-	fi
+  set -x
+  echo "#TODO"
+  logexec sudo dpkg --add-architecture i386
+  release_key=$(get_cached_file WineHQ_Release.key https://dl.winehq.org/wine-builds/winehq.key)
+  if [[ $(get_distribution) == "LinuxMint" ]]; then
+    release=bionic
+  else
+    release=$(get_ubuntu_codename)
+  fi
 
-	logexec sudo apt-key add "${release_key}"
-	add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key winehq.key
+  logexec sudo apt-key add "${release_key}"
+  add_apt_source_manual winehq "deb https://dl.winehq.org/wine-builds/ubuntu/ ${release} main" https://dl.winehq.org/wine-builds/winehq.key winehq.key
 
-#	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
-#	logexec sudo apt-key add "${release_key}"
+  #	release_key=$(get_cached_file PlayOnLinux_Release.key http://deb.playonlinux.com/public.gpg)
+  #	logexec sudo apt-key add "${release_key}"
 
+  #	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
+  if [[ $(get_ubuntu_codename) == bionic ]]; then
+    install_apt_package_file libfaudio0_19.07-0~bionic_amd64.deb libfaudio:amd64 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/amd64/libfaudio0_19.07-0~bionic_amd64.deb
+    install_apt_package_file libfaudio0_19.07-0~bionic_i386.deb libfaudio:i386 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/i386/libfaudio0_19.07-0~bionic_i386.deb
+  fi
 
-#	add_apt_source_manual playonlinux "deb http://deb.playonlinux.com/ ${release} main" http://deb.playonlinux.com/public.gpg PlayOnLinux_Release.key
-	if [[ $(get_ubuntu_codename) == bionic ]]; then
-		install_apt_package_file libfaudio0_19.07-0~bionic_amd64.deb libfaudio:amd64 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/amd64/libfaudio0_19.07-0~bionic_amd64.deb
-		install_apt_package_file libfaudio0_19.07-0~bionic_i386.deb libfaudio:i386 https://download.opensuse.org/repositories/Emulators:/Wine:/Debian/xUbuntu_18.04/i386/libfaudio0_19.07-0~bionic_i386.deb
-	fi
+  do_update
+  install_apt_packages winehq-staging #playonlinux gridsite-clients
 
-	do_update
-	install_apt_packages winehq-staging #playonlinux gridsite-clients
+  add_group wine_office
+  add_usergroup "$user" wine_office
+  local office_install="/opt/Office2007"
+  uncompress_cached_file office2007_pl.tar.xz /opt ${user}:wine_office Office2007
+  chown_dir ${office_install} "${user}:wine_office" wine_office
+  #Make sure all office is writable by anyone with execute permission preserverd
+  chmod_dir ${office_install} 777 666 777
 
-	add_group wine_office
-	add_usergroup "$user" wine_office
-	local office_install="/opt/Office2007"
-	uncompress_cached_file office2007_pl.tar.xz /opt ${user}:wine_office Office2007
-	chown_dir ${office_install} "${user}:wine_office" wine_office
-	#Make sure all office is writable by anyone with execute permission preserverd
-	chmod_dir ${office_install} 777 666 777
+  install_script files/launch_office.sh /usr/local/bin/launch_office
 
-	install_script files/launch_office.sh /usr/local/bin/launch_office
-
-	logmkdir "${home}/.PlayOnLinux/wineprefix"
-	make_symlink ${office_install} "${home}/.PlayOnLinux/wineprefix/Office2007"
+  logmkdir "${home}/.PlayOnLinux/wineprefix"
+  make_symlink ${office_install} "${home}/.PlayOnLinux/wineprefix/Office2007"
 
 textfile /usr/share/applications/excel.desktop "#!/usr/bin/env xdg-open
 [Desktop Entry]
@@ -328,13 +323,11 @@ linetextfile /etc/pam.d/common-session "session optional    pam_exec.so /bin/sh 
 #	install_file files/bright /usr/local/bin
 #	install_file files/bright /usr/local/lib/adam/scripts
 
-
-
 # udev rules for charging
 install_file files/60-onbattery.rules /etc/udev/rules.d
 install_file files/ac_changed.sh /usr/local/bin 1
 install_apt_packages acpitool ubuntu-touch-sounds sox
-crontab -l -u $USER > /tmp/cron_tmp.cron
+crontab -l -u $USER >/tmp/cron_tmp.cron
 linetextfile /tmp/cron_tmp.cron "* * * * * [ -f /tmp/discharging ] && play /usr/share/sounds/ubuntu/notifications/Blip.ogg"
 sudo udevadm control --reload
 crontab -u $USER /tmp/cron_tmp.cron
@@ -353,7 +346,7 @@ fi
 do_update
 install_apt_packages ubuntu-drivers-common
 logexec sudo ubuntu-drivers autoinstall
-nvidia_package=$(apt list --installed |grep -E 'nvidia-[0-9]+/')
+nvidia_package=$(apt list --installed | grep -E 'nvidia-[0-9]+/')
 pattern='nvidia-([0-9]+)/'
 if [[ "${nvidia_package}" =~ $pattern ]]; then
 	nvidia_version=${BASH_REMATCH[1]}
@@ -390,7 +383,7 @@ linetextfile /etc/environment "__GLVND_DISALLOW_PATCHING=1"
 
 install_apt_package ubuntu-drivers-common ubuntu-drivers
 logexec sudo ubuntu-drivers autoinstall
-nvidia_package=$(apt list --installed |grep -E 'nvidia-[0-9]+/')
+nvidia_package=$(apt list --installed | grep -E 'nvidia-[0-9]+/')
 pattern='nvidia-([0-9]+)/'
 if [[ "${nvidia_package}" =~ $pattern ]]; then
 	# shellcheck disable=SC2034
@@ -521,7 +514,7 @@ modifier_map Lock    { Caps_Lock };
 modifier_map Mod1    { Alt_L, Alt_R, Meta_L, Meta_R };
 modifier_map Mod2    { Num_Lock };
 modifier_map Mod4    { Super_L, Super_R };"
-echo "$patch">/tmp/symbols_pc.patch
+echo "$patch" >/tmp/symbols_pc.patch
 
 #	apply_patch /usr/share/X11/xkb/symbols/pc 2019c40a10ccb69d6b1d95c5762f8c3a09fce64b 63867d13946f00aa9017937ef0b4d3aad25caa52 /tmp/symbols_pc.patch
 apply_patch /usr/share/X11/xkb/symbols/pc c8231d3a67cdf7656f7a141dc38f36a0cb241e5e a4fa42917d882f8492162c045833619d3d2d2cb2 /tmp/symbols_pc.patch
@@ -553,7 +546,6 @@ add_apt_source_manual waterfox "deb http://download.opensuse.org/repositories/ho
 install_apt_package waterfox
 
 #TODO: Install addon: https://github.com/iamadamdev/bypass-paywalls-firefox
-
 
 #	waterfox_version=$(get_latest_github_release_name MrAlex94/Waterfox)
 #	pattern='^([0-9\.]+)\-(classic[0-9\-]+)$'
@@ -640,9 +632,9 @@ add_host $host 192.168.10.6 ${host}.dom.statystyka.net
 
 local i=1
 arraylength=${#folders[@]}
-for (( i=1; i<${arraylength}+1; i++ )); do
-	folder=/media/${folders[$i-1]}
-	share=${shares[$i-1]}
+for ((i = 1; i < ${arraylength} + 1; i++)); do
+	folder=/media/${folders[$i - 1]}
+	share=${shares[$i - 1]}
 	logmkdir ${folder}
 	smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	foldername=$(basename ${folder})
@@ -656,9 +648,9 @@ add_host $host 192.168.10.2 ${host}.dom.statystyka.net
 
 local i=1
 arraylength=${#folders[@]}
-for (( i=1; i<${arraylength}+1; i++ )); do
-	folder=/media/${folders[$i-1]}
-	share=${shares[$i-1]}
+for ((i = 1; i < ${arraylength} + 1; i++)); do
+	folder=/media/${folders[$i - 1]}
+	share=${shares[$i - 1]}
 	logmkdir ${folder}
 	smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	foldername=$(basename ${folder})
@@ -763,14 +755,17 @@ $(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "
 }
 
 function i3wm() {
+tweaks+="fix_backlight_permissions"
 set -x
 
 #	install_apt_package_file keyring.deb sur5r-keyring https://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2023.02.18_all.deb
 #	add_apt_source_manual sur5r-i3 "deb [arch=amd64] http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe"
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
-install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme  acpi
+install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme acpi pulseaudio-utils
 #   install_apt_packages qt4-qtconfig
+
+install_pipx_command "git+https://github.com/adamryczkowski/bright"
 
 get_git_repo https://github.com/vivien/i3blocks "${home}/tmp"
 if ! which i3blocks >/dev/null; then
@@ -794,18 +789,16 @@ make_symlink "${home}/.config/i3-config/fusuma" "${home}/.config/fusuma"
 logexec sudo gem install fusuma
 logexec sudo usermod -aG input "${user}"
 
-add_apt_source_manual manuelschneid3r "deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_$(get_ubuntu_version .)/ /" "https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_$(get_ubuntu_version .)/Release.key"  manuelschneid3r.key
+add_apt_source_manual manuelschneid3r "deb http://download.opensuse.org/repositories/home:/manuelschneid3r/xUbuntu_$(get_ubuntu_version .)/ /" "https://download.opensuse.org/repositories/home:manuelschneid3r/xUbuntu_$(get_ubuntu_version .)/Release.key" manuelschneid3r.key
 install_script files/i3exit '/usr/local/bin' root
 
-install_apt_packages pcmanfm units playerctl  # albert
-
-
-
+install_apt_packages pcmanfm units playerctl # albert
 
 #	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
 #	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb
 
-input_class_contents=$(cat <<EOF
+input_class_contents=$(
+	cat <<EOF
 Section "InputClass"
     Identifier "libinput touchpad catchall"
     MatchIsTouchpad "on"
@@ -821,7 +814,7 @@ textfile "/etc/X11/xorg.conf.d/40-libinput.conf" "${input_class_contents}" root
 
 #Dark theme
 install_apt_packages gnome-themes-extra
-if [ ! -f  "${home}/.config/gtk-3.0/settings.ini" ]; then
+if [ ! -f "${home}/.config/gtk-3.0/settings.ini" ]; then
 	logmkdir "${home}/.config/gtk-3.0"
 	textfile "${home}/.config/gtk-3.0/settings.ini" "[Settings]
 gtk-application-prefer-dark-theme=1
@@ -864,7 +857,6 @@ install_apt_packages libinput-tools ruby
 install_pipx_command git+https://github.com/adamryczkowski/bright
 }
 
-
 function kitty() {
 local version
 local kitty_source
@@ -885,6 +877,11 @@ linetextfile ${home}/.bashrc 'alias ssh="kitty +kitten ssh"'
 # libcairo-script-interpreter2 libfontconfig1-dev libfreetype6-dev libiw30 libmpdclient2 libpixman-1-dev
 # libxcb-composite0 libxcb-render0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-util-dev
 #libxcb-xfixes0-dev libxext-dev libxrender-dev x11proto-xext-dev
+}
+
+function fix_backlight_permissions() {
+install_script files/fix_permissions.sh '/usr/local/lib/adam/scripts' root 1
+linetextfile /etc/pam.d/common-session "session optional pam_exec.so /bin/sh /usr/local/lib/adam/scripts/fix_permissions.sh"
 }
 
 oldifs=${IFS}
