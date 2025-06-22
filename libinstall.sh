@@ -198,7 +198,7 @@ function install_gh_binary() {
 	link="$(get_app_link_gh "$gh_name" "${override_arch}" "tar\.gz")"
 	if [[ "$link" == "" ]]; then
 		set +x
-		return 1
+		return 0
 	fi
 
 	version="$(get_latest_github_release_name "$gh_name")"
@@ -258,7 +258,7 @@ function install_gh_deb() {
 	link="$(get_app_link_gh "$gh_name" "${override_arch}" deb)"
 	if [[ "$link" == "" ]]; then
 		set +x
-		return 1
+		return 0
 	fi
 	version="$(get_latest_github_release_name "$gh_name")"
 
@@ -300,7 +300,7 @@ function is_arch_supported() {
 	if [[ "$ans" == "" ]]; then
 		return 0
 	else
-		return 1
+		return 0
 	fi
 }
 

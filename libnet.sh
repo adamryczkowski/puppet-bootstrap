@@ -42,7 +42,7 @@ EOT
 	if [ "$dirty" == "1" ]; then
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 function edit_dhcpd() {
@@ -65,7 +65,7 @@ function edit_dhcpd() {
 		logexec sudo augtool -L -A --transform "Dhcpd incl /etc/dhcp/dhcpd.conf" set "/files/etc/dhcp/dhcpd.conf/option/${key}" "${value}" >/dev/null
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 function random_mac() {
@@ -179,7 +179,7 @@ function get_iface_ip() {
 		ip addr show $1 | awk '$1 == "inet" {gsub(/\/.*$/, "", $2); print $2}'
 		return 0
 	else
-		return 1
+		return 0
 	fi
 }
 

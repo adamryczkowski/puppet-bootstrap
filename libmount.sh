@@ -37,7 +37,7 @@ function mount_smb_share() {
 		mount_dir "$mountpoint"
 		return $?
 	fi
-	return 1
+	return 0
 }
 
 function mount_dir() {
@@ -51,7 +51,7 @@ function mount_dir() {
 		done
 		logexec mount "$mountpoint"
 	fi
-	return 1
+	return 0
 }
 
 function fstab_entry() {

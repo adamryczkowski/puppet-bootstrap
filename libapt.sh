@@ -9,7 +9,7 @@ function purge_apt_package() {
 		logexec sudo apt-get --yes --force-yes -q purge "$package"
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 function cpu_arch() {
@@ -86,7 +86,7 @@ function install_apt_package_file() {
 		logexec sudo apt install -f --yes
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 function install_pip3_packages() {
@@ -106,7 +106,7 @@ function install_pip3_packages() {
 		logexec pipx install "$to_install"
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 # shellcheck disable=SC2120
@@ -151,7 +151,7 @@ function add_ppa() {
 		flag_need_apt_update=1
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 #Adds apt source. filename must exclude the extension .list.

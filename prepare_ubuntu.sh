@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 ## dependency: prepare_ubuntu_user.sh
 cd "$(dirname "$0")" || exit 1
 . ./common.sh
@@ -591,6 +592,7 @@ if [ -n "$users" ]; then
   fi
   pushd "$DIR" || exit 1
   #	set -x
+  echo ./prepare_ubuntu_user.sh "${users[0]}" "${user_opts}" "${private_key_path}"
   bash -x ./prepare_ubuntu_user.sh "${users[0]}" "${user_opts}" "${private_key_path}"
   for user in "${users[@]:1}"; do
     sudo -H -u "${user}" -- bash -x ./prepare_ubuntu_user.sh "${user}" "${user_opts}"

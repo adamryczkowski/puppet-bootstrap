@@ -17,11 +17,9 @@ function replace_bashrc() {
 	fi
 
 	# Compare existing bashrc with the universal bashrc. If they are the same, do nothing.
-	if [ -f "$bashrc" ]; then
-		if cmp -s "$bashrc" "$(get_home_dir "$user")/.bashrc"; then
-			return 0
-		fi
-	fi
+  if cmp -s "$bashrc_src" "$(get_home_dir "$user")/.bashrc"; then
+    return 0
+  fi
 	if ! [ -f "$(get_home_dir "$user")/.bashrc" ]; then
 		install_file "$bashrc_src" "$(get_home_dir "$user")/.bashrc" "$user"
 	elif ! cmp -s "$bashrc_src" "$(get_home_dir "$user")/.bashrc"; then
@@ -84,7 +82,7 @@ EOF
 
 function add_bashrc_file() {
 	local content_filename="$1"
-	local filename="$2"
+	local bashrc_filename="$2"
 	local user
 	# Makes a file in ~/.bashrc.d/ with the name of the file, and contents copied from the content_filename
 	if [[ -z ${3+x} ]]; then
@@ -98,18 +96,21 @@ function add_bashrc_file() {
 
 	# Check if filename already ends in '.sh'. If not - add it
 	local pattern='^.*\.sh$'
-	if [[ ! "$filename" =~ $pattern ]]; then
-		filename="${filename}.sh"
+	if [[ ! "$bashrc_filename" =~ $pattern ]]; then
+		bashrc_filename="${bashrc_filename}.sh"
 	fi
 
-	install_file "$content_filename" "$bashrcd/$filename" "$user"
-	set_non_executable "$bashrcd/$filename"
+	install_file "$content_filename" "$bashrcd/$bashrc_filename" "$user"
+	set_non_executable "$bashrcd/$bashrc_filename"
 }
 
+
 function add_bashrc_lines() {
-	local lines="$1"
-	local filename="$2"
-	local user
+	local lines
+	local bashrc_filename
+#	local user
+	lines="$1"
+	bashrc_filename="$2"
 	# Makes a file in ~/.bashrc.d/ with the name of the file, and contents of the lines
 	if [[ -z ${3+x} ]]; then
 		user="$USER"
@@ -122,11 +123,11 @@ function add_bashrc_lines() {
 
 	# Check if filename already ends in '.sh'. If not - add it
 	local pattern='^.*\.sh$'
-	if [[ ! "$filename" =~ $pattern ]]; then
-		filename="${filename}.sh"
+	if [[ ! "$bashrc_filename" =~ $pattern ]]; then
+		bashrc_filename="${bashrc_filename}.sh"
 	fi
 
-	textfile "$bashrcd/$filename" "$lines" "$user"
+	textfile "$bashrcd/$bashrc_filename" "$lines" "$user"
 }
 
 function setup_bash_path_man() {
@@ -168,5 +169,5 @@ function install_bash_preexec() {
 	local homedir
 	homedir="$(get_home_dir "$user")"
 	download_file "$homedir/.bash-preexec.sh" https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
-	add_bashrc_line '[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh' 80 "bash-preexec" "$user"
+	add_bashrc_lines '[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh' "80_bash-preexec"
 }

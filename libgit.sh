@@ -7,7 +7,7 @@ function get_latest_github_release_name() { #source: https://gist.github.com/luk
 	local skip_v=$2
 	if ! which curl >/dev/null; then
 		install_apt_package curl curl
-		return 1
+		return 0
 	fi
 	ans=$(curl "$github_token" --silent "https://api.github.com/repos/$1/releases/latest" | # Get latest release from GitHub api
 		grep '"tag_name":' |                                            # Get tag line
@@ -32,11 +32,11 @@ function get_latest_github_tag() {
 	fi
 	if ! which curl >/dev/null; then
 		install_apt_package curl curl
-		return 1
+		return 0
 	fi
 	if ! which jq >/dev/null; then
 		install_apt_package jq jq
-		return 1
+		return 0
 	fi
 	ans=$(curl "$github_token" --silent "https://api.github.com/repos/$1/tags" |
 	jq ".[${offset}].name")
@@ -78,7 +78,7 @@ function get_app_link_gh() {
 	elif [[ "$_arch" == "none" ]]; then
 		to_try=(".*")
 	else
-		return 1
+		return 0
 	fi
 
 	for phrase in "${to_try[@]}"; do

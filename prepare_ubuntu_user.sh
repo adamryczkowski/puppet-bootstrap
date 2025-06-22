@@ -1,4 +1,6 @@
 #!/bin/bash
+#set -euo pipefail
+set -eo pipefail
 cd "$(dirname "$0")" || exit 1
 . ./common.sh
 
@@ -168,11 +170,11 @@ case $key in
 esac
 done
 
-if [ -n "$debug" ]; then
-	if [ -z "$log" ]; then
-		log=/dev/stdout
-	fi
-fi
+#if [ -n "$debug" ]; then
+#	if [ -z "$log" ]; then
+#		log=/dev/stdout
+#	fi
+#fi
 
 if [ -z "$user" ]; then
   exit 1
@@ -242,8 +244,11 @@ fi
 
 # shellcheck disable=SC2016
 add_bashrc_file files/bashrc.d/20_bash_aliases.sh "20_bash_aliases.sh" "$user"
-#add_bashrc_line 'mkcdir() { mkdir -p -- "$1" && cd -P -- "$1"; }' 30 "mkcdir function"
+
+#
+# add_bashrc_line 'mkcdir() { mkdir -p -- "$1" && cd -P -- "$1"; }' 30 "mkcdir function"
 #linetextfile "${sshhome}/.bashrc" 'mkcdir() { mkdir -p -- "$1" && cd -P -- "$1"; }'
+
 
 if [ "${install_bat}" == "1" ]; then
 #		tmp=$(mktemp)
@@ -321,7 +326,19 @@ fi
 if [ "${install_eza}" == "1" ]; then
   install_rust_app eza
   # https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/FiraCode.zip
-  download_file  $(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")
+
+  # Check if font "FiraCodeNerdFont-Medium" is installed
+  if ! fc-list | grep -q "FiraCodeNerdFont-Medium"; then
+    echo "Installing FiraCode Nerd Font..."
+    install_apt_package jq curl
+    download_file files/FiraCode.tar.xz $(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")
+    extract_archive files/FiraCode.tar.xz files $user onedir FiraCodeNerd
+    logmkdir "$sshhome/.local/share/fonts"
+    logexec mv files/FiraCodeNerd/*.ttf "$sshhome/.local/share/fonts"
+    logexec sudo fc-cache -fv
+    logexec rm -rf files/FiraCodeNerd
+  fi
+
   add_bashrc_lines 'alias ls="eza --icons --group-directories-first"' "21_ls_replacement"
   add_bashrc_lines 'alias ll="eza --long --group-directories-first"' "21_ll_replacement"
 fi
@@ -337,7 +354,9 @@ if [ "${install_atuin}" == "1" ]; then
   add_bashrc_lines 'eval "$(atuin init bash --disable-up-arrow)"' "81_atuin"
   if [ -d "$sshhome/.config/i3-config/atuin" ]; then
 
-    rmdir "$sshhome/.config/atuin" 2>/dev/null
+    if [ -d "$sshhome/.config/atuin" ]; then
+      logexec rm -rf "$sshhome/.config/atuin"
+    fi
     make_symlink "$sshhome/.config/i3-config/atuin" "$sshhome/.config/atuin"
   fi
 fi
@@ -363,11 +382,6 @@ if [ "${install_zoxide}" == "1" ]; then
 fi
 
 if [ "${install_liquidprompt}" == "1" ]; then
-  if [[ "$user" != "$USER" ]]; then
-    logexec sudo -Hu "$user" liquidprompt_activate
-  else
-    logexec liquidprompt_activate
-  fi
   install_bash_preexec
   # shellcheck disable=SC2016
   add_bashrc_lines 'echo $- | grep -q i 2>/dev/null && . /usr/share/liquidprompt/liquidprompt' "81_liquidprompt"

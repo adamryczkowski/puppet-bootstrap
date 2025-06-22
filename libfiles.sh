@@ -71,11 +71,7 @@ function logmkdir() {
 		user="$2"
 	fi
 	if ! [ -d "$dir" ]; then
-		if [ -w "$(dirname "$dir")" ]; then
-			#      set -x
-			logexec mkdir -p "$dir"
-			#      set +x
-		else
+		if ! mkdir -p "$dir"; then
 			logexec sudo mkdir -p "$dir"
 		fi
 	fi
@@ -172,7 +168,7 @@ function textfile() {
 		fi
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 
@@ -264,9 +260,9 @@ function set_executable() {
 }
 
 function set_non_executable() {
-	local input_file="$1"
+	local dest="$1"
 	if [ -f "$dest" ]; then
-		if [[ ! -x "$dest" ]]; then
+		if [[ -x "$dest" ]]; then
 			if [ -w "$dest" ]; then
 				logexec chmod -x "$dest"
 			else
@@ -437,6 +433,24 @@ function get_cached_file() {
 #	exec "$@" | true
 #}
 
+function extract_archive_flat() {
+	#'extracts all files in the archive to the destination_parent, ignoring any paths within the archive.
+	local archive_path="$1"
+	local destination_folder="$2"
+	local act_as_user="$3"
+	if [[ "$archive_path" != /* ]]; then
+    archive_path="$(pwd)/$archive_path"
+  fi
+  if [[ "$destination_folder" != /* ]]; then
+    destination_folder="$(pwd)/$destination_folder"
+  fi
+  make_sure_dtrx_exists
+	logmkdir "${destination_folder}" "$act_as_user"
+	pushd "${destination_folder}" || return 1
+	dtrx --one=here "$archive_path"
+	popd
+}
+
 function extract_archive() {
 	local archive_path="$1"
 	local destination_parent="$2"
@@ -445,6 +459,11 @@ function extract_archive() {
 	#'original' - (default) the archive with single folder will be extracted directly to destination_parent, ignoring extracted_name. Similarily, if archive with a single file - that file will be extracted in the destination_parent under its original name.
 	#'onedir' - if archive with single folder - acts exactly as 'rename' policy. If archive with a single file - that file will be put in the subfolder extracted_name with the name extracted_name.
 	local extracted_name="$5" #Defaults to the archive name minus extensions
+
+  # Make sure archive_path is absolute
+  if [[ "$archive_path" != /* ]]; then
+    archive_path="$(pwd)/$archive_path"
+  fi
 
 	if [[ "$single_item_policy" == "" ]]; then
 		single_item_policy=original
@@ -461,14 +480,20 @@ function extract_archive() {
 	if is_folder_writable "$(dirname "$destination_parent")" "$act_as_user"; then
 		if [ "$act_as_user" == "$USER" ]; then
 			mode=1
-			(cd "${dest_path}" || exit 1; dtrx --one here "$archive_path")
+			pushd "${dest_path}"
+			dtrx --one here "$archive_path"
+			popd
 		else
 			mode=2
-			(cd "${dest_path}" || exit 1; sudo -u "$act_as_user" "$(which dtrx)" --one here "$archive_path")
+			pushd "${dest_path}" || return 1
+			sudo -u "$act_as_user" "$(which dtrx)" --one here "$archive_path"
+			popd
 		fi
 	else
 		mode=2
-		(cd "${dest_path}" || exit 1; sudo -u "$act_as_user" "$(which dtrx)" --one here "$archive_path")
+		pushd "${dest_path}" || return 1
+		sudo -u "$act_as_user" "$(which dtrx)" --one here "$archive_path"
+		popd
 	fi
 
 	filecount="$(find "${dest_path}" -mindepth 1 -maxdepth 1 | wc -l)"
@@ -733,7 +758,8 @@ function is_folder_writable() {
 	#source: https://stackoverflow.com/questions/14103806/bash-test-if-a-directory-is-writable-by-a-given-uid
 	# Use -L to get information about the target of a symlink,
 	# not the link itself, as pointed out in the comments
-	mapfile -t INFO < <(stat -L -c "0%a %G %U" "$folder")
+#	mapfile -t INFO < <(stat -L -c "0%a %G %U" "$folder")
+	read -a INFO <<< "$(stat -L -c "0%a %G %U" "$folder")"
 	PERM=${INFO[0]}
 	GROUP=${INFO[1]}
 	OWNER=${INFO[2]}
@@ -745,7 +771,8 @@ function is_folder_writable() {
 	elif (( (PERM & 0020) != 0 )); then
 		# Some group has write access.
 		# Is user in that group?
-		mapfile -t gs < <(groups "$user")
+#		mapfile -t gs < <(groups "$user")
+		read -a gs <<< "$(groups "$user")"
 		for g in "${gs[@]}"; do
 			if [[ $GROUP == "$g" ]]; then
 				ACCESS=yes

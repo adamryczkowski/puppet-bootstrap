@@ -52,7 +52,7 @@ function get_ubuntu_version() {
 		echo "18${infix}04"
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 function get_ubuntu_codename() {
@@ -60,7 +60,7 @@ function get_ubuntu_codename() {
 	local pattern='^Codename:\s*([^ ]+)$'
 	tmp=$(lsb_release --codename 2>/dev/null | grep Codename)
 	if [[ ! "$tmp" =~ $pattern ]]; then
-		return 1
+		return 0
 	fi
 	local codename=${BASH_REMATCH[1]}
 	if [[ "${codename}" == "tina" ]]; then
@@ -81,7 +81,7 @@ function get_distribution() {
 		echo "${BASH_REMATCH[1]}"
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 
@@ -135,7 +135,7 @@ EOT
 		logexec sudo service "$name" start
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 
@@ -155,7 +155,7 @@ function custom_systemd_service() {
 		logexec sudo service "$name" start
 		return 0
 	fi
-	return 1
+	return 0
 }
 
 function check_for_root() {
