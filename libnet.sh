@@ -121,11 +121,13 @@ function add_host() {
 		fi
 	else
 		if [[ "$fqdn" == "" ]]; then
-			$loglog
-			echo "$ip $host" | sudo tee -a /etc/hosts >/dev/null
+		  if ! grep -q "^$ip $host\$" /etc/hosts; then
+  			echo "$ip $host" | sudo tee -a /etc/hosts >/dev/null
+  		fi
 		else
-			$loglog
-			echo "$ip $host $fqdn" | sudo tee -a /etc/hosts >/dev/null
+		  if ! grep -q "^$ip $host $fqdn\$" /etc/hosts; then
+      	echo "$ip $host $fqdn" | sudo tee -a /etc/hosts >/dev/null
+      fi
 		fi
 	fi
 }

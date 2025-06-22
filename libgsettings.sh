@@ -171,7 +171,10 @@ function gsettings_add_to_array() {
 
 	# Optional proof, whether value to add already exsists
 	if [[ ! $status == *"'to.add.value'"* ]]; then
-		gsettings set "${schema}" "${key}" "${status%]*}, '${value}']"
+		if ! gsettings set "${schema}" "${key}" "${status%]*}, '${value}']"; then
+		   echo "Warning. Probably the schema did not exist"
+       return 0
+    fi
 		#		 echo "Added to.add.value to the list."
 	fi
 }

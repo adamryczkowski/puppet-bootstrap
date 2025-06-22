@@ -18,7 +18,7 @@ function smb_share_client() {
 	local remote_name=$2
 	local local_path=$3
 	local credentials_file=$4
-	local extra_opt=$5
+	local extra_opt=${5:-""}
 	if [ "${credentials_file}" == "auto" ]; then
 		credentials_file="/etc/samba/user"
 	fi
@@ -54,63 +54,78 @@ function mount_dir() {
 	return 0
 }
 
+#function fstab_entry() {
+#	local spec=$1
+#	local file=$2
+#	local vfstype=$3
+#	local opt=$4
+#	local dump=$5
+#	local passno=${6:-""}
+#	install_apt_package augeas-tools augtool
+#	logheredoc EOT
+#	cat >/tmp/fstab.augeas<<EOT
+##!/usr/bin/augtool -Asf
+#
+## The -A combined with this makes things much faster
+## by loading only the required lens/file
+#transform Fstab.lns incl /etc/fstab
+#load
+#
+## \$noentry will match /files/etc/fstab only if the entry isn't there yet
+#defvar noentry /files/etc/fstab[count(*[file="${file}"])=0]
+#
+## Create the entry if it's missing
+#set \$noentry/01/spec "${spec}"
+#set \$noentry/01/file "${file}"
+#
+## Now amend existing entry or finish creating the missing one
+#defvar entry /files/etc/fstab/*[file="${file}"]
+#
+#set \$entry/spec "${spec}"
+#set \$entry/vfstype "${vfstype}"
+##rm \$entry/opt
+#
+#EOT
+#	OLDIFS="$IFS"
+#	export IFS=","
+#	local i=1
+#	pattern='^([^=]+)=(.*)$'
+#	for entry in $opt; do
+#		if [ "$i" == "1" ]; then
+#			echo "ins opt after \$entry/vfstype">>/tmp/fstab.augeas
+#		else
+#			echo "ins opt after \$entry/opt[last()]">>/tmp/fstab.augeas
+#		fi
+#		if [[ "${entry}" =~ $pattern ]]; then
+#			lhs=${BASH_REMATCH[1]}
+#			rhs=${BASH_REMATCH[2]}
+#			echo "set \$entry/opt[last()] \"$lhs\"">>/tmp/fstab.augeas
+#			echo "set \$entry/opt[last()]/value \"${rhs}\"">>/tmp/fstab.augeas
+#		else
+#			echo "set \$entry/opt[last()] \"$entry\"">>/tmp/fstab.augeas
+#		fi
+#		(( i++ ))
+#	done
+#	export IFS="$OLDIFS"
+#	echo "set \$entry/dump \"${dump}\"">>/tmp/fstab.augeas
+#	echo "set \$entry/passno \"${passno}\"">>/tmp/fstab.augeas
+#	logexec sudo /usr/bin/augtool -Asf /tmp/fstab.augeas
+#
+#}
+
 function fstab_entry() {
 	local spec=$1
 	local file=$2
 	local vfstype=$3
 	local opt=$4
 	local dump=$5
-	local passno=$6
-	install_apt_package augeas-tools augtool
-	logheredoc EOT
-	cat >/tmp/fstab.augeas<<EOT
-#!/usr/bin/augtool -Asf
-
-# The -A combined with this makes things much faster
-# by loading only the required lens/file
-transform Fstab.lns incl /etc/fstab
-load
-
-# $noentry will match /files/etc/fstab only if the entry isn't there yet
-defvar noentry /files/etc/fstab[count(*[file="${file}"])=0]
-
-# Create the entry if it's missing
-set \$noentry/01/spec "${spec}"
-set \$noentry/01/file "${file}"
-
-# Now amend existing entry or finish creating the missing one
-defvar entry /files/etc/fstab/*[file="${file}"]
-
-set \$entry/spec "${spec}"
-set \$entry/vfstype "${vfstype}"
-rm \$entry/opt
-
-EOT
-	OLDIFS="$IFS"
-	export IFS=","
-	local i=1
-	pattern='^([^=]+)=(.*)$'
-	for entry in $opt; do
-		if [ "$i" == "1" ]; then
-			echo "ins opt after \$entry/vfstype">>/tmp/fstab.augeas
-		else
-			echo "ins opt after \$entry/opt[last()]">>/tmp/fstab.augeas
-		fi
-		if [[ "${entry}" =~ $pattern ]]; then
-			lhs=${BASH_REMATCH[1]}
-			rhs=${BASH_REMATCH[2]}
-			echo "set \$entry/opt[last()] \"$lhs\"">>/tmp/fstab.augeas
-			echo "set \$entry/opt[last()]/value \"${rhs}\"">>/tmp/fstab.augeas
-		else
-			echo "set \$entry/opt[last()] \"$entry\"">>/tmp/fstab.augeas
-		fi
-		(( i++ ))
-	done
-	export IFS="$OLDIFS"
-	echo "set \$entry/dump \"${dump}\"">>/tmp/fstab.augeas
-	echo "set \$entry/passno \"${passno}\"">>/tmp/fstab.augeas
-	logexec sudo /usr/bin/augtool -Asf /tmp/fstab.augeas
-
+	local passno=${6:-""}
+	# Check if the entry already exists for the given mount folder
+	if grep -qE "^[^#]*[[:space:]]+${file//\//\\/}[[:space:]]" /etc/fstab; then
+		return 0
+	fi
+	# Construct the fstab line
+	echo -e "${spec}\t${file}\t${vfstype}\t${opt}\t${dump}\t${passno}" | sudo tee -a /etc/fstab > /dev/null
 }
 
 #Iterates over all devices managed by dmsetup and returns true, if found the device with the given path

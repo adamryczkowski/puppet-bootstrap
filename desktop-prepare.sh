@@ -623,7 +623,7 @@ install_apt_packages owncloud-client libgnome-keyring0 python-keyring gnome-keyr
 function smb() {
 install_apt_package cifs-utils
 textfile /etc/samba/user "username=adam
-password=Zero tolerancji"
+password=Zero tolerancji" $user
 
 declare -a folders=("szesciodysk/filmy" "szesciodysk/niezbednik" "szesciodysk/docs" "szesciodysk/adam" "szesciodysk/zdjecia")
 declare -a shares=("filmy" "niezbednik" "docs" "adam" "zdjecia")
@@ -638,7 +638,7 @@ for ((i = 1; i < ${arraylength} + 1; i++)); do
 	logmkdir ${folder}
 	smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	foldername=$(basename ${folder})
-	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
+#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 done
 
 declare -a folders=("adam-minipc/download" "adam-minipc/other" "adam-minipc/unfinished" "adam-minipc/videos")
@@ -654,7 +654,7 @@ for ((i = 1; i < ${arraylength} + 1; i++)); do
 	logmkdir ${folder}
 	smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	foldername=$(basename ${folder})
-	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
+#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 done
 }
 
@@ -756,7 +756,6 @@ $(which julia) -e 'using Pkg;Pkg.add(["Revise", "IJulia", "Rebugger", "RCall", "
 
 function i3wm() {
 tweaks+="fix_backlight_permissions"
-set -x
 
 #	install_apt_package_file keyring.deb sur5r-keyring https://debian.sur5r.net/i3/pool/main/s/sur5r-keyring/sur5r-keyring_2023.02.18_all.deb
 #	add_apt_source_manual sur5r-i3 "deb [arch=amd64] http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe"
@@ -854,7 +853,6 @@ install_apt_packages fonts-noto fonts-hack fonts-font-awesome fonts-powerline
 install_apt_packages libinput-tools ruby
 
 #	get_git_repo https://github.com/flumm/Themes.git ${home}/tmp/i3themes i3themes
-install_pipx_command git+https://github.com/adamryczkowski/bright
 }
 
 function kitty() {
