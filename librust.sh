@@ -34,6 +34,7 @@ function install_rust() {
 			rm $rustup_script
 		fi
 	fi
+	install_apt_package build-essential
 
 	if [ ! -d "$rustup_dir" ]; then
 		echo "Rust installation failed."

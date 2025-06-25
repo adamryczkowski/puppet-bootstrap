@@ -357,7 +357,11 @@ if [ "${install_atuin}" == "1" ]; then
     if [ -d "$sshhome/.config/atuin" ]; then
       logexec rm -rf "$sshhome/.config/atuin"
     fi
-    make_symlink "$sshhome/.config/i3-config/atuin" "$sshhome/.config/atuin"
+    if [ -f "$sshhome/.config/i3-config/atuin/config.toml" ]; then
+      make_symlink "$sshhome/.config/i3-config/atuin" "$sshhome/.config/atuin"
+    else
+      install_data_file "files/atuin_config.toml" "$sshhome/.config/atuin.toml" "$user"
+    fi
   fi
 fi
 
@@ -383,6 +387,7 @@ fi
 
 if [ "${install_liquidprompt}" == "1" ]; then
   install_bash_preexec
+  install_apt_package liquidprompt
   # shellcheck disable=SC2016
   add_bashrc_lines 'echo $- | grep -q i 2>/dev/null && . /usr/share/liquidprompt/liquidprompt' "81_liquidprompt"
 fi
