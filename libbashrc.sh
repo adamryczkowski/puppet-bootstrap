@@ -138,7 +138,7 @@ function setup_bash_path_man() {
 	else
 		user="$1"
 	fi
-	add_bashrc_file files/bash.d/00_path.sh "00_path.sh" "$user"
+	add_bashrc_file files/bashrc.d/00_path.sh "00_path.sh" "$user"
 	home="$(get_home_dir "$user")"
 
 	if [ ! -f "$home/.path" ]; then

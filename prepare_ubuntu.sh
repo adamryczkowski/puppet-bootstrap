@@ -82,6 +82,7 @@ fi
 
 debug=0
 repo_path=""
+aptproxy=""
 install_rust=0
 install_wormhole=0
 install_pipx=0
