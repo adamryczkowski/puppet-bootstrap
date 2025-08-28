@@ -761,7 +761,7 @@ tweaks+="fix_backlight_permissions"
 #	add_apt_source_manual sur5r-i3 "deb [arch=amd64] http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe"
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
-install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme acpi pulseaudio-utils pkg-config
+install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme acpi pulseaudio-utils pkg-config ruby-rubygems
 #   install_apt_packages qt4-qtconfig
 
 install_pipx_command "git+https://github.com/adamryczkowski/bright"
