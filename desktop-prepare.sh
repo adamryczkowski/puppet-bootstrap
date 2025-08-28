@@ -638,7 +638,7 @@ for ((i = 1; i < ${arraylength} + 1; i++)); do
 	logmkdir ${folder}
 	smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	foldername=$(basename ${folder})
-#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
+	#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 done
 
 declare -a folders=("adam-minipc/download" "adam-minipc/other" "adam-minipc/unfinished" "adam-minipc/videos")
@@ -654,7 +654,7 @@ for ((i = 1; i < ${arraylength} + 1; i++)); do
 	logmkdir ${folder}
 	smb_share_client ${host} ${share} ${folder} /etc/samba/user
 	foldername=$(basename ${folder})
-#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
+	#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 done
 }
 
@@ -761,7 +761,7 @@ tweaks+="fix_backlight_permissions"
 #	add_apt_source_manual sur5r-i3 "deb [arch=amd64] http://debian.sur5r.net/i3/ $(get_ubuntu_codename) universe"
 
 #	/etc/apt/sources.list.d/sur5r-i3.list
-install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme acpi pulseaudio-utils
+install_apt_packages i3 alsa-utils pasystray apparmor-notify lxappearance scrot gnome-screenshot compton fonts-firacode suckless-tools terminator sysstat lxappearance gtk-chtheme acpi pulseaudio-utils pkg-config
 #   install_apt_packages qt4-qtconfig
 
 install_pipx_command "git+https://github.com/adamryczkowski/bright"
@@ -795,6 +795,10 @@ install_apt_packages pcmanfm units playerctl # albert
 
 #	install_apt_package_file libplayerctl2_2.0.1-1_amd64.deb libplayerctl2 http://ftp.nl.debian.org/debian/pool/main/p/playerctl/libplayerctl2_2.0.1-1_amd64.deb
 #	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb
+
+logmkdir "${home}/.config/xdg-desktop-portal"
+multilinetextfile "${home}/.config/xdg-desktop-portal/portals.conf" "[preferred]
+default=gtk;wlr"
 
 input_class_contents=$(
 	cat <<EOF
