@@ -106,7 +106,7 @@ function multilinetextfile() {
 	local plik="$1"
 	local variablename="$2"
 
-	local contents="${!variablename}"
+	local contents="${variablename}"
 
 	if [ -z "$contents" ]; then
 		errcho "Empty contents to multilinetextfile"

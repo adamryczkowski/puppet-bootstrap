@@ -797,8 +797,9 @@ install_apt_packages pcmanfm units playerctl # albert
 #	install_apt_package_file playerctl_2.0.1-1_amd64.deb playerctl http://ftp.nl.debian.org/debian/pool/main/p/playerctl/playerctl_2.0.1-1_amd64.deb
 
 logmkdir "${home}/.config/xdg-desktop-portal"
-multilinetextfile "${home}/.config/xdg-desktop-portal/portals.conf" "[preferred]\
+contents="[preferred]
 default=gtk;wlr"
+multilinetextfile "${home}/.config/xdg-desktop-portal/portals.conf" contents
 
 input_class_contents=$(
 	cat <<EOF
