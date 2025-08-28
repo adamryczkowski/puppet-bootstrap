@@ -43,6 +43,8 @@ function install_rust() {
 
 	export PATH="$PATH:$rustup_dir/bin"
 	add_bashrc_lines '. "$HOME/.cargo/env"' "05_rust"
+  source $HOME/.cargo/env
+  rustup default stable
 }
 
 function install_rust_app() {

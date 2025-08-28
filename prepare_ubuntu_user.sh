@@ -54,6 +54,7 @@ install_bat=0
 install_bashrcd=0
 install_ping=0
 install_fzf=0
+install_tldr=0
 #install_du=0
 install_git_extra=0
 install_atuin=0
@@ -156,7 +157,7 @@ case $key in
 	install_fzf=1
   ;;
   --tldr)
-  install_pipx_command tldr
+  install_tldr=1
 	;;
 #	--du)
 #	install_du=1
@@ -267,6 +268,10 @@ fi
 if [ "${install_ping}" == "1" ]; then
   add_bashrc_lines 'alias ping="prettyping --nolegend"' "21_Pretty-ping_alias"
 #  linetextfile ${sshhome}/.bashrc 'alias ping="prettyping --nolegend"'
+fi
+
+if [ "${install_tldr}" == "1"]; then
+  install_pipx_command tldr
 fi
 
 if [ "${install_fzf}" == "1" ]; then
