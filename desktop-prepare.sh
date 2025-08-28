@@ -506,24 +506,24 @@ patch="--- /tmp/symbols_pc.patch	2025-08-28 14:47:47.136168607 +0200
 +++ /usr/share/X11/xkb/symbols/pc	2025-05-06 11:38:30.013552499 +0200
 @@ -28,7 +28,8 @@
 
-     modifier_map Shift   { Shift_L, Shift_R };
-     modifier_map Lock    { Caps_Lock };
+modifier_map Shift   { Shift_L, Shift_R };
+modifier_map Lock    { Caps_Lock };
 -    modifier_map Control { Control_L, Control_R };
 +    modifier_map Control { Control_L };
 +    modifier_map Mod3    { Control_R };
-     modifier_map Mod1    { Alt_L, Alt_R, Meta_L, Meta_R };
-     modifier_map Mod2    { Num_Lock };
-     modifier_map Mod4    { Super_L, Super_R };
+modifier_map Mod1    { Alt_L, Alt_R, Meta_L, Meta_R };
+modifier_map Mod2    { Num_Lock };
+modifier_map Mod4    { Super_L, Super_R };
 @@ -37,7 +38,7 @@
-     key <LVL3> {[  ISO_Level3_Shift  ]};
-     modifier_map Mod5  { <LVL3> };
+key <LVL3> {[  ISO_Level3_Shift  ]};
+modifier_map Mod5  { <LVL3> };
 
 -    key <LVL5> {[  ISO_Level5_Shift  ]};
 +    key <LVL5> {[  ISO_Level5_Shift, Control_R  ]};
-     modifier_map Mod3  { <LVL5> };
+modifier_map Mod3  { <LVL5> };
 
-     key  <ALT> {[  NoSymbol, Alt_L  ]};
- };
+key  <ALT> {[  NoSymbol, Alt_L  ]};
+};
 -
 "
 echo "$patch" >/tmp/symbols_pc.patch
@@ -645,12 +645,12 @@ add_host $host 192.168.10.6 ${host}.dom.statystyka.net
 local i=1
 arraylength=${#folders[@]}
 for ((i = 1; i < ${arraylength} + 1; i++)); do
-	folder=/media/${folders[$i - 1]}
-	share=${shares[$i - 1]}
-	logmkdir ${folder}
-	smb_share_client ${host} ${share} ${folder} /etc/samba/user
-	foldername=$(basename ${folder})
-	#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
+folder=/media/${folders[$i - 1]}
+share=${shares[$i - 1]}
+logmkdir ${folder}
+smb_share_client ${host} ${share} ${folder} /etc/samba/user
+foldername=$(basename ${folder})
+#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 done
 
 declare -a folders=("adam-minipc/download" "adam-minipc/other" "adam-minipc/unfinished" "adam-minipc/videos")
@@ -661,12 +661,12 @@ add_host $host 192.168.10.2 ${host}.dom.statystyka.net
 local i=1
 arraylength=${#folders[@]}
 for ((i = 1; i < ${arraylength} + 1; i++)); do
-	folder=/media/${folders[$i - 1]}
-	share=${shares[$i - 1]}
-	logmkdir ${folder}
-	smb_share_client ${host} ${share} ${folder} /etc/samba/user
-	foldername=$(basename ${folder})
-	#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
+folder=/media/${folders[$i - 1]}
+share=${shares[$i - 1]}
+logmkdir ${folder}
+smb_share_client ${host} ${share} ${folder} /etc/samba/user
+foldername=$(basename ${folder})
+#	gsettings_add_to_array com.canonical.Unity.Devices blacklist ${foldername}
 done
 }
 
@@ -677,39 +677,39 @@ localhome=$(get_home_dir $user)
 logmkdir /opt/gedit-plugins
 
 if [ ! -f "${localhome}/.local/share/gedit/plugins/pair_char_completion.py" ]; then
-	plik=$(get_cached_file gedit-pair-char-completion-1.0.6-gnome3.tar.gz https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/gedit-pair-char-autocomplete/gedit-pair-char-completion-1.0.6-gnome3.tar.gz)
-	tmpdir=$(mktemp -d)
+plik=$(get_cached_file gedit-pair-char-completion-1.0.6-gnome3.tar.gz https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/gedit-pair-char-autocomplete/gedit-pair-char-completion-1.0.6-gnome3.tar.gz)
+tmpdir=$(mktemp -d)
 
-	uncompress_cached_file $plik $tmpdir $user pair_char_completion
-	pushd $tmpdir/pair_char_completion
-	logexec ${tmpdir}/pair_char_completion/install.sh
-	popd
+uncompress_cached_file $plik $tmpdir $user pair_char_completion
+pushd $tmpdir/pair_char_completion
+logexec ${tmpdir}/pair_char_completion/install.sh
+popd
 fi
 gsettings_add_to_array org.gnome.gedit.plugins active-plugins pair_char_completion
 
 if [ ! -f "${localhome}/.local/share/gedit/plugins/ex-mortis.plugin" ]; then
-	install_gh_source jefferyto/gedit-ex-mortis /opt/gedit-plugins "" ex-mortis
+install_gh_source jefferyto/gedit-ex-mortis /opt/gedit-plugins "" ex-mortis
 
-	#		plik=$(get_cached_file gedit-ex-mortis.tar.gz https://github.com/jefferyto/gedit-ex-mortis/archive/master.tar.gz)
-	#		tmpdir=$(mktemp -d)
-	#		uncompress_cached_file $plik $tmpdir $user ex-mortis
-	logexec cp -R /opt/gedit-plugins/ex-mortis/ex-mortis ${localhome}/.local/share/gedit/plugins
-	logexec cp /opt/gedit-plugins/ex-mortis/ex-mortis.plugin ${localhome}/.local/share/gedit/plugins
+#		plik=$(get_cached_file gedit-ex-mortis.tar.gz https://github.com/jefferyto/gedit-ex-mortis/archive/master.tar.gz)
+#		tmpdir=$(mktemp -d)
+#		uncompress_cached_file $plik $tmpdir $user ex-mortis
+logexec cp -R /opt/gedit-plugins/ex-mortis/ex-mortis ${localhome}/.local/share/gedit/plugins
+logexec cp /opt/gedit-plugins/ex-mortis/ex-mortis.plugin ${localhome}/.local/share/gedit/plugins
 fi
 gsettings_add_to_array org.gnome.gedit.plugins active-plugins ex-mortis
 
 if [ ! -d "/usr/share/gedit/plugins/crypto" ]; then
-	plik=$(get_cached_file gedit-crypto.deb http://pietrobattiston.it/_media/gedit-crypto:gedit-crypto-plugin_0.5-1_all.deb)
-	install_apt_package_file "$plik" gedit-crypto-plugin
-	gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
+plik=$(get_cached_file gedit-crypto.deb http://pietrobattiston.it/_media/gedit-crypto:gedit-crypto-plugin_0.5-1_all.deb)
+install_apt_package_file "$plik" gedit-crypto-plugin
+gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
 fi
 gsettings_add_to_array org.gnome.gedit.plugins active-plugins crypto
 
 if [ ! -f "${localhome}/.local/share/gedit/plugins/controlyourtabs.plugin" ]; then
-	install_gh_source jefferyto/gedit-control-your-tabs /opt/gedit-plugins "" control-your-tabs
+install_gh_source jefferyto/gedit-control-your-tabs /opt/gedit-plugins "" control-your-tabs
 
-	logexec cp -R /opt/gedit-plugins/control-your-tabs/controlyourtabs ${localhome}/.local/share/gedit/plugins
-	logexec cp $/opt/gedit-plugins/control-your-tabs/controlyourtabs.plugin ${localhome}/.local/share/gedit/plugins
+logexec cp -R /opt/gedit-plugins/control-your-tabs/controlyourtabs ${localhome}/.local/share/gedit/plugins
+logexec cp $/opt/gedit-plugins/control-your-tabs/controlyourtabs.plugin ${localhome}/.local/share/gedit/plugins
 fi
 gsettings_add_to_array org.gnome.gedit.plugins active-plugins controlyourtabs
 install_apt_packages gedit-plugins gedit-plugin-text-size
@@ -748,10 +748,10 @@ local julia_path
 julia_version=$(get_latest_github_release_name JuliaLang/julia skip_v)
 local pattern='^([0-9]+\.[0-9])\..*'
 if [[ $julia_version =~ $pattern ]]; then
-	local short_version=${BASH_REMATCH[1]}
+local short_version=${BASH_REMATCH[1]}
 else
-	echo "Wrong format of version: ${julia_version}"
-	return 1
+echo "Wrong format of version: ${julia_version}"
+return 1
 fi
 local julia_file="julia-${julia_version}-linux-x86_64.tar.gz"
 local julia_link="https://julialang-s3.julialang.org/bin/linux/x64/${short_version}/${julia_file}"
@@ -780,13 +780,13 @@ install_pipx_command "git+https://github.com/adamryczkowski/bright"
 
 get_git_repo https://github.com/vivien/i3blocks "${home}/tmp"
 if ! which i3blocks >/dev/null; then
-	install_apt_packages autoconf automake build-essential
-	pushd "${home}/tmp/i3blocks"
-	logexec ./autogen.sh
-	logexec ./configure
-	logexec make
-	logexec sudo make install
-	popd
+install_apt_packages autoconf automake build-essential
+pushd "${home}/tmp/i3blocks"
+logexec ./autogen.sh
+logexec ./configure
+logexec make
+logexec sudo make install
+popd
 fi
 logmkdir "${home}/.config"
 
@@ -814,7 +814,7 @@ default=gtk;wlr"
 multilinetextfile "${home}/.config/xdg-desktop-portal/portals.conf" contents
 
 input_class_contents=$(
-	cat <<EOF
+cat <<EOF
 Section "InputClass"
     Identifier "libinput touchpad catchall"
     MatchIsTouchpad "on"
@@ -831,8 +831,8 @@ textfile "/etc/X11/xorg.conf.d/40-libinput.conf" "${input_class_contents}" root
 #Dark theme
 install_apt_packages gnome-themes-extra
 if [ ! -f "${home}/.config/gtk-3.0/settings.ini" ]; then
-	logmkdir "${home}/.config/gtk-3.0"
-	textfile "${home}/.config/gtk-3.0/settings.ini" "[Settings]
+logmkdir "${home}/.config/gtk-3.0"
+textfile "${home}/.config/gtk-3.0/settings.ini" "[Settings]
 gtk-application-prefer-dark-theme=1
 gtk-theme-name=Adwaita-dark
 gtk-icon-theme-name=hicolor
@@ -848,10 +848,10 @@ gtk-enable-input-feedback-sounds=1
 gtk-xft-antialias=1
 gtk-xft-hinting=1
 gtk-xft-hintstyle=hintfull
-	" "${user}"
+" "${user}"
 else
-	linetextfile "${home}/.config/gtk-3.0/settings.ini" "gtk-application-prefer-dark-theme=1"
-	linetextfile "${home}/.config/gtk-3.0/settings.ini" "gtk-theme-name=Adwaita-dark"
+linetextfile "${home}/.config/gtk-3.0/settings.ini" "gtk-application-prefer-dark-theme=1"
+linetextfile "${home}/.config/gtk-3.0/settings.ini" "gtk-theme-name=Adwaita-dark"
 fi
 
 #https://i3wm.org/docs/repositories.html
@@ -867,7 +867,18 @@ fi
 
 install_apt_packages fonts-noto fonts-hack fonts-font-awesome fonts-powerline
 
-install_apt_packages libinput-tools ruby
+install_apt_packages libinput-tools
+
+if ! fc-list | grep -q "FiraCodeNerdFont-Medium"; then
+echo "Installing FiraCode Nerd Font..."
+install_apt_package jq curl
+download_file files/FiraCode.tar.xz $(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")
+extract_archive files/FiraCode.tar.xz files $user onedir FiraCodeNerd
+logmkdir "$sshhome/.local/share/fonts"
+logexec mv files/FiraCodeNerd/*.ttf "$sshhome/.local/share/fonts"
+logexec sudo fc-cache -fv
+logexec rm -rf files/FiraCodeNerd
+fi
 
 #	get_git_repo https://github.com/flumm/Themes.git ${home}/tmp/i3themes i3themes
 }
@@ -883,7 +894,7 @@ uncompress_cached_file "$file" /opt/kitty $user
 
 make_symlink /opt/kitty/bin/kitty /usr/local/bin/kitty
 if which nemo >/dev/null; then
-	gsettings set_value org.cinnamon.desktop.default-applications.terminal exec "kitty"
+gsettings set_value org.cinnamon.desktop.default-applications.terminal exec "kitty"
 fi
 
 logexec sudo update-alternatives --install /usr/bin/x-terminal-emulator x-terminal-emulator /opt/kitty/bin/kitty 100
