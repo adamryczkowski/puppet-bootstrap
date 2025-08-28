@@ -564,7 +564,7 @@ function extract_archive() {
 # shellcheck disable=SC2120
 function make_sure_dtrx_exists() {
 	# TODO: Re-implement this function using libpipx.sh.
-	local mute="$1"
+	local mute="${1:-}"
 	if ! which dtrx >/dev/null; then
 		if [[ $mute == "" ]]; then
 			install_apt_package dtrx dtrx
