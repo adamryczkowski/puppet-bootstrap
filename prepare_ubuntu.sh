@@ -297,9 +297,7 @@ if [ -n "$debug" ]; then
   fi
 fi
 
-if check_for_root; then
-  exit 1
-fi
+check_for_root;
 
 install_apt_package wget wget
 install_apt_package jq jq
