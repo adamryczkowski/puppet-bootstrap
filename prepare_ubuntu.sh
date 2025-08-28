@@ -298,7 +298,7 @@ if [ -n "$debug" ]; then
 fi
 
 if check_for_root; then
-  return 1
+  exit 1
 fi
 
 install_apt_package wget wget
