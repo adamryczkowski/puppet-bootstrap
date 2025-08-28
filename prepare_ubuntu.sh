@@ -75,10 +75,15 @@ cd "$mypath" || exit 1
 
 users=()
 pattern='^--.*$'
-if [[ "${1:-}" == "" || ! "$1" =~ $pattern ]]; then
-  users+=("$1")
-  shift
+if [[ "${1:-}" == "" ]]; then
+  users=("$USER")
+else
+  if [[ "${1:-}" =~ $pattern ]]; then
+    users+=("$1")
+    shift
+  fi
 fi
+
 
 debug=0
 repo_path=""
