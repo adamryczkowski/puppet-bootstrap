@@ -502,7 +502,7 @@ cp_file "$(get_cached_file fix_jpeg_rotation_files.nemo_action https://raw.githu
 
 function mod3() {
 set -x
-patch="--- /home/adam/keys_original.c	2025-08-28 14:47:47.136168607 +0200
+patch="--- /tmp/symbols_pc.patch	2025-08-28 14:47:47.136168607 +0200
 +++ /usr/share/X11/xkb/symbols/pc	2025-05-06 11:38:30.013552499 +0200
 @@ -28,7 +28,8 @@
 
