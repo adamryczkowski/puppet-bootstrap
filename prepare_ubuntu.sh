@@ -75,7 +75,7 @@ cd "$mypath" || exit 1
 
 users=()
 pattern='^--.*$'
-if [[ ! "${1:-}" =~ $pattern ]]; then
+if [[ "${1:-}" == "" || ! "$1" =~ $pattern ]]; then
   users+=("$1")
   shift
 fi
