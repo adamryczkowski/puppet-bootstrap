@@ -502,18 +502,33 @@ cp_file "$(get_cached_file fix_jpeg_rotation_files.nemo_action https://raw.githu
 
 function mod3() {
 set -x
-patch="--- /usr/share/X11/xkb/symbols/pc	2024-02-05 02:24:20.000000000 +0100
-+++ pc	2025-05-24 12:38:16.221637893 +0200
+patch="--- /home/adam/keys_original.c	2025-08-28 14:47:47.136168607 +0200
++++ /usr/share/X11/xkb/symbols/pc	2025-05-06 11:38:30.013552499 +0200
 @@ -28,7 +28,8 @@
 
-modifier_map Shift   { Shift_L, Shift_R };
-modifier_map Lock    { Caps_Lock };
+     modifier_map Shift   { Shift_L, Shift_R };
+     modifier_map Lock    { Caps_Lock };
 -    modifier_map Control { Control_L, Control_R };
 +    modifier_map Control { Control_L };
 +    modifier_map Mod3    { Control_R };
-modifier_map Mod1    { Alt_L, Alt_R, Meta_L, Meta_R };
-modifier_map Mod2    { Num_Lock };
-modifier_map Mod4    { Super_L, Super_R };"
+     modifier_map Mod1    { Alt_L, Alt_R, Meta_L, Meta_R };
+     modifier_map Mod2    { Num_Lock };
+     modifier_map Mod4    { Super_L, Super_R };
+@@ -37,7 +38,7 @@
+     key <LVL3> {[  ISO_Level3_Shift  ]};
+     modifier_map Mod5  { <LVL3> };
+
+-    key <LVL5> {[  ISO_Level5_Shift  ]};
++    key <LVL5> {[  ISO_Level5_Shift, Control_R  ]};
+     modifier_map Mod3  { <LVL5> };
+
+     key  <ALT> {[  NoSymbol, Alt_L  ]};
+@@ -89,4 +90,3 @@
+     key <KIDN> {[  XF86KbdBrightnessDown  ]};
+     key <KIUP> {[  XF86KbdBrightnessUp  ]};
+ };
+-
+"
 echo "$patch" >/tmp/symbols_pc.patch
 
 #	apply_patch /usr/share/X11/xkb/symbols/pc 2019c40a10ccb69d6b1d95c5762f8c3a09fce64b 63867d13946f00aa9017937ef0b4d3aad25caa52 /tmp/symbols_pc.patch
