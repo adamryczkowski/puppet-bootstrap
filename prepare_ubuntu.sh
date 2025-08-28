@@ -84,7 +84,7 @@ else
   fi
 fi
 
-
+private_key_path=""
 debug=0
 repo_path=""
 aptproxy=""
