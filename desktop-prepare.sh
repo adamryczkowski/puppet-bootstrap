@@ -874,8 +874,8 @@ echo "Installing FiraCode Nerd Font..."
 install_apt_package jq curl
 download_file files/FiraCode.tar.xz $(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")
 extract_archive files/FiraCode.tar.xz files $user onedir FiraCodeNerd
-logmkdir "$sshhome/.local/share/fonts"
-logexec mv files/FiraCodeNerd/*.ttf "$sshhome/.local/share/fonts"
+logmkdir "$home/.local/share/fonts"
+logexec mv files/FiraCodeNerd/*.ttf "$home/.local/share/fonts"
 logexec sudo fc-cache -fv
 logexec rm -rf files/FiraCodeNerd
 fi
