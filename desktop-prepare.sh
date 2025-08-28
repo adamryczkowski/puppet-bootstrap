@@ -523,9 +523,6 @@ patch="--- /home/adam/keys_original.c	2025-08-28 14:47:47.136168607 +0200
      modifier_map Mod3  { <LVL5> };
 
      key  <ALT> {[  NoSymbol, Alt_L  ]};
-@@ -89,4 +90,3 @@
-     key <KIDN> {[  XF86KbdBrightnessDown  ]};
-     key <KIUP> {[  XF86KbdBrightnessUp  ]};
  };
 -
 "
