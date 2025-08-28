@@ -283,7 +283,7 @@ while [[ $# -gt 0 ]]; do
     install_dtrx=1
     ;;
   -*)
-    echo "Error: Unknown option: $1" >&2
+    echo "Error: Unknown option: ${1:-}" >&2
     echo "$usage" >&2
     ;;
   esac

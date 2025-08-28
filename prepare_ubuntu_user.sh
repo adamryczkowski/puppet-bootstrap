@@ -37,6 +37,7 @@ where
  --fzf                    - fzf (for bash ctr+r)
  --difft                  - difftastic (diff replacement),
  --find                   - fd (replaces find)
+ --tldr                   - tldr
  --du                     - ncdu (replaces du),
  --liquidprompt           - liquidprompt
  --git-extra              - git extra (https://github.com/unixorn/git-extra-commands)
@@ -153,6 +154,9 @@ case $key in
 	;;
 	--fzf)
 	install_fzf=1
+  ;;
+  --tldr)
+  install_pipx_command tldr
 	;;
 #	--du)
 #	install_du=1
