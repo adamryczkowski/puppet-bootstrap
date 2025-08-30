@@ -37,6 +37,8 @@ where
 - kitty
 - waterfox (=firefox)
 - julia
+- firefox
+- thunderbird
 
 --user <user name>       - Name of user. If specified, some extra user-specific tasks
 will be performed for most of the tricks.
@@ -103,7 +105,7 @@ while [[ $# -gt 0 ]]; do
     echo "$usage"
     exit 0
     ;;
-  -*)
+  -* )
     echo "Error: Unknown option: $1" >&2
     echo "$usage" >&2
     ;;
@@ -159,8 +161,8 @@ function desktop {
   gsettings_set_value org.gnome.desktop.screensaver ubuntu-lock-on-suspend false
   gsettings_set_value com.canonical.Unity integrated-menus true
   gsettings_set_value org.gnome.desktop.input-sources show-all-sources true
-  #	set_gsettings_array org.gnome.desktop.input-sources sources "[('xkb', 'pl+intl')]"
-  gsettings set org.gnome.desktop.input-sources sources "[('xkb,', 'pl+intl')]"
+  #	set_gsettings_array org.gnome.desktop.input-sources sources "[(\'xkb\', \'pl+intl\')]"
+  gsettings set org.gnome.desktop.input-sources sources "[(\'xkb,\', \'pl+intl\')]"
 
   if [ "$release" == "bionic" ]; then
     install_apt_package gnome-tweak-tool
@@ -582,26 +584,75 @@ install_apt_package waterfox
 }
 
 function firefox() {
-install_apt_package firefox
-#TODO: Install scrapbook with python -m pip install -U webscrapbook
-#Then make a user systemd script on ~/.local/share/systemd/user/scrapbook.service with contents:
-#[Unit]
-#Description=WebScrapbook serve component
-#
-#[Service]
-#WorkingDirectory=/home/Adama-docs/Adam/Scrapbook
-#RemainAfterExit=true
-#ExecStart=/home/adam/.local/bin/wsb serve
-#
-#[Install]
-#WantedBy=default.target
-#
-#
-# enable the script with systemctl --user enable scrapbook
-# and then run it with systemctl --user start scrapbook
-#
-# To convert from the old scrapbook X with wsb convert sb2wsb /path/to/webscrapbook /path/to/scrapbookX
+  # Install Firefox from mozillateam PPA (apt) instead of Snap
+  if which snap >/dev/null 2>/dev/null; then
+    if snap list | grep -q '^firefox '; then
+      logexec sudo snap remove firefox || true
+    fi
+  fi
 
+  # Detect origin of installed APT package, if any
+  local installed ver origin need_purge
+  need_purge=0
+  ver=$(apt-cache policy firefox 2>/dev/null | awk '/Installed:/ {print $2}') || ver=""
+  if [ -n "${ver:-}" ] && [ "${ver}" != "(none)" ]; then
+    origin=$(apt-cache policy firefox 2>/dev/null | awk -v ver="$ver" '$1=="***" && index($0,ver){f=1; next} f && $0 ~ /http/ {print $2; exit}') || origin=""
+    # If already installed from mozillateam PPA, exit early successfully
+    if echo "${origin}" | grep -q 'ppa\.launchpadcontent\.net/mozillateam/ppa'; then
+      return 0
+    fi
+    # If installed from the Ubuntu archive, plan to purge before re-install
+    if echo "${origin}" | grep -q 'archive\.ubuntu\.com'; then
+      need_purge=1
+    fi
+  fi
+
+  add_ppa mozillateam/ppa
+  textfile /etc/apt/preferences.d/mozillateamppa-firefox "Package: firefox*
+Pin: release o=LP-PPA-mozillateam
+Pin-Priority: 501" root
+  do_update 1
+
+  if [ "${need_purge}" = "1" ]; then
+    purge_apt_package firefox || true
+  fi
+  install_apt_package firefox firefox
+}
+
+function thunderbird() {
+  # Install Thunderbird from mozillateam PPA (apt) instead of Snap
+  if which snap >/dev/null 2>/dev/null; then
+    if snap list | grep -q '^thunderbird '; then
+      logexec sudo snap remove thunderbird || true
+    fi
+  fi
+
+  # Detect origin of installed APT package, if any
+  local ver origin need_purge
+  need_purge=0
+  ver=$(apt-cache policy thunderbird 2>/dev/null | awk '/Installed:/ {print $2}') || ver=""
+  if [ -n "${ver:-}" ] && [ "${ver}" != "(none)" ]; then
+    origin=$(apt-cache policy thunderbird 2>/dev/null | awk -v ver="$ver" '$1=="***" && index($0,ver){f=1; next} f && $0 ~ /http/ {print $2; exit}') || origin=""
+    # If already installed from mozillateam PPA, exit early successfully
+    if echo "${origin}" | grep -q 'ppa\.launchpadcontent\.net/mozillateam/ppa'; then
+      return 0
+    fi
+    # If installed from the Ubuntu archive, plan to purge before re-install
+    if echo "${origin}" | grep -q 'archive\.ubuntu\.com'; then
+      need_purge=1
+    fi
+  fi
+
+  add_ppa mozillateam/ppa
+  textfile /etc/apt/preferences.d/mozillateamppa-thunderbird "Package: thunderbird*
+Pin: release o=LP-PPA-mozillateam
+Pin-Priority: 501" root
+  do_update 1
+
+  if [ "${need_purge}" = "1" ]; then
+    purge_apt_package thunderbird || true
+  fi
+  install_apt_package thunderbird thunderbird
 }
 
 function zulip() {
@@ -872,7 +923,7 @@ install_apt_packages libinput-tools
 if ! fc-list | grep -q "FiraCodeNerdFont-Medium"; then
 echo "Installing FiraCode Nerd Font..."
 install_apt_package jq curl
-download_file files/FiraCode.tar.xz $(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")
+download_file files/FiraCode.tar.xz "$(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")"
 extract_archive files/FiraCode.tar.xz files $user onedir FiraCodeNerd
 logmkdir "$home/.local/share/fonts"
 logexec mv files/FiraCodeNerd/*.ttf "$home/.local/share/fonts"
