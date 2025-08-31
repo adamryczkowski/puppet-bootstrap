@@ -955,6 +955,61 @@ linetextfile ${home}/.bashrc 'alias ssh="kitty +kitten ssh"'
 # libxcb-composite0 libxcb-render0-dev libxcb-shape0-dev libxcb-shm0-dev libxcb-util-dev
 #libxcb-xfixes0-dev libxext-dev libxrender-dev x11proto-xext-dev
 }
+function keyboard() {
+  # Install ibus-table-translit using the helper function
+  install_apt_packages ibus-table-translit
+
+  # Configure keyboard layout - add Polish international layout
+  if [ -f /etc/default/keyboard ]; then
+    # Check if XKBLAYOUT already contains 'pl'
+    if ! grep -q 'XKBLAYOUT.*pl' /etc/default/keyboard; then
+      # Get current layout if it exists
+      current_layout=$(grep '^XKBLAYOUT=' /etc/default/keyboard | cut -d= -f2 | tr -d '"')
+      if [ -n "$current_layout" ] && [ "$current_layout" != "pl" ]; then
+        # Add pl to existing layout
+        new_layout="${current_layout},pl"
+      else
+        # Set to pl only
+        new_layout="pl"
+      fi
+      # Use sed to update the line
+      logexec sudo sed -i "s/^XKBLAYOUT=.*/XKBLAYOUT=\"${new_layout}\"/" /etc/default/keyboard
+    fi
+
+    # Check if XKBVARIANT already contains 'intl'
+    if ! grep -q 'XKBVARIANT.*intl' /etc/default/keyboard; then
+      # Get current variant if it exists
+      current_variant=$(grep '^XKBVARIANT=' /etc/default/keyboard | cut -d= -f2 | tr -d '"')
+      if [ -n "$current_variant" ] && [ "$current_variant" != "intl" ]; then
+        # Add intl to existing variant
+        new_variant="${current_variant},intl"
+      else
+        # Set to intl only
+        new_variant="intl"
+      fi
+      # Use sed to update the line
+      logexec sudo sed -i "s/^XKBVARIANT=.*/XKBVARIANT=\"${new_variant}\"/" /etc/default/keyboard
+    fi
+
+    # If XKBVARIANT line doesn't exist, add it using linetextfile helper
+    if ! grep -q '^XKBVARIANT=' /etc/default/keyboard; then
+      linetextfile /etc/default/keyboard 'XKBVARIANT="intl"'
+    fi
+  else
+    # Create keyboard configuration file if it doesn't exist using textfile helper
+    keyboard_config='XKBMODEL="pc105"
+XKBLAYOUT="pl"
+XKBVARIANT="intl"
+XKBOPTIONS=""
+
+BACKSPACE="guess"'
+    textfile /etc/default/keyboard "$keyboard_config" root
+  fi
+
+  # Apply the keyboard configuration
+  logexec sudo dpkg-reconfigure -f noninteractive keyboard-configuration
+}
+
 
 function fix_backlight_permissions() {
 install_script files/fix_permissions.sh '/usr/local/lib/adam/scripts' root 1
