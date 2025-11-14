@@ -19,6 +19,35 @@ DIR=$( cd "$( dirname "${BASH_SOURCE[1]}" )" && pwd )
 _ERR_HDR_FMT="%.8s %s@%s:%s:%s"
 _ERR_MSG_FMT="[${_ERR_HDR_FMT}]%s \$"
 
+# Ensure $log points to a writable path. If the current path is not writable,
+# try to chown it (if created by sudo earlier) or fall back to $HOME/<basename>.
+_ensure_log_writable() {
+	if [ -z "$log" ]; then
+		return 0
+	fi
+	case "$log" in
+		/dev/stdout|/dev/stderr) return 0 ;;
+	esac
+	# If exists but not writable, try to take ownership and make it writable
+	if [ -e "$log" ] && [ ! -w "$log" ]; then
+		if command -v sudo >/dev/null 2>&1; then
+			sudo chown "$USER":"$(id -gn)" "$log" 2>/dev/null || true
+			sudo chmod u+rw "$log" 2>/dev/null || true
+		fi
+	fi
+	# If still not writable or directory is not writable, choose a fallback
+	if ! touch "$log" >/dev/null 2>&1; then
+		local base
+		base="$(basename "$log")"
+		if touch "$HOME/$base" >/dev/null 2>&1; then
+			log="$HOME/$base"
+		else
+			# Last resort: disable logging
+			log=""
+		fi
+	fi
+}
+
 function msg() {
 	# shellcheck disable=SC2059
 	# shellcheck disable=SC2086
@@ -51,6 +80,7 @@ if [ "$repetition_count" -gt "0" ]; then
 	fi
 	return 254;
 fi
+if [ -n "$log" ]; then _ensure_log_writable; fi
 if [ -z "$log" ]; then
 	if [ -n "$USE_X" ]; then
 		set -x
@@ -169,11 +199,12 @@ tmpcmd=$(mktemp)
 echo "$line" > "$tmpcmd"
 tmpoutput=$(mktemp)
 if [ -n "$log" ]; then
-mymsg=$(msg)
-exec 3>&1 4>&2 >"$tmpoutput" 2>&1 # redirect stdout and stderr to tmpoutput
-set -x
-# shellcheck disable=SC1090
-source "$tmpcmd"
+	_ensure_log_writable
+	mymsg=$(msg)
+	exec 3>&1 4>&2 >"$tmpoutput" 2>&1 # redirect stdout and stderr to tmpoutput
+	set -x
+	# shellcheck disable=SC1090
+	source "$tmpcmd"
 exitstatus=$?
 set +x
 if [ "$common_debug" -eq "1" ]; then
@@ -251,6 +282,7 @@ function logmsg()
 {
 case $- in *x*) USE_X="-x" ;; *) USE_X= ;; esac
 set +x
+if [ -n "$log" ]; then _ensure_log_writable; fi
 if [ -n "$log" ]; then
 echo "$(msg) $*" >>"$log"
 fi
@@ -324,6 +356,7 @@ case $- in *x*) USE_X="-x" ;; *) USE_X= ;; esac
 #	if [ "$1" == "1" ]; then
 #		set -x
 #	fi
+if [ -n "$log" ]; then _ensure_log_writable; fi
 if [ -n "$log" ]; then
 #		trap - ERR
 _file=${BASH_SOURCE[1]##*/}
@@ -347,6 +380,7 @@ fi
 
 function logheading()
 {
+if [ -n "$log" ]; then _ensure_log_writable; fi
 if [ -n "$log" ]; then
 # shellcheck disable=SC2129
 echo >>"$log"

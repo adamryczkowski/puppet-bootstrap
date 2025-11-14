@@ -64,6 +64,7 @@ install_wormhole=0
 install_dtrx=0
 install_gitutils=0
 install_zoxide=0
+install_rg=0
 
 dir_resolve()
 {
@@ -153,11 +154,17 @@ case $key in
 	--zoxide)
 	install_zoxide=1
 	;;
+	--rg)
+	install_rg=1
+	;;
+	--ripgrep)
+	install_rg=1
+	;;
 	--fzf)
 	install_fzf=1
-  ;;
-  --tldr)
-  install_tldr=1
+	 ;;
+	 --tldr)
+	 install_tldr=1
 	;;
 #	--du)
 #	install_du=1
@@ -270,7 +277,7 @@ if [ "${install_ping}" == "1" ]; then
 #  linetextfile ${sshhome}/.bashrc 'alias ping="prettyping --nolegend"'
 fi
 
-if [ "${install_tldr}" == "1"]; then
+if [ "${install_tldr}" == "1" ]; then
   install_pipx_command tldr
 fi
 
@@ -392,6 +399,10 @@ if [ "${install_zoxide}" == "1" ]; then
   install_rust_app zoxide
   # shellcheck disable=SC2016
   add_bashrc_lines 'eval "$(zoxide init bash --cmd cd)"' "22_zoxide"
+fi
+
+if [ "${install_rg}" == "1" ]; then
+  install_rust_app ripgrep
 fi
 
 if [ "${install_liquidprompt}" == "1" ]; then

@@ -75,13 +75,10 @@ cd "$mypath" || exit 1
 
 users=()
 pattern='^--.*$'
-if [[ "${1:-}" == "" ]]; then
-  users=("$USER")
-else
-  if [[ "${1:-}" =~ $pattern ]]; then
-    users+=("$1")
-    shift
-  fi
+# If the first argument is a username (not an option), treat it as the primary user
+if [[ -n "${1:-}" && ! "${1:-}" =~ $pattern ]]; then
+  users+=("$1")
+  shift
 fi
 
 private_key_path=""
@@ -159,6 +156,10 @@ while [[ $# -gt 0 ]]; do
     shift
     ;;
   --users)
+    users+=("$1")
+    shift
+    ;;
+  --user)
     users+=("$1")
     shift
     ;;
@@ -289,7 +290,9 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-users+=("$USER")
+if [ ${#users[@]} -eq 0 ]; then
+  users+=("$USER")
+fi
 
 if [ -n "$debug" ]; then
   if [ -z "$log" ]; then
@@ -375,8 +378,10 @@ if [ "${install_ping}" == "1" ]; then
 fi
 
 if [ "${install_gping}" == "1" ]; then
-  add_apt_source_manual gping "deb http://packages.azlux.fr/debian/ buster main" https://azlux.fr/repo.gpg.key gping.gpg.key
-  install_apt_packages gping
+  if [ "${install_rust}" == "0" ]; then
+    add_apt_source_manual gping "deb http://packages.azlux.fr/debian/ buster main" https://azlux.fr/repo.gpg.key gping.gpg.key
+    install_apt_packages gping
+  fi
   user_opts="${user_opts} --gping"
 fi
 
@@ -516,7 +521,7 @@ if [ "${install_rg}" == "1" ]; then
       install_gh_binary BurntSushi/ripgrep /usr/local/share rg "" "" "" "" rg
     fi
   else
-    user_opts="${user_opts} --ripgrep"
+    user_opts="${user_opts} --rg"
   fi
 #	install_gh_deb BurntSushi/ripgrep ripgrep
 #	_arch=$(cpu_arch)
@@ -587,7 +592,7 @@ if [ "${install_wormhole}" == "1" ]; then
 fi
 
 # shellcheck disable=SC2128
-if [ -n "$users" ]; then
+if [ "${#users[@]}" -gt 0 ]; then
   if [ -n "$debug" ]; then
     user_opts="--debug ${user_opts}"
   fi
@@ -596,10 +601,13 @@ if [ -n "$users" ]; then
   fi
   pushd "$DIR" || exit 1
   #	set -x
-  echo ./prepare_ubuntu_user.sh "${users[0]}" "${user_opts}" "${private_key_path}"
-  bash -x ./prepare_ubuntu_user.sh "${users[0]}" "${user_opts}" "${private_key_path}"
+  # shellcheck disable=SC2086
+  echo ./prepare_ubuntu_user.sh "${users[0]}" ${user_opts} ${private_key_path}
+  # shellcheck disable=SC2086
+  bash -x ./prepare_ubuntu_user.sh "${users[0]}" ${user_opts} ${private_key_path}
   for user in "${users[@]:1}"; do
-    sudo -H -u "${user}" -- bash -x ./prepare_ubuntu_user.sh "${user}" "${user_opts}"
+    # shellcheck disable=SC2086
+    sudo -H -u "${user}" -- bash -x ./prepare_ubuntu_user.sh "${user}" ${user_opts}
   done
   popd || exit 1
 fi

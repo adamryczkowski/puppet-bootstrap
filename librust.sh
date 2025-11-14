@@ -10,41 +10,59 @@ function is_rust_installed() {
 
 # shellcheck disable=SC2120
 function install_rust() {
-	if [[ -z ${1+x} ]]; then
-		user="$USER"
-	else
-		user="$1"
-	fi
-	local rustup_dir
-	local rustup_url="https://sh.rustup.rs"
-	local rustup_script="rustup-init.sh"
-	rustup_dir="$(get_home_dir "$user")/.cargo"
-	local rustup_bin="$rustup_dir/bin/rustup"
+  # Determine target user robustly:
+  # 1) explicit param
+  # 2) 'user' variable from calling script (prepare_ubuntu_user.sh)
+  # 3) SUDO_USER when present and non-root
+  # 4) fallback to current USER
+  local target_user
+  if [[ -n ${1+x} && -n "$1" ]]; then
+    target_user="$1"
+  elif [[ -n ${user+x} && -n "$user" ]]; then
+    target_user="$user"
+  elif [[ -n ${SUDO_USER+x} && "$SUDO_USER" != "" && "$SUDO_USER" != "root" ]]; then
+    target_user="$SUDO_USER"
+  else
+    target_user="$USER"
+  fi
 
-	if [ ! -f "$rustup_bin" ]; then
-		logexec curl --proto '=https' --tlsv1.2 -sSf $rustup_url -o $rustup_script
-		if [ "$user" != "$USER" ]; then
-			chown "$user:$user" $rustup_script
-			chmod +x $rustup_script
-			logexec sudo -u "$user" ./$rustup_script -y
-			sudo rm $rustup_script
-		else
-			chmod +x $rustup_script
-			logexec ./$rustup_script -y
-			rm $rustup_script
-		fi
-	fi
-	install_apt_package build-essential
+  local rustup_url="https://sh.rustup.rs"
+  local rustup_script="rustup-init.sh"
+  local target_home
+  target_home="$(get_home_dir "$target_user")"
+  local rustup_dir="${target_home}/.cargo"
+  local rustup_bin="${rustup_dir}/bin/rustup"
 
-	if [ ! -d "$rustup_dir" ]; then
-		echo "Rust installation failed."
-		return 1
-	fi
+  if [ ! -f "$rustup_bin" ]; then
+    logexec curl --proto '=https' --tlsv1.2 -sSf "$rustup_url" -o "$rustup_script"
+    chmod +x "$rustup_script"
+    if [ "$target_user" != "$USER" ]; then
+      chown "$target_user:$target_user" "$rustup_script"
+      # Ensure HOME points to target user's home so rustup installs there
+      logexec sudo -H -u "$target_user" env HOME="$target_home" RUSTUP_INIT_SKIP_PATH_CHECK=yes ./"$rustup_script" -y
+      sudo rm -f "$rustup_script"
+    else
+      # Override HOME in case sudo -E preserved the caller HOME
+      logexec env HOME="$target_home" RUSTUP_INIT_SKIP_PATH_CHECK=yes ./"$rustup_script" -y
+      rm -f "$rustup_script"
+    fi
+  fi
 
-	export PATH="$PATH:$rustup_dir/bin"
-	add_bashrc_lines '. "$HOME/.cargo/env"' "05_rust"
-  source $HOME/.cargo/env
-  rustup default stable
+  install_apt_package build-essential
+
+  if [ ! -d "$rustup_dir" ]; then
+    echo "Rust installation failed."
+    return 1
+  fi
+
+  export HOME="$target_home"
+  export PATH="$PATH:$rustup_dir/bin"
+  add_bashrc_lines '. "$HOME/.cargo/env"' "05_rust" "$target_user"
+  if [ -f "$target_home/.cargo/env" ]; then
+    # shellcheck disable=SC1090
+    . "$target_home/.cargo/env"
+  fi
+  logexec sudo -H -u "$target_user" env HOME="$target_home" "$rustup_dir/bin/rustup" default stable
 }
 
 function install_rust_app() {

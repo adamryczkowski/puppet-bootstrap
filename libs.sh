@@ -159,11 +159,19 @@ function custom_systemd_service() {
 }
 
 function check_for_root() {
-	if which sudo >/dev/null; then
-		if ! sudo -n true 2>/dev/null; then
-			errcho "User $USER doesn't have admin rights"
-			return 1
+	# Do NOT require passwordless sudo. Allow interactive sudo later during apt installs.
+	# Success criteria:
+	#  - sudo exists AND either user is in sudo group OR `sudo -v` succeeds (may prompt),
+	#  - OR we are already root (then ensure sudo is present).
+	if command -v sudo >/dev/null 2>&1; then
+		if groups "$USER" 2>/dev/null | grep -q '\bsudo\b'; then
+			return 0
 		fi
+		if sudo -v; then
+			return 0
+		fi
+		errcho "User $USER doesn't have admin rights"
+		return 1
 	else
 		if [[ "$UID" != 0 ]]; then
 			errcho "No sudo present and user $USER is not root!"
