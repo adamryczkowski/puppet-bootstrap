@@ -111,9 +111,9 @@ if [ -n "$debug" ]; then
 	fi
 fi
 
-if [ -n "${install_lib}" ]; then
-	install_lib=$(pwd)/rdep
-fi
+#if [ -n "${install_lib}" ]; then
+#	install_lib=$(pwd)/rdep
+#fi
 
 
 if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/sources.list.d/* 2>/dev/null; then
@@ -125,37 +125,16 @@ if ! grep -q "^deb .*https://cran.rstudio.com" /etc/apt/sources.list /etc/apt/so
 	flag_need_apt_update=1
 fi
 
-install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-11-jdk pkg-config libnlopt-dev gdebi-core gfortran liblapack-dev
+install_apt_packages r-base-core libxml2-dev libssl-dev libcurl4-openssl-dev libssh2-1-dev sysbench openjdk-11-jdk pkg-config libnlopt-dev gdebi-core gfortran liblapack-dev libtiff-dev libfribidi-dev libharfbuzz-dev libfontconfig-dev 
 
-
-logexec sudo R CMD javareconf
-
-if ! which Rscript >/dev/null; then
-	errcho "Something wrong with the R install. Abort."
-	exit 1
-fi
-logheredoc EOT
-tee /tmp/prepare_R.R <<EOT
-dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings = FALSE, recursive = TRUE)
-if(!require('devtools')) install.packages('devtools', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
-if(!require('stringr')) install.packages('stringr', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
-EOT
-
-logexec Rscript /tmp/prepare_R.R
-# logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install_github('hadley/devtools', Ncpus=8, lib = Sys.getenv('R_LIBS_USER'))"
 
 
 if [ "$rstudio" == "1" ]; then
 	if ! dpkg -s rstudio>/dev/null  2> /dev/null; then
 		latest_version=$(get_latest_github_tag rstudio/rstudio 1 0)
 		latest_version=${latest_version//+/-}
-		codename=$(get_ubuntu_codename)
-		if [[ "$codename" == "focal" ]]; then
-			codename="bionic"
-		fi
 #		RSTUDIO_URI="https://download1.rstudio.org/desktop/${codename}/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"
-		RSTUDIO_URI="https://download1.rstudio.org/electron/bionic/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"
-
+		RSTUDIO_URI="https://download1.rstudio.org/electron/jammy/$(cpu_arch)/rstudio-${latest_version}-$(cpu_arch).deb"
 		wget -c "$RSTUDIO_URI" -O ${deb_folder}/rstudio_${latest_version}_$(cpu_arch).deb
 		logexec sudo gdebi --n ${deb_folder}/rstudio_${latest_version}_$(cpu_arch).deb
 		out=$?
@@ -220,6 +199,22 @@ if [ "$rstudio_server" == "1" ]; then
 	fi
 fi
 
+
+logexec sudo R CMD javareconf
+
+if ! which Rscript >/dev/null; then
+	errcho "Something wrong with the R install. Abort."
+	exit 1
+fi
+logheredoc EOT
+tee /tmp/prepare_R.R <<EOT
+dir.create(path = Sys.getenv("R_LIBS_USER"), showWarnings = FALSE, recursive = TRUE)
+if(!require('devtools')) install.packages('devtools', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
+if(!require('stringr')) install.packages('stringr', Ncpus=8, repos=setNames('${repo_server}', 'CRAN'), lib = Sys.getenv("R_LIBS_USER"))
+EOT
+
+logexec Rscript /tmp/prepare_R.R
+# logexec Rscript -e "repos=setNames('${repo_server}', 'CRAN');options(repos=repos);devtools::install_github('hadley/devtools', Ncpus=8, lib = Sys.getenv('R_LIBS_USER'))"
 
 
 
