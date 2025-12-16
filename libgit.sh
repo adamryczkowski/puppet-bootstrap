@@ -1,9 +1,14 @@
 #!/bin/bash
 ## dependency: binary_blob.bin
 
+# Try to load github token from encrypted file, but don't fail if it doesn't exist
+github_token=""
+if [ -f "${adamlibpath:-$(dirname "${BASH_SOURCE[0]}")}/binary_blob.bin" ]; then
+    github_token=$(openssl enc -d -in "${adamlibpath:-$(dirname "${BASH_SOURCE[0]}")}/binary_blob.bin" -pbkdf2 -aes-256-cbc -pass pass:BASH_REMATCH 2>/dev/null) || github_token=""
+fi
 
 function get_latest_github_release_name() { #source: https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
-  github_token=$(openssl enc -d -in binary_blob.bin -pbkdf2 -aes-256-cbc -pass pass:BASH_REMATCH)
+  # github_token is now loaded globally at script initialization
 	#   set +x
 	local skip_v=$2
 	if ! which curl >/dev/null; then

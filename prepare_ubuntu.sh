@@ -285,11 +285,7 @@ while [[ $# -gt 0 ]]; do
     install_dtrx=1
     ;;
   -*)
-<<<<<<< Updated upstream
-    echo "Error: Unknown option: ${1:-}" >&2
-=======
-    echo "Error: Unknown option: $key" >&2
->>>>>>> Stashed changes
+    echo "Error: Unknown option: ${key:-$1}" >&2
     echo "$usage" >&2
     ;;
   esac
@@ -305,13 +301,9 @@ if [ -n "$debug" ]; then
   fi
 fi
 
-<<<<<<< Updated upstream
-check_for_root;
-=======
 if ! check_for_root; then
   exit 1
 fi
->>>>>>> Stashed changes
 
 install_apt_package wget wget
 install_apt_package jq jq
@@ -441,12 +433,12 @@ if [ "${install_eza}" == "1" ]; then
     install_apt_package eza
   fi
   user_opts="${user_opts} --eza"
-  if command -v fc-list >/dev/null 2>&1; then
-    if ! fc-list | grep -Fq "FiraCode Nerd Font Med"; then
-      download_file "/tmp/FiraCode.tar.xz" "$(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")"
-      extract_archive "/tmp/FiraCode.tar.xz" "/usr/local/share/fonts" "root" "rename" "FiraCode"
-      logexec sudo fc-cache -f
-    fi
+  # Ensure fontconfig is installed for fc-list and fc-cache commands
+  install_apt_package fontconfig fc-cache
+  if ! fc-list | grep -Fq "FiraCode Nerd Font Med"; then
+    download_file "/tmp/FiraCode.tar.xz" "$(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")"
+    extract_archive "/tmp/FiraCode.tar.xz" "/usr/local/share/fonts" "root" "rename" "FiraCode"
+    logexec sudo fc-cache -f
   fi
 fi
 
@@ -614,15 +606,10 @@ if [ "${#users[@]}" -gt 0 ]; then
   fi
   pushd "$DIR" || exit 1
   #	set -x
-<<<<<<< Updated upstream
   # shellcheck disable=SC2086
-  echo ./prepare_ubuntu_user.sh "${users[0]}" ${user_opts} ${private_key_path}
+  echo ./prepare_ubuntu_user.sh "${users[0]}" ${user_opts} ${private_key_path:-}
   # shellcheck disable=SC2086
-  bash -x ./prepare_ubuntu_user.sh "${users[0]}" ${user_opts} ${private_key_path}
-=======
-  echo ./prepare_ubuntu_user.sh ${users[0]} ${user_opts} ${private_key_path:-}
-  bash -x ./prepare_ubuntu_user.sh ${users[0]} ${user_opts} ${private_key_path:-}
->>>>>>> Stashed changes
+  bash -x ./prepare_ubuntu_user.sh "${users[0]}" ${user_opts} ${private_key_path:-}
   for user in "${users[@]:1}"; do
     # shellcheck disable=SC2086
     sudo -H -u "${user}" -- bash -x ./prepare_ubuntu_user.sh "${user}" ${user_opts}

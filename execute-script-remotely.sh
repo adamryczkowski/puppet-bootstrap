@@ -308,8 +308,13 @@ case $exec_mode in
 	remote_dir=$(lxc exec ${exec_lxcname} --mode=non-interactive -- mktemp -d)
 	exec_prefix="lxc exec ${exec_lxcname} --mode=non-interactive -- "
 	for plik in ${dependencies[@]}; do
-		lxc exec ${exec_lxcname} --mode=non-interactive -- mkdir -p "$(dirname ${exec_lxcname}/${plik})"
-		lxc file push ${plik} ${exec_lxcname}/${remote_dir}/${plik}
+		lxc exec ${exec_lxcname} --mode=non-interactive -- mkdir -p "${remote_dir}/$(dirname ${plik})"
+		if [ -d "${plik}" ]; then
+			# For directories, use recursive push
+			lxc file push -r ${plik} ${exec_lxcname}/${remote_dir}/$(dirname ${plik})/
+		else
+			lxc file push ${plik} ${exec_lxcname}/${remote_dir}/${plik}
+		fi
 	done
 	if [ "root" != "${exec_user}" ]; then
 		${exec_prefix} chown -R ${exec_user} ${remote_dir}

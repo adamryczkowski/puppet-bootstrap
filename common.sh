@@ -1,138 +1,5 @@
 #!/bin/bash
-<<<<<<< Updated upstream
-
-#Defines various functions for logging purposes.
-#
-#
-if [ -z ${USE_X+x} ]; then
-	USE_X=""
-fi
-
-if [ -z ${log+x} ]; then
-	log=""
-fi
-
-shopt -s extdebug
-repetition_count=0
-
-DIR=$( cd "$( dirname "${BASH_SOURCE[1]}" )" && pwd )
-
-_ERR_HDR_FMT="%.8s %s@%s:%s:%s"
-_ERR_MSG_FMT="[${_ERR_HDR_FMT}]%s \$"
-
-# Ensure $log points to a writable path. If the current path is not writable,
-# try to chown it (if created by sudo earlier) or fall back to $HOME/<basename>.
-_ensure_log_writable() {
-	if [ -z "$log" ]; then
-		return 0
-	fi
-	case "$log" in
-		/dev/stdout|/dev/stderr) return 0 ;;
-	esac
-	# If exists but not writable, try to take ownership and make it writable
-	if [ -e "$log" ] && [ ! -w "$log" ]; then
-		if command -v sudo >/dev/null 2>&1; then
-			sudo chown "$USER":"$(id -gn)" "$log" 2>/dev/null || true
-			sudo chmod u+rw "$log" 2>/dev/null || true
-		fi
-	fi
-	# If still not writable or directory is not writable, choose a fallback
-	if ! touch "$log" >/dev/null 2>&1; then
-		local base
-		base="$(basename "$log")"
-		if touch "$HOME/$base" >/dev/null 2>&1; then
-			log="$HOME/$base"
-		else
-			# Last resort: disable logging
-			log=""
-		fi
-	fi
-}
-
-function msg() {
-	# shellcheck disable=SC2059
-	# shellcheck disable=SC2086
-	printf "$_ERR_MSG_FMT" "$(date +%T)" $USER $HOSTNAME $DIR/${BASH_SOURCE[2]##*/} ${BASH_LINENO[1]}
-	echo " ${*}"
-}
-
-function msg2() {
-	# shellcheck disable=SC2059
-	# shellcheck disable=SC2086
-	printf "$_ERR_MSG_FMT" "$(date +%T)" $USER $HOSTNAME $DIR/${BASH_SOURCE[2]##*/} $((BASH_LINENO[1] + 1 ))
-	echo " ${*}"
-}
-
-function rlog()
-{
-case $- in *x*) USE_X="-x";; *) USE_X=;; esac
-	set +x
-case $- in *e*) USE_E="-e" ;; *) USE_E= ;; esac
-if [ "${BASH_LINENO[0]}" -ne "$myline" ]; then
-	repetition_count=0
-	if [ -n "$USE_X" ]; then
-		set -x
-	fi
-	return 0;
-fi
-if [ "$repetition_count" -gt "0" ]; then
-	if [ -n "$USE_X" ]; then
-		set -x
-	fi
-	return 254;
-fi
-if [ -n "$log" ]; then _ensure_log_writable; fi
-if [ -z "$log" ]; then
-	if [ -n "$USE_X" ]; then
-		set -x
-	fi
-	return 0
-fi
-if [ "$1" == "1" ]; then
-	set -x
-fi
-#	trap - ERR
-file=${BASH_SOURCE[1]##*/}
-line="$(sed "1,$((myline-1)) d;${myline} s/^ *//; q" "$DIR/$file")"
-tmpcmd=$(mktemp)
-echo "$line" > "$tmpcmd"
-tmpoutput=$(mktemp)
-mymsg=$(msg)
-exec 3>&1 4>&2 >"$tmpoutput" 2>&1
-set -x
-set +e
-# shellcheck disable=SC1090
-source "$tmpcmd"
-set +x
-if [ "$1" == "1" ]; then
-	set -x
-fi
-exitstatus=$?
-rm "$tmpcmd"
-exec 1>&3 2>&4 4>&- 3>&-
-repetition_count=1 #This flag is to prevent multiple execution of the current line of code. This condition gets checked at the beginning of the function
-frstline=$(sed '1q' "$tmpoutput")
-[[ "$frstline" =~ ^(\++)[^+].*$ ]]
-eval 'tmp="${BASH_REMATCH[1]}"'
-pluscnt=$(( (${#tmp} + 1) *2 ))
-pluses="\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+\+"
-pluses=${pluses:0:$pluscnt}
-commandlines=$(awk "gsub(/^${pluses} /,\"\")" "$tmpoutput")
-n=0
-#There might me more then 1 command in the debugged line. The next loop appends each command to the log.
-while read -r line; do
-	if [ "$n" -ne "0" ]; then
-		echo "+ $line" >>"$log"
-	else
-		echo "${mymsg}$line" >>"$log"
-		n=1
-	fi
-done <<< "$commandlines"
-#Next line extracts all lines that are prefixed by sufficent number of "+" (usually 3), that are immidiately after the last line prefixed with $pluses, i.e. after the last command line.
-if [ -n "$USE_X" ]; then
-	awk "BEGIN {flag=0} /${pluses}/ { flag=1 } /^[^+]/ { if (flag==1) print \$0; }" "$tmpoutput" | tee -a "$log"
-=======
-DISABLE_LOGGING=1
+DISABLE_LOGGING=${DISABLE_LOGGING:-0}
 if [[ "${DISABLE_LOGGING:-}" == "1" ]]; then
   function rlog() {
     return 0
@@ -167,7 +34,6 @@ if [[ "${DISABLE_LOGGING:-}" == "1" ]]; then
   }
   log=""
   DIR=$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)
->>>>>>> Stashed changes
 else
 
   #Defines various functions for logging purposes.
@@ -184,109 +50,52 @@ else
   shopt -s extdebug
   repetition_count=0
 
-<<<<<<< Updated upstream
-function logexec()
-{
-case $- in *x*) USE_X="-x" ;; *) USE_X= ;; esac
-#	set +x
-case $- in *e*) USE_E="-e" ;; *) USE_E= ;; esac
-set +e
-if [ "$1" == "1" ]; then
-common_debug=1
-shift
-else
-common_debug=0
-fi
-if [ "$common_debug" -eq "1" ]; then
-set -x
-fi
-#	trap - ERR
-_file=${BASH_SOURCE[1]##*/}
-linenr=$((BASH_LINENO[0]-1))
-if [ ! -f "$DIR/$_file" ]; then
-msg "Cannot find file $DIR/$_file!!" >>"$log"
-line="$*"
-echo "$line" >>"$log"
-else
-line=$(sed "1,${linenr} d;$((linenr+1)) s/^\\s*//; q" "$DIR/$_file")
-line=${line:$(( ${#FUNCNAME[0]} + (common_debug == 1 ? 3 : 0) ))}
-fi
-tmpcmd=$(mktemp)
-echo "$line" > "$tmpcmd"
-tmpoutput=$(mktemp)
-if [ -n "$log" ]; then
-	_ensure_log_writable
-	mymsg=$(msg)
-	exec 3>&1 4>&2 >"$tmpoutput" 2>&1 # redirect stdout and stderr to tmpoutput
-	set -x
-	# shellcheck disable=SC1090
-	source "$tmpcmd"
-exitstatus=$?
-set +x
-if [ "$common_debug" -eq "1" ]; then
-set -x
-fi
-exec 1>&3 2>&4 4>&- 3>&- # restore stdout and stderr
-#		set +x
-#		echo "exitstatus=$exitstatus"
-#		echo "## line:"
-#		cat $tmpcmd
-#		echo "## output:"
-#		cat $tmpoutput
-#		echo "## End ouf output"
-#		echo "## _file: $DIR/$_file"
-#		echo "## linenr: $linenr"
-#		echo "## tmpcmd: $tmpcmd"
-#		set -x
-line=$(awk '/^\+\+/ { print $0; exit; }' "$tmpoutput")
-echo "${mymsg}${line:3}" >>"$log"
-if [ -n "$log" ]; then
-tmpoutput2=$(mktemp)
-awk -v file="$DIR/$_file" -v linenr="$linenr" -v tmpfile="$tmpcmd" '
-        BEGIN {start=0; stop=0}
-        /^\+\+/ {if (start==0) start=NR+1; else stop=1;}
-        /^\+[^\+]/ {if (start>0) stop=1;}
-        {if (start>0 && NR>=start && stop==0) print $0;}
-' "$tmpoutput" > $tmpoutput2
-#      if [ -n "$USE_X" ]; then
-#      else
-#        awk -v file="$DIR/$_file" -v linenr="$linenr" -v tmpfile="$tmpcmd" '
-#          BEGIN {start=0; stop=0}
-#          /^\+\+/ {if (start==0) start=NR+1; else stop=1;}
-#          /^\+[^\+]/ {if (start>0) stop=1;}
-#          {if (start>0 && NR>=start && stop==0) print $0;}
-#        ' "$tmpoutput" >> "$log"
-#      fi
-=======
   DIR=$(cd "$(dirname "${BASH_SOURCE[1]}")" && pwd)
->>>>>>> Stashed changes
 
   _ERR_HDR_FMT="%.8s %s@%s:%s:%s"
   _ERR_MSG_FMT="[${_ERR_HDR_FMT}]%s \$"
 
-<<<<<<< Updated upstream
-function logmsg()
-{
-case $- in *x*) USE_X="-x" ;; *) USE_X= ;; esac
-set +x
-if [ -n "$log" ]; then _ensure_log_writable; fi
-if [ -n "$log" ]; then
-echo "$(msg) $*" >>"$log"
-fi
-if [ -n "$USE_X" ]; then
-# shellcheck disable=SC2319
-echo "$?"
-set -x
-fi
-}
-=======
+  # Ensure $log points to a writable path. If the current path is not writable,
+  # try to chown it (if created by sudo earlier) or fall back to $HOME/<basename>.
+  _ensure_log_writable() {
+    if [ -z "$log" ]; then
+      return 0
+    fi
+    case "$log" in
+      /dev/stdout|/dev/stderr)
+        # Check if stdout/stderr is actually writable (may not be in containers)
+        if ! echo "" >> "$log" 2>/dev/null; then
+          log=""
+        fi
+        return 0
+        ;;
+    esac
+    # If exists but not writable, try to take ownership and make it writable
+    if [ -e "$log" ] && [ ! -w "$log" ]; then
+      if command -v sudo >/dev/null 2>&1; then
+        sudo chown "$USER":"$(id -gn)" "$log" 2>/dev/null || true
+        sudo chmod u+rw "$log" 2>/dev/null || true
+      fi
+    fi
+    # If still not writable or directory is not writable, choose a fallback
+    if ! touch "$log" >/dev/null 2>&1; then
+      local base
+      base="$(basename "$log")"
+      if touch "$HOME/$base" >/dev/null 2>&1; then
+        log="$HOME/$base"
+      else
+        # Last resort: disable logging
+        log=""
+      fi
+    fi
+  }
+
   function msg() {
     # shellcheck disable=SC2059
     # shellcheck disable=SC2086
     printf "$_ERR_MSG_FMT" "$(date +%T)" $USER $HOSTNAME $DIR/${BASH_SOURCE[2]##*/} ${BASH_LINENO[1]}
     echo " ${*}"
   }
->>>>>>> Stashed changes
 
   function msg2() {
     # shellcheck disable=SC2059
@@ -312,6 +121,7 @@ fi
       fi
       return 254
     fi
+    if [ -n "$log" ]; then _ensure_log_writable; fi
     if [ -z "$log" ]; then
       if [ -n "$USE_X" ]; then
         set -x
@@ -429,6 +239,7 @@ fi
     echo "$line" >"$tmpcmd"
     tmpoutput=$(mktemp)
     if [ -n "$log" ]; then
+      _ensure_log_writable
       mymsg=$(msg)
       exec 3>&1 4>&2 >"$tmpoutput" 2>&1 # redirect stdout and stderr to tmpoutput
       set -x
@@ -471,47 +282,6 @@ fi
         #        ' "$tmpoutput" >> "$log"
         #      fi
 
-<<<<<<< Updated upstream
-function loglog()
-{
-case $- in *x*) USE_X="-x" ;; *) USE_X= ;; esac
-#	set +x
-#	if [ "$1" == "1" ]; then
-#		set -x
-#	fi
-if [ -n "$log" ]; then _ensure_log_writable; fi
-if [ -n "$log" ]; then
-#		trap - ERR
-_file=${BASH_SOURCE[1]##*/}
-linenr=$((BASH_LINENO[0] ))
-lines=$(sed "1,${linenr} d;$((linenr+1)) s/^\s*//; q" "$DIR/$_file")
-n=0
-while read -r line; do
-if [ "$n" -ne "0" ]; then
-echo "$line" >>"$log"
-else
-msg2 "$line" >>"$log"
-n=1
-fi
-done <<< "$lines"
-#		trap 'errorhdl' ERR
-fi
-if [ -n "$USE_X" ]; then
-set -x
-fi
-}
-
-function logheading()
-{
-if [ -n "$log" ]; then _ensure_log_writable; fi
-if [ -n "$log" ]; then
-# shellcheck disable=SC2129
-echo >>"$log"
-echo "################## $* ################">>"$log"
-echo >>"$log"
-fi
-}
-=======
         awk -v file="$DIR/$_file" -v linenr="$linenr" -v tmpfile="$tmpcmd" '
           $0 ~ "^" tmpfile ": line 1:" {
             sub("^" tmpfile ": line 1:", file ": line " linenr ":");
@@ -519,7 +289,7 @@ fi
           }
   ' "$tmpoutput2" | tee -a "$log"
       fi
-      echo rm "$tmpoutput"
+      rm "$tmpoutput"
       if [ "$exitstatus" -ne "0" ]; then
         echo "## Exit status: $exitstatus" >>"$log"
       fi
@@ -529,7 +299,7 @@ fi
       source "$tmpcmd"
       exitstatus=$?
     fi
-    echo rm "$tmpcmd"
+    rm "$tmpcmd"
     #	trap 'errorhdl' ERR
     if [ "$exitstatus" -ne "0" ]; then
       if [ -n "$USE_E" ]; then
@@ -551,6 +321,7 @@ fi
   function logmsg() {
     case $- in *x*) USE_X="-x" ;; *) USE_X= ;; esac
     set +x
+    if [ -n "$log" ]; then _ensure_log_writable; fi
     if [ -n "$log" ]; then
       echo "$(msg) $*" >>"$log"
     fi
@@ -560,7 +331,6 @@ fi
       set -x
     fi
   }
->>>>>>> Stashed changes
 
   # shellcheck disable=SC2120
   function previousmsg() {
@@ -590,6 +360,7 @@ fi
   function logheredoc() {
     case $- in *x*) USE_X="-x" ;; *) USE_X= ;; esac
     set +x
+    if [ -n "$log" ]; then _ensure_log_writable; fi
     if [ -n "$log" ]; then
       #		trap - ERR
       token=$1
@@ -619,6 +390,7 @@ fi
     #	if [ "$1" == "1" ]; then
     #		set -x
     #	fi
+    if [ -n "$log" ]; then _ensure_log_writable; fi
     if [ -n "$log" ]; then
       #		trap - ERR
       _file=${BASH_SOURCE[1]##*/}
@@ -641,6 +413,7 @@ fi
   }
 
   function logheading() {
+    if [ -n "$log" ]; then _ensure_log_writable; fi
     if [ -n "$log" ]; then
       # shellcheck disable=SC2129
       echo >>"$log"

@@ -1,6 +1,14 @@
 #!/bin/bash
-## dependency: files
-set -euo pipefail
+## dependency: files/bashrc
+## dependency: files/bashrc.d/00_path.sh
+## dependency: files/bashrc.d/01_histcontrol.sh
+## dependency: files/bashrc.d/02_checkwinsize.sh
+## dependency: files/bashrc.d/03_lesspipe.sh
+## dependency: files/bashrc.d/04_standard_prompt.sh
+## dependency: files/bashrc.d/10_color_aliases.sh
+## dependency: files/bashrc.d/20_bash_aliases.sh
+## dependency: files/bashrc.d/30_bash_completions.sh
+set -eo pipefail
 cd "$(dirname "$0")" || exit 1
 . ./common.sh
 
@@ -166,9 +174,24 @@ case $key in
 	 --tldr)
 	 install_tldr=1
 	;;
-#	--du)
-#	install_du=1
-#	;;
+	--du)
+	install_du=1
+	;;
+	--bandwidth)
+	install_bandwidth=1
+	;;
+	--dust)
+	install_dust=1
+	;;
+	--difft)
+	install_difft=1
+	;;
+	--hexyl)
+	install_hexyl=1
+	;;
+	--find)
+	install_find=1
+	;;
 	--git-extra)
 	install_git_extra=1
 	;;
@@ -176,7 +199,7 @@ case $key in
 	install_liquidprompt=1
 	;;
 	-*)
-	echo "Error: Unknown option: $1" >&2
+	echo "Error: Unknown option: $key" >&2
 	echo "$usage" >&2
 	;;
 esac
@@ -268,12 +291,12 @@ if [ "${install_bat}" == "1" ]; then
 #less --tabs 4 -RF \"$@\"" $USER
 #		install_script $tmp ${sshhome}/bin/less $user
   install_rust_app bat
-  add_bashrc_lines 'alias cat="bat"' "21_cat_replacement"
+  add_bashrc_lines 'alias cat="bat"' "21_cat_replacement" "$user"
 #  linetextfile "${sshhome}/.bashrc" 'alias cat="bat"'
 fi
 
 if [ "${install_ping}" == "1" ]; then
-  add_bashrc_lines 'alias ping="prettyping --nolegend"' "21_Pretty-ping_alias"
+  add_bashrc_lines 'alias ping="prettyping --nolegend"' "21_Pretty-ping_alias" "$user"
 #  linetextfile ${sshhome}/.bashrc 'alias ping="prettyping --nolegend"'
 fi
 
@@ -286,8 +309,8 @@ if [ "${install_fzf}" == "1" ]; then
     errcho "fzf cannot be installed with atuin. Please install fzf manually."
   fi
   install_rust_app fzf
-  add_bashrc_lines "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\"" "21_fzf_preview"
-  add_bashrc_lines "[ -f \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash ] && source \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash" "31_fzf_bash_completion"
+  add_bashrc_lines "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\"" "21_fzf_preview" "$user"
+  add_bashrc_lines "[ -f \"${XDG_CONFIG_HOME:-\$HOME/.config}\"/fzf/fzf.bash ] && source \"${XDG_CONFIG_HOME:-\$HOME/.config}\"/fzf/fzf.bash" "31_fzf_bash_completion" "$user"
 #  linetextfile ${sshhome}/.bashrc "alias preview=\"fzf --preview 'bat --color \\\"always\\\" {}'\""
 #  linetextfile ${sshhome}/.bashrc "[ -f \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash ] && source \"${XDG_CONFIG_HOME:-$HOME/.config}\"/fzf/fzf.bash"
 fi
@@ -355,19 +378,19 @@ if [ "${install_eza}" == "1" ]; then
     logexec rm -rf files/FiraCodeNerd
   fi
 
-  add_bashrc_lines 'alias ls="eza --icons --group-directories-first"' "21_ls_replacement"
-  add_bashrc_lines 'alias ll="eza --long --group-directories-first"' "21_ll_replacement"
+  add_bashrc_lines 'alias ls="eza --icons --group-directories-first"' "21_ls_replacement" "$user"
+  add_bashrc_lines 'alias ll="eza --long --group-directories-first"' "21_ll_replacement" "$user"
 fi
 if [ "${install_git_extra}" == "1" ]; then
-  add_path_to_bashrc /usr/local/lib/git-extra-commands/bin
+  add_path_to_bashrc /usr/local/lib/git-extra-commands/bin "$user"
 #  linetextfile ${sshhome}/.bashrc 'export PATH="$PATH:/usr/local/lib/git-extra-commands/bin"'
 fi
 
 if [ "${install_atuin}" == "1" ]; then
   install_rust_app atuin
   # shellcheck disable=SC2016
-  install_bash_preexec
-  add_bashrc_lines 'eval "$(atuin init bash --disable-up-arrow)"' "81_atuin"
+  install_bash_preexec "$user"
+  add_bashrc_lines 'eval "$(atuin init bash --disable-up-arrow)"' "81_atuin" "$user"
   if [ -d "$sshhome/.config/i3-config/atuin" ]; then
 
     if [ -d "$sshhome/.config/atuin" ]; then
@@ -398,7 +421,7 @@ fi
 if [ "${install_zoxide}" == "1" ]; then
   install_rust_app zoxide
   # shellcheck disable=SC2016
-  add_bashrc_lines 'eval "$(zoxide init bash --cmd cd)"' "22_zoxide"
+  add_bashrc_lines 'eval "$(zoxide init bash --cmd cd)"' "22_zoxide" "$user"
 fi
 
 if [ "${install_rg}" == "1" ]; then
@@ -406,8 +429,8 @@ if [ "${install_rg}" == "1" ]; then
 fi
 
 if [ "${install_liquidprompt}" == "1" ]; then
-  install_bash_preexec
+  install_bash_preexec "$user"
   install_apt_package liquidprompt
   # shellcheck disable=SC2016
-  add_bashrc_lines 'echo $- | grep -q i 2>/dev/null && . /usr/share/liquidprompt/liquidprompt' "81_liquidprompt"
+  add_bashrc_lines 'echo $- | grep -q i 2>/dev/null && . /usr/share/liquidprompt/liquidprompt' "81_liquidprompt" "$user"
 fi

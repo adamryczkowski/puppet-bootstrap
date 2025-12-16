@@ -169,5 +169,5 @@ function install_bash_preexec() {
 	local homedir
 	homedir="$(get_home_dir "$user")"
 	download_file "$homedir/.bash-preexec.sh" https://raw.githubusercontent.com/rcaloras/bash-preexec/master/bash-preexec.sh
-	add_bashrc_lines '[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh' "80_bash-preexec"
+	add_bashrc_lines '[[ -f ~/.bash-preexec.sh ]] && source ~/.bash-preexec.sh' "80_bash-preexec" "$user"
 }

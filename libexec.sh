@@ -14,8 +14,11 @@ function read_file_header() {
 				break
 			fi
 		done < "$input_file"
+	elif [ -d "${input_file}" ]; then
+		# Directories are valid dependencies but don't have headers to read
+		return 0
 	else
-		errcho "Cannot find file $input_file"
+		errcho "Cannot find file or directory $input_file"
 		exit 1
 	fi
 }

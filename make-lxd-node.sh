@@ -271,7 +271,8 @@ fi
 
 sudoprefix=""
 
-hostlxcip=$(ifconfig $internalif  | grep 'inet addr:'| grep -v '127.0.0.1' | cut -d: -f2 | awk '{ print $1}')
+# Use 'ip' command instead of deprecated 'ifconfig'
+hostlxcip=$(ip -4 addr show "$internalif" 2>/dev/null | grep -oP '(?<=inet\s)\d+(\.\d+){3}' | head -n1)
 
 if [ -z "$aptproxy" ]; then
 	pattern='^Acquire::http::Proxy "https?://(.*)";$'
@@ -343,16 +344,16 @@ if [[ -n "$hostuser" ]]; then
 	hostuid=$(id -u ${hostuser})
 	hostgid=$(id -g ${hostuser})
 	if [[ $hostuid == $hostgid ]]; then
-	   if ! lxc config get proba raw.idmap | grep -q "both ${hostuid} 1001"; then
-   		logexec lxc config set ${name} raw.idmap "both ${hostuid} 1001"
-   	fi
+	   if ! lxc config get ${name} raw.idmap | grep -q "both ${hostuid} 1001"; then
+	  		logexec lxc config set ${name} raw.idmap "both ${hostuid} 1001"
+	  	fi
 	else
-	   if ! lxc config get proba raw.idmap | grep -q "uid ${hostuid} 1001"; then
-   		logexec lxc config set ${name} raw.idmap "uid ${hostuid} 1001"
-   	fi
-	   if ! lxc config get proba raw.idmap | grep -q "gid ${hostgid} 1001"; then
-   		logexec lxc config set ${name} raw.idmap "gid ${hostgid} 1001"
-   	fi
+	   if ! lxc config get ${name} raw.idmap | grep -q "uid ${hostuid} 1001"; then
+	  		logexec lxc config set ${name} raw.idmap "uid ${hostuid} 1001"
+	  	fi
+	   if ! lxc config get ${name} raw.idmap | grep -q "gid ${hostgid} 1001"; then
+	  		logexec lxc config set ${name} raw.idmap "gid ${hostgid} 1001"
+	  	fi
 	fi
 fi
 
@@ -392,8 +393,8 @@ if [ -n "${forward_ports}" ]; then
 
             if [[ "${proxy_name}" == "${forward_name}" ]]; then
                if [[ "${listen_str}" != "${host_address}" ]] || [[ "${connect_str}" == "${lxc_address}" ]]; then
-         			logexec lxc config device remove ${name} ${forward_name}
-         			lobexec lxc config device add ${name} ${forward_name} proxy listen=${host_address} connect=${lxc_address}
+            logexec lxc config device remove ${name} ${forward_name}
+            logexec lxc config device add ${name} ${forward_name} proxy listen=${host_address} connect=${lxc_address}
                fi
             else
                logexec lxc config device add ${name} ${forward_name} proxy listen=${host_address} connect=${lxc_address}
@@ -598,9 +599,9 @@ fi
 #set -x
 #logexec lxc exec $name -- chown ${lxcuser}:${lxcuser} -R ${sshhome}
 
-if [[ ! -f "$private_key_path" ]]; then
-	if ! lxc exec ${name} -- test -f ~/.ssh/id_ed25519; then
-		lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
+if [ ! -f "$private_key_path" ]; then
+	if ! lxc exec ${name} -- ls ${sshhome}/.ssh/id_ed25519 2>/dev/null; then
+		logexec lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
 	fi
 else
 	logexec lxc file push ${private_key_path} ${name}${sshhome}/.ssh/ >/dev/null
