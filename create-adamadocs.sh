@@ -1,5 +1,6 @@
-#!/bin/sh
-
+#!/bin/env bash
+set -euo pipefail
+set -x
 # Aktualizujemy profil bash użytkownika
 
 #Usuwamy aplikacje z autostartu
@@ -10,11 +11,33 @@
 
 #!/bin/bash
 
-USAGE="Usage: `basename $0`  -k <key-path> -s <size> <crypt-device> <mountpoint>"
+USAGE="Usage: `basename $0` <crypt-device> <mountpoint> -k <key-path> -s <size> "
+
+#MyDocsCryptFile="dokumenty.bin"
+#MyDocsCryptDir="/home/Adama-docs"
+MyDocsCryptMapperName="adama-docs"
+
+if [ -z ${1+x} ]; then
+  echo "Error: No crypt device specified."
+  echo $USAGE >&2
+  exit 1
+else
+  MyDocsCryptFile=$1
+  shift
+fi
+#MyDocsCryptMapperName=$3
+if [ -z ${1+x} ]; then
+  echo "Error: No mountpoint specified."
+  echo $USAGE >&2
+  exit 1
+else
+  MyDocsCryptDir=$1
+  shift
+fi
 
 # Parse command line options.
 MyDocsCryptKeyFile="$HOME/klucz.bin"
-MyDocsCryptFileSize=161061273600
+#MyDocsCryptFileSize=161061273600
 while getopts ":k:" OPT; do
 	case "$OPT" in
 		k)
@@ -40,14 +63,8 @@ while getopts ":k:" OPT; do
 done
 
 
-MyDocsCryptFile="dokumenty.bin"
-MyDocsCryptDir="/home/Adama-docs/Adam"
-MyDocsCryptMapperName="adama-docs"
 
-shift `expr $OPTIND - 1`
-MyDocsCryptFile=$1
-#MyDocsCryptMapperName=$3
-MyDocsCryptDir=$2
+
 
 if [ -d $MyDocsCryptDir ]; then
 	echo "Warning: Mountpoint already exists"
@@ -63,28 +80,27 @@ else
 	sudo dd if=/dev/zero of=$MyDocsCryptFile bs=1 count=1 seek=$MyDocsCryptFileSize
 fi
 
-sudo cryptsetup luksClose $MyDocsCryptMapperName 2>/dev/null
+if sudo cryptsetup luksClose $MyDocsCryptMapperName 2>/dev/null; then
+  echo "Closed existing crypt device $MyDocsCryptMapperName"
+fi
 
 if [ ! -f "$MyDocsCryptKeyFile" ]; then
 	echo "Creating new key on $MyDocsCryptKeyFile..."
 	dd if=/dev/random of=$MyDocsCryptKeyFile bs=512 count=1
 fi
 
-sudo cryptsetup luksOpen --key-file $MyDocsCryptKeyFile $MyDocsCryptFile $MyDocsCryptMapperName 2>/dev/null
 
-if [ $? -eq 0 ]; then
+
+if sudo cryptsetup luksOpen --key-file $MyDocsCryptKeyFile $MyDocsCryptFile $MyDocsCryptMapperName 2>/dev/null; then
 	sudo cryptsetup luksClose $MyDocsCryptMapperName 2>/dev/null
 	echo "Error: the crypt device already exists and seems not empty!"
 	exit 1
 else
-	sudo cryptsetup luksFormat -q --key-file $MyDocsCryptKeyFile --cipher aes-xts-plain --size 512 $MyDocsCryptFile
+	sudo cryptsetup luksFormat -q --key-file $MyDocsCryptKeyFile --cipher aes-xts-plain $MyDocsCryptFile
 fi
 
 sudo cryptsetup luksOpen --key-file $MyDocsCryptKeyFile $MyDocsCryptFile $MyDocsCryptMapperName 2>/dev/null
-if [ $? -ne 0 ]; then
-	echo "Error: the crypt device failed to initialize!"
-	exit 1
-fi
+
 sudo mkfs.btrfs /dev/mapper/$MyDocsCryptMapperName
 
 #sudo cryptsetup luksClose $MyDocsCryptMapperName 2>/dev/null

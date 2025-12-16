@@ -4,7 +4,7 @@
 
 # Search these processes for the session variable
 # (they are run as the current user and have the DBUS session variable set)
-compatiblePrograms=( nemo unity nautilus kdeinit kded4 pulseaudio trackerd )
+compatiblePrograms=( nemo unity nautilus kdeinit kded4 pulseaudio trackerd pcmanfm )
 
 # Attempt to get a program pid
 for index in ${compatiblePrograms[@]}; do

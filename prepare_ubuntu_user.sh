@@ -1,6 +1,6 @@
 #!/bin/bash
-#set -euo pipefail
-set -eo pipefail
+## dependency: files
+set -euo pipefail
 cd "$(dirname "$0")" || exit 1
 . ./common.sh
 

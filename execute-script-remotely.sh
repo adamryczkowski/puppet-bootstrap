@@ -315,7 +315,7 @@ case $exec_mode in
 		${exec_prefix} chown -R ${exec_user} ${remote_dir}
 	fi
 
-	if [ ! "$repo_path" == "" ]; then
+	if [ "$repo_path" != "" ]; then
 		if ! lxc config device list ${exec_lxcname} | grep tmprepo; then
 			lxc exec ${exec_lxcname} --mode=non-interactive -- mkdir -p ${repo_path}
 			lxc config device add ${exec_lxcname} tmprepo disk path="${repo_path}" source="${repo_path}"
@@ -331,54 +331,54 @@ esac
 
 
 
-function appendlog ()
-{
-#Funkcja zbierająca log na końcu pracy
-	if [ -n "$log" ] && [ "$log" != "/dev/stdout" ]; then
-		case $exec_mode in
-			1)
-			cat $remote_dir/log.log >>$log
-			;;
-			2)
-			#ssh
-			ssh $sshuser@$exec_host cat $remote_dir/log.log >>$log
-			;;
-			3)
-			#lxc
-			lxc exec ${exec_lxcname} --mode=non-interactive -- cat $remote_dir/log.log >>$log
-			if [ ! "$repo_path" == "" ]; then
-				lxc config device remove ${exec_lxcname} tmprepo disk
-			fi
-			;;
-			*)
-			echo "Error. Aborting."
-			exit 1
-			;;
-		esac
-#		echo "########################### RETURN #############################" >>$log
-#		echo >>$log
-#		echo >>$log
-	fi
-}
+#function appendlog ()
+#{
+##Funkcja zbierająca log na końcu pracy
+#	if [ -n "$log" ] && [ "$log" != "/dev/stdout" ]; then
+#		case $exec_mode in
+#			1)
+#			cat $remote_dir/log.log >>$log
+#			;;
+#			2)
+#			#ssh
+#			ssh $sshuser@$exec_host cat $remote_dir/log.log >>$log
+#			;;
+#			3)
+#			#lxc
+#			lxc exec ${exec_lxcname} --mode=non-interactive -- cat $remote_dir/log.log >>$log
+#			if [ ! "$repo_path" == "" ]; then
+#				lxc config device remove ${exec_lxcname} tmprepo disk
+#			fi
+#			;;
+#			*)
+#			echo "Error. Aborting."
+#			exit 1
+#			;;
+#		esac
+##		echo "########################### RETURN #############################" >>$log
+##		echo >>$log
+##		echo >>$log
+#	fi
+#}
 
 #A teraz wykonujemy skrypt
-if [ -n "$log" ] && [ "$log" != "/dev/stdout" ] ; then
-	trap 'appendlog' ERR
-#	logheading $exec_prefix $remote_dir $exec_opts
-#	echo "$exec_prefix $remote_dir $exec_opts"
-fi
+#if [ -n "$log" ] && [ "$log" != "/dev/stdout" ] ; then
+#	trap 'appendlog' ERR
+##	logheading $exec_prefix $remote_dir $exec_opts
+##	echo "$exec_prefix $remote_dir $exec_opts"
+#fi
 if [ "$exec_fulldebug" -eq "1" ]; then
 #	if [ "$exec_fulldebug" -eq "1" ]; then
-#		echo "EXECUTING $exec_prefix bash -x -- $remote_dir $exec_opts"
+  echo "EXECUTING $exec_prefix bash -x -- ${remote_dir}/${exec_script} $exec_opts"
 #	fi
 	$exec_prefix bash -x -- ${remote_dir}/${exec_script} $exec_opts
 else
 	$exec_prefix bash -- ${remote_dir}/${exec_script} $exec_opts
 fi
 exec_err=$?
-trap 'errorhdl' ERR
+#trap 'errorhdl' ERR
 
-appendlog
+#appendlog
 
 if [ $exec_err -ne 0 ]; then
 	exit $exec_err

@@ -209,7 +209,7 @@ case $key in
 		;;
 esac
 done
-
+set -x
 if [ "$repo_path" == "" ]; then
 	guess_repo_path /media/adam-minipc/other/debs
 fi
@@ -563,10 +563,11 @@ fi
 #	fi
 #done
 
-
+echo "About to execute prepare_ubuntu.sh on the container using lxc..."
+echo "	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ubuntu -- $lxcuser ${repopath_arg} --cli-improved --rust --pipx --need-apt-update --external-key $(cat $sshhome/.ssh/id_ed25519.pub) --no-sudo-password"
 #set -x
 if [[ $bare == 0 ]]; then
-	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ubuntu -- $lxcuser ${repopath_arg} --cli-improved --need-apt-update --external-key $(cat $sshhome/.ssh/id_ed25519.pub) --no-sudo-password
+	bash -x ./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ubuntu -- $lxcuser ${repopath_arg} --cli-improved --rust --pipx --need-apt-update --external-key $(cat $sshhome/.ssh/id_ed25519.pub) --no-sudo-password
 else
 	./execute-script-remotely.sh prepare_ubuntu.sh ${repopath_arg} --step-debug --lxc-name ${name} $opts --user ubuntu -- $lxcuser ${repopath_arg} --need-apt-update --external-key $(cat $sshhome/.ssh/id_ed25519.pub) --no-sudo-password
 fi
@@ -590,7 +591,6 @@ ssh-keyscan -H $name >> $sshhome/.ssh/known_hosts 2>/dev/null
 $loglog
 ssh-keyscan -H $lxcfqdn >> $sshhome/.ssh/known_hosts 2>/dev/null
 if [ -n "$actual_ip" ]; then
-	$loglog
 	ssh-keyscan -H $actual_ip >> $sshhome/.ssh/known_hosts 2>/dev/null
 fi
 
@@ -598,9 +598,9 @@ fi
 #set -x
 #logexec lxc exec $name -- chown ${lxcuser}:${lxcuser} -R ${sshhome}
 
-if [ ! -f "$private_key_path" ]; then
-	if ! lxc exec ${name} -- ls ~/.ssh/id_ed25519; then
-		logexec lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
+if [[ ! -f "$private_key_path" ]]; then
+	if ! lxc exec ${name} -- test -f ~/.ssh/id_ed25519; then
+		lxc exec $name -- su -l ${lxcuser} -c "ssh-keygen -t ed25519 -a 100 -f ~/.ssh/id_ed25519 -P ''"
 	fi
 else
 	logexec lxc file push ${private_key_path} ${name}${sshhome}/.ssh/ >/dev/null
@@ -640,7 +640,7 @@ if [ "${update_all}" == "1" ]; then
 			opts="$opts --log $log"
 		fi
 	fi
-	./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- --puppet-bootstrap
+	bash -x ./execute-script-remotely.sh prepare_update-all.sh --ssh-address ${lxcuser}@${actual_ip} $opts -- --puppet-bootstrap
 fi
 
 

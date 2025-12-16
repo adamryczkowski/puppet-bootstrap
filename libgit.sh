@@ -1,8 +1,9 @@
 #!/bin/bash
+## dependency: binary_blob.bin
 
-github_token=$(openssl enc -d -in binary_blob.bin -pbkdf2 -aes-256-cbc -pass pass:BASH_REMATCH)
 
 function get_latest_github_release_name() { #source: https://gist.github.com/lukechilds/a83e1d7127b78fef38c2914c4ececc3c
+  github_token=$(openssl enc -d -in binary_blob.bin -pbkdf2 -aes-256-cbc -pass pass:BASH_REMATCH)
 	#   set +x
 	local skip_v=$2
 	if ! which curl >/dev/null; then

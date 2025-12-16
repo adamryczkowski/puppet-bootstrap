@@ -1,6 +1,7 @@
 #!/bin/bash
-set -euo pipefail
 ## dependency: prepare_ubuntu_user.sh
+## dependency: files/bashrc.d
+set -euo pipefail
 cd "$(dirname "$0")" || exit 1
 . ./common.sh
 
@@ -143,10 +144,10 @@ while [[ $# -gt 0 ]]; do
     shift
     ;;
   --no-sudo-password)
-    user_opts="${user_opts} --no-sudo-password $1"
+    user_opts="${user_opts:-} --no-sudo-password"
     ;;
   --external-key)
-    user_opts="${user_opts} --external-key $1 $2 $3"
+    user_opts="${user_opts:-} --external-key $1 $2 $3"
     shift
     shift
     shift
@@ -182,7 +183,7 @@ while [[ $# -gt 0 ]]; do
     install_btop=1
     install_zoxide=1
     install_ping=1
-    install_gping=1
+    install_gping=0 # TODO
     install_htop=1
     install_atuin=1
     install_eza=1
@@ -284,7 +285,11 @@ while [[ $# -gt 0 ]]; do
     install_dtrx=1
     ;;
   -*)
+<<<<<<< Updated upstream
     echo "Error: Unknown option: ${1:-}" >&2
+=======
+    echo "Error: Unknown option: $key" >&2
+>>>>>>> Stashed changes
     echo "$usage" >&2
     ;;
   esac
@@ -300,7 +305,13 @@ if [ -n "$debug" ]; then
   fi
 fi
 
+<<<<<<< Updated upstream
 check_for_root;
+=======
+if ! check_for_root; then
+  exit 1
+fi
+>>>>>>> Stashed changes
 
 install_apt_package wget wget
 install_apt_package jq jq
@@ -430,10 +441,12 @@ if [ "${install_eza}" == "1" ]; then
     install_apt_package eza
   fi
   user_opts="${user_opts} --eza"
-  if ! fc-list | grep -Fq "FiraCode Nerd Font Med"; then
-    download_file "/tmp/FiraCode.tar.xz" "$(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")"
-    extract_archive "/tmp/FiraCode.tar.xz" "/usr/local/share/fonts" "root" "rename" "FiraCode"
-    logexec sudo fc-cache -f
+  if command -v fc-list >/dev/null 2>&1; then
+    if ! fc-list | grep -Fq "FiraCode Nerd Font Med"; then
+      download_file "/tmp/FiraCode.tar.xz" "$(get_gh_download_link "ryanoasis/nerd-fonts" "FiraCode.tar.xz")"
+      extract_archive "/tmp/FiraCode.tar.xz" "/usr/local/share/fonts" "root" "rename" "FiraCode"
+      logexec sudo fc-cache -f
+    fi
   fi
 fi
 
@@ -590,7 +603,7 @@ if [ "${install_wormhole}" == "1" ]; then
     user_opts="${user_opts} --wormhole"
   fi
 fi
-
+set -x
 # shellcheck disable=SC2128
 if [ "${#users[@]}" -gt 0 ]; then
   if [ -n "$debug" ]; then
@@ -601,10 +614,15 @@ if [ "${#users[@]}" -gt 0 ]; then
   fi
   pushd "$DIR" || exit 1
   #	set -x
+<<<<<<< Updated upstream
   # shellcheck disable=SC2086
   echo ./prepare_ubuntu_user.sh "${users[0]}" ${user_opts} ${private_key_path}
   # shellcheck disable=SC2086
   bash -x ./prepare_ubuntu_user.sh "${users[0]}" ${user_opts} ${private_key_path}
+=======
+  echo ./prepare_ubuntu_user.sh ${users[0]} ${user_opts} ${private_key_path:-}
+  bash -x ./prepare_ubuntu_user.sh ${users[0]} ${user_opts} ${private_key_path:-}
+>>>>>>> Stashed changes
   for user in "${users[@]:1}"; do
     # shellcheck disable=SC2086
     sudo -H -u "${user}" -- bash -x ./prepare_ubuntu_user.sh "${user}" ${user_opts}
